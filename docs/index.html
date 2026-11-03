@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none';">
+    <title>Drawlib Examples — Illustration &amp; Documentation as Code Showcase</title>
+    <meta name="description" content="Explore real-world engineering whitepapers, onboarding guides, 16:9 presentation slide decks, and brand illustrations built in pure Python &amp; Markdown with Drawlib.">
+    <meta property="og:title" content="Drawlib Examples Gallery">
+    <meta property="og:description" content="Single Source of Truth examples compiled into HTML, Vector PDF, MS Word (.docx), MS PowerPoint (.pptx), and PNGs with Drawlib.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://examples.drawlib.com/">
+    <meta property="og:image" content="https://examples.drawlib.com/ogp/social_preview.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="icon" type="image/png" href="./logo/favicon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+    <!-- Pure-CSS category filter state -->
+    <input type="radio" name="category-filter" id="filter-all" class="filter-radio" checked>
+    <input type="radio" name="category-filter" id="filter-doc" class="filter-radio">
+    <input type="radio" name="category-filter" id="filter-slide" class="filter-radio">
+    <input type="radio" name="category-filter" id="filter-images" class="filter-radio">
+
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="./index.html" class="brand-link" id="nav-brand-home">
+                <img src="./logo/logo_transparent.png" alt="Drawlib" class="brand-logo">
+                <span class="brand-divider">/</span>
+                <span class="brand-subtitle">Examples Gallery</span>
+            </a>
+            <nav class="header-nav" aria-label="Primary Navigation">
+                <a href="https://www.drawlib.com/" class="nav-link" id="nav-official-docs" target="_blank" rel="noopener noreferrer">Official Docs</a>
+                <a href="https://github.com/yuichi110/drawlib" class="nav-link" id="nav-drawlib-core" target="_blank" rel="noopener noreferrer">Drawlib Core</a>
+                <a href="https://github.com/yuichi110/drawlib-examples" class="nav-link nav-link-repo" id="nav-examples-repo" target="_blank" rel="noopener noreferrer">GitHub Repo</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <section class="hero">
+            <div class="container hero-grid">
+                <div>
+                    <p class="hero-eyebrow">Illustration &amp; Docs as Code</p>
+                    <h1>Drawlib Examples Showcase</h1>
+                    <p class="hero-lead">
+                        Production-ready documents, 16:9 widescreen slide decks, and standalone Python illustrations compiled from version-controlled Markdown and Python into Web HTML, Vector PDF, Word (<code>.docx</code>), and PowerPoint (<code>.pptx</code>).
+                    </p>
+                    <div class="hero-meta-row">
+                        <span class="code-command"><span class="code-prompt">$</span> uv sync &amp;&amp; ./build.sh</span>
+                    </div>
+                </div>
+                <div class="hero-visual">
+                    <img src="./ogp/social_preview.png" alt="Drawlib Single Source of Truth Workflow — Git Repo to Site, Doc, and Slide">
+                </div>
+            </div>
+        </section>
+
+        <div class="container">
+            <div class="toolbar" role="region" aria-label="Filter examples by project type">
+                <div class="filter-tabs">
+                    <label for="filter-all" class="filter-label" id="tab-all">All<span class="filter-count">6</span></label>
+                    <label for="filter-doc" class="filter-label" id="tab-doc">Documents<span class="filter-count">2</span></label>
+                    <label for="filter-slide" class="filter-label" id="tab-slide">Slide Decks<span class="filter-count">2</span></label>
+                    <label for="filter-images" class="filter-label" id="tab-images">Illustrations<span class="filter-count">2</span></label>
+                </div>
+                <span class="toolbar-note">Every artifact below is built directly from <code>examples/</code></span>
+            </div>
+
+            <!-- 1. Linear Documents (doc) -->
+            <section class="category-section" data-category="doc" id="section-doc">
+                <div class="section-header">
+                    <div class="section-title-group">
+                        <h2 class="section-title">Documents &amp; Whitepapers</h2>
+                        <span class="archetype-tag">type = "doc"</span>
+                    </div>
+                    <p class="section-desc">Multi-chapter linear specifications compiled into HTML, A4 Vector PDF, and editable MS Word.</p>
+                </div>
+
+                <div class="cards-grid">
+                    <!-- dogfooding -->
+                    <article class="example-card" id="card-dogfooding">
+                        <a href="./dogfooding/en/index.html" class="card-preview" id="preview-dogfooding">
+                            <img src="./dogfooding/images/00_cover/fig_cover_autonomous_loop.png" alt="Drawlib Dogfooding Whitepaper — Autonomous AI Visual Self-Correction Loop">
+                        </a>
+                        <div class="card-body">
+                            <div class="card-meta">
+                                <span class="card-path">examples/doc/dogfooding</span>
+                                <span class="locale-list">
+                                    <span class="locale-chip">EN</span>
+                                    <span class="locale-chip">JA</span>
+                                </span>
+                            </div>
+                            <h3 class="card-title"><a href="./dogfooding/en/index.html">Drawlib Dogfooding Whitepaper</a></h3>
+                            <p class="card-desc">Bilingual architectural whitepaper covering AI agent visual self-correction loops, SmartArts, declarative charts, and cloud diagrams.</p>
+                            <div class="card-actions">
+                                <div class="action-row">
+                                    <a href="./dogfooding/en/index.html" class="btn btn-primary" id="open-dogfooding-en">Open HTML (EN)</a>
+                                    <a href="./dogfooding/ja/index.html" class="btn btn-secondary" id="open-dogfooding-ja">Open HTML (日本語)</a>
+                                </div>
+                                <div class="action-row">
+                                    <a href="./dogfooding/dogfooding_en.pdf" class="btn btn-download" id="dl-dogfooding-pdf-en">PDF (EN)</a>
+                                    <a href="./dogfooding/dogfooding_ja.pdf" class="btn btn-download" id="dl-dogfooding-pdf-ja">PDF (JA)</a>
+                                    <a href="./dogfooding/dogfooding_en.docx" class="btn btn-download" id="dl-dogfooding-docx-en">DOCX (EN)</a>
+                                    <a href="./dogfooding/dogfooding_ja.docx" class="btn btn-download" id="dl-dogfooding-docx-ja">DOCX (JA)</a>
+                                    <a href="https://github.com/yuichi110/drawlib-examples/tree/main/examples/doc/dogfooding" class="btn btn-source" id="src-dogfooding" target="_blank" rel="noopener noreferrer">Source ↗</a>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+
+                    <!-- quickstart -->
+                    <article class="example-card" id="card-quickstart">
+                        <a href="./quickstart/en/index.html" class="card-preview" id="preview-quickstart">
+                            <img src="./quickstart/images/00-cover/cover_workflow.png" alt="Drawlib Quickstart Guide — End-to-End Workflow">
+                        </a>
+                        <div class="card-body">
+                            <div class="card-meta">
+                                <span class="card-path">examples/doc/quickstart</span>
+                                <span class="locale-list">
+                                    <span class="locale-chip">EN</span>
+                                </span>
+                            </div>
+                            <h3 class="card-title"><a href="./quickstart/en/index.html">Drawlib Quickstart Onboarding Guide</a></h3>
+                            <p class="card-desc">16-chapter engineering handbook walking through canvas coordinates, primitives, styling tokens, CLI workflows, and project templates.</p>
+                            <div class="card-actions">
+                                <div class="action-row">
+                                    <a href="./quickstart/en/index.html" class="btn btn-primary" id="open-quickstart-en">Open HTML (EN)</a>
+                                </div>
+                                <div class="action-row">
+                                    <a href="./quickstart/quickstart_en.pdf" class="btn btn-download" id="dl-quickstart-pdf">PDF</a>
+                                    <a href="./quickstart/quickstart_en.docx" class="btn btn-download" id="dl-quickstart-docx">DOCX</a>
+                                    <a href="https://github.com/yuichi110/drawlib-examples/tree/main/examples/doc/quickstart" class="btn btn-source" id="src-quickstart" target="_blank" rel="noopener noreferrer">Source ↗</a>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            </section>
+
+            <!-- 2. Presentation Slide Decks (slide) -->
+            <section class="category-section" data-category="slide" id="section-slide">
+                <div class="section-header">
+                    <div class="section-title-group">
+                        <h2 class="section-title">16:9 Presentation Slide Decks</h2>
+                        <span class="archetype-tag">type = "slide"</span>
+                    </div>
+                    <p class="section-desc">Interactive browser slide decks with speaker notes, compiled alongside vector PDFs and editable PowerPoint decks.</p>
+                </div>
+
+                <div class="cards-grid">
+                    <!-- about-drawlib -->
+                    <article class="example-card" id="card-about-drawlib">
+                        <a href="./about-drawlib/en/index.html" class="card-preview" id="preview-about-drawlib">
+                            <img src="./about-drawlib/images/00_opening/01_title/title_hero.svg" alt="About Drawlib Presentation Deck — Unified Pipeline">
+                        </a>
+                        <div class="card-body">
+                            <div class="card-meta">
+                                <span class="card-path">examples/slide/about-drawlib</span>
+                                <span class="locale-list">
+                                    <span class="locale-chip">EN</span>
+                                </span>
+                            </div>
+                            <h3 class="card-title"><a href="./about-drawlib/en/index.html">About Drawlib — Official Showcase Deck</a></h3>
+                            <p class="card-desc">Comprehensive 16:9 showcase presentation covering Drawlib's motivation, primitives catalog, SmartArts, charts, diagrams, and AI workflows.</p>
+                            <div class="card-actions">
+                                <div class="action-row">
+                                    <a href="./about-drawlib/en/index.html" class="btn btn-primary" id="open-about-drawlib-en">Open Slide Deck</a>
+                                </div>
+                                <div class="action-row">
+                                    <a href="./about-drawlib/about-drawlib_en.pdf" class="btn btn-download" id="dl-about-drawlib-pdf">PDF</a>
+                                    <a href="./about-drawlib/about-drawlib_en.pptx" class="btn btn-download" id="dl-about-drawlib-pptx">PPTX</a>
+                                    <a href="https://github.com/yuichi110/drawlib-examples/tree/main/examples/slide/about-drawlib" class="btn btn-source" id="src-about-drawlib" target="_blank" rel="noopener noreferrer">Source ↗</a>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+
+                    <!-- ddos-incident-response -->
+                    <article class="example-card" id="card-ddos-incident-response">
+                        <a href="./ddos-incident-response/en/index.html" class="card-preview" id="preview-ddos-incident-response">
+                            <img src="./ddos-incident-response/images/00_opening/01_title/drawlib_1_1.svg" alt="DDoS Incident Response Presentation Deck — End-to-End Defense Evolution">
+                        </a>
+                        <div class="card-body">
+                            <div class="card-meta">
+                                <span class="card-path">examples/slide/ddos-incident-response</span>
+                                <span class="locale-list">
+                                    <span class="locale-chip">EN</span>
+                                </span>
+                            </div>
+                            <h3 class="card-title"><a href="./ddos-incident-response/en/index.html">Surviving a 300M+ Req/Day DDoS &amp; EDoS Attack</a></h3>
+                            <p class="card-desc">Real-world serverless cloud security postmortem deck illustrating attack traffic waves, WAF billing traps, and 5-layer edge defense.</p>
+                            <div class="card-actions">
+                                <div class="action-row">
+                                    <a href="./ddos-incident-response/en/index.html" class="btn btn-primary" id="open-ddos-en">Open Slide Deck</a>
+                                </div>
+                                <div class="action-row">
+                                    <a href="./ddos-incident-response/ddos-incident-response_en.pdf" class="btn btn-download" id="dl-ddos-pdf">PDF</a>
+                                    <a href="./ddos-incident-response/ddos-incident-response_en.pptx" class="btn btn-download" id="dl-ddos-pptx">PPTX</a>
+                                    <a href="https://github.com/yuichi110/drawlib-examples/tree/main/examples/slide/ddos-incident-response" class="btn btn-source" id="src-ddos" target="_blank" rel="noopener noreferrer">Source ↗</a>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            </section>
+
+            <!-- 3. Standalone Illustrations (images) -->
+            <section class="category-section" data-category="images" id="section-images">
+                <div class="section-header">
+                    <div class="section-title-group">
+                        <h2 class="section-title">Standalone Python Illustrations</h2>
+                        <span class="archetype-tag">type = "images"</span>
+                    </div>
+                    <p class="section-desc">Batch-rendered brand marks, favicons, and Open Graph banners written as pure Python scripts.</p>
+                </div>
+
+                <div class="cards-grid">
+                    <!-- logo -->
+                    <article class="example-card" id="card-logo">
+                        <a href="./logo/index.html" class="card-preview" id="preview-logo">
+                            <img src="./logo/logo_transparent.png" alt="Drawlib Brand Logo Assets">
+                        </a>
+                        <div class="card-body">
+                            <div class="card-meta">
+                                <span class="card-path">examples/images/logo</span>
+                                <span class="locale-list">
+                                    <span class="locale-chip">13 PNGs</span>
+                                </span>
+                            </div>
+                            <h3 class="card-title"><a href="./logo/index.html">Drawlib Brand Logo &amp; Favicon Assets</a></h3>
+                            <p class="card-desc">Official horizontal logos, square icon marks, wordmarks, and favicons rendered across light, dark, solid, and transparent themes.</p>
+                            <div class="card-actions">
+                                <div class="action-row">
+                                    <a href="./logo/index.html" class="btn btn-primary" id="open-logo-gallery">Open Asset Sheet</a>
+                                    <a href="https://github.com/yuichi110/drawlib-examples/tree/main/examples/images/logo" class="btn btn-source" id="src-logo" target="_blank" rel="noopener noreferrer">Source ↗</a>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+
+                    <!-- ogp -->
+                    <article class="example-card" id="card-ogp">
+                        <a href="./ogp/index.html" class="card-preview card-preview-cover" id="preview-ogp">
+                            <img src="./ogp/social_preview_codebase.png" alt="Drawlib GitHub Social Preview &amp; OGP Banners">
+                        </a>
+                        <div class="card-body">
+                            <div class="card-meta">
+                                <span class="card-path">examples/images/ogp</span>
+                                <span class="locale-list">
+                                    <span class="locale-chip">3 PNGs</span>
+                                </span>
+                            </div>
+                            <h3 class="card-title"><a href="./ogp/index.html">GitHub Social Preview &amp; OGP Banners</a></h3>
+                            <p class="card-desc">Three 1280 × 640 px Open Graph Protocol banner layouts illustrating Drawlib's Single Source of Truth workflow.</p>
+                            <div class="card-actions">
+                                <div class="action-row">
+                                    <a href="./ogp/index.html" class="btn btn-primary" id="open-ogp-gallery">Open Banner Sheet</a>
+                                    <a href="https://github.com/yuichi110/drawlib-examples/tree/main/examples/images/ogp" class="btn btn-source" id="src-ogp" target="_blank" rel="noopener noreferrer">Source ↗</a>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container footer-inner">
+            <span>Generated with <a href="https://github.com/yuichi110/drawlib" target="_blank" rel="noopener noreferrer">Drawlib</a> · Apache License 2.0</span>
+            <div class="footer-links">
+                <a href="https://www.drawlib.com/" target="_blank" rel="noopener noreferrer">Official Documentation</a>
+                <a href="https://pypi.org/project/drawlib/" target="_blank" rel="noopener noreferrer">PyPI</a>
+                <a href="https://github.com/yuichi110/drawlib" target="_blank" rel="noopener noreferrer">Drawlib Core</a>
+                <a href="https://github.com/yuichi110/drawlib-examples" target="_blank" rel="noopener noreferrer">Examples Repository</a>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

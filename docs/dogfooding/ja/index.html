@@ -1,0 +1,803 @@
+<!--
+ Copyright (c) 2026 Yuichi Ito (yuichi@yuichi.com)
+
+ This software is licensed under the Apache License, Version 2.0.
+ For more information, please visit: https://github.com/yuichi110/drawlib
+
+ This software is provided "as is", without warranty of any kind,
+ express or implied, including but not limited to the warranties of
+ merchantability, fitness for a particular purpose and noninfringement.
+-->
+<!DOCTYPE html>
+<html lang="ja" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AIとDrawlibによるドキュメント自動生成</title>
+    
+    
+    <link rel="alternate" hreflang="en" href="../en/index.html">
+    
+    <link rel="alternate" hreflang="ja" href="index.html">
+    
+    <link rel="alternate" hreflang="x-default" href="../index.html">
+    
+    
+    
+    <link rel="icon" type="image/png" href="../_assets/favicon.png">
+    
+    
+    <link rel="stylesheet" href="style.css">
+    
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body class="doc-body">
+    <main class="main-container">
+        
+        <div class="doc-topbar">
+            <div class="lang-switcher">
+                <details class="lang-dropdown">
+                    <summary class="lang-dropdown-btn" aria-label="Select language">
+                        <svg class="lang-globe-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                        <span class="lang-current-label">日本語</span>
+                        <svg class="lang-caret-icon" viewBox="0 0 24 24" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </summary>
+                    <div class="lang-dropdown-menu" role="menu">
+                        
+                        <a href="../en/index.html" class="lang-option" lang="en" hreflang="en" >
+                            <span>English</span>
+                            
+                        </a>
+                        
+                        <a href="index.html" class="lang-option active" lang="ja" hreflang="ja" aria-current="page">
+                            <span>日本語</span>
+                            
+                            <svg class="lang-check-icon" viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            
+                        </a>
+                        
+                    </div>
+                </details>
+            </div>
+        </div>
+        
+        <section id="chapter-1-00_cover" class="doc-chapter pdf-chapter">
+<h1>AIとDrawlibによるドキュメント自動生成</h1>
+<p>AI時代の &quot;Illustrated Documentation as Code&quot;</p>
+<figure class="drawlib-image" style="text-align: center;">
+  <img src="../images/00_cover/fig_cover_autonomous_loop_ja.png" alt="00_cover_1" />
+  <figcaption class="drawlib-caption">AI Agent による作図・視覚的自律検証ループ</figcaption>
+</figure>
+<p><strong>作成者</strong>: Drawlib Core Team<br />
+<strong>対象</strong>: ソフトウェアエンジニア・アーキテクト・AI ペアプログラマー<br />
+<strong>バージョン</strong>: 0.3.4<br />
+<strong>発行日</strong>: 2026年11月</p>
+
+</section>
+
+<nav class="doc-toc pdf-toc">
+  <h2>目次</h2>
+  <ul>
+    <li><a href="#chapter-2-01_ai_challenges">第1章: AI 開発における作図・ドキュメントの課題</a></li>
+    <li><a href="#chapter-3-02_solution_approach">第2章: 解決アプローチ: Illustrated Documentation as Code</a></li>
+    <li><a href="#chapter-4-03_drawlib_overview">第3章: Drawlib の全体像と主要機能</a></li>
+    <li><a href="#chapter-5-04_installation">第4章: インストールと環境構築</a></li>
+    <li><a href="#chapter-6-05_project_creation">第5章: プロジェクト作成とビルド運用</a></li>
+    <li><a href="#chapter-7-06_agent_instructions">第6章: AI エージェントとの連携・インストラクション</a></li>
+    <li><a href="#chapter-8-07_basic_drawing">第7章: ベーシックな描画（Primitives）</a></li>
+    <li><a href="#chapter-9-08_smartarts">第8章: SmartArts（構造化ビジュアル）</a></li>
+    <li><a href="#chapter-10-09_charts">第9章: チャート描画（定量データの可視化）</a></li>
+    <li><a href="#chapter-11-10_diagrams">第10章: システムダイアグラム（アーキテクチャ・設計図）</a></li>
+    <li><a href="#chapter-12-11_customization">第11章: スタイルとテーマのカスタマイズ</a></li>
+    <li><a href="#chapter-13-12_slide_presentation">第12章: プレゼンテーションスライドの作成 (`slide`)</a></li>
+  </ul>
+</nav>
+
+<section id="chapter-2-01_ai_challenges" class="doc-chapter pdf-chapter">
+<h1>第1章: AI 開発における作図・ドキュメントの課題</h1>
+<p>AI によるコード生成やペアプログラミングが日常的になる中、ソフトウェア開発におけるボトルネックは「コードの実装」から「<strong>設計・アーキテクチャの可視化とドキュメントの同期</strong>」へとシフトしています。</p>
+<h2>1.1 設計書と実装の乖離（ドキュメントの腐敗）</h2>
+<p>AI コーディングエージェント（Claude Code, Cursor, Gemini CLI, GitHub Copilot など）を活用することで、プログラムコードは驚異的なスピードでリファクタリングや機能追加が行われます。しかし、システム全体のアーキテクチャ図やシーケンス図、データベーススキーマ図などのドキュメントは更新されずに置き去りにされがちです。</p>
+<p>結果として、以下のような問題が発生します:</p>
+<ul>
+<li><strong>ドキュメントの形骸化</strong>: 「ドキュメントと現行コードのどちらが正しいのかわからない」状態に陥る。</li>
+<li><strong>オンボーディングの遅延</strong>: 新規メンバーや別の AI セッションが全体構造を正しく把握できない。</li>
+<li><strong>暗黙知の増大</strong>: 最新の設計意図がコードのコミットログやチャット履歴にしか残らない。</li>
+</ul>
+<h2>1.2 手動 GUI ツールの限界</h2>
+<p>従来、エンジニアは以下のような GUI ツールを用いて作図を行ってきました:</p>
+<ul>
+<li>draw.io / diagrams.net</li>
+<li>Figma / Miro</li>
+<li>PowerPoint / Google Slides</li>
+</ul>
+<p>これらのツールで作成された図版は通常、<strong>PNG や JPEG などのバイナリ画像</strong>としてリポジトリに保存されます。このバイナリ管理には決定的な欠点があります:</p>
+<ol>
+<li><strong>Git で差分（diff）が追えない</strong>: どこが変更されたのかプルリクエストで視覚的にも論理的にも追跡できません。</li>
+<li><strong>AI Agent が編集できない</strong>: AI はバイナリ PNG の中身を直接編集することができません。図を直すには人間が手動でツールを開いて修正し、再度エクスポートする手間が発生します。</li>
+<li><strong>デザインの不統一</strong>: 作成者ごとにフォント、色、線の太さ、余白がバラバラになり、組織としてのドキュメント品質が保てません。</li>
+</ol>
+<h2>1.3 AI に生の SVG や Matplotlib を書かせると破綻する理由</h2>
+<p>では、AI にコードで図を描かせれば解決するでしょうか？ 多くの開発者が試みて挫折するのが、<strong>生 SVG</strong> や <strong>Matplotlib</strong> の直接生成です:</p>
+<ul>
+<li><strong>生 SVG の直接生成</strong>:
+<ul>
+<li>日本語（CJK）を含むテキストの折り返し計算やフォント幅の算出が難しく、テキストが枠からはみ出す。</li>
+<li>矢印やコネクタの座標計算が複雑で、線の交差や位置ずれが多発する。</li>
+<li>何百行もの <code>&lt;path&gt;</code> や <code>&lt;rect&gt;</code> が生成され、人間が保守・レビュー不能になる。</li>
+</ul>
+</li>
+<li><strong>Matplotlib の流用</strong>:
+<ul>
+<li>本来は学術的な散布図や折れ線グラフのためのライブラリであり、システム構成図やシーケンス図、構造化図解を描くための高レベルなプリミティブ（ノード、グループ、矢印配線、アイコン、自動レイアウト）が存在しない。</li>
+<li>大量のボイラープレートコードが必要となり、AI も構文エラーや座標崩れを起こしやすい。</li>
+</ul>
+</li>
+</ul>
+<p>こうした背景から生まれたのが、Python による <strong>&quot;Illustration as Code&quot;（コードとしての図版）</strong> および <strong>&quot;Illustrated Documentation as Code&quot;（図解統合ドキュメント）</strong> を実現するライブラリ <strong>Drawlib</strong> です。</p>
+
+</section>
+
+<section id="chapter-3-02_solution_approach" class="doc-chapter pdf-chapter">
+<h1>第2章: 解決アプローチ: Illustrated Documentation as Code</h1>
+<p>Drawlib は、ソフトウェアエンジニアと AI コーディングエージェントのための <strong>&quot;Illustrated Documentation as Code&quot; (IDaC)</strong> を実現する Python ライブラリです。従来の Documentation as Code（DaC）がテキスト中心であったのに対し、Drawlib は「図解・設計図がファーストクラスで統合された技術文書」をコードだけで構築します。</p>
+<h2>2.1 &quot;Illustrated Documentation as Code&quot; のコア思想</h2>
+<p>Drawlib のアプローチはシンプルです:</p>
+<ol>
+<li><strong>宣言的 Python スクリプト</strong>: 直感的な高レベル API でアーキテクチャ図・フロー図・チャート・構造化図解を定義します。</li>
+<li><strong>Markdown への直接インライン埋め込み</strong>: ドキュメントの中に <code>drawlib</code> コードブロックとして作図コードを直接記述します。</li>
+<li><strong>完全なバージョン管理</strong>: 図版の定義コードが Markdown テキストとして Git で管理され、プルリクエストでコード差分としてレビュー可能です。</li>
+<li><strong>マルチフォーマット自動コンパイルと差分キャッシュ</strong>: CLI ビルド（<code>drawlib build</code>）によって、マルチページ HTML サイト（<code>site</code>）、A4 ベクター PDF・単一 HTML レポート（<code>doc</code>）、16:9 ワイドスクリーンスライドデッキ（<code>slide</code>）、および GitHub 向け Markdown へと自動コンパイルされます。また、SQLite ベースの差分ビルドキャッシュ（<code>.drawlib/cache.db</code>）により、変更された図版のみを高速に再レンダリングします。</li>
+</ol>
+<h2>2.2 従来のアプローチとの比較</h2>
+<figure class="drawlib-image" style="text-align: center;">
+  <img src="../images/02_solution_approach/fig_solution_comparison_ja.png" alt="02_solution_approach_1" />
+  <figcaption class="drawlib-caption">図 2.1: 従来の手動管理と Drawlib アプローチの比較</figcaption>
+</figure>
+<h2>2.3 AI ペアプログラミングとの相乗効果</h2>
+<p>コードとして表現できることで、AI コーディングエージェント（Claude Code, Cursor, Gemini CLI, GitHub Copilot 等）との協調作業が飛躍的に容易になります:</p>
+<ul>
+<li><strong>AI が仕様から図を自動生成</strong>: 新しい API エンドポイントやデータモデルを実装した際、AI に「アーキテクチャ図を更新して」と指示するだけで図版コードが生成されます。</li>
+<li><strong>マルチモーダル検証</strong>: AI Agent は自身が生成した図版を座標グリッド付き画像（<code>drawlib show -g</code>）としてレンダリングし、配置やテキストの重なりを視覚的にセルフレビューして修正できます。</li>
+<li><strong>再現性（100% Deterministic）</strong>: 同じコードからは常にピクセル単位で同一の図版が再現されます。</li>
+</ul>
+
+</section>
+
+<section id="chapter-4-03_drawlib_overview" class="doc-chapter pdf-chapter">
+<h1>第3章: Drawlib の全体像と主要機能</h1>
+<p>Drawlib は、&quot;Illustrated Documentation as Code&quot; を支える統合描画・ドキュメント作成プラットフォームです。ドキュメント構築パイプラインに加え、低レベルの基本図形描画から高度なシステムアーキテクチャ設計、プレゼンテーション・アニメーション生成までをカバーする 6 つの機能レイヤーを提供しています。</p>
+<h2>3.1 描画・ドキュメントコンポーネントレイヤー</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">レイヤー</th>
+<th style="text-align:left">提供モジュール</th>
+<th style="text-align:left">主な用途・描画対象</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><strong>1. Primitives (基本要素)</strong></td>
+<td style="text-align:left"><code>drawlib.shapes</code>, <code>lines</code>, <code>text</code>, <code>icons</code>, <code>images</code></td>
+<td style="text-align:left"><strong>43種</strong>の幾何図形、折れ線・曲線・ブロック矢印、リッチテキスト、Phosphor / FontAwesome / 公式 GCP アイコン</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>2. SmartArts (構造化)</strong></td>
+<td style="text-align:left"><code>drawlib.smartarts</code></td>
+<td style="text-align:left">プロセスシェブロン、表組み (<code>Table</code>)、オフライン世界・日本地図 (<code>GeoMap</code>)、シンタックスハイライト付きコードカード (<code>SourceCode</code>)、マインドマップ (<code>MindMapNode</code>)、ツリー階層 (<code>TreeNode</code>)、サイクル図 (<code>Cycle</code>)、ピラミッド、グリッド等</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>3. Charts (定量データ)</strong></td>
+<td style="text-align:left"><code>drawlib.charts</code></td>
+<td style="text-align:left">ガントチャート、棒グラフ、折れ線グラフ、面グラフ、円・ドーナツグラフ、レーダー、散布図・バブルチャート（共通軸・対数スケール・凡例基盤）</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>4. Diagrams &amp; Graphs (システム設計)</strong></td>
+<td style="text-align:left"><code>drawlib.diagrams</code>, <code>drawlib.graph</code></td>
+<td style="text-align:left">クラウド構成図、フロー図、シーケンス図、ER図、クラス図、状態遷移図、および 5 種の Pure Python 自動レイアウトソルバー (<code>get_layout()</code>)</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>5. Presentation &amp; Animation</strong></td>
+<td style="text-align:left"><code>drawlib.slide</code>, <code>drawlib.anim</code></td>
+<td style="text-align:left">16:9 プレゼンテーションステージ (<code>::: block</code> / <code>::: note</code>, Presenter View)、APNG / Animated WebP マルチフレームアニメーション</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>6. Builder, CLI &amp; Tools (ドキュメント基盤)</strong></td>
+<td style="text-align:left"><code>drawlib.tools</code>（CLI: <code>drawlib</code>）</td>
+<td style="text-align:left">HTML / PDF / スライド / Markdown / 画像一括ビルド、SQLite 差分ビルドキャッシュ (<code>.drawlib/cache.db</code>)、アセットキャッシュ管理 (<code>drawlib cache</code>)、ローカル検証サーバー (<code>drawlib serve --check</code>)</td>
+</tr>
+</tbody>
+</table>
+<h2>3.2 統一デザインシステムとセマンティックカラー</h2>
+<p>Drawlib では、作図のたびに RGB 値を迷う必要はありません。洗練された <strong>セマンティック 6 色パレット</strong> と <strong>ニュートラルベースライン</strong>、および一貫したスタイル命名規則が標準で組み込まれています。</p>
+<ul>
+<li><strong><code>Styles.Neutral</code> / <code>Styles.PrimaryNeutral</code> / <code>Styles.SecondaryNeutral</code></strong>: 図版全体の土台となる落ち着いたニュートラルカード（淡いグレー・ブルーグレー・スレート系）</li>
+<li><strong><code>Styles.Primary</code></strong>: システムの中核ノードや主動線（青系）</li>
+<li><strong><code>Styles.Secondary</code></strong>: 外部システムやクライアント（スレート・インディゴ系）</li>
+<li><strong><code>Styles.Accent</code></strong>: 注目させたいハイライトや補助サービス（アンバー・ティール系）</li>
+<li><strong><code>Styles.Muted</code></strong>: 境界枠や補助注記、背景コンテナ（薄いグレー系）</li>
+<li><strong><code>Styles.Success</code> / <code>Styles.Danger</code></strong>: 正常ステータス（緑系）および異常・警告・エラー（赤系）</li>
+</ul>
+<p>各カラーには <code>PrimaryFlat</code>（塗りつぶし）、<code>PrimaryOutline</code>（枠線）、<code>PrimaryBold</code>（太線）、<code>PrimaryDashed</code>（破線）などの PascalCase 定数トークンが用意されています。</p>
+<h3>50%以上ニュートラルベースライン原則（虹色ダイアグラムの防止）</h3>
+<p>すべてのノードに鮮やかな原色（<code>PrimaryFlat</code>, <code>AccentFlat</code>, <code>SuccessFlat</code> 等）を割り当てると、どこが重要なのか判別できない「虹色ダイアグラム」になってしまいます。Drawlib ではプロフェッショナルな視覚的階層を保つため、以下の配色原則を採用しています:</p>
+<ul>
+<li><strong>50%以上をニュートラルカードで構成</strong>: 図内の 50% 以上のノードには <strong><code>Styles.Neutral</code></strong>、<strong><code>Styles.PrimaryNeutral</code></strong>、<strong><code>Styles.SecondaryNeutral</code></strong> を使用し、穏やかな背景トーンで構造を整えます。</li>
+<li><strong>高彩度カラーは 1〜2 個の焦点（Focal Point）に限定</strong>: <strong><code>Styles.PrimaryFlat</code></strong> や <strong><code>Styles.AccentFlat</code></strong> などの強い塗りつぶしは、図の中で最も注目させたい 1〜2 個の主要要素だけに厳選して使用します。</li>
+</ul>
+<h3>テキストおよび接続線のニュートラルカラー原則</h3>
+<p>視認性の確保と見やすいレイアウトのため、テキストと接続線にも以下の基本ルールが定められています:</p>
+<ul>
+<li><strong>ニュートラルタイポグラフィ</strong>: 背景が明るいカードやキャンバス上では <strong><code>Styles.Dark</code></strong> または <strong><code>Styles.DarkBold</code></strong> を基本とします。<code>PrimaryFlat</code> などの濃い塗りつぶしノード内部では <strong><code>Styles.WhiteBold</code></strong> または <strong><code>Styles.Light</code></strong> を使用します（意味なく文字自体に <code>Primary</code> や <code>Secondary</code> を選ぶことは避けます）。</li>
+<li><strong>ニュートラルコネクタ</strong>: 通常の処理進行や接続線・矢印は <strong><code>Styles.DarkBold</code></strong> を推奨します。<code>Styles.Primary</code> や <code>Styles.Danger</code> などのカラー矢印は、クリティカル動線やエラーロールバックなど、強調すべき意味がある場合のみ使用します。</li>
+</ul>
+<h2>3.3 日本語フォント・CJK の完全サポート</h2>
+<p>Drawlib は、日本語を含む多言語タイポグラフィをファーストクラスでサポートしています。
+<code>--lang ja</code> を指定してプロジェクトを作成すると、以下の環境が自動的に整います:</p>
+<ul>
+<li><strong>HTML / PDF 出力</strong>: Google Fonts（Noto Sans JP）およびローカルシステムフォント（Hiragino Sans, Yu Gothic）の適切なフォントスタックが適用されます。</li>
+<li><strong>キャンバス描画</strong>: <code>drawlib.fonts.FontJapanese</code> が自動適用され、図形内の日本語テキストの文字化けやレイアウト崩れを防ぎます。</li>
+</ul>
+
+</section>
+
+<section id="chapter-5-04_installation" class="doc-chapter pdf-chapter">
+<h1>第4章: インストールと環境構築</h1>
+<p>Drawlib（<code>v0.3.4</code>）は公式 PyPI パッケージとして公開されており、モダンな Python パッケージマネージャー <code>uv</code> または <code>pip</code> を用いて数秒でセットアップできます。</p>
+<h2>4.1 前提環境</h2>
+<ul>
+<li><strong>Python</strong>: 3.11 以上（3.11 / 3.12 / 3.13 対応）</li>
+<li><strong>対応 OS</strong>: Linux / macOS / Windows</li>
+<li><strong>パッケージマネージャー</strong>: <code>uv</code>（推奨）または <code>pip</code></li>
+</ul>
+<h2>4.2 PyPI からのインストール (<code>uv</code> / <code>pip</code> / <code>uvx</code>)</h2>
+<p>標準の <code>drawlib</code> パッケージをインストールするだけで、作図・HTML ドキュメント・16:9 Web スライド・Markdown に加え、<strong>ベクター PDF（<code>drawlib build pdf</code>）</strong>、<strong>編集可能な MS Word（<code>drawlib build docx</code>）</strong>、<strong>編集可能な 16:9 MS PowerPoint（<code>drawlib build pptx</code>）</strong> のすべてのエクスポート機能が追加オプションなしでそのまま利用できます:</p>
+<pre><code class="language-bash"><span class="c1"># uv を使用する場合（推奨）</span>
+uv<span class="w"> </span>add<span class="w"> </span>drawlib
+uv<span class="w"> </span>run<span class="w"> </span>drawlib<span class="w"> </span>--version
+
+<span class="c1"># プロジェクトに追加せず、一時環境で単発実行する場合 (uvx)</span>
+uvx<span class="w"> </span>drawlib<span class="w"> </span>--version
+uvx<span class="w"> </span>drawlib<span class="w"> </span>init<span class="w"> </span>project<span class="w"> </span>site
+
+<span class="c1"># pip を使用する場合</span>
+pip<span class="w"> </span>install<span class="w"> </span>drawlib
+</code></pre>
+<h2>4.3 PDF・Office（Word / PowerPoint）出力とヘッドレスブラウザ自動取得</h2>
+<p>Drawlib は標準インストールだけでドキュメントおよびスライドの各種オフィス・印刷フォーマット出力を完結させます:</p>
+<ul>
+<li><strong>ベクター PDF / 16:9 PowerPoint 出力 (<code>drawlib build pdf</code>, <code>drawlib build pptx</code>)</strong>:
+初回の PDF または PPTX ビルド実行時に、Playwright 経由で管理対象の <strong>ヘッドレス Chromium バイナリが自動的にダウンロード・キャッシュ</strong> されます。手動でブラウザをセットアップする必要はありません。</li>
+<li><strong>編集可能な MS Word 出力 (<code>drawlib build docx</code>)</strong>:
+ピュア Python（<code>python-docx</code>）のみで動作し、ヘッドレスブラウザ不要で <code>doc</code> プロジェクトから編集可能な <code>.docx</code> 仕様書（<code>--generate-index</code> による目次生成対応）を直接出力できます。</li>
+</ul>
+<blockquote>
+<p><strong>Note (最小構成の Linux Docker コンテナ環境)</strong>:<br />
+Ubuntu / Debian 等の最小コンテナイメージで、ヘッドレス Chromium の起動に必要な OS 共有ライブラリが不足している場合は、以下のコマンドでシステム依存パッケージを一括導入できます:<br />
+<code>uv run playwright install-deps chromium</code></p>
+</blockquote>
+<h2>4.4 アセット・ビルドキャッシュ管理 (<code>drawlib cache</code>)</h2>
+<p>PyPI パッケージ本体を軽量に保つため、以下の 2 種類のキャッシュ機構が備わっています:</p>
+<ol>
+<li><strong>外部アセット &amp; ヘッドレスブラウザキャッシュ</strong>:
+多言語フォント（Roboto, Noto Sans JP 等）、ベクターアイコン（Phosphor, FontAwesome, 公式 GCP アイコン）、オフライン地図データ（<code>GeoMap</code>）、および PDF / PPTX 出力用のヘッドレス Chromium は、初回利用時にオンデマンドで自動取得され、ローカルにキャッシュされます。</li>
+<li><strong>図版差分ビルドキャッシュ (<code>.drawlib/cache.db</code>)</strong>:
+<code>drawlib build</code> や <code>drawlib show</code> の実行時、コードブロック・<code>styles.py</code>・<code>utils.py</code>・参照アセットのハッシュ値を SQLite データベースに記録し、変更のない図版の再レンダリングをスキップしてビルドを高速化します。</li>
+</ol>
+<p>オフライン環境や CI/CD コンテナ向けに全アセット・ブラウザを事前取得したい場合や、キャッシュをクリアしたい場合は <code>drawlib cache</code> コマンドを使用します:</p>
+<pre><code class="language-bash"><span class="c1"># キャッシュ状態の一覧表示</span>
+uv<span class="w"> </span>run<span class="w"> </span>drawlib<span class="w"> </span>cache<span class="w"> </span>list
+
+<span class="c1"># オフライン・CI 環境向けに全アセット（フォント・アイコン・地図・ヘッドレス Chromium）を一括事前取得</span>
+uv<span class="w"> </span>run<span class="w"> </span>drawlib<span class="w"> </span>cache<span class="w"> </span>download<span class="w"> </span>--all
+<span class="c1"># カテゴリ別に取得する場合: --fonts / --icons / --maps / --browser</span>
+
+<span class="c1"># 差分ビルドキャッシュ（.drawlib/cache.db）のみをクリアして全図版を強制再描画</span>
+uv<span class="w"> </span>run<span class="w"> </span>drawlib<span class="w"> </span>cache<span class="w"> </span>clear<span class="w"> </span>--images
+
+<span class="c1"># アセットと差分ビルドキャッシュをすべてクリア</span>
+uv<span class="w"> </span>run<span class="w"> </span>drawlib<span class="w"> </span>cache<span class="w"> </span>clear<span class="w"> </span>--all
+</code></pre>
+<h2>4.5 インストールの動作確認</h2>
+<p>インストールが完了したら、以下のコマンドで CLI が利用可能であることを確認します:</p>
+<pre><code class="language-bash"><span class="c1"># バージョンの確認 (0.3.4)</span>
+uv<span class="w"> </span>run<span class="w"> </span>drawlib<span class="w"> </span>--version
+
+<span class="c1"># 利用可能なプロジェクトテンプレート一覧の表示</span>
+uv<span class="w"> </span>run<span class="w"> </span>drawlib<span class="w"> </span>init<span class="w"> </span>project<span class="w"> </span>list
+</code></pre>
+<p><code>doc</code>、<code>site</code>、<code>slide</code>、<code>images</code> の 4 種類のプロジェクトテンプレートが表示されれば環境構築は完了です。</p>
+
+</section>
+
+<section id="chapter-6-05_project_creation" class="doc-chapter pdf-chapter">
+<h1>第5章: プロジェクト作成とビルド運用</h1>
+<p>Drawlib には、目的別のドキュメントプロジェクトを瞬時にスキャフォールドする <code>drawlib init project</code> コマンドが用意されています。</p>
+<h2>5.1 プロジェクトテンプレートの種類</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">テンプレート</th>
+<th style="text-align:left">用途</th>
+<th style="text-align:left">主な生成成果物</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><strong><code>doc</code></strong></td>
+<td style="text-align:left">複数章の技術仕様書、設計レポート、提出資料</td>
+<td style="text-align:left"><code>&lt;target&gt;_&lt;lang&gt;.pdf</code>, <code>&lt;target&gt;_&lt;lang&gt;.docx</code>, <code>&lt;target&gt;_html/</code>, <code>&lt;target&gt;_markdown/</code>, <code>&lt;target&gt;_images/</code></td>
+</tr>
+<tr>
+<td style="text-align:left"><strong><code>site</code></strong></td>
+<td style="text-align:left">サイドバーナビゲーション付きの多ページドキュメントサイト</td>
+<td style="text-align:left"><code>&lt;target&gt;_html/</code>, <code>&lt;target&gt;_markdown/</code>, <code>&lt;target&gt;_images/</code></td>
+</tr>
+<tr>
+<td style="text-align:left"><strong><code>slide</code></strong></td>
+<td style="text-align:left">16:9 プレゼンテーションスライド（Web 発表・PDF / PPTX）</td>
+<td style="text-align:left"><code>&lt;target&gt;_html/&lt;lang&gt;/index.html</code>, <code>&lt;target&gt;_&lt;lang&gt;.pdf</code>, <code>&lt;target&gt;_&lt;lang&gt;.pptx</code>, <code>&lt;target&gt;_images/</code></td>
+</tr>
+<tr>
+<td style="text-align:left"><strong><code>images</code></strong></td>
+<td style="text-align:left">独立した Python 作図スクリプト集</td>
+<td style="text-align:left"><code>&lt;target&gt;_images/*.png</code>（または <code>&lt;target&gt;/*.png</code>, <code>*.webp</code>）</td>
+</tr>
+</tbody>
+</table>
+<h2>5.2 日本語 Google スタイルのドキュメントプロジェクト作成</h2>
+<p>以下のコマンド 1 つで、日本語対応および Google スタイルの線形ドキュメントプロジェクト（<code>report_src/</code>）を作成できます（<code>-l en,ja</code> のように複数言語を同時初期化することも可能です）:</p>
+<pre><code class="language-bash">uv<span class="w"> </span>run<span class="w"> </span>drawlib<span class="w"> </span>init<span class="w"> </span>project<span class="w"> </span>doc<span class="w"> </span>report<span class="w"> </span>-l<span class="w"> </span>ja<span class="w"> </span>-s<span class="w"> </span>google
+</code></pre>
+<figure class="drawlib-image" style="text-align: center;">
+  <img src="../images/05_project_creation/fig_project_lifecycle_ja.png" alt="05_project_creation_1" />
+  <figcaption class="drawlib-caption">図 5.1: プロジェクト作成から成果物生成までのライフサイクル</figcaption>
+</figure>
+<h3>ターゲット引数による名前の連動仕様</h3>
+<p><code>drawlib init project doc report -l ja</code> を実行すると、<code>i18n</code> ネイティブの連動関係が自動的に構築されます:</p>
+<ul>
+<li><strong>ソースフォルダ</strong>: <code>report_src/</code> 直下に <code>drawlib.toml</code>（<code>[project]</code> + <code>[i18n]</code>）とロケールフォルダ <code>report_src/ja/</code>（<code>-l en,ja</code> の場合は <code>en/</code> と <code>ja/</code>）が作成されます。</li>
+<li><strong>ビルド出力</strong>: <code>report_ja.pdf</code>（<code>report_&lt;lang&gt;.pdf</code>）, <code>report_html/</code>, <code>report_markdown/</code>, <code>report_images/</code> が出力対象として自動設定されます（さらに <code>drawlib build docx</code> で <code>report_&lt;lang&gt;.docx</code> も出力可能）。</li>
+</ul>
+<h2>5.3 ディレクトリ構造とインクリメンタルキャッシュ</h2>
+<p>生成された <code>report_src/</code> 内の各ファイルとディレクトリは以下の役割を持ちます:</p>
+<pre><code class="language-text">report_src/
+├── drawlib.toml          # プロジェクトマニフェスト ([project] type/style + [i18n] langs)
+├── _assets/              # ロゴや外部画像などの静的アセット格納ディレクトリ
+├── ja/                   # ロケール別章ディレクトリ (多言語化時は en/ 等を追加)
+│   ├── 00_cover.md       # [必須] 表紙（タイトル・メタデータ）
+│   ├── 01_overview.md    # 第1章ドキュメント
+│   └── 02_design.md      # 第2章ドキュメント
+├── style.css             # PDF / HTML デザイン用スタイルシート (Google テーマ)
+├── styles.py             # Python 作図用スタイル設定 (GoogleStyles + 日本語; &lt;lang&gt;/styles.py も可)
+├── template.html         # Jinja2 印刷・Web レイアウトテンプレート
+├── utils.py              # プロジェクト共通の作図ヘルパー関数・定数
+├── build.sh              # [実行可能] 全ターゲット一括ビルドスクリプト
+├── serve.sh              # ローカルプレビューサーバー起動スクリプト
+└── README.md             # プロジェクト手引書
+</code></pre>
+<p>また、ビルド時には <code>drawlib.toml</code> に定義された全ロケール間の構造パリティを検証して共通図版を重複排除するとともに、ワークスペース直下の <code>.drawlib/cache.db</code>（SQLite ベース）に <strong>SHA-256 によるインクリメンタルビルドキャッシュ</strong> が自動生成されます。各 <code>drawlib</code> コードブロックの内容、<code>styles.py</code>、<code>utils.py</code>、および <code>_assets/</code> 内の参照アセットのハッシュ値を追跡し、変更された図版のみを再レンダリングするため、2 回目以降のビルドが劇的に高速化されます。</p>
+<h2>5.4 ビルドの実行とリンク整合性チェック</h2>
+<p>ドキュメントを PDF や HTML、Markdown、抽出画像へ一括コンパイルするには、生成された <code>build.sh</code> を実行するだけです:</p>
+<pre><code class="language-bash"><span class="c1"># 全成果物（HTML, PDF, Markdown, Images）を一括ビルド</span>
+./report_src/build.sh
+
+<span class="c1"># 生成された HTML のリンク切れや画像参照エラーを自動検証</span>
+uv<span class="w"> </span>run<span class="w"> </span>drawlib<span class="w"> </span>serve<span class="w"> </span>report_html/<span class="w"> </span>--check
+</code></pre>
+<p>ビルドが完了すると、<code>report_ja.pdf</code>（<code>report_&lt;lang&gt;.pdf</code>）、<code>report_html/</code>、<code>report_markdown/</code>、<code>report_images/</code> が出力され、<code>drawlib serve --check</code> によって壊れた内部リンクや画像欠損がないことを CI やローカルで即座に検証できます。</p>
+
+</section>
+
+<section id="chapter-7-06_agent_instructions" class="doc-chapter pdf-chapter">
+<h1>第6章: AI エージェントとの連携・インストラクション</h1>
+<p>Drawlib は、AI コーディングアシスタント（Claude, Cursor, Gemini, Copilot）が自律的かつ正確に作図を行えるよう「Agent-First」で設計されています。エージェントに基本 instruction を登録した後は、AI が Drawlib CLI と自律的に対話して必要な機能を調査し、検証済みの図解ドキュメントを出力します。</p>
+<figure class="drawlib-image" style="text-align: center;">
+  <img src="../images/06_agent_instructions/fig_agent_interaction_ja.png" alt="06_agent_instructions_1" />
+  <figcaption class="drawlib-caption">図 6.1: Drawlib と AI Agent の自律対話・ドキュメント出力モデル</figcaption>
+</figure>
+<h2>6.1 組み込みルールシステムの活用 (<code>drawlib rules</code>)</h2>
+<p>Drawlib には、ライブラリ仕様や作図ベストプラクティスが最初からルールとして組み込まれています。ターミナルからオンデマンドでエージェントに知識を提供できます:</p>
+<pre><code class="language-bash"><span class="c1"># 利用可能なルール一覧</span>
+uv<span class="w"> </span>run<span class="w"> </span>drawlib<span class="w"> </span>rules<span class="w"> </span>list
+
+<span class="c1"># エージェント用指示マニュアル・基本原則</span>
+uv<span class="w"> </span>run<span class="w"> </span>drawlib<span class="w"> </span>rules<span class="w"> </span>show<span class="w"> </span>agent-instruction
+
+<span class="c1"># キャンバス座標系 (原点左下) と描画ライフサイクル</span>
+uv<span class="w"> </span>run<span class="w"> </span>drawlib<span class="w"> </span>rules<span class="w"> </span>show<span class="w"> </span>overview
+
+<span class="c1"># 配色・タイポグラフィ・50%+ ニュートラルルール</span>
+uv<span class="w"> </span>run<span class="w"> </span>drawlib<span class="w"> </span>rules<span class="w"> </span>show<span class="w"> </span>style-guide
+
+<span class="c1"># 自律 3 ステージ検証ループと 720pt フォントサイズ計算</span>
+uv<span class="w"> </span>run<span class="w"> </span>drawlib<span class="w"> </span>rules<span class="w"> </span>show<span class="w"> </span>review-guide
+
+<span class="c1"># プロジェクト構成ガイド (doc / site / slide / images)</span>
+uv<span class="w"> </span>run<span class="w"> </span>drawlib<span class="w"> </span>rules<span class="w"> </span>show<span class="w"> </span>project-overview
+uv<span class="w"> </span>run<span class="w"> </span>drawlib<span class="w"> </span>rules<span class="w"> </span>show<span class="w"> </span>project-doc
+uv<span class="w"> </span>run<span class="w"> </span>drawlib<span class="w"> </span>rules<span class="w"> </span>show<span class="w"> </span>project-site
+uv<span class="w"> </span>run<span class="w"> </span>drawlib<span class="w"> </span>rules<span class="w"> </span>show<span class="w"> </span>project-slide
+uv<span class="w"> </span>run<span class="w"> </span>drawlib<span class="w"> </span>rules<span class="w"> </span>show<span class="w"> </span>project-images
+
+<span class="c1"># 全 API シンボル一覧と各モジュールの詳細仕様</span>
+uv<span class="w"> </span>run<span class="w"> </span>drawlib<span class="w"> </span>rules<span class="w"> </span>show<span class="w"> </span>api
+uv<span class="w"> </span>run<span class="w"> </span>drawlib<span class="w"> </span>rules<span class="w"> </span>show<span class="w"> </span>lib-smartarts-overview
+uv<span class="w"> </span>run<span class="w"> </span>drawlib<span class="w"> </span>rules<span class="w"> </span>show<span class="w"> </span>lib-diagrams-overview
+uv<span class="w"> </span>run<span class="w"> </span>drawlib<span class="w"> </span>rules<span class="w"> </span>show<span class="w"> </span>lib-graph-overview
+uv<span class="w"> </span>run<span class="w"> </span>drawlib<span class="w"> </span>rules<span class="w"> </span>show<span class="w"> </span>lib-charts-overview
+</code></pre>
+<h2>6.2 プロジェクトルールファイルへの設定 (<code>drawlib init agent</code>)</h2>
+<p><code>uv run drawlib init agent &lt;claude|cursor|antigravity|copilot|windsurf|cline|roo|codex|gemini|all&gt;</code> コマンドで各エージェント専用のルールファイルを自動生成するか、以下の基本ルールを登録しておくと、AI が自動的に Drawlib の作図原則に従うようになります:</p>
+<pre><code class="language-markdown"><span class="gh"># Drawlib 作図ルール</span>
+<span class="k">-</span><span class="w"> </span>Project-First Rule: 裸の <span class="sb">`.py`</span> ファイルを直接作らず、必ず <span class="sb">`uv run drawlib init project &lt;doc|site|slide|images&gt;`</span> でプロジェクトを初期化すること。
+<span class="k">-</span><span class="w"> </span>生 SVG や低レベル matplotlib は書かず、drawlib の高レベルモジュール（smartarts, diagrams, graph, charts）を使用すること。
+<span class="k">-</span><span class="w"> </span>キャンバスの原点 (0, 0) は「左下」である。
+<span class="k">-</span><span class="w"> </span>スタイルとカラーは常に PascalCase（`Styles`, <span class="sb">`Colors`</span>）でインポート・参照すること。
+<span class="k">-</span><span class="w"> </span>50%+ Neutral Baseline: 図形要素の 50% 以上に落ち着いたニュートラルカード（`Styles.Neutral`, <span class="sb">`Styles.PrimaryNeutral`</span>, <span class="sb">`Styles.SecondaryNeutral`</span>）を使用し、濃い塗り（`Styles.PrimaryFlat`, <span class="sb">`Styles.AccentFlat`</span>）は 1〜2 個の主役要素やヘッダーに限定すること。
+<span class="k">-</span><span class="w"> </span>フォントサイズは <span class="sb">`text_size &gt;= 10.0`</span>（標準 10.0〜11.5、見出し 11.5〜12.5）を維持すること。
+<span class="k">-</span><span class="w"> </span>Markdown 内のコードブロックには <span class="sb">`file=&lt;名前&gt;.png`</span> と <span class="sb">`caption="..."`</span>（および必要に応じて <span class="sb">`code=fold`</span> / <span class="sb">`code=show`</span>）を <span class="sb">`=`</span> 構文で指定し、狭いピクセル幅指定（`width=600px` 等）は省くこと。
+</code></pre>
+<h2>6.3 エージェントの自律 3 ステージ検証ループ (Autonomous 3-Stage Review Loop)</h2>
+<p>AI エージェントが図版やドキュメントを作成する際は、以下の <strong>自律 3 ステージ検証ループ</strong> を実行させることで、座標ズレや文字切れ、リンク切れのない高品質な成果物が得られます:</p>
+<ol>
+<li><strong>Stage 1 — 静的・座標アンカー検証</strong>:
+<ul>
+<li>プリミティブ要素（<code>shapes</code>, <code>text</code>, <code>icons</code>）は <strong>中心座標 <code>(cx, cy)</code></strong>、高レベルコンポーネント（<code>SmartArts</code>, <code>Charts</code>, <code>Diagrams</code>）は <strong>左下座標 <code>(x0, y0)</code></strong> というアンカー仕様の違いを確認します。</li>
+<li>キャンバス幅（<code>120〜136</code> 前後）に対して <code>text_size &gt;= 10.0</code> が確保されているか、<code>save()</code> が呼ばれているかを検査します。</li>
+</ul>
+</li>
+<li><strong>Stage 2 — マイクロジオメトリ・グリッド検証 (<code>drawlib show -g</code>)</strong>:<pre><code class="language-bash">uv<span class="w"> </span>run<span class="w"> </span>drawlib<span class="w"> </span>show<span class="w"> </span>doc.md<span class="w"> </span>arch.png<span class="w"> </span>-s<span class="w"> </span>styles.py<span class="w"> </span>-u<span class="w"> </span>utils.py<span class="w"> </span>-g<span class="w"> </span>-o<span class="w"> </span>.drawlib/scratch/arch_grid.png
+</code></pre>
+<ul>
+<li>10 単位（実線）および 5 単位（破線）の座標グリッドを重ねたプレビュー画像を出力し、マルチモーダル画像確認ツールでテキストのはみ出し、矢印の交差、余白バランス（外周 4〜6 単位以上）、50%+ ニュートラル配色を視覚検査して即座に座標を微調整します。</li>
+</ul>
+</li>
+<li><strong>Stage 3 — マクロページ・ブラウザ HTML / PDF 検証</strong>:<pre><code class="language-bash">./build.sh
+uv<span class="w"> </span>run<span class="w"> </span>drawlib<span class="w"> </span>serve<span class="w"> </span>report_html/<span class="w"> </span>--check
+</code></pre>
+<ul>
+<li>全体ビルド後に <code>drawlib serve &lt;html_dir&gt; --check</code> でリンク切れや画像欠損がないことを検証し、ブラウザレンダリング画面で本文テキストと図版内ラベルのサイズ感の調和を確認します。</li>
+</ul>
+</li>
+</ol>
+
+</section>
+
+<section id="chapter-8-07_basic_drawing" class="doc-chapter pdf-chapter">
+<h1>第7章: ベーシックな描画（Primitives）</h1>
+<p>Drawlib の基本描画レイヤー（<code>shapes</code>, <code>lines</code>, <code>text</code>, <code>icons</code>）を使用すると、任意の幾何学図形や自由なレイアウトを自在に構築できます。</p>
+<h2>7.1 キャンバスの座標系とアンカー基準</h2>
+<p>Drawlib は、数学的な <strong>直交座標系（デカルト座標系）</strong> を採用しています:</p>
+<ul>
+<li><strong>原点 <code>(0, 0)</code></strong>: キャンバスの <strong>左下</strong> です（画面描画系の左上原点とは異なります）。</li>
+<li><strong>サイズ指定</strong>: <code>setup(width=W, height=H)</code> でキャンバスサイズを定義し、描画の最後に <code>save()</code> を呼び出します。</li>
+<li><strong>中心座標アンカー <code>(cx, cy)</code></strong>: 基本描画プリミティブ（<code>shapes</code>, <code>text</code>, <code>icons</code>, <code>images</code>）はすべて <strong>中心座標 <code>(cx, cy)</code></strong> を基準に配置します（高レベルモジュールの <code>smartarts</code>, <code>charts</code>, <code>diagrams</code> が左下 <code>(x0, y0)</code> を基準とする点と対比されます）。</li>
+</ul>
+<h2>7.2 基本図形（Shapes）と矢印（Lines）</h2>
+<p><strong>43 種類</strong>の図形プリミティブ（<code>rectangle</code>, <code>circle</code>, <code>ellipse</code>, <code>polygon</code>, <code>star</code>, <code>donuts</code>, <code>fan</code>, <code>bubblespeech</code>, <code>cylinder</code>, <code>parallelogram</code>, <code>trapezoid</code>, <code>chevron</code>、およびブロック矢印 <code>arrow_polyline</code>, <code>arrow_l</code>, <code>arrow_u</code>, <code>arrow_arc</code> など）が用意されています。</p>
+<figure class="drawlib-image" style="text-align: center;">
+  <img src="../images/07_basic_drawing/fig_basic_drawing_ja.png" alt="07_basic_drawing_1" />
+  <figcaption class="drawlib-caption">図 7.1: 基本図形・矢印・アイコンを組み合わせたサービス連携図</figcaption>
+</figure>
+<h2>7.3 主要な描画関数一覧</h2>
+<ul>
+<li><strong><code>rectangle(xy, width, height, style=...)</code></strong>: 長方形（<code>style.shape_r</code> で角丸対応）</li>
+<li><strong><code>circle(xy, radius, style=...)</code></strong>: 円</li>
+<li><strong><code>line(start_xy, end_xy, arrow_head=&quot;-&gt;&quot;, style=...)</code></strong>: 矢印付き直線</li>
+<li><strong><code>line_curved(start_xy, end_xy, bend=0.2, ...)</code></strong>: 滑らかな曲線</li>
+<li><strong><code>text(xy, text=&quot;...&quot;, style=...)</code></strong>: スタイル付きテキスト</li>
+<li><strong><code>phosphor.&lt;icon_name&gt;(xy, width, style=...)</code></strong>: Phosphor ベクターアイコン（<code>drawlib.icons.phosphor</code>）</li>
+<li><strong><code>fontawesome.&lt;icon_name&gt;(xy, width, style=...)</code></strong>: FontAwesome アイコン（<code>drawlib.icons.fontawesome</code>）</li>
+<li><strong><code>gcp.&lt;icon_name&gt;(xy, width, ...)</code></strong>: Google Cloud 公式アーキテクチャアイコン（<code>drawlib.icons.gcp</code>）</li>
+</ul>
+
+</section>
+
+<section id="chapter-9-08_smartarts" class="doc-chapter pdf-chapter">
+<h1>第8章: SmartArts（構造化ビジュアル）</h1>
+<p><code>drawlib.smartarts</code> は、手作業で個々の四角形や直線の座標を計算することなく、洗練された構造化図版を自動レイアウトする高レベルモジュールです。SmartArts コンポーネントの <code>.draw(xy=...)</code> は、コンポーネント全体の <strong>左下座標 <code>(x0, y0)</code></strong> を基準に配置します（<code>Table</code> は <code>align=&quot;bottom_left&quot;</code> またはデフォルトの <code>align=&quot;top_left&quot;</code> を指定可能）。</p>
+<h2>8.1 利用可能な SmartArts コンポーネント</h2>
+<ul>
+<li><strong><code>ChevronProcess</code></strong>: 矢羽型（シェブロン）による工程・デプロイパイプライン表現。</li>
+<li><strong><code>Table</code></strong>: 均等セル配置、ヘッダー強調、罫線装飾を備えたデータ比較テーブル。</li>
+<li><strong><code>GeoMap</code></strong>: 世界・地域・日本都道府県のオフラインベクター地図、特定国や都道府県のハイライト、ピン配置、拠点間アーク接続。</li>
+<li><strong><code>MindMapNode</code></strong>: 放射状または特定方向に広がるアイデアマップ・機能構造図。</li>
+<li><strong><code>TreeNode</code></strong>: 組織図やディレクトリツリーを表す階層構造図。</li>
+<li><strong><code>Cycle</code></strong>: フィードバックループや継続的改善サイクル図。</li>
+<li><strong><code>Pyramid</code></strong>: テストピラミッドやセキュリティ階層モデル。</li>
+<li><strong><code>BoxList</code> / <code>BulletPoints</code></strong>: 箇条書きやカードスタックの整列配置。</li>
+<li><strong><code>GridLayout</code></strong>: 均等グリッドによるダッシュボード風レイアウト。</li>
+<li><strong><code>SourceCode</code></strong>: シンタックスハイライト付きコードブロック表示。</li>
+</ul>
+<blockquote>
+<p>[!NOTE]
+特定のノードを指し示すコールアウト吹き出しは、基本図形モジュール <code>drawlib.shapes.bubblespeech</code> から利用できます。</p>
+</blockquote>
+<h2>8.2 パイプラインと機能比較の作成例</h2>
+<figure class="drawlib-image" style="text-align: center;">
+  <img src="../images/08_smartarts/fig_smartarts_sample_ja.png" alt="08_smartarts_1" />
+  <figcaption class="drawlib-caption">図 8.1: ChevronProcess と Table を組み合わせたリリースフロー</figcaption>
+</figure>
+
+</section>
+
+<section id="chapter-10-09_charts" class="doc-chapter pdf-chapter">
+<h1>第9章: チャート描画（定量データの可視化）</h1>
+<p><code>drawlib.charts</code> は、プロジェクトのロードマップ、スケジュール管理、パフォーマンスメトリクスを美麗にレンダリングするチャートモジュールです。すべてのチャートの <code>.draw(xy=...)</code> は、バウンディングボックスの <strong>左下座標 <code>(x0, y0)</code></strong> を基準に配置します。</p>
+<h2>9.1 ガントチャート (<code>GanttChart</code>)</h2>
+<p>開発スケジュールやマイルストーン、タスク間の依存関係（先行タスクと後続タスクの矢印）を視覚化できます。</p>
+<figure class="drawlib-image" style="text-align: center;">
+  <img src="../images/09_charts/fig_gantt_roadmap_ja.png" alt="09_charts_1" />
+  <figcaption class="drawlib-caption">図 9.1: エンジニアリング開発ロードマップ</figcaption>
+</figure>
+<h2>9.2 その他のチャート</h2>
+<ul>
+<li><strong><code>BarChart</code></strong>: 垂直・水平棒グラフ、グループ化（<code>bar_mode=&quot;group&quot;</code>）・積み上げ（<code>bar_mode=&quot;stack&quot;</code>）、先端角丸（<code>bar_r</code>）、対数軸（<code>Axis(scale=&quot;log&quot;)</code>）対応。</li>
+<li><strong><code>LineChart</code> / <code>AreaChart</code></strong>: 時系列推移や多系列プロット。スプライン曲線補間（<code>smooth=True</code>）やオーバーラップ・積み上げ面グラフに対応。</li>
+<li><strong><code>PieChart</code></strong>: 構成比率の可視化。ドーナツチャート（<code>hole_ratio</code>）および中央 KPI バッジ（<code>center_text</code>）、特定スライスの切り出し強調（<code>explode</code>）に対応。</li>
+<li><strong><code>RadarChart</code></strong>: 多変量評価、アーキテクチャのトレードオフ分析やスキルマトリクス（多角形・円形グリッド対応）。</li>
+<li><strong><code>ScatterChart</code></strong>: 2 次元散布図および 3 変数バブルプロット（<code>(x, y, radius)</code>）、対数軸（<code>Axis(scale=&quot;log&quot;)</code>）によるレイテンシ・スループット相関の可視化。</li>
+</ul>
+
+</section>
+
+<section id="chapter-11-10_diagrams" class="doc-chapter pdf-chapter">
+<h1>第10章: システムダイアグラム（アーキテクチャ・設計図）</h1>
+<p><code>drawlib.diagrams</code> は、複雑なソフトウェアシステムやネットワーク構造をエンジニアリング標準記法で描画するための最上位モジュールです。</p>
+<h2>10.1 アーキテクチャ図 (<code>ArchitectureDiagram</code>)</h2>
+<p>VPC やサブネットなどの境界グループ（<code>NodeGroup</code>）、コンポーネント（<code>Node</code>）、サービス間の直交配線を直感的に定義できます。</p>
+<figure class="drawlib-image" style="text-align: center;">
+  <img src="../images/10_diagrams/fig_architecture_diagram_ja.png" alt="10_diagrams_1" />
+  <figcaption class="drawlib-caption">図 10.1: クラウドマイクロサービス構成図</figcaption>
+</figure>
+<h2>10.2 自動レイアウトエンジン (<code>drawlib.graph</code>)</h2>
+<p>ゼロからノードのトポロジー（論理関係）とピクセル座標（幾何美観）を同時に計算しようとすると、人間にとっても AI にとってもワーキングメモリが逼迫します（<strong>コールドスタート問題</strong>）。</p>
+<p>Drawlib の <code>drawlib.graph</code> は、外部バイナリ（Graphviz 等）に依存しない <strong>Pure Python の座標・レイアウト計算エンジン（<code>get_layout()</code>）</strong> です。描画スタイルやラベル属性を持たず、Step 1 でトポロジーから座標（<code>xy</code>, <code>local_xy</code>, <code>bottom_left</code>, <code>local_bottom_left</code>, <code>points</code>）を算出し、Step 2 で <code>drawlib.diagrams</code> や <code>drawlib.shapes</code> に渡して描画する <strong>2 段階ワークフロー</strong> を実現します。</p>
+<figure class="drawlib-image" style="text-align: center;">
+  <img src="../images/10_diagrams/fig_architecture_graph_ja.png" alt="10_diagrams_2" />
+  <figcaption class="drawlib-caption">図 10.2: ArchitectureGraph.get_layout() と ArchitectureDiagram の 2 段階連携</figcaption>
+</figure>
+<h3>2 段階ワークフロー (<code>get_layout()</code> &amp; <code>print(layout)</code>)</h3>
+<ul>
+<li><strong>Step 1 — 座標解決 (<code>layout = g.get_layout()</code>)</strong>: 宣言したトポロジーから全ノードとクラスタの座標を算出します。<code>print(layout)</code> で人間や AI が読みやすい座標一覧を出力してスクリプトに転記することも、<code>layout[&quot;id&quot;]</code> を直接参照して <code>layout.offset(&quot;api&quot;, dy=-4.0)</code> で微調整することも可能です。</li>
+<li><strong>Step 2 — 表現力豊かな描画 (<code>drawlib.diagrams</code> / <code>drawlib.shapes</code>)</strong>: 算出された <code>.xy</code>、<code>.local_xy</code>、<code>.bottom_left</code>、<code>.local_bottom_left</code>、<code>.points</code> を <code>ArchitectureDiagram</code>、<code>FlowDiagram</code>、または基本図形に渡すことで、自動配置とアイコン・スタイル表現を両立します。</li>
+</ul>
+<h3>専門用途に応じた 5 大ソルバー</h3>
+<ul>
+<li><strong><code>ArchitectureGraph</code></strong>: 多層階層（Tier）と VPC / サブネット境界、方位（Compass: left/right/top/bottom/center）配置。</li>
+<li><strong><code>LayerGraph</code></strong>: Sugiyama 法に基づく多段 DAG・データフロー・依存関係グラフ（<code>.tier()</code> 対応）。</li>
+<li><strong><code>TreeGraph</code></strong>: Reingold-Tilford 法による組織図・決定木・AST（<code>.child()</code> 対応）。</li>
+<li><strong><code>RadialGraph</code></strong>: 同心円（Concentric Rings）によるイベント駆動・ハブ＆スポーク（<code>.spoke()</code>・<code>layout.ring_radii</code> 対応）。</li>
+<li><strong><code>GridGraph</code></strong>: 2D 行列グリッド整列とスマートチャネル配線（<code>.cell()</code>・<code>.cluster_row()</code> 対応）。</li>
+</ul>
+<h2>10.3 その他の専門ダイアグラム</h2>
+<ul>
+<li><strong><code>FlowDiagram</code></strong>: 処理ステップ、条件分岐（Decision）、ループ制御。</li>
+<li><strong><code>SequenceDiagram</code></strong>: アクター、参加者、同期/非同期メッセージ、ノート。</li>
+<li><strong><code>ERDiagram</code></strong>: 物理テーブル定義、PK/FK、Crow's Foot（鳥の足）記法によるリレーション。</li>
+<li><strong><code>ClassDiagram</code></strong>: オブジェクト指向クラス、メソッド、継承・集約関係。</li>
+<li><strong><code>StateDiagram</code></strong>: 状態遷移マシン、イベントトリガー、ガード条件。</li>
+</ul>
+
+</section>
+
+<section id="chapter-12-11_customization" class="doc-chapter pdf-chapter">
+<h1>第11章: スタイルとテーマのカスタマイズ</h1>
+<p>Drawlib では、ドキュメント全体の配色や作図トーンをプロジェクト単位で柔軟にカスタマイズできます。</p>
+<h2>11.1 <code>styles.py</code> による作図テーマの制御</h2>
+<p>プロジェクトのルート（またはソースディレクトリ）にある <code>styles.py</code> で、作図時に使用される <code>Colors</code> と <code>Styles</code> を決定します:</p>
+<pre><code class="language-python"><span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.fonts</span><span class="w"> </span><span class="kn">import</span> <span class="n">FontJapanese</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.preset_colors</span><span class="w"> </span><span class="kn">import</span> <span class="n">GoogleColors</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.preset_styles</span><span class="w"> </span><span class="kn">import</span> <span class="n">GoogleStyles</span>
+
+<span class="c1"># カラーパレットとスタイルの初期化</span>
+<span class="n">Colors</span> <span class="o">=</span> <span class="n">GoogleColors</span><span class="p">()</span>
+<span class="n">Styles</span> <span class="o">=</span> <span class="n">GoogleStyles</span><span class="p">()</span><span class="o">.</span><span class="n">patch_font</span><span class="p">(</span>
+    <span class="n">regular</span><span class="o">=</span><span class="n">FontJapanese</span><span class="o">.</span><span class="n">SANSSERIF_REGULAR</span><span class="p">,</span>
+    <span class="n">bold</span><span class="o">=</span><span class="n">FontJapanese</span><span class="o">.</span><span class="n">SANSSERIF_BOLD</span><span class="p">,</span>
+    <span class="n">thin</span><span class="o">=</span><span class="n">FontJapanese</span><span class="o">.</span><span class="n">SANSSERIF_THIN</span><span class="p">,</span>
+<span class="p">)</span>
+</code></pre>
+<h2>11.2 利用可能なスタイルプリセットとニュートラルカードトークン</h2>
+<p>Drawlib には 3 つの全体テーマプリセットが用意されています:</p>
+<ul>
+<li><strong><code>DefaultStyles</code> / <code>DefaultColors</code></strong>: Tailwind / VitePress にインスパイアされた開発者向け標準テーマ。</li>
+<li><strong><code>GoogleStyles</code> / <code>GoogleColors</code></strong>: Material Design および Google Docs/Slides に準拠した親しみやすいテーマ。</li>
+<li><strong><code>MonochromeStyles</code> / <code>MonochromeColors</code></strong>: 印刷物や公的文書に適した白黒・グレースケールテーマ。</li>
+</ul>
+<p>いずれのテーマプリセットでも、図面が派手な「虹色（レインボー）ダイアグラム」になるのを防ぐため、<strong>50% 以上の要素を落ち着いたニュートラルカードで組む（50%+ Neutral Baseline Rule）</strong> ための専用トークンが標準搭載されています:</p>
+<ul>
+<li><strong><code>Styles.Neutral</code></strong>: 白〜淡いグレー背景の標準カードスタイル（一般的なノードやコンテナ用）。</li>
+<li><strong><code>Styles.PrimaryNeutral</code></strong>: プライマリカラーの極淡色背景＋細枠線カード（主要グループやサブシステム用）。</li>
+<li><strong><code>Styles.SecondaryNeutral</code></strong>: セカンダリカラーの極淡色背景＋細枠線カード（補助コンポーネントや周辺系用）。</li>
+<li><strong><code>Styles.PrimaryFlat</code> / <code>Styles.AccentFlat</code> / <code>Styles.DarkFlat</code></strong>: 視線を集める 1〜2 個の主役ノードやコンテナのヘッダーバーに限定して使用する高彩度・高コントラストな塗りスタイル。</li>
+</ul>
+<h2>11.3 既存スタイルの部分変更 (<code>.patch()</code>) と <code>utils.py</code> の共通化</h2>
+<p>既存のスタイルをベースに、特定の色や線幅、角丸、フォントサイズだけを変更した新しいスタイルを <code>.patch()</code> で簡単に派生できます。また、プロジェクト内の <code>utils.py</code> に定義した定数やヘルパー関数は、各 Markdown の <code>drawlib</code> コードブロックから <code>from drawlib.utils import ...</code> として直接インポートできます:</p>
+<pre><code class="language-python"><span class="c1"># utils.py での定義例</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.shapes</span><span class="w"> </span><span class="kn">import</span> <span class="n">rectangle</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.styles</span><span class="w"> </span><span class="kn">import</span> <span class="n">Styles</span>
+
+<span class="c1"># PrimaryNeutral をベースに角丸と線幅をカスタマイズ</span>
+<span class="n">CARD_STYLE</span> <span class="o">=</span> <span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryNeutral</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">shape_line_width</span><span class="o">=</span><span class="mf">1.5</span><span class="p">)</span>
+<span class="n">HEADER_STYLE</span> <span class="o">=</span> <span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryFlat</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">1.5</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">draw_titled_card</span><span class="p">(</span><span class="n">xy</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span> <span class="n">width</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">height</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">title</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""ヘッダーバー付きのニュートラルカードを描画する共通ヘルパー。"""</span>
+    <span class="n">cx</span><span class="p">,</span> <span class="n">cy</span> <span class="o">=</span> <span class="n">xy</span>
+    <span class="n">rectangle</span><span class="p">((</span><span class="n">cx</span><span class="p">,</span> <span class="n">cy</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="n">height</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">CARD_STYLE</span><span class="p">)</span>
+    <span class="n">rectangle</span><span class="p">(</span>
+        <span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cy</span> <span class="o">+</span> <span class="n">height</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">-</span> <span class="mf">3.5</span><span class="p">),</span>
+        <span class="n">width</span><span class="o">=</span><span class="n">width</span> <span class="o">-</span> <span class="mf">2.0</span><span class="p">,</span>
+        <span class="n">height</span><span class="o">=</span><span class="mf">5.5</span><span class="p">,</span>
+        <span class="n">style</span><span class="o">=</span><span class="n">HEADER_STYLE</span><span class="p">,</span>
+        <span class="n">text</span><span class="o">=</span><span class="n">title</span><span class="p">,</span>
+        <span class="n">text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">WhiteBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">11.0</span><span class="p">),</span>
+    <span class="p">)</span>
+</code></pre>
+<p>各章の <code>drawlib</code> コードブロックからは以下のように呼び出せます:</p>
+<pre><code class="language-python"><span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">CARD_STYLE</span><span class="p">,</span> <span class="n">draw_titled_card</span>
+
+<span class="n">draw_titled_card</span><span class="p">((</span><span class="mi">50</span><span class="p">,</span> <span class="mi">25</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">"Auth Service"</span><span class="p">)</span>
+</code></pre>
+<h2>11.4 ドキュメントスタイル (<code>style.css</code>) との連動</h2>
+<p><code>drawlib init project &lt;type&gt;</code> で <code>--style google</code> を指定すると、<code>styles.py</code> だけでなく <code>style.css</code> にも Google テーマ（青のアクセントカラー、Google Sans フォントスタック、クリーンなカード余白）が展開されます。これにより、<strong>本文のテキストと作図のビジュアルが完全に調和した美しいドキュメント</strong> が自動的に仕上がります。</p>
+
+</section>
+
+<section id="chapter-13-12_slide_presentation" class="doc-chapter pdf-chapter">
+<h1>第12章: プレゼンテーションスライドの作成 (<code>slide</code>)</h1>
+<p>Drawlib は、技術文書（<code>doc</code>）やWebサイト（<code>site</code>）だけでなく、<strong>16:9 プレゼンテーションスライド</strong>（<code>slide</code>）の作成をファーストクラスでサポートしています。</p>
+<p>PowerPoint や Google Slides などの GUI ツールを使わずに、Markdown と Python 作図コードだけで、学会発表・カンファレンス・社内勉強会向けの美しいスライドデッキをコード管理できます。</p>
+<figure class="drawlib-image" style="text-align: center;">
+  <img src="../images/12_slide_presentation/fig_slide_layout_ja.png" alt="12_slide_presentation_1" />
+  <figcaption class="drawlib-caption">図 12.1: Drawlib スライド生成アーキテクチャとマルチ出力</figcaption>
+</figure>
+<h2>12.1 スライドプロジェクトの作成 (<code>drawlib init project slide</code>)</h2>
+<p>スライドプロジェクトは <code>uv run drawlib init project slide</code> コマンドで一発で足場生成できます（<code>-l en,ja</code> で多言語デッキも同時生成可能）:</p>
+<pre><code class="language-bash"><span class="c1"># 標準のスライドプロジェクトを生成 (slide_src/ が作成されます)</span>
+uv<span class="w"> </span>run<span class="w"> </span>drawlib<span class="w"> </span>init<span class="w"> </span>project<span class="w"> </span>slide
+
+<span class="c1"># プロジェクト名やテーマ、言語を指定する場合 (-l en,ja で多言語デッキも作成可能)</span>
+uv<span class="w"> </span>run<span class="w"> </span>drawlib<span class="w"> </span>init<span class="w"> </span>project<span class="w"> </span>slide<span class="w"> </span>my_presentation<span class="w"> </span>-s<span class="w"> </span>google<span class="w"> </span>-l<span class="w"> </span>ja
+</code></pre>
+<h3>生成されるディレクトリ構成</h3>
+<p><code>uv run drawlib init project slide my_presentation -s google -l ja</code> を実行すると、<code>i18n</code> ネイティブな以下のディレクトリ構成が構築されます:</p>
+<pre><code class="language-text">.
+├── my_presentation_src/           # [正本] スライドの Markdown ソース
+│   ├── drawlib.toml               # プロジェクトマニフェスト ([project] + [i18n] langs)
+│   ├── _assets/                   # スライド内で参照する静的画像・ロゴ
+│   ├── ja/                        # ロケール別スライドフォルダ (多言語化時は en/ 等を追加)
+│   │   ├── 01_title.md            # タイトルスライド
+│   │   ├── 02_agenda.md           # アジェンダ
+│   │   └── 03_architecture.md     # アーキテクチャ図解スライド
+│   ├── styles.py                  # スライド全体のスタイル・テーマ定義 (&lt;lang&gt;/styles.py も可)
+│   ├── utils.py                   # スライド専用のレイアウト補助関数
+│   ├── slide.js                   # プレゼン再生・言語切替・発表者ビュー制御エンジン
+│   ├── build.sh                   # 全ターゲット一括ビルドスクリプト
+│   ├── build_html.sh              # Web プレゼン生成スクリプト
+│   ├── build_pdf.sh               # 1スライド1ページの PDF 生成スクリプト
+│   └── serve.sh                   # プレゼン用ローカルサーバー起動スクリプト
+├── my_presentation_html/          # [成果物] Web プレゼンテーション (ja/index.html + ルートリダイレクト)
+├── my_presentation_ja.pdf         # [成果物] ロケール別 16:9 ベクター PDF プレゼンテーション
+└── my_presentation_images/        # [成果物] 抽出された高解像度図面画像
+</code></pre>
+<h2>12.2 16:9 プレゼンテーションの執筆モデル (<code>::: block</code> / <code>::: note</code> と <code>current_slide</code>)</h2>
+<p>Drawlib のスライドは、<strong>「1 つの Markdown ファイル ＝ 1 つのスライド」</strong> という直感的なモデルに加え、<strong>デュアルレイヤー構造（<code>::: block</code> と <code>::: note</code>）</strong> および <strong><code>current_slide</code> (<code>SlideContext</code>)</strong> を備えています。</p>
+<ol>
+<li><strong>デュアルレイヤー構造（<code>::: block</code> と <code>::: note</code>）</strong>:
+<ul>
+<li><strong><code>::: block</code>（ビジュアルステージ層）</strong>: <code>1920 × 1080</code> スライドステージ上に表示されるカードやマルチカラム段組、および <code>drawlib</code> 図版を配置します。聴衆が一目で理解できるよう、テキストは簡潔なキーワードに絞ります。</li>
+<li><strong><code>::: note</code>（スピーカーノート・詳細解説層）</strong>: スライド下部に記述する発表者用トークスクリプト兼、配布資料としての詳細解説文です。通常スライド表示時は非表示ですが、<strong>発表者ビュー（Presenter View）</strong> で手元に表示され、読み物としても機能します。</li>
+</ul>
+</li>
+<li><strong><code>current_slide</code> (<code>SlideContext</code>) による動的領域取得</strong>:
+<ul>
+<li>スライド内の <code>drawlib</code> ブロックで <code>from drawlib.slide import current_slide</code> をインポートすると、見出しや上部の <code>::: block</code> を除いた残りのキャンバス領域（<code>current_slide.content_box</code>）を自動計算して図版をぴったり配置できます。</li>
+</ul>
+</li>
+</ol>
+<h3>スライド Markdown の記述例</h3>
+<pre><code class="language-markdown"><span class="gh"># マイクロサービスアーキテクチャの刷新</span>
+
+&lt;div class="subtitle"&gt;イベント駆動型アーキテクチャへの段階的移行計画&lt;/div&gt;
+
+::: block
+<span class="k">-</span><span class="w"> </span><span class="gs">**疎結合化**</span>: API Gateway とワーカー間を非同期イベントブローカーで分離
+<span class="k">-</span><span class="w"> </span><span class="gs">**耐障害性**</span>: スパイクアクセス時のバックプレッシャー制御と再試行の自動化
+:::
+
+<span class="sb">```drawlib</span><span class="w"> </span>align=center code=fold file=arch_slide.png caption="イベント駆動型パイプライン"
+<span class="s">from drawlib.canvas import save, setup</span>
+<span class="s">from drawlib.lines import line</span>
+<span class="s">from drawlib.shapes import rectangle</span>
+<span class="s">from drawlib.slide import current_slide</span>
+<span class="s">from drawlib.styles import Styles</span>
+
+<span class="s"># current_slide.content_box のアスペクト比に合わせてキャンバスをセットアップ</span>
+<span class="s">box = current_slide.content_box</span>
+<span class="s">setup(width=132, height=38)</span>
+
+<span class="s">ts_card = Styles.DarkBold.patch(text_size=11.0)</span>
+<span class="s">ts_primary = Styles.WhiteBold.patch(text_size=11.0)</span>
+
+<span class="s">rectangle((24, 19), width=34, height=18, style=Styles.Neutral, text="API Gateway", text_style=ts_card)</span>
+<span class="s">rectangle((66, 19), width=34, height=18, style=Styles.PrimaryFlat, text="Event Broker", text_style=ts_primary)</span>
+<span class="s">rectangle((108, 19), width=34, height=18, style=Styles.SecondaryNeutral, text="Order Worker", text_style=ts_card)</span>
+
+<span class="s">line((41, 19), (49, 19), arrow_head="-&gt;", style=Styles.DarkBold)</span>
+<span class="s">line((83, 19), (91, 19), arrow_head="-&gt;", style=Styles.DarkBold)</span>
+<span class="s">save()</span>
+<span class="sb">```</span>
+
+::: note
+このスライドでは、従来の同期 RPC 呼び出しから Event Broker を介した非同期メッセージングへの移行アーキテクチャを説明します。
+特にピーク時の注文処理遅延を解消するため、Order Worker を水平スケール可能な構成に変更した点を強調してください。
+:::
+</code></pre>
+<h2>12.3 マルチ出力（Web / PDF / PowerPoint）と発表者ビュー</h2>
+<p>スライドプロジェクトからは、標準ビルドの Web・PDF に加え、オプションで編集可能な MS PowerPoint ファイルも出力できます:</p>
+<ol>
+<li><strong>インタラクティブ Web プレゼンテーション (<code>my_presentation_html/&lt;lang&gt;/index.html</code>)</strong>:
+<ul>
+<li>会場での登壇やオンライン勉強会向けの HTML5 プレゼンテーション（<code>my_presentation_html/index.html</code> から自動的に既定ロケールへリダイレクトされます）。</li>
+<li><strong>キーボードナビゲーション・言語切替 &amp; 発表者ビュー</strong>:
+<ul>
+<li><code>Space</code> / <code>→</code> / <code>PageDown</code>: 次のスライドへ進む</li>
+<li><code>←</code> / <code>PageUp</code>: 前のスライドへ戻る</li>
+<li><code>P</code> キー（または URL に <code>?presenter=1</code> を付与）: <strong>発表者ビュー（Presenter View）</strong> を起動。現在のスライド、次のスライドのプレビュー、経過タイマー、および <code>::: note</code> に記述したスピーカーノートが一画面に表示され、別ウィンドウの聴衆向けスクリーンとリアルタイム同期します。</li>
+<li><code>L</code>: 多言語デッキで <code>.slide-lang-dropdown</code> 言語メニューを開閉し、現在の <code>#N</code> スライド番号を維持したまま言語を切り替えます。</li>
+<li><code>F</code>: フルスクリーン（全画面）表示の切り替え</li>
+<li><code>O</code> / <code>Esc</code>: スライド全体をグリッド一覧表示するオーバービューモード</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>1 スライド 1 ページのベクター PDF (<code>my_presentation_&lt;lang&gt;.pdf</code>)</strong>:
+<ul>
+<li>参加者への事前配布、SpeakerDeck / DocSend へのアップロード、印刷向けの PDF。</li>
+<li>初回実行時に自動取得されるヘッドレス Chromium（Playwright）により、各スライドが 1 ページずつ欠けのない 16:9 ベクター PDF として忠実に焼き込まれます。</li>
+</ul>
+</li>
+<li><strong>編集可能な 16:9 MS PowerPoint エクスポート (<code>drawlib build pptx</code>・オプション)</strong>:
+<ul>
+<li>カンファレンス事務局への <code>.pptx</code> 提出やチーム内での共同編集が必要な場合は、CLI からロケール別の 16:9 MS PowerPoint デッキ（<code>my_presentation_&lt;lang&gt;.pptx</code>、<code>::: note</code> のスピーカーノート付き）を直接生成できます（なお、技術文書 <code>doc</code> プロジェクト向けには <code>uv run drawlib build docx &lt;src&gt; -o &lt;out.docx&gt; --generate-index</code> による編集可能な MS Word 出力も用意されています）:</li>
+</ul>
+<pre><code class="language-bash">uv<span class="w"> </span>run<span class="w"> </span>drawlib<span class="w"> </span>build<span class="w"> </span>pptx<span class="w"> </span>my_presentation_src/<span class="w"> </span>-o<span class="w"> </span>my_presentation.pptx
+</code></pre>
+</li>
+</ol>
+
+</section>
+    </main>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const langDropdowns = document.querySelectorAll('.lang-dropdown');
+            if (langDropdowns.length > 0) {
+                document.addEventListener('click', function(e) {
+                    langDropdowns.forEach(function(dd) {
+                        if (dd.hasAttribute('open') && !dd.contains(e.target)) {
+                            dd.removeAttribute('open');
+                        }
+                    });
+                });
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape') {
+                        langDropdowns.forEach(function(dd) {
+                            dd.removeAttribute('open');
+                        });
+                    }
+                });
+            }
+        });
+    </script>
+    
+</body>
+</html>

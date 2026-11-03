@@ -1,0 +1,10 @@
+[project]
+name = "about-drawlib"
+type = "slide"
+title = ""
+description = "About Drawlib 16:9 Showcase Presentation Deck"
+style = "default"
+
+[i18n]
+default_lang = "en"
+langs = ["en"]

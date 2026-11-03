@@ -1,0 +1,880 @@
+<!--
+ Copyright (c) 2026 Yuichi Ito (yuichi@yuichi.com)
+
+ This software is licensed under the Apache License, Version 2.0.
+ For more information, please visit: https://github.com/yuichi110/drawlib
+
+ This software is provided "as is", without warranty of any kind,
+ express or implied, including but not limited to the warranties of
+ merchantability, fitness for a particular purpose and noninfringement.
+-->
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drawlib Quickstart Guide</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    
+    
+    <link rel="icon" type="image/png" href="../_assets/favicon.png">
+    
+    
+    <link rel="stylesheet" href="style.css">
+    
+    
+</head>
+<body class="doc-body">
+    <main class="main-container">
+        
+        <section id="chapter-1-00-cover" class="doc-chapter pdf-chapter">
+<h1>Drawlib Quickstart Guide</h1>
+<p><strong>Illustration as Code &amp; Documentation as Code in Pure Python</strong></p>
+<p>Drawlib is a pure-Python library designed to bridge technical system design, cloud architecture diagrams, quantitative charts, and publication-grade engineering documentation. Instead of maintaining fragile binary drawings or low-level plotting code, Drawlib enables developers and AI agents to express architecture and workflows declaratively in Python.</p>
+<figure class="drawlib-image" style="text-align: center;">
+  <img src="../images/00-cover/cover_workflow.png" alt="00-cover_1" style="width: 640px; max-width: 100%;" />
+  <figcaption class="drawlib-caption">Figure 0.1: Drawlib End-to-End Workflow — Code to Publication</figcaption>
+</figure>
+<hr />
+<h3>Document Overview &amp; Navigation</h3>
+<p>This guide serves as a comprehensive handbook for developers and AI agents adopting Drawlib:</p>
+<ul>
+<li><strong>Chapters 1–3</strong>: Foundations — Design philosophy, installation, and Cartesian canvas coordinate system.</li>
+<li><strong>Chapters 4–6</strong>: Core Primitives &amp; Styling — Shapes, lines, GoogleStyles, fonts, icons, and external images.</li>
+<li><strong>Chapters 7–10</strong>: High-Level Graphics — SmartArts components, declarative charts, cloud diagrams, and software models.</li>
+<li><strong>Chapters 11–12</strong>: Documentation as Code &amp; CLI — Markdown integration, code fence options, and build automation.</li>
+<li><strong>Chapters 13–15</strong>: AI Collaboration &amp; Engineering Practice — Autonomous agent workflows, scaffolding templates, and design rules.</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Document Metadata</th>
+<th style="text-align:left">Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><strong>Document Version</strong></td>
+<td style="text-align:left"><code>0.3.4</code></td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Theme</strong></td>
+<td style="text-align:left">GoogleStyles &amp; GoogleColors</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Source Repository</strong></td>
+<td style="text-align:left"><code>https://github.com/yuichi110/drawlib</code></td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Author</strong></td>
+<td style="text-align:left">Yuichi Ito</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>License</strong></td>
+<td style="text-align:left">Apache License 2.0</td>
+</tr>
+</tbody>
+</table>
+
+</section>
+
+<nav class="doc-toc pdf-toc">
+  <h2>Table of Contents</h2>
+  <ul>
+    <li><a href="#chapter-2-01-about">1. About Drawlib</a></li>
+    <li><a href="#chapter-3-02-install">2. Installation & Environment Setup</a></li>
+    <li><a href="#chapter-4-03-canvas">3. Canvas & Coordinate System</a></li>
+    <li><a href="#chapter-5-04-shapes_and_lines">4. Drawing Primitives: Shapes, Lines & Math</a></li>
+    <li><a href="#chapter-6-05-colors_and_styles">5. Styling System: GoogleStyles & Design Tokens</a></li>
+    <li><a href="#chapter-7-06-icons_and_images">6. Standardized Icons & Media Assets</a></li>
+    <li><a href="#chapter-8-07-smartarts">7. SmartArts: High-Level Visual Components</a></li>
+    <li><a href="#chapter-9-08-charts">8. Declarative Quantitative Charts</a></li>
+    <li><a href="#chapter-10-09-diagrams_cloud">9. Cloud & Distributed Architecture Diagrams</a></li>
+    <li><a href="#chapter-11-10-diagrams_software">10. Software Design Diagrams</a></li>
+    <li><a href="#chapter-12-11-doc_as_code">11. Documentation as Code: Embedded Drawlib Blocks</a></li>
+    <li><a href="#chapter-13-12-cli_workflow">12. Developer CLI & Build Automation</a></li>
+    <li><a href="#chapter-14-13-ai_collaboration">13. AI Agent Collaboration & Autonomous Workflows</a></li>
+    <li><a href="#chapter-15-14-project_templates">14. Project Scaffolding & Standard Templates</a></li>
+    <li><a href="#chapter-16-15-best_practices">15. Best Practices & Architectural Checklist</a></li>
+  </ul>
+</nav>
+
+<section id="chapter-2-01-about" class="doc-chapter pdf-chapter">
+<h1>1. About Drawlib</h1>
+<p>Drawlib is a pure-Python library designed to establish <strong>&quot;Illustration as Code&quot;</strong> and <strong>&quot;Documentation as Code&quot;</strong> as first-class engineering disciplines. Instead of relying on manual drag-and-drop vector drawing tools that produce opaque binary assets, Drawlib generates crisp, version-controlled diagrams and technical specifications directly from readable Python code.</p>
+<h2>The Problem with Traditional Diagramming</h2>
+<p>Modern software teams manage code, infrastructure, and CI/CD pipelines as version-controlled text. Yet technical illustrations are frequently created in GUI tools (draw.io, Figma, PowerPoint, Visio) or complex DSLs:</p>
+<ol>
+<li><strong>Binary or Opaque File Formats</strong>: XML/JSON blobs produced by GUI tools cannot be meaningfully reviewed in Pull Requests (<code>git diff</code>).</li>
+<li><strong>Drift and Staleness</strong>: As services, schemas, and endpoints evolve, manual diagram updates are neglected, causing architecture documentation to fall out of sync.</li>
+<li><strong>Inconsistent Styling</strong>: Without centralized design tokens, each team member uses different fonts, margins, line weights, and arbitrary colors.</li>
+<li><strong>Low-Level Plotting Boilerplate</strong>: Tools like matplotlib or raw SVG libraries require hundreds of lines of low-level trigonometry and coordinate math for simple rounded boxes and curved arrows.</li>
+</ol>
+<h2>Drawlib's Three Architectural Pillars</h2>
+<figure class="drawlib-image" style="text-align: center;">
+  <img src="../images/01-about/about_pillars.png" alt="01-about_1" style="width: 620px; max-width: 100%;" />
+  <figcaption class="drawlib-caption">Figure 1.1: Drawlib Core Architectural Pillars</figcaption>
+</figure>
+<ol>
+<li><strong>High-Level Declarative Components</strong>: Rather than assembling raw polygons by hand, Drawlib provides pre-engineered modules for cloud architectures (<code>ArchitectureDiagram</code>), pipelines (<code>ChevronProcess</code>), sequence flows (<code>SequenceDiagram</code>), tables (<code>Table</code>), and charts (<code>BarChart</code>).</li>
+<li><strong>Centralized Style Tokens</strong>: Themes (<code>DefaultStyles</code>, <code>GoogleStyles</code>, <code>MonochromeStyles</code>) decouple geometry from presentation. Updating a theme propagates across an entire multi-document project instantly.</li>
+<li><strong>Unified Document Compiler</strong>: Drawlib embeds directly into Markdown files using <code>drawlib</code> blocks, building searchable static HTML sites, GitHub-flavored Markdown, and printable PDF books from a single source of truth.</li>
+</ol>
+
+</section>
+
+<section id="chapter-3-02-install" class="doc-chapter pdf-chapter">
+<h1>2. Installation &amp; Environment Setup</h1>
+<p>Drawlib is a modern, pure-Python library requiring <strong>Python 3.11 or higher</strong>. It integrates seamlessly with modern Python tooling like <code>uv</code> or standard <code>pip</code>.</p>
+<h2>Package Installation</h2>
+<pre><code class="language-bash"><span class="c1"># Recommended: Using uv (fast, isolated virtual environment)</span>
+uv<span class="w"> </span>add<span class="w"> </span>drawlib
+
+<span class="c1"># Or using standard pip</span>
+pip<span class="w"> </span>install<span class="w"> </span>drawlib
+</code></pre>
+<h2>Verifying the Installation</h2>
+<p>After installation, verify that both the Python library and the CLI tool are accessible:</p>
+<pre><code class="language-bash"><span class="c1"># Check installed CLI version</span>
+uv<span class="w"> </span>run<span class="w"> </span>drawlib<span class="w"> </span>--version
+<span class="c1"># Output: 0.3.4</span>
+
+<span class="c1"># Or execute via Python module launcher</span>
+python3<span class="w"> </span>-m<span class="w"> </span>drawlib<span class="w"> </span>--version
+</code></pre>
+<h2>Built-in PDF, Office &amp; Image Export</h2>
+<p>A standard <code>uv add drawlib</code> or <code>pip install drawlib</code> installation includes every output engine out of the box—no optional <code>[pdf]</code> package extras or manual browser setup steps are needed:</p>
+<ul>
+<li><strong>Raster &amp; Vector Images (PNG, WebP, SVG)</strong>: Supported out of the box via Pillow and Matplotlib backends.</li>
+<li><strong>Headless PDF &amp; 16:9 PowerPoint (<code>drawlib build pdf</code>, <code>drawlib build pptx</code>)</strong>: Drawlib uses Playwright with headless Chromium to compile print-ready vector PDFs and measure 16:9 slide layouts for editable <code>.pptx</code> decks. On your first PDF or PPTX build, Drawlib <strong>automatically downloads and caches</strong> headless Chromium.</li>
+<li><strong>Editable MS Word (<code>drawlib build docx</code>)</strong>: Generates editable <code>.docx</code> technical specifications directly in pure Python without requiring a browser.</li>
+<li><strong>Offline / CI Pre-fetching &amp; Minimal Linux Containers</strong>: Pre-download all fonts, icons, maps, and headless Chromium ahead of time for air-gapped CI runners via <code>uv run drawlib cache download --all</code> (or <code>uv run drawlib cache download --browser</code> for Chromium only). On minimal Linux Docker containers missing OS shared libraries, install system packages once with:<pre><code class="language-bash">uv<span class="w"> </span>run<span class="w"> </span>playwright<span class="w"> </span>install-deps<span class="w"> </span>chromium
+</code></pre>
+</li>
+<li><strong>Universal Typography</strong>: Drawlib automatically fetches and caches CJK-ready Google Noto Sans and Roboto fonts, ensuring Chinese, Japanese, Korean, and Latin typography renders consistently across Linux, macOS, and Windows without missing glyph boxes (<code>tofu</code>).</li>
+</ul>
+<figure class="drawlib-image" style="text-align: center;">
+  <img src="../images/02-install/install_toolchain.png" alt="02-install_1" />
+  <figcaption class="drawlib-caption">Figure 2.1: Drawlib Environment & Toolchain Architecture</figcaption>
+</figure>
+
+</section>
+
+<section id="chapter-4-03-canvas" class="doc-chapter pdf-chapter">
+<h1>3. Canvas &amp; Coordinate System</h1>
+<p>Every Drawlib illustration is rendered on a virtual <strong>Canvas</strong>. Understanding Drawlib's coordinate space is the foundation of creating clear, balanced diagrams.</p>
+<h2>Cartesian Coordinate Space</h2>
+<p>Unlike traditional web or GUI coordinate systems where <code>(0, 0)</code> sits at the top-left with a descending Y-axis, Drawlib uses the standard mathematical <strong>Cartesian Coordinate System</strong>:</p>
+<ul>
+<li><strong>Origin <code>(0, 0)</code></strong>: Located at the <strong>Bottom-Left</strong> corner of the canvas.</li>
+<li><strong>X-Axis</strong>: Increases from left to right (<code>0</code> to <code>width</code>).</li>
+<li><strong>Y-Axis</strong>: Increases from bottom to top (<code>0</code> to <code>height</code>).</li>
+</ul>
+<figure class="drawlib-image" style="text-align: center;">
+  <img src="../images/03-canvas/canvas_coordinates.png" alt="03-canvas_1" style="width: 620px; max-width: 100%;" />
+  <figcaption class="drawlib-caption">Figure 3.1: Cartesian Coordinate System & Canvas Anchors</figcaption>
+</figure>
+<h2>Configuring the Canvas with <code>setup()</code></h2>
+<p>Call <code>setup()</code> at the beginning of a drawing script or Markdown block to define canvas dimensions:</p>
+<pre><code class="language-python"><span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.canvas</span><span class="w"> </span><span class="kn">import</span> <span class="n">setup</span>
+
+<span class="c1"># 120 x 60 coordinate units, high-resolution 150 DPI, visual coordinate grid enabled</span>
+<span class="n">setup</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mi">120</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">150</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</code></pre>
+<ul>
+<li><strong><code>width</code> / <code>height</code></strong>: Logical coordinate space (defaults to <code>100.0</code> x <code>100.0</code>). Choosing an aspect ratio tailored to your content (e.g. <code>120 x 60</code> for horizontal architectures) prevents letterboxing.</li>
+<li><strong><code>dpi</code></strong>: Dots per inch (default <code>100</code>). At <code>100</code> DPI, a canvas of <code>100</code> units renders at <code>1000px</code> width.</li>
+<li><strong><code>grid=True</code></strong>: Overlays grid lines every 10 units and coordinate numbers every 20 units. Extremely useful during rapid development to inspect exact alignment.</li>
+</ul>
+<h2>Alignment &amp; Text Anchors (<code>halign</code> and <code>valign</code>)</h2>
+<p>Text labels support horizontal (<code>halign</code>) and vertical (<code>valign</code>) alignment configured via style attributes or <code>.patch()</code>:</p>
+<ul>
+<li><strong>Horizontal Alignment (<code>halign</code>)</strong>: <code>&quot;left&quot;</code>, <code>&quot;center&quot;</code>, <code>&quot;right&quot;</code>.</li>
+<li><strong>Vertical Alignment (<code>valign</code>)</strong>: <code>&quot;bottom&quot;</code>, <code>&quot;center&quot;</code>, <code>&quot;top&quot;</code>.</li>
+</ul>
+<figure class="drawlib-image" style="text-align: center;">
+  <img src="../images/03-canvas/canvas_text_alignment.png" alt="03-canvas_2" style="width: 620px; max-width: 100%;" />
+  <figcaption class="drawlib-caption">Figure 3.2: Text Alignment Anchors with halign</figcaption>
+</figure>
+
+</section>
+
+<section id="chapter-5-04-shapes_and_lines" class="doc-chapter pdf-chapter">
+<h1>4. Drawing Primitives: Shapes, Lines &amp; Math</h1>
+<p>Drawlib provides a rich suite of 2D geometric primitives, flexible line connecting algorithms, styled text labels, and geometric math utilities.</p>
+<h2>Shape Primitives (<code>drawlib.shapes</code>)</h2>
+<p>Drawlib includes over 20 shape primitives. Every shape supports direct text embedding, corner radius rounding (<code>style.shape_r</code>), rotation (<code>style.angle</code>), and full alignment controls (<code>style.halign</code>, <code>style.valign</code>):</p>
+<figure class="drawlib-image" style="text-align: center;">
+  <img src="../images/04-shapes_and_lines/shapes_primitives.png" alt="04-shapes_and_lines_1" style="width: 620px; max-width: 100%;" />
+  <figcaption class="drawlib-caption">Figure 4.1: Selection of Drawlib Vector Shapes</figcaption>
+</figure>
+<h3>Direct Text Integration in Shapes</h3>
+<p>In traditional plotting tools, placing a centered label inside a box requires calculating coordinates and issuing separate text calls. In Drawlib, shapes accept <code>text</code> and <code>text_style</code> directly:</p>
+<pre><code class="language-python"><span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.shapes</span><span class="w"> </span><span class="kn">import</span> <span class="n">rectangle</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.styles</span><span class="w"> </span><span class="kn">import</span> <span class="n">Styles</span>
+
+<span class="n">rectangle</span><span class="p">(</span>
+    <span class="n">xy</span><span class="o">=</span><span class="p">(</span><span class="mi">50</span><span class="p">,</span> <span class="mi">30</span><span class="p">),</span>
+    <span class="n">width</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span>
+    <span class="n">height</span><span class="o">=</span><span class="mi">18</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryFlat</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span>
+    <span class="n">text</span><span class="o">=</span><span class="s2">"Worker Node</span><span class="se">\n</span><span class="s2">(Active)"</span><span class="p">,</span>
+    <span class="n">text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">WhiteBold</span><span class="p">,</span>
+<span class="p">)</span>
+</code></pre>
+<h2>Connecting Lines &amp; Arrowheads (<code>drawlib.lines</code>)</h2>
+<p>Drawlib provides straight, curved, bezier, and multi-segment chained lines with customizable arrowheads:</p>
+<ul>
+<li><strong>Arrowhead Styles</strong>: <code>&quot;-&gt;&quot;</code> (end), <code>&quot;&lt;-&quot;</code> (start), <code>&quot;&lt;-&gt;&quot;</code> (both ends), <code>&quot;-&quot;</code> (none).</li>
+<li><strong>Line Functions</strong>:
+<ul>
+<li><code>line(xy1, xy2, arrow_head=&quot;-&gt;&quot;, style=...)</code>: Straight connection.</li>
+<li><code>line_curved(xy1, xy2, bend=0.25, arrow_head=&quot;-&gt;&quot;, style=...)</code>: Smooth arc with defined bend curve.</li>
+<li><code>line_bezier1(xy1, xy2, cp, ...)</code> / <code>line_bezier2</code>: Bezier paths with control points.</li>
+<li><code>lines(xys=[(x1, y1), (x2, y2), ...], ...)</code>: Polyline connecting arbitrary waypoints.</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>[!TIP]
+<strong>Neutral Connectors Principle</strong>: Always use <code>Styles.DarkBold</code> (or <code>Styles.LightBold</code> on dark backgrounds) for standard sequential lines and arrows. Reserve colors (<code>Styles.Primary</code>, <code>Styles.Accent</code>, <code>Styles.Danger</code>) strictly for meaningful distinctions, such as primary data flows or error rollbacks.</p>
+</blockquote>
+<figure class="drawlib-image" style="text-align: center;">
+  <img src="../images/04-shapes_and_lines/lines_connections.png" alt="04-shapes_and_lines_2" style="width: 620px; max-width: 100%;" />
+  <figcaption class="drawlib-caption">Figure 4.2: Connecting Lines, Curvature, and Arrowheads</figcaption>
+</figure>
+<h2>Geometric Math Utilities (<code>drawlib.math</code>)</h2>
+<p>When computing dynamic layouts or connecting rotated components, use <code>drawlib.math</code>:</p>
+<ul>
+<li><strong><code>get_distance(p1, p2)</code></strong>: Euclidean distance between two points.</li>
+<li><strong><code>get_angle(p1, p2)</code></strong>: Angle in degrees from <code>p1</code> to <code>p2</code> relative to the X-axis.</li>
+<li><strong><code>get_center_and_size(points)</code></strong>: Bounding box center coordinate <code>(cx, cy)</code> and <code>(width, height)</code> enclosing a collection of coordinates.</li>
+</ul>
+
+</section>
+
+<section id="chapter-6-05-colors_and_styles" class="doc-chapter pdf-chapter">
+<h1>5. Styling System: GoogleStyles &amp; Design Tokens</h1>
+<p>Drawlib decouples visual presentation from geometric drawing logic using a systematic <strong>Design Token &amp; Style Matrix</strong>. This ensures consistent line widths, colors, borders, and typography across large documentation projects.</p>
+<h2>Semantic Roles &amp; Style Matrix</h2>
+<p>Drawlib defines 6 core semantic roles across all color palettes:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Semantic Role</th>
+<th style="text-align:left">Typical Architectural Meaning</th>
+<th style="text-align:left">Google Theme Hex</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><strong><code>primary</code></strong></td>
+<td style="text-align:left">Main computation, core services, active state</td>
+<td style="text-align:left">Google Blue (<code>#4285F4</code>)</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong><code>secondary</code></strong></td>
+<td style="text-align:left">Data stores, caches, asynchronous queues</td>
+<td style="text-align:left">Google Dark Gray (<code>#5F6368</code>)</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong><code>accent</code></strong></td>
+<td style="text-align:left">Ingress gateways, external clients, key callouts</td>
+<td style="text-align:left">Google Amber (<code>#FBBC04</code>)</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong><code>muted</code></strong></td>
+<td style="text-align:left">Boundaries, VPC containers, structural lines</td>
+<td style="text-align:left">Google Light Gray (<code>#DADCE0</code>)</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong><code>danger</code></strong></td>
+<td style="text-align:left">Errors, alerts, vulnerabilities, security zones</td>
+<td style="text-align:left">Google Red (<code>#EA4335</code>)</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong><code>success</code></strong></td>
+<td style="text-align:left">Verified status, health checks, completed stages</td>
+<td style="text-align:left">Google Green (<code>#34A853</code>)</td>
+</tr>
+</tbody>
+</table>
+<p>Each semantic role provides <strong>10 orthogonal style variants</strong>:</p>
+<ul>
+<li><strong>Borders &amp; Fills</strong>: <code>bordered</code> (default), <code>flat</code>, <code>solid</code>, <code>light</code></li>
+<li><strong>Outlines</strong>: <code>outline</code>, <code>outline_bold</code>, <code>outline_light</code></li>
+<li><strong>Dashed Lines</strong>: <code>dashed</code>, <code>dashed_bold</code>, <code>dashed_light</code></li>
+</ul>
+<h3>Neutral Typography &amp; Connectors Principles</h3>
+<p>To maintain high contrast and prevent visual clutter:</p>
+<ul>
+<li><strong>Neutral Typography</strong>: Text on light backgrounds should always use <code>Styles.Dark</code> or <code>Styles.DarkBold</code>. On dark fills, use <code>Styles.WhiteBold</code> or <code>Styles.Light</code>. Avoid coloring body text with <code>Styles.Primary</code> or <code>Styles.Secondary</code> arbitrarily.</li>
+<li><strong>Neutral Connectors</strong>: Connecting lines and flow arrows default to <code>Styles.DarkBold</code>. Reserve accent colors (<code>Styles.Primary</code>, <code>Styles.Danger</code>) strictly for meaningful architectural emphasis or error loops.</li>
+</ul>
+<figure class="drawlib-image" style="text-align: center;">
+  <img src="../images/05-colors_and_styles/styles_semantic_roles.png" alt="05-colors_and_styles_1" style="width: 640px; max-width: 100%;" />
+  <figcaption class="drawlib-caption">Figure 5.1: The 6 Semantic Roles Across Core Style Variants</figcaption>
+</figure>
+<h2>Creating Custom Styles with <code>.patch()</code></h2>
+<p>Styles are immutable by design. To derive a variant with modified properties (e.g. customized font size or fill opacity), call <code>.patch()</code> on an existing style:</p>
+<pre><code class="language-python"><span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.styles</span><span class="w"> </span><span class="kn">import</span> <span class="n">Styles</span>
+
+<span class="c1"># Derive a custom style by modifying specific attributes</span>
+<span class="n">callout_style</span> <span class="o">=</span> <span class="n">Styles</span><span class="o">.</span><span class="n">AccentFlat</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span>
+    <span class="n">alpha</span><span class="o">=</span><span class="mf">0.85</span><span class="p">,</span>
+    <span class="n">text_size</span><span class="o">=</span><span class="mf">11.0</span><span class="p">,</span>
+    <span class="n">shape_line_width</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span>
+<span class="p">)</span>
+</code></pre>
+<h2>Typography &amp; Universal Fonts (<code>drawlib.fonts</code>)</h2>
+<p>Typography is a critical component of professional technical diagrams. Drawlib provides CJK/Latin cross-platform font families:</p>
+<ul>
+<li><strong><code>Font</code></strong>: Universal Google Noto Sans family supporting English, Japanese, Chinese, and Korean.</li>
+<li><strong><code>FontRoboto</code></strong>: Clean sans-serif optimized for modern UI and cloud architecture documentation.</li>
+<li><strong><code>FontMonoSpace</code></strong>: Roboto Mono for code blocks, URLs, and JSON keys.</li>
+<li><strong><code>FontFile(path)</code></strong>: Custom TrueType/OpenType font files.</li>
+</ul>
+<figure class="drawlib-image" style="text-align: center;">
+  <img src="../images/05-colors_and_styles/styles_typography.png" alt="05-colors_and_styles_2" style="width: 620px; max-width: 100%;" />
+  <figcaption class="drawlib-caption">Figure 5.2: Typography Hierarchy & Font Families</figcaption>
+</figure>
+
+</section>
+
+<section id="chapter-7-06-icons_and_images" class="doc-chapter pdf-chapter">
+<h1>6. Standardized Icons &amp; Media Assets</h1>
+<p>Diagrams communicate faster when accompanied by standard iconography and project logos. Drawlib bundles extensive vector icon packages under <code>drawlib.icons</code> and provides chainable image transformations via <code>drawlib.images</code>.</p>
+<h2>Phosphor Vector Icons (<code>drawlib.icons.phosphor</code>)</h2>
+<p><code>drawlib.icons.phosphor</code> provides ~1,500 scalable vector icons covering computing, networking, devices, users, interfaces, and tools:</p>
+<p>Every icon is a pure Python function accepting <code>xy</code>, <code>width</code>, and <code>style</code> (including <code>style.angle</code> for rotation):</p>
+<figure class="drawlib-image" style="text-align: center;">
+  <img src="../images/06-icons_and_images/icons_phosphor.png" alt="06-icons_and_images_1" style="width: 620px; max-width: 100%;" />
+  <figcaption class="drawlib-caption">Figure 6.1: Vector Iconography from Phosphor</figcaption>
+</figure>
+<h2>Google Cloud Architecture Icons (<code>drawlib.icons.gcp</code>)</h2>
+<p>For cloud infrastructure and microservice topologies, Drawlib includes 250+ official Google Cloud icons:</p>
+<figure class="drawlib-image" style="text-align: center;">
+  <img src="../images/06-icons_and_images/icons_gcp.png" alt="06-icons_and_images_2" style="width: 620px; max-width: 100%;" />
+  <figcaption class="drawlib-caption">Figure 6.2: Official Google Cloud Service Architecture Icons</figcaption>
+</figure>
+<h2>External Media &amp; In-Memory Images (<code>drawlib.images</code>)</h2>
+<p>Embed external PNG, WebP, or JPEG images with the <code>image()</code> function or transform them via <code>Dimage</code>:</p>
+<ul>
+<li><strong><code>image(xy, width, image=path_or_dimage, style=...)</code></strong>: Embeds raster images with optional border styles.</li>
+<li><strong><code>Dimage(path)</code></strong>: In-memory image representation supporting chainable operations (<code>.mirror()</code>, <code>.sepia()</code>, <code>.crop()</code>).</li>
+</ul>
+<pre><code class="language-python"><span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.images</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dimage</span><span class="p">,</span> <span class="n">image</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.styles</span><span class="w"> </span><span class="kn">import</span> <span class="n">Styles</span>
+
+<span class="c1"># Load external logo, apply horizontal mirror, and render to canvas</span>
+<span class="n">mirrored_logo</span> <span class="o">=</span> <span class="n">Dimage</span><span class="p">(</span><span class="s2">"_assets/linux.png"</span><span class="p">)</span><span class="o">.</span><span class="n">mirror</span><span class="p">()</span>
+<span class="n">image</span><span class="p">(</span><span class="n">xy</span><span class="o">=</span><span class="p">(</span><span class="mi">50</span><span class="p">,</span> <span class="mi">30</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">image</span><span class="o">=</span><span class="n">mirrored_logo</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryOutline</span><span class="p">)</span>
+</code></pre>
+
+</section>
+
+<section id="chapter-8-07-smartarts" class="doc-chapter pdf-chapter">
+<h1>7. SmartArts: High-Level Visual Components</h1>
+<p><code>drawlib.smartarts</code> provides presentation-ready visual layouts inspired by enterprise presentation tools. Instead of assembling dozens of individual shapes and calculating complex offsets by hand, SmartArt components encapsulate layout geometry and item spacing.</p>
+<h2>Available SmartArt Components</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Component</th>
+<th style="text-align:left">Anchor Point</th>
+<th style="text-align:left">Typical Use Case</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><strong><code>ChevronProcess</code></strong></td>
+<td style="text-align:left">Bottom-Left <code>(x, y)</code></td>
+<td style="text-align:left">Linear stages, CI/CD delivery pipelines, sequential workflows</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong><code>Table</code></strong></td>
+<td style="text-align:left">Top-Left <code>(x, y)</code></td>
+<td style="text-align:left">Service matrices, SLA comparison tables, schema summaries</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong><code>TreeNode</code></strong></td>
+<td style="text-align:left">Top-Left <code>(x, y)</code></td>
+<td style="text-align:left">Directory trees, organization charts, package hierarchies</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong><code>MindMapNode</code></strong></td>
+<td style="text-align:left">Center <code>(x, y)</code></td>
+<td style="text-align:left">Brainstorming nodes, radial feature maps, architectural taxonomy</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong><code>Cycle</code></strong></td>
+<td style="text-align:left">Center <code>(x, y)</code></td>
+<td style="text-align:left">Feedback loops, continuous monitoring lifecycles, SRE runbooks</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong><code>Pyramid</code></strong></td>
+<td style="text-align:left">Bottom-Left <code>(x, y)</code></td>
+<td style="text-align:left">Testing pyramids, security tier models, priority hierarchies</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong><code>BoxList</code></strong></td>
+<td style="text-align:left">Top-Left <code>(x, y)</code></td>
+<td style="text-align:left">Feature checklists, component listings, vertical card stacks</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong><code>BulletPoints</code></strong></td>
+<td style="text-align:left">Top-Left <code>(x, y)</code></td>
+<td style="text-align:left">Bulleted textual summaries, key takeaways, architectural principles</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong><code>GridLayout</code></strong></td>
+<td style="text-align:left">Bottom-Left <code>(x, y)</code></td>
+<td style="text-align:left">Uniform grid arrangements, dashboard widgets, matrix cells</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong><code>SourceCode</code></strong></td>
+<td style="text-align:left">Top-Left <code>(x, y)</code></td>
+<td style="text-align:left">Syntax-highlighted code blocks with line numbering</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>[!NOTE]
+For pointing speech bubbles and callout annotations, use <code>bubblespeech</code> from <code>drawlib.shapes</code>.</p>
+</blockquote>
+<h2>Linear Workflow: <code>ChevronProcess</code></h2>
+<p><code>ChevronProcess</code> creates connected pipeline chevrons with automatic text and description formatting:</p>
+<figure class="drawlib-image" style="text-align: center;">
+  <img src="../images/07-smartarts/smartarts_cicd.png" alt="07-smartarts_1" style="width: 640px; max-width: 100%;" />
+  <figcaption class="drawlib-caption">Figure 7.1: Automated CI/CD Pipeline via ChevronProcess</figcaption>
+</figure>
+<h2>Relational Tables: <code>Table</code></h2>
+<p>The <code>Table</code> component draws structured tabular data with configurable headers, alternating row colors, and border separators:</p>
+<figure class="drawlib-image" style="text-align: center;">
+  <img src="../images/07-smartarts/smartarts_sla_table.png" alt="07-smartarts_2" style="width: 640px; max-width: 100%;" />
+  <figcaption class="drawlib-caption">Figure 7.2: Microservice SLA & Metric Table</figcaption>
+</figure>
+
+</section>
+
+<section id="chapter-9-08-charts" class="doc-chapter pdf-chapter">
+<h1>8. Declarative Quantitative Charts</h1>
+<p><code>drawlib.charts</code> provides a declarative, vector-grade charting engine directly integrated with Drawlib's canvas primitives. Unlike standalone plotting libraries that output static PNG plots in isolated windows, Drawlib charts can be composed alongside architectural diagrams, callouts, and system annotations on a single canvas.</p>
+<h2>Supported Chart Types</h2>
+<ul>
+<li><strong><code>BarChart</code></strong>: Grouped and stacked bars with vertical or horizontal orientation and optional value labels.</li>
+<li><strong><code>LineChart</code> &amp; <code>AreaChart</code></strong>: Continuous trend lines, splines, markers, and filled cumulative areas.</li>
+<li><strong><code>PieChart</code> &amp; <code>RadarChart</code></strong>: Proportional slices, donut rings, and multivariate spider web diagrams.</li>
+<li><strong><code>ScatterChart</code></strong>: Distribution plots, latency correlations, and cluster maps.</li>
+<li><strong><code>GanttChart</code></strong>: Project milestones, sprint roadmaps, and task dependency schedules.</li>
+</ul>
+<h2>Grouped Bar Chart Example</h2>
+<figure class="drawlib-image" style="text-align: center;">
+  <img src="../images/08-charts/charts_barchart.png" alt="08-charts_1" style="width: 640px; max-width: 100%;" />
+  <figcaption class="drawlib-caption">Figure 8.1: Declarative Grouped BarChart</figcaption>
+</figure>
+<h2>Multi-Series Line Chart Example</h2>
+<figure class="drawlib-image" style="text-align: center;">
+  <img src="../images/08-charts/charts_linechart.png" alt="08-charts_2" style="width: 640px; max-width: 100%;" />
+  <figcaption class="drawlib-caption">Figure 8.2: Service Throughput & Error Rate LineChart</figcaption>
+</figure>
+
+</section>
+
+<section id="chapter-10-09-diagrams_cloud" class="doc-chapter pdf-chapter">
+<h1>9. Cloud &amp; Distributed Architecture Diagrams</h1>
+<p>Designing scalable cloud infrastructures, microservices, and distributed topologies is one of Drawlib's primary strengths. Drawlib provides tailored containers, directional network connectors, and standardized vector icons to depict complex systems with clarity.</p>
+<h2>Blueprint Structure &amp; Boundary Containers</h2>
+<p>Cloud architecture diagrams follow a standard hierarchy:</p>
+<ol>
+<li><strong>Outer Cloud Boundary / Region</strong>: A subtle, dashed boundary container (<code>Styles.MutedDashed</code>).</li>
+<li><strong>Virtual Private Cloud (VPC) / Subnets</strong>: Structured network zones separating public ingress from private compute tiers.</li>
+<li><strong>Managed Services &amp; Workloads</strong>: High-level icons from <code>drawlib.icons.gcp</code> or <code>drawlib.icons.phosphor</code>.</li>
+<li><strong>Data Flows &amp; Protocols</strong>: Directional connectors with protocol labels (<code>HTTPS</code>, <code>gRPC</code>, <code>SQL</code>).</li>
+</ol>
+<figure class="drawlib-image" style="text-align: center;">
+  <img src="../images/09-diagrams_cloud/diagrams_gcp.png" alt="09-diagrams_cloud_1" style="width: 640px; max-width: 100%;" />
+  <figcaption class="drawlib-caption">Figure 9.1: Serverless Cloud Event-Driven Architecture on GCP</figcaption>
+</figure>
+<h2>Architectural Guidelines for Cloud Blueprints</h2>
+<ul>
+<li><strong>Anchor Primary Services</strong>: Place entry points (clients, API gateways) on the left and progress toward data stores on the right.</li>
+<li><strong>Color Discipline</strong>: Avoid rainbow diagrams. Use <code>accent</code> for entry points, <code>primary</code> for services, <code>secondary</code> for queues/caches, and <code>muted</code> for perimeter network boundaries.</li>
+</ul>
+
+</section>
+
+<section id="chapter-11-10-diagrams_software" class="doc-chapter pdf-chapter">
+<h1>10. Software Design Diagrams</h1>
+<p><code>drawlib.diagrams</code> provides specialized, declarative diagramming engines tailored for software architecture, API protocols, workflows, and object-oriented modeling.</p>
+<h2>1. Sequence Diagrams (<code>SequenceDiagram</code>)</h2>
+<p>In a <code>SequenceDiagram</code>, participants and lifelines are defined as Python objects. Interactions use clear methods (<code>request()</code>, <code>reply()</code>, <code>note()</code>) with automatic timeline layout:</p>
+<figure class="drawlib-image" style="text-align: center;">
+  <img src="../images/10-diagrams_software/diagrams_sequence.png" alt="10-diagrams_software_1" style="width: 640px; max-width: 100%;" />
+  <figcaption class="drawlib-caption">Figure 10.1: Declarative Sequence Diagram with Phosphor Icons</figcaption>
+</figure>
+<h2>2. Decision &amp; Process Flows (<code>FlowDiagram</code>)</h2>
+<p><code>FlowDiagram</code> models logical branching, decision criteria, and workflow stages without manual line coordinate calculations:</p>
+<figure class="drawlib-image" style="text-align: center;">
+  <img src="../images/10-diagrams_software/diagrams_auth_flow.png" alt="10-diagrams_software_2" style="width: 640px; max-width: 100%;" />
+  <figcaption class="drawlib-caption">Figure 10.2: Request Authentication Flow with Branching Logic</figcaption>
+</figure>
+<h2>3. Class, State &amp; ER Diagrams</h2>
+<ul>
+<li><strong><code>ClassDiagram</code></strong>: Document classes, attributes, methods, inheritance (<code>--|&gt;</code>), implementation (<code>..|&gt;</code>), and associations.</li>
+<li><strong><code>StateDiagram</code></strong>: Model state machine lifecycles (<code>InitialState</code>, <code>State</code>, <code>FinalState</code>) with event triggers and guard conditions.</li>
+<li><strong><code>ERDiagram</code></strong>: Relational database schemas documenting primary keys (<code>PK</code>), foreign keys (<code>FK</code>), and 1:N cardinalities.</li>
+</ul>
+
+</section>
+
+<section id="chapter-12-11-doc_as_code" class="doc-chapter pdf-chapter">
+<h1>11. Documentation as Code: Embedded Drawlib Blocks</h1>
+<p>Drawlib unifies technical writing and architectural illustrations into a single, cohesive <strong>Documentation as Code</strong> workflow. Instead of exporting static PNG files that must be re-uploaded whenever code changes, you embed declarative drawing blocks directly within your Markdown documents.</p>
+<h2>The <code>drawlib</code> Code Fence</h2>
+<p>Write diagrams inline within Markdown using the <code>drawlib</code> tag:</p>
+<pre><code class="language-markdown"><span class="gh"># System Architecture</span>
+
+The following diagram illustrates our microservice communication topology:
+
+<span class="sb">```drawlib</span><span class="w"> </span>width=600px align=center file=event_microservices.png caption="Figure 1.1: Event-Driven Order Processing"
+<span class="s">from drawlib.canvas import setup</span>
+<span class="s">from drawlib.shapes import rectangle</span>
+<span class="s">from drawlib.lines import line</span>
+<span class="s">from drawlib.styles import Styles</span>
+
+<span class="s">setup(width=100, height=40)</span>
+<span class="s">rectangle((25, 20), width=30, height=18, style=Styles.PrimaryFlat, text="Publisher", text_style=Styles.WhiteBold)</span>
+<span class="s">rectangle((75, 20), width=30, height=18, style=Styles.SecondaryFlat, text="Consumer", text_style=Styles.WhiteBold)</span>
+<span class="s">line((40, 20), (60, 20), arrow_head="-&gt;", style=Styles.DarkBold)</span>
+<span class="sb">```</span>
+</code></pre>
+<figure class="drawlib-image" style="text-align: center;">
+  <img src="../images/11-doc_as_code/doc_code_inline_block.png" alt="11-doc_as_code_1" style="width: 600px; max-width: 100%;" />
+  <figcaption class="drawlib-caption">Figure 11.1: Embedded Drawlib Block Rendered Inline</figcaption>
+</figure>
+<h2>Block Header Options</h2>
+<p>Drawlib's code fence header accepts flexible options:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Option Category</th>
+<th style="text-align:left">Allowed Tokens</th>
+<th style="text-align:left">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><strong>Code Visibility</strong></td>
+<td style="text-align:left"><code>hide-code</code> <em>(default)</em>, <code>show-code</code>, <code>fold-code</code></td>
+<td style="text-align:left">Controls whether Python source is hidden, shown above image, or placed in a collapsible <code>&lt;details&gt;</code> dropdown.</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Dimensions</strong></td>
+<td style="text-align:left"><code>400px</code>, <code>600px</code>, <code>100%</code>, <code>w:500 h:300</code></td>
+<td style="text-align:left">Target display width or CSS dimension string.</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Alignment</strong></td>
+<td style="text-align:left"><code>center</code> <em>(default)</em>, <code>left</code>, <code>right</code></td>
+<td style="text-align:left">Horizontal image alignment.</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Figure Caption</strong></td>
+<td style="text-align:left"><code>caption:&quot;Descriptive title&quot;</code></td>
+<td style="text-align:left">Renders a semantic <code>&lt;figcaption&gt;</code> below the illustration.</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Output File</strong></td>
+<td style="text-align:left"><code>file:custom_name.png</code></td>
+<td style="text-align:left">Names the generated output image file instead of using index numbers (<code>1.png</code>).</td>
+</tr>
+</tbody>
+</table>
+<h2>Sandbox Isolation &amp; Explicit Imports</h2>
+<ul>
+<li><strong>Automatic Clear</strong>: Drawlib invokes <code>canvas.clear()</code> before executing each embedded block. State, shapes, and variables from preceding diagrams will never leak into subsequent blocks.</li>
+<li><strong>Explicit Imports</strong>: Every block explicitly imports what it needs (e.g. <code>from drawlib.shapes import circle</code>, <code>from drawlib.styles import Styles</code>). This guarantees reproducible compilation, full IDE autocompletion, and robust static type validation.</li>
+</ul>
+
+</section>
+
+<section id="chapter-13-12-cli_workflow" class="doc-chapter pdf-chapter">
+<h1>12. Developer CLI &amp; Build Automation</h1>
+<p>Drawlib provides a unified command-line interface (<code>drawlib</code>) that automates rapid illustration previewing, document compilation, cache management, and local web serving.</p>
+<h2>Unified CLI Subcommands</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Command</th>
+<th style="text-align:left">Usage &amp; Flags</th>
+<th style="text-align:left">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><strong><code>build html</code></strong></td>
+<td style="text-align:left"><code>drawlib build html &lt;src&gt; -o &lt;out&gt; [--css google]</code></td>
+<td style="text-align:left">Compiles Markdown documents and embedded diagrams into a responsive static website.</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong><code>build pdf</code></strong></td>
+<td style="text-align:left"><code>drawlib build pdf &lt;src&gt; -o &lt;out.pdf&gt; [--generate-index]</code></td>
+<td style="text-align:left">Merges chapters into a publication-ready vector PDF (auto-downloads headless Chromium on first run).</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong><code>build docx</code></strong></td>
+<td style="text-align:left"><code>drawlib build docx &lt;src&gt; -o &lt;out.docx&gt; [--generate-index]</code></td>
+<td style="text-align:left">Exports <code>doc</code> Markdown chapters and diagrams into an editable MS Word (<code>.docx</code>) document.</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong><code>build slide</code></strong></td>
+<td style="text-align:left"><code>drawlib build slide &lt;src&gt; -o &lt;out&gt;</code></td>
+<td style="text-align:left">Compiles slide Markdown files into an interactive 16:9 HTML presentation deck with Presenter View.</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong><code>build pptx</code></strong></td>
+<td style="text-align:left"><code>drawlib build pptx &lt;src&gt; -o &lt;out.pptx&gt;</code></td>
+<td style="text-align:left">Exports <code>slide</code> Markdown files into an editable 16:9 MS PowerPoint (<code>.pptx</code>) deck with speaker notes.</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong><code>build markdown</code></strong></td>
+<td style="text-align:left"><code>drawlib build markdown &lt;src&gt; -o &lt;out&gt;</code></td>
+<td style="text-align:left">Pre-renders embedded diagrams into standalone PNGs for GitHub repository browsing.</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong><code>build image</code></strong></td>
+<td style="text-align:left"><code>drawlib build image &lt;src&gt; -o &lt;out&gt;</code></td>
+<td style="text-align:left">Batch-executes standalone Python scripts (<code>images_src/*.py</code>) or extracts embedded diagrams.</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong><code>show</code></strong></td>
+<td style="text-align:left"><code>drawlib show &lt;file&gt; [target] [-g] [-o &lt;out.png&gt;]</code></td>
+<td style="text-align:left">Previews an individual script or embedded Markdown block instantly with optional coordinate grid overlay.</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong><code>serve</code></strong></td>
+<td style="text-align:left"><code>drawlib serve &lt;dir&gt; [-p 8000] [--check]</code></td>
+<td style="text-align:left">Launches a local HTTP preview server and verifies internal links and assets.</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong><code>cache</code></strong></td>
+<td style="text-align:left"><code>drawlib cache list / download [--all|--browser] / clear</code></td>
+<td style="text-align:left">Pre-downloads fonts, icons, maps, and headless Chromium, or clears the SQLite build cache.</td>
+</tr>
+</tbody>
+</table>
+<figure class="drawlib-image" style="text-align: center;">
+  <img src="../images/12-cli_workflow/cli_pipeline.png" alt="12-cli_workflow_1" />
+  <figcaption class="drawlib-caption">Figure 12.1: Unified Drawlib CLI Build & Preview Pipeline</figcaption>
+</figure>
+<h2>High-Performance Incremental Build Cache</h2>
+<p>Full documentation builds can contain dozens of diagrams. Drawlib avoids redundant compilation using a SHA-256 <strong>SQLite build cache</strong> (<code>.drawlib/cache.db</code>):</p>
+<ul>
+<li><strong>Zero-Latency Repeat Builds</strong>: When a Markdown file or drawing script is compiled, Drawlib computes a SHA-256 hash of its code block, styles, and options. Unchanged diagrams are restored instantly from cache.</li>
+<li><strong>Forced Rebuilds</strong>: Pass <code>--no-cache</code> to bypass the cache, or run <code>drawlib cache clear --images</code> to purge cached illustrations.</li>
+</ul>
+
+</section>
+
+<section id="chapter-14-13-ai_collaboration" class="doc-chapter pdf-chapter">
+<h1>13. AI Agent Collaboration &amp; Autonomous Workflows</h1>
+<p>Drawlib was purposefully architected for the era of <strong>AI Pair Programming</strong> and <strong>Autonomous Coding Agents</strong>. While visual diagramming tools cannot be operated without complex UI automation, and raw matplotlib requires verbose plotting boilerplate, Drawlib's declarative Python API enables AI agents to generate, verify, and refine diagrams independently.</p>
+<h2>Why Drawlib is Optimized for AI Agents</h2>
+<ol>
+<li><strong>Deterministic Code Generation</strong>: Clean, semantic components (<code>ChevronProcess</code>, <code>Table</code>, <code>ArchitectureDiagram</code>) prevent hallucinations and reduce coordinate math errors.</li>
+<li><strong>Unified Rules System (<code>drawlib rules show &lt;topic&gt;</code>)</strong>: Built-in, on-demand rule manuals give agents immediate reference for all library capabilities directly in their terminal environment.</li>
+<li><strong>Headless Verification Loop</strong>: Agents can render any code block into an image with a coordinate grid (<code>-g</code>), visually inspect the output using multimodal vision tools, and self-correct layout flaws before showing the final result to the user.</li>
+</ol>
+<h2>The Autonomous AI Feedback Loop</h2>
+<p>Every AI coding agent generating Drawlib illustrations should follow this 5-stage self-correction cycle:</p>
+<figure class="drawlib-image" style="text-align: center;">
+  <img src="../images/13-ai_collaboration/ai_feedback_loop.png" alt="13-ai_collaboration_1" style="width: 640px; max-width: 100%;" />
+  <figcaption class="drawlib-caption">Figure 13.1: The Autonomous AI Drawing & Self-Correction Feedback Loop</figcaption>
+</figure>
+<h3>Self-Review Checklist for Agents</h3>
+<p>When reviewing a rendered illustration via image tools:</p>
+<ul>
+<li><strong>Text Clipping</strong>: Verify text strings do not overflow shape boundaries.</li>
+<li><strong>Perimeter Margins</strong>: Ensure elements do not touch the canvas boundary (maintain 5–10% perimeter margin).</li>
+<li><strong>Line Endpoints</strong>: Check that arrowheads point accurately to target components without awkward intersections.</li>
+<li><strong>High-Level Over Raw Primitives</strong>: Confirm that <code>SmartArts</code> or <code>Diagrams</code> are used rather than manually assembling dozens of raw rectangles and lines.</li>
+</ul>
+
+</section>
+
+<section id="chapter-15-14-project_templates" class="doc-chapter pdf-chapter">
+<h1>14. Project Scaffolding &amp; Standard Templates</h1>
+<p>Drawlib enforces a clean, predictable project structure for all documentation and illustration repositories. Never construct project folders manually; always scaffold them using <code>drawlib init project</code>.</p>
+<h2>The 4 Standard Project Templates</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Template</th>
+<th style="text-align:left">Scaffold Command</th>
+<th style="text-align:left">Best Suited For</th>
+<th style="text-align:left">Output Deliverables</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><strong><code>doc</code></strong></td>
+<td style="text-align:left"><code>drawlib init project doc</code></td>
+<td style="text-align:left">Linear technical document, spec, RFC, or formal report</td>
+<td style="text-align:left"><code>doc_src/</code> -&gt; <code>doc_html/</code>, <code>doc_en.pdf</code>, <code>doc_en.docx</code>, <code>doc_markdown/</code></td>
+</tr>
+<tr>
+<td style="text-align:left"><strong><code>site</code></strong></td>
+<td style="text-align:left"><code>drawlib init project site</code></td>
+<td style="text-align:left">Complete documentation website with sidebar navigation</td>
+<td style="text-align:left"><code>docs_src/</code> -&gt; <code>docs_html/</code> &amp; <code>docs_markdown/</code></td>
+</tr>
+<tr>
+<td style="text-align:left"><strong><code>slide</code></strong></td>
+<td style="text-align:left"><code>drawlib init project slide</code></td>
+<td style="text-align:left">16:9 presentation slide deck (web, PDF &amp; PowerPoint)</td>
+<td style="text-align:left"><code>slide_src/</code> -&gt; <code>slide_html/</code>, <code>slide_en.pdf</code> &amp; <code>slide_en.pptx</code></td>
+</tr>
+<tr>
+<td style="text-align:left"><strong><code>images</code></strong></td>
+<td style="text-align:left"><code>drawlib init project images</code></td>
+<td style="text-align:left">Standalone Python drawing batch scripts</td>
+<td style="text-align:left"><code>images_src/</code> -&gt; <code>images/</code></td>
+</tr>
+</tbody>
+</table>
+<figure class="drawlib-image" style="text-align: center;">
+  <img src="../images/14-project_templates/project_templates.png" alt="14-project_templates_1" style="width: 640px; max-width: 100%;" />
+  <figcaption class="drawlib-caption">Figure 14.1: The Four Standard Drawlib Project Templates</figcaption>
+</figure>
+<h2>Standard Project Directory Architecture</h2>
+<p>Every Drawlib Markdown project (<code>doc</code>, <code>site</code>, <code>slide</code>) uses a unified <code>drawlib.toml</code> manifest and <code>&lt;lang&gt;/</code> locale subdirectories (<code>-l en</code> or <code>-l en,ja</code>), adhering to strict source-of-truth isolation:</p>
+<pre><code class="language-text">my_project/
+├── docs_src/               # SOURCE OF TRUTH (Always edit here)
+│   ├── drawlib.toml        # Project manifest ([project] + [i18n])
+│   ├── en/                 # Locale content directory (add ja/ for i18n)
+│   │   ├── index.md        # Landing page (or 00_cover.md for doc)
+│   │   ├── 01_overview.md  # Chapter / section page
+│   │   └── navbar.md       # Sidebar navigation tree (for site template)
+│   ├── _assets/            # Shared static logos &amp; images
+│   ├── styles.py           # Custom project design tokens (optional)
+│   ├── utils.py            # Custom drawing helper macros (optional)
+│   ├── template.html       # HTML layout template (optional)
+│   ├── style.css           # Custom CSS styling (optional)
+│   └── build.sh            # Automated build launcher script
+├── docs_html/              # GENERATED: Static HTML website (do not edit directly)
+└── docs_markdown/          # GENERATED: Markdown with images for GitHub
+</code></pre>
+<h2>Presentations with <code>drawlib.slide</code></h2>
+<p>The <code>slide</code> template compiles 16:9 widescreen presentation decks (<code>slide_src/&lt;lang&gt;/*.md</code>) to an interactive web presentation (<code>slide_html/&lt;lang&gt;/index.html</code>), a vector PDF deck (<code>slide_&lt;lang&gt;.pdf</code>), and an editable MS PowerPoint deck (<code>slide_&lt;lang&gt;.pptx</code>):</p>
+<pre><code class="language-python"><span class="c1"># slide_src/utils.py</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.slide</span><span class="w"> </span><span class="kn">import</span> <span class="n">current_slide</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.text</span><span class="w"> </span><span class="kn">import</span> <span class="n">text</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.styles</span><span class="w"> </span><span class="kn">import</span> <span class="n">Styles</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">draw_slide_footer</span><span class="p">():</span>
+    <span class="c1"># Introspect page number and total count at draw time</span>
+    <span class="n">page_text</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">current_slide</span><span class="o">.</span><span class="n">page_number</span><span class="si">}</span><span class="s2"> / </span><span class="si">{</span><span class="n">current_slide</span><span class="o">.</span><span class="n">total_pages</span><span class="si">}</span><span class="s2">"</span>
+    <span class="n">text</span><span class="p">((</span><span class="mi">1800</span><span class="p">,</span> <span class="mi">45</span><span class="p">),</span> <span class="n">text</span><span class="o">=</span><span class="n">page_text</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Dark</span><span class="p">)</span>
+</code></pre>
+<h2>Dynamic Animations with <code>drawlib.anim</code></h2>
+<p>Drawlib also natively supports generating looping animated diagrams (APNG and Animated WebP) using <code>from drawlib.anim import Animation</code>:</p>
+<pre><code class="language-python"><span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.anim</span><span class="w"> </span><span class="kn">import</span> <span class="n">Animation</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.canvas</span><span class="w"> </span><span class="kn">import</span> <span class="n">setup</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.shapes</span><span class="w"> </span><span class="kn">import</span> <span class="n">circle</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.styles</span><span class="w"> </span><span class="kn">import</span> <span class="n">Styles</span>
+
+<span class="n">anim</span> <span class="o">=</span> <span class="n">Animation</span><span class="p">(</span><span class="n">file</span><span class="o">=</span><span class="s2">"pipeline_flow.webp"</span><span class="p">,</span> <span class="n">loop</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+    <span class="k">with</span> <span class="n">anim</span><span class="o">.</span><span class="n">frame</span><span class="p">(</span><span class="n">duration</span><span class="o">=</span><span class="mf">0.5</span><span class="p">):</span>
+        <span class="n">setup</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">40</span><span class="p">)</span>
+        <span class="n">circle</span><span class="p">((</span><span class="mi">25</span> <span class="o">+</span> <span class="n">step</span> <span class="o">*</span> <span class="mi">25</span><span class="p">,</span> <span class="mi">20</span><span class="p">),</span> <span class="n">radius</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryFlat</span><span class="p">)</span>
+</code></pre>
+<h3>The Golden Rule of Source of Truth</h3>
+<p>Never edit generated output directories or deliverables (<code>docs_html/</code>, <code>docs_markdown/</code>, <code>images/</code>, <code>slide_html/</code>, <code>*_&lt;lang&gt;.pdf</code>, <code>*_&lt;lang&gt;.docx</code>, <code>*_&lt;lang&gt;.pptx</code>). All files in these outputs are automatically overwritten during compilation. Always edit files inside <code>&lt;base&gt;_src/</code>.</p>
+
+</section>
+
+<section id="chapter-16-15-best_practices" class="doc-chapter pdf-chapter">
+<h1>15. Best Practices &amp; Architectural Checklist</h1>
+<p>Drawing effective architectural illustrations requires visual discipline, clear typographic hierarchy, and consistent color semantics. Follow these proven principles when designing with Drawlib.</p>
+<h2>1. Visual Hierarchy &amp; Typography Scale</h2>
+<p>Establish an unambiguous reading order by adhering to a consistent text hierarchy:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Hierarchy Level</th>
+<th style="text-align:left">Recommended Size</th>
+<th style="text-align:left">Recommended Style</th>
+<th style="text-align:left">Typical Placement</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><strong>Diagram Title</strong></td>
+<td style="text-align:left"><code>14–18</code></td>
+<td style="text-align:left"><code>Styles.DarkBold</code></td>
+<td style="text-align:left">Top of canvas or figure caption</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Container / Boundary</strong></td>
+<td style="text-align:left"><code>10–12</code></td>
+<td style="text-align:left"><code>Styles.MutedBold</code></td>
+<td style="text-align:left">Top-left of boundary boxes</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Service / Node Title</strong></td>
+<td style="text-align:left"><code>9–11</code></td>
+<td style="text-align:left"><code>Styles.WhiteBold</code> (or <code>bold</code>)</td>
+<td style="text-align:left">Centered inside service cards</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Subtitle / Tech Stack</strong></td>
+<td style="text-align:left"><code>7.5–8.5</code></td>
+<td style="text-align:left"><code>Styles.Dark</code> (or <code>Styles.Muted</code>)</td>
+<td style="text-align:left">Below node titles (<code>fastapi / :8000</code>)</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Annotation / Metadata</strong></td>
+<td style="text-align:left"><code>7–8</code></td>
+<td style="text-align:left"><code>Styles.Muted</code></td>
+<td style="text-align:left">Connector protocols, IP subnets</td>
+</tr>
+</tbody>
+</table>
+<h2>2. Perimeter Margins &amp; Spacing</h2>
+<p>Never place elements flush against the edges of the canvas. Maintain at least a <strong>5% to 10% perimeter buffer</strong> around the canvas boundary. This ensures illustrations look polished in PDF page margins and responsive web viewports.</p>
+<h2>3. Semantic Color Discipline</h2>
+<p>Avoid arbitrary rainbow palettes. Use colors intentionally to communicate architectural roles:</p>
+<figure class="drawlib-image" style="text-align: center;">
+  <img src="../images/15-best_practices/matrix.png" alt="15-best_practices_1" style="width: 640px; max-width: 100%;" />
+  <figcaption class="drawlib-caption">Figure 15.1: Architectural Design Best Practices Matrix</figcaption>
+</figure>
+<h2>4. Semantic Coordinates Pattern (<code>*_xy</code>)</h2>
+<p>Avoid scattering raw coordinate literals <code>(50, 25)</code> or cryptic list indices (<code>a[1]</code>) across drawing calls. Define meaningful coordinate variables (e.g. <code>client_xy = (25, 25)</code>, <code>gateway_xy = (65, 25)</code>) at the beginning of the block:</p>
+<ul>
+<li><strong>Refactoring Resilience</strong>: Repositioning a node automatically updates both its shape and all incoming/outgoing connection lines.</li>
+<li><strong>Self-Documenting Flows</strong>: Connectors read with immediate clarity: <code>line(client_xy, gateway_xy, arrow_head=&quot;-&gt;&quot;, style=Styles.DarkBold)</code>.</li>
+</ul>
+<h2>Summary Checklist for Production Blueprints</h2>
+<p>Before merging illustrations into production documentation:</p>
+<ul>
+<li>[ ] <strong>Explicit Imports</strong>: Does every <code>drawlib</code> block explicitly import all required symbols (e.g. <code>from drawlib.styles import Colors, Styles</code>)?</li>
+<li>[ ] <strong>Explicit Naming</strong>: Does every block specify <code>file:&lt;name&gt;.png</code> for deterministic referencing?</li>
+<li>[ ] <strong>Semantic Coordinates</strong>: Are coordinates organized via named variables (<code>*_xy</code>) rather than raw magic literals?</li>
+<li>[ ] <strong>Aspect Ratio</strong>: Is the canvas <code>width</code> and <code>height</code> proportioned to the diagram contents without wasted letterbox space?</li>
+<li>[ ] <strong>Contrast Verification</strong>: Is text easily readable across dark (use <code>Styles.WhiteBold</code>) and light (use <code>Styles.Dark</code> / <code>Styles.DarkBold</code>) backgrounds?</li>
+<li>[ ] <strong>Neutral Connectors</strong>: Are standard flow connectors styled with <code>Styles.DarkBold</code>, reserving colors strictly for semantic emphasis?</li>
+<li>[ ] <strong>Connected Flows</strong>: Do connecting lines have directional arrowheads indicating data flow direction?</li>
+<li>[ ] <strong>Incremental Verification</strong>: Has the block been tested with <code>uv run drawlib show &lt;file&gt; &lt;name.png&gt; -g -o .drawlib/scratch/test.png</code>?</li>
+</ul>
+
+</section>
+    </main>
+    
+</body>
+</html>

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none';">
+    <title>OGP &amp; Social Preview Banners — Drawlib Examples</title>
+    <meta name="description" content="1280x640 Open Graph Protocol (OGP) and GitHub Social Preview banner illustrations built in pure Python with Drawlib.">
+    <link rel="icon" type="image/png" href="../logo/favicon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="../index.html" class="brand-link" id="nav-brand-home">
+                <img src="../logo/logo_transparent.png" alt="Drawlib" class="brand-logo">
+                <span class="brand-divider">/</span>
+                <span class="brand-subtitle">Examples Gallery</span>
+            </a>
+            <nav class="header-nav" aria-label="Primary Navigation">
+                <a href="../index.html" class="nav-link" id="nav-all-examples">All Examples</a>
+                <a href="https://github.com/yuichi110/drawlib-examples/tree/main/examples/images/ogp" class="nav-link nav-link-repo" id="nav-ogp-source" target="_blank" rel="noopener noreferrer">Source Code</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="page-hero">
+            <div class="breadcrumb">
+                <a href="../index.html" id="breadcrumb-home">Examples</a>
+                <span>/</span>
+                <span>images</span>
+                <span>/</span>
+                <span>ogp</span>
+            </div>
+            <h1>GitHub Social Preview &amp; OGP Banners</h1>
+            <p>Three <code>1280 × 640 px</code> Open Graph banner variants compiled from standalone Python scripts via <code>drawlib build image examples/images/ogp</code>.</p>
+        </section>
+
+        <section class="asset-grid asset-grid-wide" aria-label="Generated OGP Banner Variants">
+            <article class="asset-card">
+                <div class="asset-well"><img src="./social_preview.png" alt="Primary GitHub Social Preview — Git Repo Single Source of Truth"></div>
+                <div class="asset-meta">
+                    <span class="asset-filename">social_preview.png — Primary Git Repo Single Source of Truth</span>
+                    <a href="./social_preview.png" download class="btn btn-download" id="dl-social-preview">PNG (1280×640)</a>
+                </div>
+            </article>
+            <article class="asset-card">
+                <div class="asset-well"><img src="./social_preview_codebase.png" alt="Codebase to Docs as Code Social Preview"></div>
+                <div class="asset-meta">
+                    <span class="asset-filename">social_preview_codebase.png — Codebase → Docs as Code → Output</span>
+                    <a href="./social_preview_codebase.png" download class="btn btn-download" id="dl-social-preview-codebase">PNG (1280×640)</a>
+                </div>
+            </article>
+            <article class="asset-card">
+                <div class="asset-well"><img src="./social_preview_minimal.png" alt="Minimal 3-column Git Repo to AI Agent + Drawlib Social Preview"></div>
+                <div class="asset-meta">
+                    <span class="asset-filename">social_preview_minimal.png — Minimal 3-Column Variant</span>
+                    <a href="./social_preview_minimal.png" download class="btn btn-download" id="dl-social-preview-minimal">PNG (1280×640)</a>
+                </div>
+            </article>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container footer-inner">
+            <span>Generated with <a href="https://github.com/yuichi110/drawlib" target="_blank" rel="noopener noreferrer">Drawlib</a> · Apache License 2.0</span>
+            <div class="footer-links">
+                <a href="../index.html">Examples Index</a>
+                <a href="https://www.drawlib.com/" target="_blank" rel="noopener noreferrer">Official Docs</a>
+                <a href="https://github.com/yuichi110/drawlib-examples" target="_blank" rel="noopener noreferrer">GitHub</a>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
