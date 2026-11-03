@@ -1,24 +1,26 @@
 ::: block xy=(0, 0) width=1920 height=1080
-```drawlib file=divider.svg
+```drawlib file=ch4_divider.svg
 import utils
 
 utils.draw_chapter_divider(
-    chapter_num=4,
-    title="Domain Diagrams & Auto-Layout Graphs",
-    subtitle="6 Purpose-Built Software Diagram Engines & 5 Declarative Graph Solvers",
+    4,
+    "Diagrams, Graphs & Animations",
+    subtitle="6 Engineering Diagram Engines, 5 Solvers & APNG",
     topics=[
-        "Cloud & Microservice Topologies (ArchitectureDiagram)",
-        "Workflows & API Lifelines (FlowDiagram, SequenceDiagram)",
-        "Data & OOP Structural Models (ERDiagram, ClassDiagram, StateDiagram)",
-        "Declarative Auto-Layout Engine (drawlib.graph: 5 Specialized Solvers)",
+        "Cloud Topology (ArchitectureDiagram)",
+        "Flowcharts & API Sequence Diagrams",
+        "UML Class, ER & State Machines",
+        "Auto-Layout Graphs & Animations",
     ],
+    total_chapters=6,
 )
 ```
 :::
 
 ::: note
-- Welcome to Chapter 4: **Domain Diagrams & Auto-Layout Graphs**.
-- Software architecture documentation requires standard formal notations: cloud network topologies, ISO 5807 swimlane flowcharts, chronological UML sequence lifelines, Crow's Foot database schemas, UML 2.0 class hierarchies, and finite state machines.
-- In the first half of this chapter, we explore `drawlib.diagrams`—six purpose-built engines where you specify clean node coordinates while Drawlib handles boundary clipping, orthogonal Z-bends, row-level foreign key anchoring, and group bounding boxes.
-- In the second half, we explore `drawlib.graph`—five pure coordinate layout solvers (`ArchitectureGraph`, `LayerGraph`, `TreeGraph`, `RadialGraph`, and `GridGraph`) that compute `GraphLayout` coordinates via `get_layout()` (`print(layout)` and `layout.offset()`) for seamless 2-step rendering with `drawlib.diagrams` and `drawlib.shapes`.
+**Chapter 4 Overview — Engineering Diagrams, Auto-Layout Graphs & Animations**:
+- In Chapter 3 we explored SmartArts and statistical Charts for executive storytelling and data visualization. Chapter 4 moves into **deep software and systems engineering**.
+- First, we cover Drawlib's **6 purpose-built diagram engines** (`drawlib.diagrams`): `ArchitectureDiagram` for multi-tier cloud topologies, `FlowDiagram` and `SequenceDiagram` for workflows and API protocols, and `ClassDiagram`, `ERDiagram`, and `StateDiagram` for domain modeling.
+- Next, we examine **`drawlib.graph`**, Drawlib's pure-Python coordinate solver suite (`ArchitectureGraph`, `LayerGraph`, `TreeGraph`, `RadialGraph`, and `GridGraph`) that eliminates manual `(x, y)` math while preserving manual fine-tuning via `offset()`.
+- Finally, we demonstrate **`drawlib.anim`**, bringing declarative frame-based APNG and Animated WebP motion to every module in Drawlib with interactive presentation playback and automatic PDF/PPTX frame extraction.
 :::

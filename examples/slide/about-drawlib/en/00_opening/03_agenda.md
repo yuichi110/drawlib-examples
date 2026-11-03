@@ -1,54 +1,55 @@
-::: block xy=(80, 60) width=1760 height=140
-# Presentation Roadmap
-A comprehensive 7-chapter tour from the philosophy of Illustration as Code to high-level diagrams, animations, and AI workflows.
-:::
-
-::: block xy=(80, 210) width=960 height=760
-```drawlib file=agenda.svg
-from drawlib.canvas import clear, save, setup
-import utils
-
-clear()
-setup(width=104, height=86)
-
-utils.draw_curved_agenda(
-    [
-        ("1. Why Drawlib?", "Solving tool fragmentation, DSL limits & plotting boilerplate"),
-        ("2. Core Engine & Primitives", "Cartesian canvas, 23 shapes, curves, fonts, icons & design tokens"),
-        ("3. SmartArts & Quantitative Charts", "Pipelines, hierarchies, tables & 7 statistical/project charts"),
-        ("4. Domain Diagrams & Auto-Layout Graphs", "Cloud VPCs, UML/ER models & 5 automatic layout solvers"),
-        ("5. Multi-Frame Animations", "Keyframes, progressive reveal & interactive slide controls"),
-        ("6. Documentation & Slide Engine", "Sites, vector PDFs, 16:9 spatial stage & presenter view"),
-        ("7. AI Agent Workflow & Ecosystem", "Built-in rules, visual self-healing loop & SQLite caching"),
-    ],
-    width=104.0,
-    height=86.0,
-)
-save()
-```
-:::
-
-::: block xy=(1080, 240) width=760 height=680
-### Live Dogfooding in Action
-
-This 60-slide presentation is **100% authored and compiled with Drawlib**:
-
-- **Source of Truth**: Markdown files and embedded `drawlib` Python blocks in `docs/slide_about_drawlib_src/`
-- **Shared Theme & Macros**: Centralized palette in `styles.py` and reusable layout helpers in `utils.py`
-- **Inline Vector SVGs**: Every static diagram renders as crisp inline `<svg>` with automatic `@font-face` bundling
-- **Interactive `<canvas>` Animations**: Step-by-step animated diagrams controlled via `A` or Presenter View (`P`)
-- **Dual Output**: Compiled into both an interactive HTML5 web deck and a 1920×1080 vector PDF
-:::
-
-::: block xy=(1700, 1010) width=140 height=30
+::: block xy=(1700, 1008) width=140 height=32
 ```drawlib file=page.svg
 import utils
 utils.draw_page_number()
 ```
 :::
 
+::: block xy=(80, 1010) width=900 height=30 font_size=15px
+*Drawlib — Illustration & Documentation as Code*
+:::
+
+::: block xy=(80, 36) width=1760 height=72
+# Presentation Roadmap
+:::
+
+::: block xy=(80, 150) width=640 height=780
+## Six Core Chapters
+
+- **Motivation (Ch. 1)**: Solving visual documentation drift with Python and Git
+
+- **Visual Engines (Ch. 2–4)**: Primitives, 34 icon suites, SmartArts, charts, and diagrams
+
+- **Publishing & AI (Ch. 5–6)**: Five project archetypes, Office export, and AI grid review
+:::
+
+::: block xy=(760, 135) width=1080 height=820
+```drawlib file=agenda_roadmap.svg
+from drawlib.canvas import clear, save, setup
+import utils
+
+clear()
+setup(width=108, height=82)
+
+utils.draw_curved_agenda(
+    [
+        ("1. Why Drawlib?", "Solving visual documentation drift"),
+        ("2. Primitives & 34 Icon Suites", "Canvas, 43 shapes, styles & 4,500+ icons"),
+        ("3. 18 SmartArts & 9 Charts", "Infographics, GeoMap & pure-Python plots"),
+        ("4. Diagrams, Graphs & Animation", "Cloud, UML, auto-layout & APNG"),
+        ("5. 5 Archetypes & Publishing", "site, catalog, doc, slide, PDF/DOCX/PPTX"),
+        ("6. AI-Native Agent Workflow", "Rules CLI, -g grid loop & SQLite cache"),
+    ],
+    width=108,
+    height=82,
+)
+save()
+```
+:::
+
 ::: note
-- Here is our 7-chapter roadmap for the presentation.
-- We begin in Chapter 1 with why Drawlib exists and the problems it solves, move through the core engine and primitives in Chapter 2, SmartArts and quantitative charts in Chapter 3, domain diagrams and auto-layout graphs in Chapter 4, multi-frame animations in Chapter 5, the documentation and slide engine in Chapter 6, and finally the AI agent workflow in Chapter 7.
-- Notably, this entire slide deck is dogfooded directly from `docs/slide_about_drawlib_src/` using the exact features we are showcasing.
+This presentation walks through six chapters arranged in three natural acts.
+First, Chapter 1 examines why traditional visual documentation drifts out of sync with production systems and how treating illustrations and docs as Python code solves that dilemma.
+Next, Chapters 2 through 4 tour Drawlib's visual building blocks—starting from canvas coordinates, 43 shapes, and 34 icon suites, moving up to 18 SmartArts and 9 pure-Python charts, and culminating in cloud/UML diagrams, graph layout solvers, and keyframe animations.
+Finally, Chapters 5 and 6 demonstrate how Drawlib compiles five project archetypes across Web, PDF, and Office formats, and how AI coding agents autonomously author and visually verify diagrams using the built-in `-g` coordinate grid workflow.
 :::

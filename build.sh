@@ -64,6 +64,7 @@ if [ -d "examples/slide" ]; then
         $DRAWLIB_CMD build slide "$proj" -o "docs/$slug/"
         $DRAWLIB_CMD build pdf   "$proj" -o "docs/$slug/$slug.pdf"
         $DRAWLIB_CMD build pptx  "$proj" -o "docs/$slug/$slug.pptx"
+        $DRAWLIB_CMD show "$proj/en/00_opening/01_title.md" 1 -o "docs/$slug/preview.png"
     done
 fi
 

@@ -15,7 +15,7 @@ drawlib-examples/
 │   │   ├── dogfooding/             # Bilingual (EN/JA) architectural whitepaper
 │   │   └── quickstart/             # 16-chapter onboarding handbook
 │   ├── slide/
-│   │   ├── about-drawlib/          # 16:9 Drawlib showcase presentation deck
+│   │   ├── about-drawlib/          # Bilingual (EN/JA) 16:9 showcase presentation deck
 │   │   └── ddos-incident-response/ # 16:9 cloud security postmortem deck
 │   └── images/
 │       ├── logo/                   # Official Drawlib brand logos & favicon

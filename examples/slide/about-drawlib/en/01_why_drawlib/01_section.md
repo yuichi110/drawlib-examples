@@ -1,23 +1,23 @@
 ::: block xy=(0, 0) width=1920 height=1080
-```drawlib file=divider.svg
+```drawlib file=ch1_divider.svg
 import utils
 
 utils.draw_chapter_divider(
-    chapter_num=1,
-    title="Why Drawlib?",
-    subtitle="The Paradigm Shift to Illustration & Documentation as Code",
+    1,
+    "Why Drawlib?",
+    subtitle="Solving Visual Documentation Drift in the AI Era",
     topics=[
-        "The Tool Fragmentation Problem in Engineering Teams",
-        "Why Text DSLs & Low-Level Plotting Fall Short",
-        "Comparison Matrix Across Diagramming Approaches",
-        "Single Source of Truth for Humans & AI Agents",
+        "Why GUI Whiteboards & Text DSLs Break Down",
+        "Illustration & Documentation as Code",
+        "Landscape Comparison Matrix",
+        "Single Source of Truth Across Formats",
     ],
+    total_chapters=6,
 )
 ```
 :::
 
 ::: note
-- In Chapter 1, we explore the fundamental motivation behind Drawlib.
-- Why do engineering teams struggle to keep technical diagrams and documentation up to date?
-- We will examine the three traditional pain points—GUI tool fragmentation, text DSL layout limitations, and low-level plotting boilerplate—and show how Drawlib establishes a unified Single Source of Truth for both human engineers and AI coding agents.
+Let's begin with Chapter 1: Why Drawlib?
+In this chapter, we examine why visual documentation consistently rots in fast-moving software organizations—especially now that AI coding agents accelerate code velocity—and how unifying illustrations and documentation as pure Python inside Git eliminates that drift permanently.
 :::
