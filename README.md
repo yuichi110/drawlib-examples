@@ -1,6 +1,6 @@
 # drawlib-examples
 
-Official showcase gallery of real-world documents (`doc`), 16:9 presentations (`slide`), and standalone Python illustrations (`images`) built with [**Drawlib**](https://github.com/yuichi110/drawlib).
+Official showcase gallery of multi-page documentation sites (`site`), searchable API catalogs (`catalog`), linear documents (`doc`), 16:9 presentations (`slide`), and standalone Python illustrations (`images`) built with [**Drawlib**](https://github.com/yuichi110/drawlib).
 
 ---
 
@@ -22,6 +22,8 @@ drawlib-examples/
 │       └── ogp/                    # 1280x640 GitHub Social Preview / OGP banners
 └── docs/                           # Generated GitHub Pages output (100% build artifact)
 ```
+
+*(Note: Official `site` and `catalog` showcases — [Drawlib Documentation](https://www.drawlib.com/), [Drawlib Architecture](https://www.drawlib.com/architecture/), and [Drawlib API Specification](https://www.drawlib.com/api/) — are maintained in [`yuichi110/drawlib/docs_src/`](https://github.com/yuichi110/drawlib/tree/main/docs_src) and linked directly from `portal/index.html`.)*
 
 ---
 

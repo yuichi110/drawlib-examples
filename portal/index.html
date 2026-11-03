@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none';">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: https://www.drawlib.com; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none';">
     <title>Drawlib Examples — Illustration &amp; Documentation as Code Showcase</title>
-    <meta name="description" content="Explore real-world engineering whitepapers, onboarding guides, 16:9 presentation slide decks, and brand illustrations built in pure Python &amp; Markdown with Drawlib.">
+    <meta name="description" content="Explore real-world documentation sites, searchable API catalogs, engineering whitepapers, 16:9 presentation slide decks, and brand illustrations built in pure Python &amp; Markdown with Drawlib.">
     <meta property="og:title" content="Drawlib Examples Gallery">
-    <meta property="og:description" content="Single Source of Truth examples compiled into HTML, Vector PDF, MS Word (.docx), MS PowerPoint (.pptx), and PNGs with Drawlib.">
+    <meta property="og:description" content="Single Source of Truth examples compiled into documentation sites, API catalogs, HTML, Vector PDF, MS Word (.docx), MS PowerPoint (.pptx), and PNGs with Drawlib.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://examples.drawlib.com/">
     <meta property="og:image" content="https://examples.drawlib.com/ogp/social_preview.png">
@@ -21,6 +21,8 @@
 <body>
     <!-- Pure-CSS category filter state -->
     <input type="radio" name="category-filter" id="filter-all" class="filter-radio" checked>
+    <input type="radio" name="category-filter" id="filter-site" class="filter-radio">
+    <input type="radio" name="category-filter" id="filter-catalog" class="filter-radio">
     <input type="radio" name="category-filter" id="filter-doc" class="filter-radio">
     <input type="radio" name="category-filter" id="filter-slide" class="filter-radio">
     <input type="radio" name="category-filter" id="filter-images" class="filter-radio">
@@ -34,6 +36,7 @@
             </a>
             <nav class="header-nav" aria-label="Primary Navigation">
                 <a href="https://www.drawlib.com/" class="nav-link" id="nav-official-docs" target="_blank" rel="noopener noreferrer">Official Docs</a>
+                <a href="https://www.drawlib.com/api/" class="nav-link" id="nav-api-docs" target="_blank" rel="noopener noreferrer">API Reference</a>
                 <a href="https://github.com/yuichi110/drawlib" class="nav-link" id="nav-drawlib-core" target="_blank" rel="noopener noreferrer">Drawlib Core</a>
                 <a href="https://github.com/yuichi110/drawlib-examples" class="nav-link nav-link-repo" id="nav-examples-repo" target="_blank" rel="noopener noreferrer">GitHub Repo</a>
             </nav>
@@ -47,7 +50,7 @@
                     <p class="hero-eyebrow">Illustration &amp; Docs as Code</p>
                     <h1>Drawlib Examples Showcase</h1>
                     <p class="hero-lead">
-                        Production-ready documents, 16:9 widescreen slide decks, and standalone Python illustrations compiled from version-controlled Markdown and Python into Web HTML, Vector PDF, Word (<code>.docx</code>), and PowerPoint (<code>.pptx</code>).
+                        Production-ready documentation sites, searchable API catalogs, engineering whitepapers, 16:9 widescreen slide decks, and standalone Python illustrations compiled from version-controlled Markdown and Python into Web HTML, Vector PDF, Word (<code>.docx</code>), and PowerPoint (<code>.pptx</code>).
                     </p>
                     <div class="hero-meta-row">
                         <span class="code-command"><span class="code-prompt">$</span> uv sync &amp;&amp; ./build.sh</span>
@@ -62,15 +65,116 @@
         <div class="container">
             <div class="toolbar" role="region" aria-label="Filter examples by project type">
                 <div class="filter-tabs">
-                    <label for="filter-all" class="filter-label" id="tab-all">All<span class="filter-count">6</span></label>
+                    <label for="filter-all" class="filter-label" id="tab-all">All<span class="filter-count">9</span></label>
+                    <label for="filter-site" class="filter-label" id="tab-site">Doc Sites<span class="filter-count">2</span></label>
+                    <label for="filter-catalog" class="filter-label" id="tab-catalog">Catalogs<span class="filter-count">1</span></label>
                     <label for="filter-doc" class="filter-label" id="tab-doc">Documents<span class="filter-count">2</span></label>
                     <label for="filter-slide" class="filter-label" id="tab-slide">Slide Decks<span class="filter-count">2</span></label>
                     <label for="filter-images" class="filter-label" id="tab-images">Illustrations<span class="filter-count">2</span></label>
                 </div>
-                <span class="toolbar-note">Every artifact below is built directly from <code>examples/</code></span>
+                <span class="toolbar-note">Built from <code>drawlib/docs_src/</code> &amp; <code>examples/</code></span>
             </div>
 
-            <!-- 1. Linear Documents (doc) -->
+            <!-- 1. Multi-Page Documentation Sites (site) -->
+            <section class="category-section" data-category="site" id="section-site">
+                <div class="section-header">
+                    <div class="section-title-group">
+                        <h2 class="section-title">Multi-Page Documentation Sites</h2>
+                        <span class="archetype-tag">type = "site"</span>
+                    </div>
+                    <p class="section-desc">Hierarchical documentation portals with sidebar navigation, dark mode, i18n language switching, and SEO artifacts.</p>
+                </div>
+
+                <div class="cards-grid">
+                    <!-- drawlib-docs -->
+                    <article class="example-card" id="card-drawlib-docs">
+                        <a href="https://www.drawlib.com/" class="card-preview" id="preview-drawlib-docs" target="_blank" rel="noopener noreferrer">
+                            <img src="https://www.drawlib.com/images/index/hero_ai_doc_loop.png" alt="Drawlib Documentation — Autonomous AI Documentation Workflow">
+                        </a>
+                        <div class="card-body">
+                            <div class="card-meta">
+                                <span class="card-path">drawlib/docs_src/site</span>
+                                <span class="locale-list">
+                                    <span class="locale-chip">EN</span>
+                                    <span class="locale-chip">JA</span>
+                                </span>
+                            </div>
+                            <h3 class="card-title"><a href="https://www.drawlib.com/" target="_blank" rel="noopener noreferrer">Drawlib Documentation</a></h3>
+                            <p class="card-desc">Official bilingual user guide covering drawing primitives, 34 icon suites, SmartArts, charts, diagrams, auto-layout graphs, animations, and AI workflows.</p>
+                            <div class="card-actions">
+                                <div class="action-row">
+                                    <a href="https://www.drawlib.com/" class="btn btn-primary" id="open-drawlib-docs-en" target="_blank" rel="noopener noreferrer">Open Site (EN) ↗</a>
+                                    <a href="https://www.drawlib.com/ja/" class="btn btn-secondary" id="open-drawlib-docs-ja" target="_blank" rel="noopener noreferrer">Open Site (日本語) ↗</a>
+                                    <a href="https://github.com/yuichi110/drawlib/tree/main/docs_src/site" class="btn btn-source" id="src-drawlib-docs" target="_blank" rel="noopener noreferrer">Source ↗</a>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+
+                    <!-- drawlib-architecture -->
+                    <article class="example-card" id="card-drawlib-architecture">
+                        <a href="https://www.drawlib.com/architecture/" class="card-preview" id="preview-drawlib-architecture" target="_blank" rel="noopener noreferrer">
+                            <img src="https://www.drawlib.com/architecture/images/index/system_architecture_at_a_glance.png" alt="Drawlib Architecture — System Architecture at a Glance">
+                        </a>
+                        <div class="card-body">
+                            <div class="card-meta">
+                                <span class="card-path">drawlib/docs_src/architecture</span>
+                                <span class="locale-list">
+                                    <span class="locale-chip">EN</span>
+                                </span>
+                            </div>
+                            <h3 class="card-title"><a href="https://www.drawlib.com/architecture/" target="_blank" rel="noopener noreferrer">Drawlib Architecture</a></h3>
+                            <p class="card-desc">Internal software architecture specification detailing the layered drawing engine (L1–L4), SQLite AST cache, domain subsystems, and multi-target compilers.</p>
+                            <div class="card-actions">
+                                <div class="action-row">
+                                    <a href="https://www.drawlib.com/architecture/" class="btn btn-primary" id="open-drawlib-arch-en" target="_blank" rel="noopener noreferrer">Open Site (EN) ↗</a>
+                                    <a href="https://github.com/yuichi110/drawlib/tree/main/docs_src/architecture" class="btn btn-source" id="src-drawlib-architecture" target="_blank" rel="noopener noreferrer">Source ↗</a>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            </section>
+
+            <!-- 2. Reference Catalogs (catalog) -->
+            <section class="category-section" data-category="catalog" id="section-catalog">
+                <div class="section-header">
+                    <div class="section-title-group">
+                        <h2 class="section-title">API &amp; Reference Catalogs</h2>
+                        <span class="archetype-tag">type = "catalog"</span>
+                    </div>
+                    <p class="section-desc">Structured reference portals with instant symbol filtering, typed badges, collapsible module trees, and visual code examples.</p>
+                </div>
+
+                <div class="cards-grid">
+                    <!-- drawlib-api -->
+                    <article class="example-card" id="card-drawlib-api">
+                        <a href="https://www.drawlib.com/api/" class="card-preview" id="preview-drawlib-api" target="_blank" rel="noopener noreferrer">
+                            <img src="https://www.drawlib.com/api/images/00_overview/00_overview_hero.png" alt="Drawlib API Specification — Unified Python Package Architecture">
+                        </a>
+                        <div class="card-body">
+                            <div class="card-meta">
+                                <span class="card-path">drawlib/docs_src/api</span>
+                                <span class="locale-list">
+                                    <span class="locale-chip">EN</span>
+                                    <span class="locale-chip">JA</span>
+                                </span>
+                            </div>
+                            <h3 class="card-title"><a href="https://www.drawlib.com/api/" target="_blank" rel="noopener noreferrer">Drawlib API Specification</a></h3>
+                            <p class="card-desc">Complete bilingual Python API and CLI reference cataloging every public module, class, function, style token, and CLI subcommand across 29 pages.</p>
+                            <div class="card-actions">
+                                <div class="action-row">
+                                    <a href="https://www.drawlib.com/api/" class="btn btn-primary" id="open-drawlib-api-en" target="_blank" rel="noopener noreferrer">Open Catalog (EN) ↗</a>
+                                    <a href="https://www.drawlib.com/api/ja/" class="btn btn-secondary" id="open-drawlib-api-ja" target="_blank" rel="noopener noreferrer">Open Catalog (日本語) ↗</a>
+                                    <a href="https://github.com/yuichi110/drawlib/tree/main/docs_src/api" class="btn btn-source" id="src-drawlib-api" target="_blank" rel="noopener noreferrer">Source ↗</a>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            </section>
+
+            <!-- 3. Linear Documents (doc) -->
             <section class="category-section" data-category="doc" id="section-doc">
                 <div class="section-header">
                     <div class="section-title-group">
@@ -141,7 +245,7 @@
                 </div>
             </section>
 
-            <!-- 2. Presentation Slide Decks (slide) -->
+            <!-- 4. Presentation Slide Decks (slide) -->
             <section class="category-section" data-category="slide" id="section-slide">
                 <div class="section-header">
                     <div class="section-title-group">
@@ -208,7 +312,7 @@
                 </div>
             </section>
 
-            <!-- 3. Standalone Illustrations (images) -->
+            <!-- 5. Standalone Illustrations (images) -->
             <section class="category-section" data-category="images" id="section-images">
                 <div class="section-header">
                     <div class="section-title-group">
@@ -274,6 +378,8 @@
             <span>Generated with <a href="https://github.com/yuichi110/drawlib" target="_blank" rel="noopener noreferrer">Drawlib</a> · Apache License 2.0</span>
             <div class="footer-links">
                 <a href="https://www.drawlib.com/" target="_blank" rel="noopener noreferrer">Official Documentation</a>
+                <a href="https://www.drawlib.com/api/" target="_blank" rel="noopener noreferrer">API Specification</a>
+                <a href="https://www.drawlib.com/architecture/" target="_blank" rel="noopener noreferrer">Architecture</a>
                 <a href="https://pypi.org/project/drawlib/" target="_blank" rel="noopener noreferrer">PyPI</a>
                 <a href="https://github.com/yuichi110/drawlib" target="_blank" rel="noopener noreferrer">Drawlib Core</a>
                 <a href="https://github.com/yuichi110/drawlib-examples" target="_blank" rel="noopener noreferrer">Examples Repository</a>

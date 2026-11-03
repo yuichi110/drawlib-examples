@@ -271,6 +271,8 @@ a {
 }
 
 #filter-all:checked ~ .main-content .filter-tabs label[for="filter-all"],
+#filter-site:checked ~ .main-content .filter-tabs label[for="filter-site"],
+#filter-catalog:checked ~ .main-content .filter-tabs label[for="filter-catalog"],
 #filter-doc:checked ~ .main-content .filter-tabs label[for="filter-doc"],
 #filter-slide:checked ~ .main-content .filter-tabs label[for="filter-slide"],
 #filter-images:checked ~ .main-content .filter-tabs label[for="filter-images"] {
@@ -279,6 +281,8 @@ a {
     box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
 }
 
+#filter-site:checked ~ .main-content .category-section:not([data-category="site"]),
+#filter-catalog:checked ~ .main-content .category-section:not([data-category="catalog"]),
 #filter-doc:checked ~ .main-content .category-section:not([data-category="doc"]),
 #filter-slide:checked ~ .main-content .category-section:not([data-category="slide"]),
 #filter-images:checked ~ .main-content .category-section:not([data-category="images"]) {
