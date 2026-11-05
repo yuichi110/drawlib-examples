@@ -275,7 +275,8 @@ a {
 #filter-catalog:checked ~ .main-content .filter-tabs label[for="filter-catalog"],
 #filter-doc:checked ~ .main-content .filter-tabs label[for="filter-doc"],
 #filter-slide:checked ~ .main-content .filter-tabs label[for="filter-slide"],
-#filter-images:checked ~ .main-content .filter-tabs label[for="filter-images"] {
+#filter-images:checked ~ .main-content .filter-tabs label[for="filter-images"],
+#filter-engine:checked ~ .main-content .filter-tabs label[for="filter-engine"] {
     background: var(--bg-surface);
     color: var(--text-primary);
     box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
@@ -285,7 +286,8 @@ a {
 #filter-catalog:checked ~ .main-content .category-section:not([data-category="catalog"]),
 #filter-doc:checked ~ .main-content .category-section:not([data-category="doc"]),
 #filter-slide:checked ~ .main-content .category-section:not([data-category="slide"]),
-#filter-images:checked ~ .main-content .category-section:not([data-category="images"]) {
+#filter-images:checked ~ .main-content .category-section:not([data-category="images"]),
+#filter-engine:checked ~ .main-content .category-section:not([data-category="engine"]) {
     display: none;
 }
 
