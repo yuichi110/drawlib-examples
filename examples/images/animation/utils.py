@@ -22,8 +22,7 @@ from drawlib.shapes import circle, ellipse, rectangle
 from drawlib.styles import Styles
 from drawlib.text import text
 
-# Exact 550:355 (110:71) aspect ratio matching https://www.yuichi.com/img/logo.png
-# 10.0 in * 110 dpi = 1100 x 710 px (2x Retina resolution)
+# Widescreen 110:71 hero aspect ratio (10.0 in * 110 dpi = 1100 x 710 px)
 CANVAS_W: int = 110
 CANVAS_H: int = 71
 CANVAS_DPI: int = 110
@@ -45,7 +44,7 @@ ROW_YS: tuple[float, float, float] = (20.8, 30.0, 39.2)  # bottom, middle, top
 LEFT_COL_XS: tuple[float, float, float] = (8.0, 17.2, 26.4)  # outer, mid (core), inner
 RIGHT_COL_XS: tuple[float, float, float] = (83.6, 92.8, 102.0)  # inner, mid (core), outer
 
-# Custom geometric sci-fi font from yuichi.com
+# Custom geometric display font bundled in _assets/
 _ASSETS_DIR = Path(__file__).resolve().parent / "_assets"
 AVENGER_FONT = FontFile(str(_ASSETS_DIR / "avenger.ttf"))
 
