@@ -11,6 +11,8 @@ if [ -z "${DRAWLIB_CMD:-}" ]; then
         DRAWLIB_CMD="drawlib"
     elif python3 -m drawlib --version &> /dev/null; then
         DRAWLIB_CMD="python3 -m drawlib"
+    elif command -v uvx &> /dev/null; then
+        DRAWLIB_CMD="uvx drawlib"
     else
         DRAWLIB_CMD="drawlib"
     fi
@@ -79,7 +81,18 @@ if [ -d "examples/site" ]; then
     done
 fi
 
-# 5. Overlay static portal pages (index.html, style.css, image gallery pages)
+# 5. API & reference catalogs (examples/catalog/*)
+if [ -d "examples/catalog" ]; then
+    for proj in examples/catalog/*; do
+        [ -d "$proj" ] || continue
+        slug="$(basename "$proj")"
+        check_slug "$slug"
+        echo "=== [catalog] Building $slug (Catalog HTML) ==="
+        $DRAWLIB_CMD build html "$proj" -o "docs/$slug/"
+    done
+fi
+
+# 6. Overlay static portal pages (index.html, style.css, image gallery pages)
 if [ -d "portal" ]; then
     echo "=== Copying portal files to docs/ ==="
     cp -r portal/. docs/
