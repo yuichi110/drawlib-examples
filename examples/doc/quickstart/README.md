@@ -1,30 +1,23 @@
-# Drawlib Quickstart Document Project (`doc`)
+# Drawlib Quickstart Onboarding Guide (`doc`)
 
-This directory contains multi-chapter specification and tutorial documents compiled into static HTML, vector PDF, editable MS Word (`.docx`), Markdown, and exported images using Drawlib.
+Bilingual (`en` / `ja`) 16-chapter engineering handbook introducing **Drawlib (`v0.3.7`)** from Cartesian canvas fundamentals through 34 icon suites, 18 SmartArts, 10 quantitative charts, 6 engineering diagram engines, 5 auto-layout graph solvers, multi-format animations (`APNG` / `WebP` / `GIF`), 5 project archetypes (`site`, `catalog`, `doc`, `slide`, `images`), and autonomous AI agent visual self-correction workflows.
 
 ---
 
 ## 1. Directory Structure
 
-- `drawlib.toml`: Unified project manifest (`type = "doc"`, `style = "google"`, `[i18n]` `default_lang = "en"`, `langs = ["en"]`).
-- `en/`: English tutorial and guide chapters (`00-cover.md` ... `15-best_practices.md`).
-- `_assets/`: Shared image and font assets across locales.
-- `styles.py`: Global styles script (themes, styles, font presets).
-- `utils.py`: Reusable drawing helper functions, macros, and project constants.
-- `style.css`: Document stylesheet (layout, typography, paged media rules).
-- `template.html`: Jinja2 HTML layout.
-- `build.sh`, `build_html.sh`, `build_pdf.sh`, `build_docx.sh`, `build_markdown.sh`, `build_image.sh`, `serve.sh`: Standalone build and preview scripts (outputs to `_build/`).
+- `drawlib.toml`: Project manifest (`type = "doc"`, `style = "google"`, `langs = ["en", "ja"]`).
+- `en/` & `ja/`: Symmetric 16-chapter Markdown sources (`00_cover.md` – `15_best_practices.md`).
+- `styles.py` / `ja/styles.py`: `GoogleStyles` theme tokens and `FontJapanese` CJK overrides.
+- `utils.py`: Shared Python drawing helpers.
+- `template.html` / `style.css`: Responsive linear document layout with language switcher and `@media print` A4 rules.
+- `build.sh` / `build_*.sh`: Standalone HTML, PDF, DOCX, Markdown, and image build scripts.
 
 ---
 
 ## 2. Building & Previewing Standalone
 
 ```bash
-./build_html.sh       # Compile standalone HTML (_build/html/)
-./build_pdf.sh        # Compile vector PDF (_build/quickstart_en.pdf)
-./build_docx.sh       # Compile editable MS Word (_build/quickstart_en.docx)
-./build_markdown.sh   # Compile Markdown (_build/markdown/)
-./build_image.sh      # Export diagram images (_build/images/)
-./build.sh            # Run all builds sequentially
-./serve.sh            # Start local preview server at http://localhost:8000
+./build.sh      # Compiles HTML, PDF (EN/JA), DOCX (EN/JA), Markdown, and PNGs into _build/
+./serve.sh      # Serves _build/html/ locally
 ```

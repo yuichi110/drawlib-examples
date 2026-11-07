@@ -13,7 +13,7 @@ drawlib-examples/
 ├── examples/                       # Source of Truth (organized by drawlib project type)
 │   ├── doc/
 │   │   ├── dogfooding/             # Bilingual (EN/JA) architectural whitepaper
-│   │   └── quickstart/             # 16-chapter onboarding handbook
+│   │   └── quickstart/             # Bilingual (EN/JA) 16-chapter onboarding handbook
 │   ├── slide/
 │   │   ├── about-drawlib/          # Bilingual (EN/JA) 16:9 showcase presentation deck
 │   │   └── ddos-incident-response/ # 16:9 cloud security postmortem deck

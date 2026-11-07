@@ -13,18 +13,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ title | default("Drawlib Quickstart Guide") }}</title>
-    {% if font_link_html %}
-    {{ font_link_html | safe }}
-    {% else %}
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-    {% endif %}
+    <title>{{ title | default("Drawlib Document") }}</title>
+    {{ font_link_html | default('') | safe }}
     {% if alternate_links %}
     {% for alt in alternate_links %}
     <link rel="alternate" hreflang="{{ alt.hreflang }}" href="{{ alt.url }}">
     {% endfor %}
+    {% endif %}
+    {% if seo_meta_html %}
+{{ seo_meta_html | safe }}
     {% endif %}
     {% if favicon_href %}
     <link rel="icon" type="image/png" href="{{ favicon_href }}">

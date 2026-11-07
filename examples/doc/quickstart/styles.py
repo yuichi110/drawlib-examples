@@ -7,10 +7,29 @@
 # express or implied, including but not limited to the warranties of
 # merchantability, fitness for a particular purpose and noninfringement.
 
-"""Drawlib configuration file for Quickstart PDF."""
+"""Drawlib styles configuration file."""
+
+from __future__ import annotations
 
 from drawlib.preset_colors import GoogleColors
 from drawlib.preset_styles import GoogleStyles
+
+# Configure project-wide drawing styles, custom preset styles, or colors here.
+#
+# All variables defined here will automatically override or extend drawlib.styles.
+#
+# Available style presets:
+# - DefaultStyles / DefaultColors (Default theme, variants 1-6 available)
+# - GoogleStyles / GoogleColors (Google Slides/Docs palette & style)
+# - MonochromeStyles / MonochromeColors (Black & white printing style)
+#
+# Example (switching or extending theme):
+#
+# from drawlib.preset_colors import GoogleColors
+# from drawlib.preset_styles import GoogleStyles
+#
+# Colors = GoogleColors()
+# Styles = GoogleStyles()
 
 Colors = GoogleColors()
 Styles = GoogleStyles()
