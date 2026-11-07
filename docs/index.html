@@ -66,12 +66,12 @@
         <div class="container">
             <div class="toolbar" role="region" aria-label="Filter examples by project type">
                 <div class="filter-tabs">
-                    <label for="filter-all" class="filter-label" id="tab-all">All<span class="filter-count">10</span></label>
+                    <label for="filter-all" class="filter-label" id="tab-all">All<span class="filter-count">11</span></label>
                     <label for="filter-site" class="filter-label" id="tab-site">Doc Sites<span class="filter-count">2</span></label>
                     <label for="filter-catalog" class="filter-label" id="tab-catalog">Catalogs<span class="filter-count">1</span></label>
                     <label for="filter-doc" class="filter-label" id="tab-doc">Documents<span class="filter-count">2</span></label>
                     <label for="filter-slide" class="filter-label" id="tab-slide">Slide Decks<span class="filter-count">2</span></label>
-                    <label for="filter-images" class="filter-label" id="tab-images">Illustrations<span class="filter-count">2</span></label>
+                    <label for="filter-images" class="filter-label" id="tab-images">Illustrations<span class="filter-count">3</span></label>
                     <label for="filter-engine" class="filter-label" id="tab-engine">Engine Use Cases<span class="filter-count">1</span></label>
                 </div>
                 <span class="toolbar-note">Built from <code>drawlib/docs_src/</code>, <code>drawlib/reports/</code> &amp; <code>examples/</code></span>
@@ -325,10 +325,40 @@
                         <h2 class="section-title">Standalone Python Illustrations</h2>
                         <span class="archetype-tag">type = "images"</span>
                     </div>
-                    <p class="section-desc">Batch-rendered brand marks, favicons, and Open Graph banners written as pure Python scripts.</p>
+                    <p class="section-desc">Batch-rendered multi-frame hero animations, brand marks, favicons, and Open Graph banners written as pure Python scripts.</p>
                 </div>
 
                 <div class="cards-grid">
+                    <!-- animation -->
+                    <article class="example-card" id="card-animation">
+                        <a href="./animation/index.html" class="card-preview" id="preview-animation">
+                            <img src="./animation/grit_computing.webp" alt="GRIT COMPUTING Hero Animation Remake — APNG, WebP &amp; GIF">
+                        </a>
+                        <div class="card-body">
+                            <div class="card-meta">
+                                <span class="card-path">examples/images/animation</span>
+                                <span class="locale-list">
+                                    <span class="locale-chip">APNG</span>
+                                    <span class="locale-chip">WebP</span>
+                                    <span class="locale-chip">GIF</span>
+                                </span>
+                            </div>
+                            <h3 class="card-title"><a href="./animation/index.html">GRIT COMPUTING Hero Animations</a></h3>
+                            <p class="card-desc">2× Retina pure-Python remake of the classic <code>p5.js</code> hero animation on <code>yuichi.com</code>, exported in lossless APNG, Animated WebP, and dither-free GIF across light and dark themes.</p>
+                            <div class="card-actions">
+                                <div class="action-row">
+                                    <a href="./animation/index.html" class="btn btn-primary" id="open-animation-gallery">Open Animation Sheet</a>
+                                </div>
+                                <div class="action-row">
+                                    <a href="./animation/grit_computing.png" class="btn btn-download" id="dl-anim-apng">APNG</a>
+                                    <a href="./animation/grit_computing.webp" class="btn btn-download" id="dl-anim-webp">WebP</a>
+                                    <a href="./animation/grit_computing.gif" class="btn btn-download" id="dl-anim-gif">GIF</a>
+                                    <a href="https://github.com/yuichi110/drawlib-examples/tree/main/examples/images/animation" class="btn btn-source" id="src-animation" target="_blank" rel="noopener noreferrer">Source ↗</a>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+
                     <!-- logo -->
                     <article class="example-card" id="card-logo">
                         <a href="./logo/index.html" class="card-preview" id="preview-logo">

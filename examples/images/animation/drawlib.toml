@@ -1,0 +1,7 @@
+[project]
+name = "animation"
+type = "images"
+title = ""
+description = "GRIT COMPUTING Hero Animation Remake (APNG, WebP, GIF)"
+lang = "en"
+style = "default"

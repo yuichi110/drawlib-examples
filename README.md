@@ -18,6 +18,7 @@ drawlib-examples/
 │   │   ├── about-drawlib/          # Bilingual (EN/JA) 16:9 showcase presentation deck
 │   │   └── ddos-incident-response/ # 16:9 cloud security postmortem deck
 │   └── images/
+│       ├── animation/              # Multi-format hero animations (APNG, WebP & GIF)
 │       ├── logo/                   # Official Drawlib brand logos & favicon
 │       └── ogp/                    # 1280x640 GitHub Social Preview / OGP banners
 └── docs/                           # Generated GitHub Pages output (100% build artifact)
