@@ -98,6 +98,51 @@ if [ -d "portal" ]; then
     cp -r portal/. docs/
 fi
 
+# 7. Inject GA4 tag into generated HTML pages in docs/ (after PDF/PPTX builds
+#    so headless Chromium exports do not fire analytics, and without polluting
+#    reusable sample source files under examples/).
+#    TODO(security): SRI is intentionally omitted on googletagmanager.com/gtag/js
+#    because Google dynamically serves container scripts; portal pages enforce a
+#    strict SHA-256 CSP hash instead of 'unsafe-inline'.
+GA4_ID="G-S9N5BZ1VRC"
+echo "=== Injecting GA4 ($GA4_ID) into generated HTML pages in docs/ ==="
+python3 - "$GA4_ID" <<'PY'
+import pathlib
+import re
+import sys
+
+ga4_id = sys.argv[1]
+snippet = (
+    f"    <!-- Google tag (gtag.js) -->\n"
+    f'    <script async src="https://www.googletagmanager.com/gtag/js?id={ga4_id}"></script>\n'
+    f"    <script>\n"
+    f"        window.dataLayer = window.dataLayer || [];\n"
+    f"        function gtag(){{dataLayer.push(arguments);}}\n"
+    f"        gtag('js', new Date());\n\n"
+    f"        gtag('config', '{ga4_id}');\n"
+    f"    </script>"
+)
+
+title_re = re.compile(r"([ \t]*<title>.*?</title>)", re.IGNORECASE | re.DOTALL)
+refresh_re = re.compile(r'<meta\b[^>]*http-equiv=["\']?refresh["\']?', re.IGNORECASE)
+
+injected = 0
+for html_path in sorted(pathlib.Path("docs").rglob("*.html")):
+    content = html_path.read_text(encoding="utf-8")
+    if "googletagmanager.com/gtag/js" in content or refresh_re.search(content):
+        continue
+    if title_re.search(content):
+        new_content = title_re.sub(lambda m: f"{m.group(1)}\n{snippet}", content, count=1)
+    elif "</head>" in content:
+        new_content = content.replace("</head>", f"{snippet}\n</head>", 1)
+    else:
+        continue
+    html_path.write_text(new_content, encoding="utf-8")
+    injected += 1
+
+print(f"Injected GA4 tag into {injected} generated HTML file(s).")
+PY
+
 echo "=== Verifying links and assets in docs/ ==="
 $DRAWLIB_CMD serve docs/ --check
 

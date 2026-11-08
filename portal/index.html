@@ -3,8 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: https://www.drawlib.com; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none';">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: https://www.drawlib.com https://*.google-analytics.com https://*.googletagmanager.com; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src https://www.googletagmanager.com 'sha256-zqjjohcRf9PO/Lt5mn1ZSDT0XUh2eF9LnThl6a4prqY='; connect-src 'self' https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com; object-src 'none'; base-uri 'self'; form-action 'none';">
     <title>Drawlib Examples — Illustration &amp; Documentation as Code Showcase</title>
+    <!-- Google tag (gtag.js) — Note: SRI omitted because googletagmanager.com dynamically serves gtag.js -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-S9N5BZ1VRC"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-S9N5BZ1VRC');
+    </script>
     <meta name="description" content="Explore real-world documentation sites, searchable API catalogs, engineering whitepapers, 16:9 presentation slide decks, and brand illustrations built in pure Python &amp; Markdown with Drawlib.">
     <meta property="og:title" content="Drawlib Examples Gallery">
     <meta property="og:description" content="Single Source of Truth examples compiled into documentation sites, API catalogs, HTML, Vector PDF, MS Word (.docx), MS PowerPoint (.pptx), and PNGs with Drawlib.">
