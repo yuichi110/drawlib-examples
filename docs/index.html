@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: https://www.drawlib.com https://*.google-analytics.com https://*.googletagmanager.com; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src https://www.googletagmanager.com 'sha256-zqjjohcRf9PO/Lt5mn1ZSDT0XUh2eF9LnThl6a4prqY='; connect-src 'self' https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com; object-src 'none'; base-uri 'self'; form-action 'none';">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: https://www.drawlib.com https://fastapi.drawlib.com https://*.google-analytics.com https://*.googletagmanager.com; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src https://www.googletagmanager.com 'sha256-zqjjohcRf9PO/Lt5mn1ZSDT0XUh2eF9LnThl6a4prqY='; connect-src 'self' https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com; object-src 'none'; base-uri 'self'; form-action 'none';">
     <title>Drawlib Examples — Illustration &amp; Documentation as Code Showcase</title>
     <!-- Google tag (gtag.js) — Note: SRI omitted because googletagmanager.com dynamically serves gtag.js -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-S9N5BZ1VRC"></script>
@@ -75,15 +75,15 @@
         <div class="container">
             <div class="toolbar" role="region" aria-label="Filter examples by project type">
                 <div class="filter-tabs">
-                    <label for="filter-all" class="filter-label" id="tab-all">All<span class="filter-count">11</span></label>
-                    <label for="filter-site" class="filter-label" id="tab-site">Doc Sites<span class="filter-count">2</span></label>
-                    <label for="filter-catalog" class="filter-label" id="tab-catalog">Catalogs<span class="filter-count">1</span></label>
+                    <label for="filter-all" class="filter-label" id="tab-all">All<span class="filter-count">15</span></label>
+                    <label for="filter-site" class="filter-label" id="tab-site">Doc Sites<span class="filter-count">4</span></label>
+                    <label for="filter-catalog" class="filter-label" id="tab-catalog">Catalogs<span class="filter-count">2</span></label>
                     <label for="filter-doc" class="filter-label" id="tab-doc">Documents<span class="filter-count">2</span></label>
                     <label for="filter-slide" class="filter-label" id="tab-slide">Slide Decks<span class="filter-count">2</span></label>
                     <label for="filter-images" class="filter-label" id="tab-images">Illustrations<span class="filter-count">3</span></label>
-                    <label for="filter-engine" class="filter-label" id="tab-engine">Engine Use Cases<span class="filter-count">1</span></label>
+                    <label for="filter-engine" class="filter-label" id="tab-engine">Engine Use Cases<span class="filter-count">2</span></label>
                 </div>
-                <span class="toolbar-note">Built from <code>drawlib/docs_src/</code>, <code>drawlib/reports/</code> &amp; <code>examples/</code></span>
+                <span class="toolbar-note">Built from <code>drawlib</code>, <code>drawlib-fastapi</code> &amp; <code>examples/</code></span>
             </div>
 
             <!-- 1. Multi-Page Documentation Sites (site) -->
@@ -144,6 +144,56 @@
                             </div>
                         </div>
                     </article>
+
+                    <!-- fastapi-docs -->
+                    <article class="example-card" id="card-fastapi-docs">
+                        <a href="https://fastapi.drawlib.com/" class="card-preview" id="preview-fastapi-docs" target="_blank" rel="noopener noreferrer">
+                            <img src="https://fastapi.drawlib.com/images/index/fastapi_lifecycle_anim.png" alt="FastAPI User Guide — Request Lifecycle from Route Registration to ASGI Execution">
+                        </a>
+                        <div class="card-body">
+                            <div class="card-meta">
+                                <span class="card-path">drawlib-fastapi/docs_src</span>
+                                <span class="locale-list">
+                                    <span class="locale-chip">EN</span>
+                                    <span class="locale-chip">JA</span>
+                                </span>
+                            </div>
+                            <h3 class="card-title"><a href="https://fastapi.drawlib.com/" target="_blank" rel="noopener noreferrer">FastAPI User Guide</a></h3>
+                            <p class="card-desc">Unofficial bilingual developer guide for FastAPI v0.162.2—spanning 8 chapters and 20 pages from quickstart endpoints to 100k+ LOC modular monoliths, OAuth2/JWT, native SSE, and OpenTelemetry.</p>
+                            <div class="card-actions">
+                                <div class="action-row">
+                                    <a href="https://fastapi.drawlib.com/" class="btn btn-primary" id="open-fastapi-docs-en" target="_blank" rel="noopener noreferrer">Open Site (EN) ↗</a>
+                                    <a href="https://fastapi.drawlib.com/ja/" class="btn btn-secondary" id="open-fastapi-docs-ja" target="_blank" rel="noopener noreferrer">Open Site (日本語) ↗</a>
+                                    <a href="https://github.com/yuichi110/drawlib-fastapi/tree/main/docs_src" class="btn btn-source" id="src-fastapi-docs" target="_blank" rel="noopener noreferrer">Source ↗</a>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+
+                    <!-- fastapi-architecture -->
+                    <article class="example-card" id="card-fastapi-architecture">
+                        <a href="https://fastapi.drawlib.com/architecture/" class="card-preview" id="preview-fastapi-architecture" target="_blank" rel="noopener noreferrer">
+                            <img src="https://fastapi.drawlib.com/architecture/images/index/arch_compile_dispatch_anim.png" alt="FastAPI Architecture — Compile-Once Startup Pipeline vs Per-Request ASGI Hot Path">
+                        </a>
+                        <div class="card-body">
+                            <div class="card-meta">
+                                <span class="card-path">drawlib-fastapi/architecture_src</span>
+                                <span class="locale-list">
+                                    <span class="locale-chip">EN</span>
+                                    <span class="locale-chip">JA</span>
+                                </span>
+                            </div>
+                            <h3 class="card-title"><a href="https://fastapi.drawlib.com/architecture/" target="_blank" rel="noopener noreferrer">FastAPI Architecture</a></h3>
+                            <p class="card-desc">Unofficial bilingual internal architecture guide to FastAPI v0.162.2—dissecting its 5-tier module hierarchy, APIRoute closure compiler, Dependant DI solver, Pydantic v2 bridge, and ASGI stack.</p>
+                            <div class="card-actions">
+                                <div class="action-row">
+                                    <a href="https://fastapi.drawlib.com/architecture/" class="btn btn-primary" id="open-fastapi-arch-en" target="_blank" rel="noopener noreferrer">Open Site (EN) ↗</a>
+                                    <a href="https://fastapi.drawlib.com/architecture/ja/" class="btn btn-secondary" id="open-fastapi-arch-ja" target="_blank" rel="noopener noreferrer">Open Site (日本語) ↗</a>
+                                    <a href="https://github.com/yuichi110/drawlib-fastapi/tree/main/architecture_src" class="btn btn-source" id="src-fastapi-architecture" target="_blank" rel="noopener noreferrer">Source ↗</a>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
                 </div>
             </section>
 
@@ -178,6 +228,31 @@
                                     <a href="https://www.drawlib.com/api/" class="btn btn-primary" id="open-drawlib-api-en" target="_blank" rel="noopener noreferrer">Open Catalog (EN) ↗</a>
                                     <a href="https://www.drawlib.com/api/ja/" class="btn btn-secondary" id="open-drawlib-api-ja" target="_blank" rel="noopener noreferrer">Open Catalog (日本語) ↗</a>
                                     <a href="https://github.com/yuichi110/drawlib/tree/main/docs_src/api" class="btn btn-source" id="src-drawlib-api" target="_blank" rel="noopener noreferrer">Source ↗</a>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+
+                    <!-- fastapi-api -->
+                    <article class="example-card" id="card-fastapi-api">
+                        <a href="https://fastapi.drawlib.com/api/" class="card-preview" id="preview-fastapi-api" target="_blank" rel="noopener noreferrer">
+                            <img src="https://fastapi.drawlib.com/api/images/00_overview/fastapi_package_overview.png" alt="FastAPI API Reference — Package Architecture &amp; 15 Module Families">
+                        </a>
+                        <div class="card-body">
+                            <div class="card-meta">
+                                <span class="card-path">drawlib-fastapi/api_src</span>
+                                <span class="locale-list">
+                                    <span class="locale-chip">EN</span>
+                                    <span class="locale-chip">JA</span>
+                                </span>
+                            </div>
+                            <h3 class="card-title"><a href="https://fastapi.drawlib.com/api/" target="_blank" rel="noopener noreferrer">FastAPI API Reference</a></h3>
+                            <p class="card-desc">Unofficial bilingual API and CLI reference for FastAPI v0.162.2 cataloging every public class, parameter descriptor, security scheme, SSE/telemetry API, and CLI command across 16 pages.</p>
+                            <div class="card-actions">
+                                <div class="action-row">
+                                    <a href="https://fastapi.drawlib.com/api/" class="btn btn-primary" id="open-fastapi-api-en" target="_blank" rel="noopener noreferrer">Open Catalog (EN) ↗</a>
+                                    <a href="https://fastapi.drawlib.com/api/ja/" class="btn btn-secondary" id="open-fastapi-api-ja" target="_blank" rel="noopener noreferrer">Open Catalog (日本語) ↗</a>
+                                    <a href="https://github.com/yuichi110/drawlib-fastapi/tree/main/api_src" class="btn btn-source" id="src-fastapi-api" target="_blank" rel="noopener noreferrer">Source ↗</a>
                                 </div>
                             </div>
                         </div>
@@ -451,6 +526,31 @@
                                     <a href="https://www.drawlib.com/reports/pni-full-audit/" class="btn btn-primary" id="open-pni-full-audit-en" target="_blank" rel="noopener noreferrer">Open Report (EN) ↗</a>
                                     <a href="https://www.drawlib.com/reports/pni-full-audit/full_audit.pdf" class="btn btn-download" id="dl-pni-full-audit-pdf" target="_blank" rel="noopener noreferrer">PDF ↗</a>
                                     <a href="https://github.com/yuichi110/drawlib/tree/main/reports/full_audit_src" class="btn btn-source" id="src-pni-full-audit" target="_blank" rel="noopener noreferrer">Source ↗</a>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+
+                    <!-- fastapi-pni501 -->
+                    <article class="example-card" id="card-fastapi-pni501">
+                        <a href="https://fastapi.drawlib.com/reports/pni501/" class="card-preview" id="preview-fastapi-pni501" target="_blank" rel="noopener noreferrer">
+                            <img src="https://fastapi.drawlib.com/reports/pni501/images/00_cover/pni_cover_scorecard.png" alt="PNI Software Health Diagnostic Report — FastAPI v0.162.2 Engineering Health Scorecard">
+                        </a>
+                        <div class="card-body">
+                            <div class="card-meta">
+                                <span class="card-path">drawlib-fastapi/docs/reports/pni501</span>
+                                <span class="locale-list">
+                                    <span class="locale-chip">pni501</span>
+                                    <span class="locale-chip">EN</span>
+                                </span>
+                            </div>
+                            <h3 class="card-title"><a href="https://fastapi.drawlib.com/reports/pni501/" target="_blank" rel="noopener noreferrer">PNI Software Health Diagnostic Report (FastAPI Audit)</a></h3>
+                            <p class="card-desc">Unofficial software health &amp; architecture diagnostic of FastAPI v0.162.2 (93/100 Grade S) generated by <code>pni501</code> using Drawlib—combining AST metrics, dependency DAGs, 3,216 hermetic tests, and Trivy SCA.</p>
+                            <div class="card-actions">
+                                <div class="action-row">
+                                    <a href="https://fastapi.drawlib.com/reports/pni501/" class="btn btn-primary" id="open-fastapi-pni501-en" target="_blank" rel="noopener noreferrer">Open Report (EN) ↗</a>
+                                    <a href="https://fastapi.drawlib.com/reports/pni501/pni501.pdf" class="btn btn-download" id="dl-fastapi-pni501-pdf" target="_blank" rel="noopener noreferrer">PDF ↗</a>
+                                    <a href="https://github.com/yuichi110/drawlib-fastapi/tree/main/reports_src/pni501_src" class="btn btn-source" id="src-fastapi-pni501" target="_blank" rel="noopener noreferrer">Source ↗</a>
                                 </div>
                             </div>
                         </div>
