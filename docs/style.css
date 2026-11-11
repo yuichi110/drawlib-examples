@@ -298,6 +298,17 @@ a {
     color: var(--text-muted);
 }
 
+.toolbar-link {
+    color: var(--brand-primary);
+    font-weight: 500;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.toolbar-link:hover {
+    color: var(--brand-primary-hover);
+}
+
 /* Category Sections */
 .category-section {
     padding: 0.5rem 0 2.75rem;
