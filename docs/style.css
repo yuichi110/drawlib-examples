@@ -249,9 +249,9 @@ a {
 
 .filter-label {
     cursor: pointer;
-    padding: 0.42rem 0.9rem;
+    padding: 0.4rem 0.65rem;
     border-radius: 7px;
-    font-size: 0.86rem;
+    font-size: 0.85rem;
     font-weight: 600;
     color: var(--text-secondary);
     transition: background-color 0.16s ease, color 0.16s ease, box-shadow 0.16s ease;
@@ -276,20 +276,18 @@ a {
 #filter-doc:checked ~ .main-content .filter-tabs label[for="filter-doc"],
 #filter-slide:checked ~ .main-content .filter-tabs label[for="filter-slide"],
 #filter-images:checked ~ .main-content .filter-tabs label[for="filter-images"],
-#filter-engine:checked ~ .main-content .filter-tabs label[for="filter-engine"],
-#filter-oss:checked ~ .main-content .filter-tabs label[for="filter-oss"] {
+#filter-engine:checked ~ .main-content .filter-tabs label[for="filter-engine"] {
     background: var(--bg-surface);
     color: var(--text-primary);
     box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
 }
 
-#filter-site:checked ~ .main-content .category-section:not([data-category="site"]),
-#filter-catalog:checked ~ .main-content .category-section:not([data-category="catalog"]),
+#filter-site:checked ~ .main-content .category-section:not([data-category="site"]):not([data-category="oss"]),
+#filter-catalog:checked ~ .main-content .category-section:not([data-category="catalog"]):not([data-category="oss"]),
 #filter-doc:checked ~ .main-content .category-section:not([data-category="doc"]),
 #filter-slide:checked ~ .main-content .category-section:not([data-category="slide"]),
 #filter-images:checked ~ .main-content .category-section:not([data-category="images"]),
-#filter-engine:checked ~ .main-content .category-section:not([data-category="engine"]),
-#filter-oss:checked ~ .main-content .category-section:not([data-category="oss"]) {
+#filter-engine:checked ~ .main-content .category-section:not([data-category="engine"]):not([data-category="oss"]) {
     display: none;
 }
 
@@ -299,14 +297,23 @@ a {
 }
 
 .toolbar-link {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.12rem 0.48rem;
+    border-radius: 5px;
+    background: var(--brand-primary-soft);
+    border: 1px solid hsl(217, 80%, 88%);
     color: var(--brand-primary);
-    font-weight: 500;
+    font-weight: 600;
     text-decoration: underline;
-    text-underline-offset: 3px;
+    text-underline-offset: 2px;
+    transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
 
 .toolbar-link:hover {
-    color: var(--brand-primary-hover);
+    background: var(--brand-primary);
+    border-color: var(--brand-primary);
+    color: #ffffff;
 }
 
 /* Category Sections */
@@ -411,34 +418,24 @@ a {
     align-items: center;
     gap: 0.25rem;
     font-size: 0.82rem;
-    font-weight: 500;
-    color: var(--text-secondary);
+    font-weight: 600;
+    color: var(--brand-primary);
     padding: 0.26rem 0.58rem;
     border-radius: 5px;
-    border: 1px solid var(--border-hairline);
-    background: var(--bg-surface);
+    border: 1px solid hsl(217, 80%, 88%);
+    background: var(--brand-primary-soft);
     transition: color 0.15s ease, border-color 0.15s ease, background-color 0.15s ease;
 }
 
 .oss-link:hover {
-    color: var(--brand-primary);
+    color: #ffffff;
     border-color: var(--brand-primary);
-    background: var(--brand-primary-soft);
+    background: var(--brand-primary);
 }
 
 .oss-link-primary {
     font-family: var(--font-mono);
     font-size: 0.78rem;
-    font-weight: 600;
-    color: var(--brand-primary);
-    background: var(--brand-primary-soft);
-    border-color: hsl(217, 80%, 88%);
-}
-
-.oss-link-primary:hover {
-    background: var(--brand-primary);
-    color: #ffffff;
-    border-color: var(--brand-primary);
 }
 
 .oss-link-audit {
@@ -456,17 +453,15 @@ a {
 }
 
 .oss-link-source {
-    border-color: transparent;
-    background: transparent;
-    color: var(--text-muted);
-    padding-left: 0.35rem;
-    padding-right: 0.35rem;
+    border-color: var(--border-hairline);
+    background: var(--bg-surface);
+    color: var(--brand-primary);
 }
 
 .oss-link-source:hover {
-    background: var(--bg-subtle);
-    border-color: transparent;
-    color: var(--text-primary);
+    background: var(--brand-primary-soft);
+    border-color: var(--brand-primary);
+    color: var(--brand-primary-hover);
 }
 
 .section-header {
