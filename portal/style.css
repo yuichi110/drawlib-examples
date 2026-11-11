@@ -282,23 +282,13 @@ a {
     box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
 }
 
-#filter-site:checked ~ .main-content .category-section:not([data-category="site"]):not([data-category="oss"]),
-#filter-catalog:checked ~ .main-content .category-section:not([data-category="catalog"]):not([data-category="oss"]),
+#filter-site:checked ~ .main-content .category-section:not([data-category="site"]),
+#filter-catalog:checked ~ .main-content .category-section:not([data-category="catalog"]),
 #filter-doc:checked ~ .main-content .category-section:not([data-category="doc"]),
 #filter-slide:checked ~ .main-content .category-section:not([data-category="slide"]),
 #filter-images:checked ~ .main-content .category-section:not([data-category="images"]),
-#filter-engine:checked ~ .main-content .category-section:not([data-category="engine"]):not([data-category="oss"]) {
+#filter-engine:checked ~ .main-content .category-section:not([data-category="engine"]) {
     display: none;
-}
-
-.main-content > .container {
-    display: flex;
-    flex-direction: column;
-}
-
-#filter-catalog:checked ~ .main-content .oss-matrix-section,
-#filter-engine:checked ~ .main-content .oss-matrix-section {
-    order: 10;
 }
 
 .toolbar-note {
@@ -306,64 +296,18 @@ a {
     color: var(--text-muted);
 }
 
-.toolbar-link {
-    color: var(--brand-primary);
-    font-weight: 500;
-    text-decoration: underline;
-    text-underline-offset: 3px;
-}
-
-.toolbar-link:hover {
-    color: var(--brand-primary-hover);
-}
-
 /* Category Sections */
 .category-section {
     padding: 0.5rem 0 2.75rem;
 }
 
-/* Multi-Language OSS Showcases Matrix */
-.oss-matrix-section {
-    padding-top: 0;
-}
-
+/* Multi-Language OSS Showcases Table */
 .oss-showcase-box {
     background: var(--bg-surface);
     border: 1px solid var(--border-hairline);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-card);
     overflow: hidden;
-}
-
-.oss-showcase-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 0.65rem 1.25rem;
-    padding: 1rem 1.4rem;
-    background: var(--bg-subtle);
-    border-bottom: 1px solid var(--border-hairline);
-}
-
-.oss-header-left {
-    display: flex;
-    align-items: center;
-    gap: 0.65rem;
-    flex-wrap: wrap;
-}
-
-.oss-eyebrow {
-    font-size: 0.98rem;
-    font-weight: 700;
-    letter-spacing: -0.015em;
-    color: var(--text-primary);
-}
-
-.oss-header-desc {
-    margin: 0;
-    font-size: 0.85rem;
-    color: var(--text-secondary);
 }
 
 .oss-table-wrap {
