@@ -1,0 +1,14 @@
+[project]
+name = "gemini_latency"
+type = "doc"
+title = "Gemini Latency & Architecture Evaluation Report"
+description = "Empirical evaluation of Gemini 3.8 Flash latency, ThinkingConfig, Pydantic structured streaming, Adaptive Thinking Router, and 50-turn multi-turn chat with Implicit Context Caching."
+style = "google"
+
+[i18n]
+default_lang = "en"
+langs = ["en", "ja"]
+
+[i18n.labels]
+en = "English"
+ja = "日本語"

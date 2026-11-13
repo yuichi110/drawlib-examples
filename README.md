@@ -13,6 +13,7 @@ drawlib-examples/
 ├── examples/                       # Source of Truth (organized by drawlib project type)
 │   ├── doc/
 │   │   ├── dogfooding/             # Bilingual (EN/JA) architectural whitepaper
+│   │   ├── gemini_latency/         # Bilingual (EN/JA) Gemini 3.8 Flash latency & architecture report
 │   │   └── quickstart/             # Bilingual (EN/JA) 16-chapter onboarding handbook
 │   ├── slide/
 │   │   ├── about-drawlib/          # Bilingual (EN/JA) 16:9 showcase presentation deck

@@ -1,0 +1,533 @@
+{
+  "execution_metadata": {
+    "suite_started_at": "2026-11-13 23:05:23.699 JST",
+    "suite_completed_at": "2026-11-13 23:05:48.066 JST",
+    "sdk": "google-genai (Google AI Studio)",
+    "gemini_model": "gemini-3.8-flash",
+    "original_user_prompt": "パソコンが突然起動しなくなり、電源ボタンを押してもランプが一瞬光って消えてしまいます。原因の切り分け手順と対処法を、5行程度で分かりやすく丁寧に教えてください。"
+  },
+  "summary": [
+    {
+      "pattern": "Blocking (generate_content)",
+      "mode": "blocking",
+      "thinking": "0",
+      "status": "SUCCESS",
+      "ttft_ms": 3749.38,
+      "total_ms": 3749.38,
+      "thoughts_token_count": 0,
+      "output_token_count": 223,
+      "output_chars": 394
+    },
+    {
+      "pattern": "Streaming (generate_content_stream)",
+      "mode": "streaming",
+      "thinking": "0",
+      "status": "SUCCESS",
+      "ttft_ms": 1730.54,
+      "total_ms": 3796.48,
+      "thoughts_token_count": 0,
+      "output_token_count": 223,
+      "output_chars": 385
+    },
+    {
+      "pattern": "Blocking (generate_content)",
+      "mode": "blocking",
+      "thinking": "default",
+      "status": "SUCCESS",
+      "ttft_ms": 8522.44,
+      "total_ms": 8522.44,
+      "thoughts_token_count": 543,
+      "output_token_count": 215,
+      "output_chars": 367
+    },
+    {
+      "pattern": "Streaming (generate_content_stream)",
+      "mode": "streaming",
+      "thinking": "default",
+      "status": "SUCCESS",
+      "ttft_ms": 6360.86,
+      "total_ms": 8229.72,
+      "thoughts_token_count": 538,
+      "output_token_count": 226,
+      "output_chars": 403
+    }
+  ],
+  "executions": [
+    {
+      "pattern": "Blocking (generate_content)",
+      "mode": "blocking",
+      "thinking": "0",
+      "status": "SUCCESS",
+      "overall_timing": {
+        "started_at": "2026-11-13 23:05:23.768 JST",
+        "first_token_at": "2026-11-13 23:05:27.517 JST",
+        "completed_at": "2026-11-13 23:05:27.517 JST",
+        "time_to_first_token_ms": 3749.38,
+        "stream_completed_ms": 3749.38,
+        "ttft_ms": 3749.38,
+        "total_ms": 3749.38
+      },
+      "timeline_series": {
+        "gemini": [
+          {
+            "t_ms": 0.0,
+            "chars": 0,
+            "event": "start"
+          },
+          {
+            "t_ms": 3749.38,
+            "chars": 0,
+            "event": "blocking_wait_end"
+          },
+          {
+            "t_ms": 3749.38,
+            "chars": 394,
+            "event": "blocking_completed"
+          }
+        ],
+        "client_output": [
+          {
+            "t_ms": 0.0,
+            "chars": 0,
+            "event": "start"
+          },
+          {
+            "t_ms": 3749.38,
+            "chars": 0,
+            "event": "blocking_wait_end"
+          },
+          {
+            "t_ms": 3749.38,
+            "chars": 394,
+            "event": "blocking_completed"
+          }
+        ]
+      },
+      "breakdown": {
+        "gemini": {
+          "started_at": "2026-11-13 23:05:23.768 JST",
+          "first_chunk_at": "2026-11-13 23:05:27.517 JST",
+          "completed_at": "2026-11-13 23:05:27.517 JST",
+          "time_to_first_chunk_ms": 3749.38,
+          "ttft_ms": 3749.38,
+          "duration_ms": 3749.38,
+          "request": {
+            "model": "gemini-3.8-flash",
+            "thinking": "0",
+            "prompt_sent": "パソコンが突然起動しなくなり、電源ボタンを押してもランプが一瞬光って消えてしまいます。原因の切り分け手順と対処法を、5行程度で分かりやすく丁寧に教えてください。"
+          },
+          "response": {
+            "text": "ランプが一瞬光って消える症状は、内部の帯電やショート、または電源まわりの不具合が主な原因です。以下の手順をお試しください。\n\n1. **放電を行う：** 電源コードや周辺機器（USB等）をすべて外し、10分ほど放置してから電源コードのみを挿して再起動を試します。\n2. **コンセントの見直し：** タコ足配線をやめ、壁のコンセントに直接電源プラグをしっかりと差し込み直してください。\n3. **最小構成の確認：** 外付けHDDや増設メモリ、グラフィックボードなど後から追加した機器を外し、最小限の状態で起動するか試します。\n4. **内部の掃除：** （デスクトップ等の場合）通気口やファンに溜まったホコリを取り除き、熱暴走や接触不良を防ぎます。\n5. **改善しない場合：** 電源ユニットやマザーボードの故障の可能性が高いため、無理にいじらずメーカーや修理業者へ相談してください。",
+            "chars": 394,
+            "chunk_count": 1,
+            "finish_reason": "STOP",
+            "thoughts_token_count": 0,
+            "output_token_count": 223,
+            "prompt_token_count": 42
+          }
+        }
+      },
+      "final_output": {
+        "text": "ランプが一瞬光って消える症状は、内部の帯電やショート、または電源まわりの不具合が主な原因です。以下の手順をお試しください。\n\n1. **放電を行う：** 電源コードや周辺機器（USB等）をすべて外し、10分ほど放置してから電源コードのみを挿して再起動を試します。\n2. **コンセントの見直し：** タコ足配線をやめ、壁のコンセントに直接電源プラグをしっかりと差し込み直してください。\n3. **最小構成の確認：** 外付けHDDや増設メモリ、グラフィックボードなど後から追加した機器を外し、最小限の状態で起動するか試します。\n4. **内部の掃除：** （デスクトップ等の場合）通気口やファンに溜まったホコリを取り除き、熱暴走や接触不良を防ぎます。\n5. **改善しない場合：** 電源ユニットやマザーボードの故障の可能性が高いため、無理にいじらずメーカーや修理業者へ相談してください。",
+        "chars": 394
+      }
+    },
+    {
+      "pattern": "Streaming (generate_content_stream)",
+      "mode": "streaming",
+      "thinking": "0",
+      "status": "SUCCESS",
+      "overall_timing": {
+        "started_at": "2026-11-13 23:05:27.517 JST",
+        "first_token_at": "2026-11-13 23:05:29.248 JST",
+        "completed_at": "2026-11-13 23:05:31.314 JST",
+        "time_to_first_token_ms": 1730.54,
+        "stream_completed_ms": 3796.48,
+        "ttft_ms": 1730.54,
+        "total_ms": 3796.48
+      },
+      "timeline_series": {
+        "gemini": [
+          {
+            "t_ms": 0.0,
+            "chars": 0,
+            "event": "start"
+          },
+          {
+            "t_ms": 1730.54,
+            "chars": 0,
+            "event": "thinking_end"
+          },
+          {
+            "t_ms": 1730.54,
+            "chars": 27,
+            "event": "chunk_1"
+          },
+          {
+            "t_ms": 2044.62,
+            "chars": 72,
+            "event": "chunk_2"
+          },
+          {
+            "t_ms": 2272.04,
+            "chars": 119,
+            "event": "chunk_3"
+          },
+          {
+            "t_ms": 2551.22,
+            "chars": 163,
+            "event": "chunk_4"
+          },
+          {
+            "t_ms": 2787.06,
+            "chars": 203,
+            "event": "chunk_5"
+          },
+          {
+            "t_ms": 3101.27,
+            "chars": 249,
+            "event": "chunk_6"
+          },
+          {
+            "t_ms": 3281.99,
+            "chars": 294,
+            "event": "chunk_7"
+          },
+          {
+            "t_ms": 3540.55,
+            "chars": 337,
+            "event": "chunk_8"
+          },
+          {
+            "t_ms": 3786.73,
+            "chars": 385,
+            "event": "chunk_9"
+          }
+        ],
+        "client_output": [
+          {
+            "t_ms": 0.0,
+            "chars": 0,
+            "event": "start"
+          },
+          {
+            "t_ms": 1730.54,
+            "chars": 0,
+            "event": "thinking_end"
+          },
+          {
+            "t_ms": 1730.54,
+            "chars": 27,
+            "event": "chunk_1"
+          },
+          {
+            "t_ms": 2044.62,
+            "chars": 72,
+            "event": "chunk_2"
+          },
+          {
+            "t_ms": 2272.04,
+            "chars": 119,
+            "event": "chunk_3"
+          },
+          {
+            "t_ms": 2551.22,
+            "chars": 163,
+            "event": "chunk_4"
+          },
+          {
+            "t_ms": 2787.06,
+            "chars": 203,
+            "event": "chunk_5"
+          },
+          {
+            "t_ms": 3101.27,
+            "chars": 249,
+            "event": "chunk_6"
+          },
+          {
+            "t_ms": 3281.99,
+            "chars": 294,
+            "event": "chunk_7"
+          },
+          {
+            "t_ms": 3540.55,
+            "chars": 337,
+            "event": "chunk_8"
+          },
+          {
+            "t_ms": 3786.73,
+            "chars": 385,
+            "event": "chunk_9"
+          }
+        ]
+      },
+      "breakdown": {
+        "gemini": {
+          "started_at": "2026-11-13 23:05:27.517 JST",
+          "first_chunk_at": "2026-11-13 23:05:29.248 JST",
+          "completed_at": "2026-11-13 23:05:31.314 JST",
+          "time_to_first_chunk_ms": 1730.54,
+          "ttft_ms": 1730.54,
+          "duration_ms": 3796.48,
+          "request": {
+            "model": "gemini-3.8-flash",
+            "thinking": "0",
+            "prompt_sent": "パソコンが突然起動しなくなり、電源ボタンを押してもランプが一瞬光って消えてしまいます。原因の切り分け手順と対処法を、5行程度で分かりやすく丁寧に教えてください。"
+          },
+          "response": {
+            "text": "ランプが一瞬光って消える症状は、内部の帯電やショート、または電源まわりの接触不良が主な原因です。以下の手順をお試しください。\n\n1. **放電処置**：電源コードやバッテリー、全ての周辺機器（USB等）を外し、10分放置後に電源ボタンを数回長押しします。\n2. **最小構成での確認**：ACアダプター（電源コード）のみを**タコ足ではなく壁のコンセントに直接挿し**、起動するか試します。\n3. **内部部品の接触確認**：デスクトップ等の場合、内部のホコリを払い、メモリを一度抜き差しして挿し直します。\n4. **原因の切り分け**：これらで直らない場合、電源ユニット（アダプター含む）の故障か、マザーボードの破損の可能性が高いです。\n5. **最終対処**：一瞬でも通電はしているため、改善しない場合は無理にいじらず、メーカーや修理店への点検相談をおすすめします。",
+            "chars": 385,
+            "chunk_count": 9,
+            "finish_reason": "STOP",
+            "thoughts_token_count": 0,
+            "output_token_count": 223,
+            "prompt_token_count": 42
+          }
+        }
+      },
+      "final_output": {
+        "text": "ランプが一瞬光って消える症状は、内部の帯電やショート、または電源まわりの接触不良が主な原因です。以下の手順をお試しください。\n\n1. **放電処置**：電源コードやバッテリー、全ての周辺機器（USB等）を外し、10分放置後に電源ボタンを数回長押しします。\n2. **最小構成での確認**：ACアダプター（電源コード）のみを**タコ足ではなく壁のコンセントに直接挿し**、起動するか試します。\n3. **内部部品の接触確認**：デスクトップ等の場合、内部のホコリを払い、メモリを一度抜き差しして挿し直します。\n4. **原因の切り分け**：これらで直らない場合、電源ユニット（アダプター含む）の故障か、マザーボードの破損の可能性が高いです。\n5. **最終対処**：一瞬でも通電はしているため、改善しない場合は無理にいじらず、メーカーや修理店への点検相談をおすすめします。",
+        "chars": 385
+      }
+    },
+    {
+      "pattern": "Blocking (generate_content)",
+      "mode": "blocking",
+      "thinking": "default",
+      "status": "SUCCESS",
+      "overall_timing": {
+        "started_at": "2026-11-13 23:05:31.314 JST",
+        "first_token_at": "2026-11-13 23:05:39.836 JST",
+        "completed_at": "2026-11-13 23:05:39.836 JST",
+        "time_to_first_token_ms": 8522.44,
+        "stream_completed_ms": 8522.44,
+        "ttft_ms": 8522.44,
+        "total_ms": 8522.44
+      },
+      "timeline_series": {
+        "gemini": [
+          {
+            "t_ms": 0.0,
+            "chars": 0,
+            "event": "start"
+          },
+          {
+            "t_ms": 8522.44,
+            "chars": 0,
+            "event": "blocking_wait_end"
+          },
+          {
+            "t_ms": 8522.44,
+            "chars": 367,
+            "event": "blocking_completed"
+          }
+        ],
+        "client_output": [
+          {
+            "t_ms": 0.0,
+            "chars": 0,
+            "event": "start"
+          },
+          {
+            "t_ms": 8522.44,
+            "chars": 0,
+            "event": "blocking_wait_end"
+          },
+          {
+            "t_ms": 8522.44,
+            "chars": 367,
+            "event": "blocking_completed"
+          }
+        ]
+      },
+      "breakdown": {
+        "gemini": {
+          "started_at": "2026-11-13 23:05:31.314 JST",
+          "first_chunk_at": "2026-11-13 23:05:39.836 JST",
+          "completed_at": "2026-11-13 23:05:39.836 JST",
+          "time_to_first_chunk_ms": 8522.44,
+          "ttft_ms": 8522.44,
+          "duration_ms": 8522.44,
+          "request": {
+            "model": "gemini-3.8-flash",
+            "thinking": "default",
+            "prompt_sent": "パソコンが突然起動しなくなり、電源ボタンを押してもランプが一瞬光って消えてしまいます。原因の切り分け手順と対処法を、5行程度で分かりやすく丁寧に教えてください。"
+          },
+          "response": {
+            "text": "一瞬ランプがついて消える現象は、**「内部の帯電」**や**「パーツのショート（安全装置の作動）」**が主な原因です。以下の手順を順にお試しください。\n\n1. **放電を行う**：電源コード（ノートPCはバッテリーも）を外し、5分以上放置した後に電源を入れ直します。\n2. **周辺機器をすべて外す**：USB機器や外付けHDD、マウスなどを全て抜き、電源コードのみで起動を試します。\n3. **コンセントを壁に直接挿す**：タコ足配線をやめ、壁のコンセントに直接挿して電力不足を防ぎます。\n4. **メモリの抜き差し（可能な場合）**：接触不良を疑い、メモリを一度外してカチッと音がするまで挿し直します。\n5. **改善しない場合**：電源ユニットやマザーボード自体の故障の可能性が高いため、メーカーや専門店へ修理をご相談ください。",
+            "chars": 367,
+            "chunk_count": 1,
+            "finish_reason": "STOP",
+            "thoughts_token_count": 543,
+            "output_token_count": 215,
+            "prompt_token_count": 42
+          }
+        }
+      },
+      "final_output": {
+        "text": "一瞬ランプがついて消える現象は、**「内部の帯電」**や**「パーツのショート（安全装置の作動）」**が主な原因です。以下の手順を順にお試しください。\n\n1. **放電を行う**：電源コード（ノートPCはバッテリーも）を外し、5分以上放置した後に電源を入れ直します。\n2. **周辺機器をすべて外す**：USB機器や外付けHDD、マウスなどを全て抜き、電源コードのみで起動を試します。\n3. **コンセントを壁に直接挿す**：タコ足配線をやめ、壁のコンセントに直接挿して電力不足を防ぎます。\n4. **メモリの抜き差し（可能な場合）**：接触不良を疑い、メモリを一度外してカチッと音がするまで挿し直します。\n5. **改善しない場合**：電源ユニットやマザーボード自体の故障の可能性が高いため、メーカーや専門店へ修理をご相談ください。",
+        "chars": 367
+      }
+    },
+    {
+      "pattern": "Streaming (generate_content_stream)",
+      "mode": "streaming",
+      "thinking": "default",
+      "status": "SUCCESS",
+      "overall_timing": {
+        "started_at": "2026-11-13 23:05:39.836 JST",
+        "first_token_at": "2026-11-13 23:05:46.197 JST",
+        "completed_at": "2026-11-13 23:05:48.066 JST",
+        "time_to_first_token_ms": 6360.86,
+        "stream_completed_ms": 8229.72,
+        "ttft_ms": 6360.86,
+        "total_ms": 8229.72
+      },
+      "timeline_series": {
+        "gemini": [
+          {
+            "t_ms": 0.0,
+            "chars": 0,
+            "event": "start"
+          },
+          {
+            "t_ms": 6360.86,
+            "chars": 0,
+            "event": "thinking_end"
+          },
+          {
+            "t_ms": 6360.86,
+            "chars": 20,
+            "event": "chunk_1"
+          },
+          {
+            "t_ms": 6677.69,
+            "chars": 74,
+            "event": "chunk_2"
+          },
+          {
+            "t_ms": 7032.15,
+            "chars": 121,
+            "event": "chunk_3"
+          },
+          {
+            "t_ms": 7194.29,
+            "chars": 163,
+            "event": "chunk_4"
+          },
+          {
+            "t_ms": 7405.4,
+            "chars": 214,
+            "event": "chunk_5"
+          },
+          {
+            "t_ms": 7702.61,
+            "chars": 267,
+            "event": "chunk_6"
+          },
+          {
+            "t_ms": 7865.34,
+            "chars": 311,
+            "event": "chunk_7"
+          },
+          {
+            "t_ms": 7992.03,
+            "chars": 358,
+            "event": "chunk_8"
+          },
+          {
+            "t_ms": 8216.05,
+            "chars": 403,
+            "event": "chunk_9"
+          }
+        ],
+        "client_output": [
+          {
+            "t_ms": 0.0,
+            "chars": 0,
+            "event": "start"
+          },
+          {
+            "t_ms": 6360.86,
+            "chars": 0,
+            "event": "thinking_end"
+          },
+          {
+            "t_ms": 6360.86,
+            "chars": 20,
+            "event": "chunk_1"
+          },
+          {
+            "t_ms": 6677.69,
+            "chars": 74,
+            "event": "chunk_2"
+          },
+          {
+            "t_ms": 7032.15,
+            "chars": 121,
+            "event": "chunk_3"
+          },
+          {
+            "t_ms": 7194.29,
+            "chars": 163,
+            "event": "chunk_4"
+          },
+          {
+            "t_ms": 7405.4,
+            "chars": 214,
+            "event": "chunk_5"
+          },
+          {
+            "t_ms": 7702.61,
+            "chars": 267,
+            "event": "chunk_6"
+          },
+          {
+            "t_ms": 7865.34,
+            "chars": 311,
+            "event": "chunk_7"
+          },
+          {
+            "t_ms": 7992.03,
+            "chars": 358,
+            "event": "chunk_8"
+          },
+          {
+            "t_ms": 8216.05,
+            "chars": 403,
+            "event": "chunk_9"
+          }
+        ]
+      },
+      "breakdown": {
+        "gemini": {
+          "started_at": "2026-11-13 23:05:39.836 JST",
+          "first_chunk_at": "2026-11-13 23:05:46.197 JST",
+          "completed_at": "2026-11-13 23:05:48.066 JST",
+          "time_to_first_chunk_ms": 6360.86,
+          "ttft_ms": 6360.86,
+          "duration_ms": 8229.72,
+          "request": {
+            "model": "gemini-3.8-flash",
+            "thinking": "default",
+            "prompt_sent": "パソコンが突然起動しなくなり、電源ボタンを押してもランプが一瞬光って消えてしまいます。原因の切り分け手順と対処法を、5行程度で分かりやすく丁寧に教えてください。"
+          },
+          "response": {
+            "text": "ランプが一瞬だけ光って消える現象は、内部のショートや帯電により安全機能（保護回路）が働いている可能性が高いです。以下の手順をお試しください。\n\n1. **完全放電を行う：** 電源ケーブル（ノートPCはバッテリーも）と全ての周辺機器を外し、10分ほど放置した後に電源だけを繋いで起動を試します。\n2. **電源の供給元を変える：** 電力不足を防ぐため、タコ足配線をやめて壁のコンセントに直接電源ケーブルを差し込んでください。\n3. **最小構成の確認（可能であれば）：** 内部のホコリを払い、メモリを一度抜き差しして接触不良がないか確認します。\n4. **故障の切り分け：** 上記でも改善しない場合、電源ユニットやマザーボード（基盤）の物理的な故障の可能性が高いです。\n5. **修理・専門窓口へ相談：** 無理に何度も電源を入れず、メーカーや専門の修理サポートへ診断を依頼することをおすすめします。",
+            "chars": 403,
+            "chunk_count": 9,
+            "finish_reason": "STOP",
+            "thoughts_token_count": 538,
+            "output_token_count": 226,
+            "prompt_token_count": 42
+          }
+        }
+      },
+      "final_output": {
+        "text": "ランプが一瞬だけ光って消える現象は、内部のショートや帯電により安全機能（保護回路）が働いている可能性が高いです。以下の手順をお試しください。\n\n1. **完全放電を行う：** 電源ケーブル（ノートPCはバッテリーも）と全ての周辺機器を外し、10分ほど放置した後に電源だけを繋いで起動を試します。\n2. **電源の供給元を変える：** 電力不足を防ぐため、タコ足配線をやめて壁のコンセントに直接電源ケーブルを差し込んでください。\n3. **最小構成の確認（可能であれば）：** 内部のホコリを払い、メモリを一度抜き差しして接触不良がないか確認します。\n4. **故障の切り分け：** 上記でも改善しない場合、電源ユニットやマザーボード（基盤）の物理的な故障の可能性が高いです。\n5. **修理・専門窓口へ相談：** 無理に何度も電源を入れず、メーカーや専門の修理サポートへ診断を依頼することをおすすめします。",
+        "chars": 403
+      }
+    }
+  ]
+}

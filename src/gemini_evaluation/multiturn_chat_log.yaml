@@ -1,0 +1,4519 @@
+benchmark_metadata:
+  suite_started_at: 2026-11-13 23:05:30.184 JST
+  last_updated_at: 2026-11-13 23:13:17.540 JST
+  api_provider: Google AI Studio (google-genai)
+  model: gemini-3.8-flash
+  target_turns: 50
+  completed_turns: 50
+  design: 'Shared history list[types.Content]; per turn: User Simulator (Gemini thinking=0) -> measure 4 variants (blocking_t0,
+    streaming_t0, blocking_default, streaming_default) with rotated order -> append (user, agent streaming_t0) to history.'
+turns:
+- turn: 1
+  user_sim_ms: 2418.26
+  user_chars: 81
+  user_text: すみません、先ほどからパソコンの電源ボタンを押しても画面が真っ暗なままで全く動かなくなってしまいました。困っているのですが、まず何を確認すればよろしいでしょうか？
+  agent_canonical_chars: 563
+  history_chars_after_turn: 644
+  variants:
+    blocking_t0:
+      status: SUCCESS
+      call_order: 2
+      ttft_ms: 5418.03
+      total_ms: 5418.03
+      prompt_tokens: 176
+      cached_tokens: 0
+      thoughts_tokens: 0
+      output_tokens: 249
+      output_chars: 505
+      history_messages: 1
+      history_chars: 81
+    streaming_t0:
+      status: SUCCESS
+      call_order: 1
+      ttft_ms: 10548.86
+      total_ms: 12194.82
+      prompt_tokens: 176
+      cached_tokens: 0
+      thoughts_tokens: 953
+      output_tokens: 290
+      output_chars: 563
+      history_messages: 1
+      history_chars: 81
+    blocking_default:
+      status: SUCCESS
+      call_order: 3
+      ttft_ms: 8731.24
+      total_ms: 8731.24
+      prompt_tokens: 176
+      cached_tokens: 0
+      thoughts_tokens: 447
+      output_tokens: 243
+      output_chars: 484
+      history_messages: 1
+      history_chars: 81
+    streaming_default:
+      status: SUCCESS
+      call_order: 4
+      ttft_ms: 10410.51
+      total_ms: 11729.0
+      prompt_tokens: 176
+      cached_tokens: 0
+      thoughts_tokens: 1087
+      output_tokens: 270
+      output_chars: 513
+      history_messages: 1
+      history_chars: 81
+- turn: 2
+  user_sim_ms: 1902.68
+  user_chars: 93
+  user_text: ACアダプターを別のコンセントに挿し直してみたのですが、充電ランプがずっと点滅したままです。この点滅にはどういった意味があるのでしょうか？また、次に何を試せばいいか教えていただけますか。
+  agent_canonical_chars: 562
+  history_chars_after_turn: 1299
+  variants:
+    blocking_t0:
+      status: SUCCESS
+      call_order: 2
+      ttft_ms: 5347.25
+      total_ms: 5347.25
+      prompt_tokens: 516
+      cached_tokens: 0
+      thoughts_tokens: 0
+      output_tokens: 331
+      output_chars: 608
+      history_messages: 3
+      history_chars: 737
+    streaming_t0:
+      status: SUCCESS
+      call_order: 1
+      ttft_ms: 3273.1
+      total_ms: 6179.75
+      prompt_tokens: 516
+      cached_tokens: 0
+      thoughts_tokens: 0
+      output_tokens: 291
+      output_chars: 562
+      history_messages: 3
+      history_chars: 737
+    blocking_default:
+      status: SUCCESS
+      call_order: 3
+      ttft_ms: 13013.86
+      total_ms: 13013.86
+      prompt_tokens: 516
+      cached_tokens: 0
+      thoughts_tokens: 1229
+      output_tokens: 291
+      output_chars: 513
+      history_messages: 3
+      history_chars: 737
+    streaming_default:
+      status: SUCCESS
+      call_order: 4
+      ttft_ms: 13843.68
+      total_ms: 15379.98
+      prompt_tokens: 516
+      cached_tokens: 0
+      thoughts_tokens: 1341
+      output_tokens: 303
+      output_chars: 537
+      history_messages: 3
+      history_chars: 737
+- turn: 3
+  user_sim_ms: 4570.56
+  user_chars: 86
+  user_text: 放電を試してみたいのですが、外付けモニターやUSB機器をすべて外した上で、電源ボタンを何秒くらい長押しすれば放電やリセットができるのでしょうか？詳しい手順を教えてください。
+  agent_canonical_chars: 524
+  history_chars_after_turn: 1909
+  variants:
+    blocking_t0:
+      status: SUCCESS
+      call_order: 2
+      ttft_ms: 5067.35
+      total_ms: 5067.35
+      prompt_tokens: 852
+      cached_tokens: 0
+      thoughts_tokens: 0
+      output_tokens: 304
+      output_chars: 559
+      history_messages: 5
+      history_chars: 1385
+    streaming_t0:
+      status: SUCCESS
+      call_order: 1
+      ttft_ms: 1489.08
+      total_ms: 4704.83
+      prompt_tokens: 852
+      cached_tokens: 0
+      thoughts_tokens: 0
+      output_tokens: 302
+      output_chars: 524
+      history_messages: 5
+      history_chars: 1385
+    blocking_default:
+      status: SUCCESS
+      call_order: 3
+      ttft_ms: 15498.23
+      total_ms: 15498.23
+      prompt_tokens: 852
+      cached_tokens: 0
+      thoughts_tokens: 1677
+      output_tokens: 274
+      output_chars: 501
+      history_messages: 5
+      history_chars: 1385
+    streaming_default:
+      status: SUCCESS
+      call_order: 4
+      ttft_ms: 13192.43
+      total_ms: 14821.38
+      prompt_tokens: 852
+      cached_tokens: 0
+      thoughts_tokens: 1575
+      output_tokens: 298
+      output_chars: 538
+      history_messages: 5
+      history_chars: 1385
+- turn: 4
+  user_sim_ms: 2118.49
+  user_chars: 89
+  user_text: 教えていただいた通り30秒長押しを試したところ、ファンは回り始めたのですが、メーカーのロゴ画面が出たまま固まって先へ進みません。この場合、何が原因でどう対処すればよいでしょうか？
+  agent_canonical_chars: 593
+  history_chars_after_turn: 2591
+  variants:
+    blocking_t0:
+      status: SUCCESS
+      call_order: 2
+      ttft_ms: 4896.65
+      total_ms: 4896.65
+      prompt_tokens: 1203
+      cached_tokens: 0
+      thoughts_tokens: 0
+      output_tokens: 318
+      output_chars: 589
+      history_messages: 7
+      history_chars: 1998
+    streaming_t0:
+      status: SUCCESS
+      call_order: 1
+      ttft_ms: 1597.9
+      total_ms: 5023.62
+      prompt_tokens: 1203
+      cached_tokens: 0
+      thoughts_tokens: 0
+      output_tokens: 321
+      output_chars: 593
+      history_messages: 7
+      history_chars: 1998
+    blocking_default:
+      status: SUCCESS
+      call_order: 3
+      ttft_ms: 17257.34
+      total_ms: 17257.34
+      prompt_tokens: 1203
+      cached_tokens: 0
+      thoughts_tokens: 1817
+      output_tokens: 266
+      output_chars: 492
+      history_messages: 7
+      history_chars: 1998
+    streaming_default:
+      status: SUCCESS
+      call_order: 4
+      ttft_ms: 16174.08
+      total_ms: 17468.25
+      prompt_tokens: 1203
+      cached_tokens: 0
+      thoughts_tokens: 1874
+      output_tokens: 267
+      output_chars: 494
+      history_messages: 7
+      history_chars: 1998
+- turn: 5
+  user_sim_ms: 3167.85
+  user_chars: 69
+  user_text: 電源投入直後にF2キーを連打すればBIOS設定画面に入れますでしょうか？もし開けた場合、画面内のどの項目を確認すればよいか教えてください。
+  agent_canonical_chars: 674
+  history_chars_after_turn: 3334
+  variants:
+    blocking_t0:
+      status: SUCCESS
+      call_order: 2
+      ttft_ms: 4800.98
+      total_ms: 4800.98
+      prompt_tokens: 1560
+      cached_tokens: 0
+      thoughts_tokens: 0
+      output_tokens: 295
+      output_chars: 619
+      history_messages: 9
+      history_chars: 2660
+    streaming_t0:
+      status: SUCCESS
+      call_order: 1
+      ttft_ms: 1312.1
+      total_ms: 4643.6
+      prompt_tokens: 1560
+      cached_tokens: 0
+      thoughts_tokens: 0
+      output_tokens: 338
+      output_chars: 674
+      history_messages: 9
+      history_chars: 2660
+    blocking_default:
+      status: SUCCESS
+      call_order: 3
+      ttft_ms: 11916.59
+      total_ms: 11916.59
+      prompt_tokens: 1560
+      cached_tokens: 0
+      thoughts_tokens: 1124
+      output_tokens: 295
+      output_chars: 589
+      history_messages: 9
+      history_chars: 2660
+    streaming_default:
+      status: SUCCESS
+      call_order: 4
+      ttft_ms: 4985.53
+      total_ms: 7603.83
+      prompt_tokens: 1560
+      cached_tokens: 0
+      thoughts_tokens: 395
+      output_tokens: 300
+      output_chars: 593
+      history_messages: 9
+      history_chars: 2660
+- turn: 6
+  user_sim_ms: 6793.08
+  user_chars: 79
+  user_text: BIOS画面に入れました。内蔵SSDが正常に認識されているか確認する項目と、もし認識されていても起動しない場合に試すべき設定変更があれば教えていただけますか？
+  agent_canonical_chars: 707
+  history_chars_after_turn: 4120
+  variants:
+    blocking_t0:
+      status: SUCCESS
+      call_order: 2
+      ttft_ms: 4520.07
+      total_ms: 4520.07
+      prompt_tokens: 1935
+      cached_tokens: 0
+      thoughts_tokens: 0
+      output_tokens: 315
+      output_chars: 726
+      history_messages: 11
+      history_chars: 3413
+    streaming_t0:
+      status: SUCCESS
+      call_order: 1
+      ttft_ms: 1571.69
+      total_ms: 5278.7
+      prompt_tokens: 1935
+      cached_tokens: 0
+      thoughts_tokens: 0
+      output_tokens: 323
+      output_chars: 707
+      history_messages: 11
+      history_chars: 3413
+    blocking_default:
+      status: SUCCESS
+      call_order: 3
+      ttft_ms: 16161.37
+      total_ms: 16161.37
+      prompt_tokens: 1935
+      cached_tokens: 0
+      thoughts_tokens: 1505
+      output_tokens: 280
+      output_chars: 586
+      history_messages: 11
+      history_chars: 3413
+    streaming_default:
+      status: SUCCESS
+      call_order: 4
+      ttft_ms: 10603.03
+      total_ms: 11840.06
+      prompt_tokens: 1935
+      cached_tokens: 0
+      thoughts_tokens: 1077
+      output_tokens: 253
+      output_chars: 537
+      history_messages: 11
+      history_chars: 3413
+- turn: 7
+  user_sim_ms: 1970.24
+  user_chars: 81
+  user_text: SSDは認識されていました。BIOSの設定を初期値に戻して保存・再起動を試してみたいのですが、具体的な操作手順と、実行する際の注意点があれば教えていただけますか？
+  agent_canonical_chars: 672
+  history_chars_after_turn: 4873
+  variants:
+    blocking_t0:
+      status: SUCCESS
+      call_order: 2
+      ttft_ms: 5574.7
+      total_ms: 5574.7
+      prompt_tokens: 2298
+      cached_tokens: 0
+      thoughts_tokens: 0
+      output_tokens: 338
+      output_chars: 681
+      history_messages: 13
+      history_chars: 4201
+    streaming_t0:
+      status: SUCCESS
+      call_order: 1
+      ttft_ms: 1709.3
+      total_ms: 5031.76
+      prompt_tokens: 2298
+      cached_tokens: 0
+      thoughts_tokens: 0
+      output_tokens: 335
+      output_chars: 672
+      history_messages: 13
+      history_chars: 4201
+    blocking_default:
+      status: SUCCESS
+      call_order: 3
+      ttft_ms: 8683.95
+      total_ms: 8683.95
+      prompt_tokens: 2298
+      cached_tokens: 0
+      thoughts_tokens: 381
+      output_tokens: 321
+      output_chars: 641
+      history_messages: 13
+      history_chars: 4201
+    streaming_default:
+      status: SUCCESS
+      call_order: 4
+      ttft_ms: 11609.52
+      total_ms: 13855.65
+      prompt_tokens: 2298
+      cached_tokens: 0
+      thoughts_tokens: 1085
+      output_tokens: 290
+      output_chars: 608
+      history_messages: 13
+      history_chars: 4201
+- turn: 8
+  user_sim_ms: 3590.88
+  user_chars: 96
+  user_text: 初期化して再起動したところ、青い画面に「自動修復でPCを修復できませんでした」と出てエラーコード0xc0000001と表示されてしまいました。この画面からはどのように対処すればよいでしょうか？
+  agent_canonical_chars: 652
+  history_chars_after_turn: 5621
+  variants:
+    blocking_t0:
+      status: SUCCESS
+      call_order: 2
+      ttft_ms: 4397.51
+      total_ms: 4397.51
+      prompt_tokens: 2686
+      cached_tokens: 703
+      thoughts_tokens: 0
+      output_tokens: 308
+      output_chars: 597
+      history_messages: 15
+      history_chars: 4969
+    streaming_t0:
+      status: SUCCESS
+      call_order: 1
+      ttft_ms: 3776.08
+      total_ms: 6673.16
+      prompt_tokens: 2686
+      cached_tokens: 0
+      thoughts_tokens: 0
+      output_tokens: 326
+      output_chars: 652
+      history_messages: 15
+      history_chars: 4969
+    blocking_default:
+      status: SUCCESS
+      call_order: 3
+      ttft_ms: 12574.19
+      total_ms: 12574.19
+      prompt_tokens: 2686
+      cached_tokens: 0
+      thoughts_tokens: 838
+      output_tokens: 338
+      output_chars: 670
+      history_messages: 15
+      history_chars: 4969
+    streaming_default:
+      status: SUCCESS
+      call_order: 4
+      ttft_ms: 13535.43
+      total_ms: 15082.96
+      prompt_tokens: 2686
+      cached_tokens: 0
+      thoughts_tokens: 1488
+      output_tokens: 286
+      output_chars: 538
+      history_messages: 15
+      history_chars: 4969
+- turn: 9
+  user_sim_ms: 1670.27
+  user_chars: 72
+  user_text: 画面にある「詳細オプション」から「トラブルシューティング」に進んでセーフモードで起動してみたいのですが、具体的な操作手順を教えていただけますか？
+  agent_canonical_chars: 616
+  history_chars_after_turn: 6309
+  variants:
+    blocking_t0:
+      status: SUCCESS
+      call_order: 2
+      ttft_ms: 5588.22
+      total_ms: 5588.22
+      prompt_tokens: 3045
+      cached_tokens: 1060
+      thoughts_tokens: 0
+      output_tokens: 316
+      output_chars: 603
+      history_messages: 17
+      history_chars: 5693
+    streaming_t0:
+      status: SUCCESS
+      call_order: 1
+      ttft_ms: 2168.46
+      total_ms: 4691.46
+      prompt_tokens: 3045
+      cached_tokens: 704
+      thoughts_tokens: 0
+      output_tokens: 320
+      output_chars: 616
+      history_messages: 17
+      history_chars: 5693
+    blocking_default:
+      status: SUCCESS
+      call_order: 3
+      ttft_ms: 12280.2
+      total_ms: 12280.2
+      prompt_tokens: 3045
+      cached_tokens: 704
+      thoughts_tokens: 789
+      output_tokens: 277
+      output_chars: 533
+      history_messages: 17
+      history_chars: 5693
+    streaming_default:
+      status: SUCCESS
+      call_order: 4
+      ttft_ms: 15584.42
+      total_ms: 17164.24
+      prompt_tokens: 3045
+      cached_tokens: 704
+      thoughts_tokens: 1714
+      output_tokens: 289
+      output_chars: 546
+      history_messages: 17
+      history_chars: 5693
+- turn: 10
+  user_sim_ms: 2130.52
+  user_chars: 84
+  user_text: 教えていただいた手順で、無事にセーフモードでデスクトップ画面まで起動できました！ここから復旧に向けて、まず一番優先して行うべき作業は何でしょうか？手順を教えてください。
+  agent_canonical_chars: 716
+  history_chars_after_turn: 7109
+  variants:
+    blocking_t0:
+      status: SUCCESS
+      call_order: 2
+      ttft_ms: 5634.6
+      total_ms: 5634.6
+      prompt_tokens: 3407
+      cached_tokens: 1419
+      thoughts_tokens: 0
+      output_tokens: 366
+      output_chars: 717
+      history_messages: 19
+      history_chars: 6393
+    streaming_t0:
+      status: SUCCESS
+      call_order: 1
+      ttft_ms: 1082.12
+      total_ms: 4681.76
+      prompt_tokens: 3407
+      cached_tokens: 1061
+      thoughts_tokens: 0
+      output_tokens: 366
+      output_chars: 716
+      history_messages: 19
+      history_chars: 6393
+    blocking_default:
+      status: SUCCESS
+      call_order: 3
+      ttft_ms: 13761.45
+      total_ms: 13761.45
+      prompt_tokens: 3407
+      cached_tokens: 1061
+      thoughts_tokens: 1187
+      output_tokens: 287
+      output_chars: 546
+      history_messages: 19
+      history_chars: 6393
+    streaming_default:
+      status: SUCCESS
+      call_order: 4
+      ttft_ms: 6933.57
+      total_ms: 9723.3
+      prompt_tokens: 3407
+      cached_tokens: 1061
+      thoughts_tokens: 476
+      output_tokens: 302
+      output_chars: 578
+      history_messages: 19
+      history_chars: 6393
+- turn: 11
+  user_sim_ms: 1501.32
+  user_chars: 80
+  user_text: 今のうちに外付けUSBメモリへ仕事の書類フォルダを避難させたいのですが、セーフモードで行う際の注意点や、データが壊れない安全なコピー手順を教えていただけますか？
+  agent_canonical_chars: 664
+  history_chars_after_turn: 7853
+  variants:
+    blocking_t0:
+      status: SUCCESS
+      call_order: 2
+      ttft_ms: 4457.24
+      total_ms: 4457.24
+      prompt_tokens: 3817
+      cached_tokens: 1827
+      thoughts_tokens: 0
+      output_tokens: 337
+      output_chars: 645
+      history_messages: 21
+      history_chars: 7189
+    streaming_t0:
+      status: SUCCESS
+      call_order: 1
+      ttft_ms: 2262.12
+      total_ms: 5100.69
+      prompt_tokens: 3817
+      cached_tokens: 1421
+      thoughts_tokens: 0
+      output_tokens: 347
+      output_chars: 664
+      history_messages: 21
+      history_chars: 7189
+    blocking_default:
+      status: SUCCESS
+      call_order: 3
+      ttft_ms: 13580.15
+      total_ms: 13580.15
+      prompt_tokens: 3817
+      cached_tokens: 1421
+      thoughts_tokens: 1156
+      output_tokens: 278
+      output_chars: 532
+      history_messages: 21
+      history_chars: 7189
+    streaming_default:
+      status: SUCCESS
+      call_order: 4
+      ttft_ms: 10631.71
+      total_ms: 12623.6
+      prompt_tokens: 3817
+      cached_tokens: 1421
+      thoughts_tokens: 981
+      output_tokens: 306
+      output_chars: 591
+      history_messages: 21
+      history_chars: 7189
+- turn: 12
+  user_sim_ms: 2400.86
+  user_chars: 96
+  user_text: 無事にデータのバックアップが完了しました！直近のWindows Updateが原因かもしれないのですが、セーフモードのまま最近入った更新プログラムを確認して削除する手順を教えていただけますか？
+  agent_canonical_chars: 735
+  history_chars_after_turn: 8684
+  variants:
+    blocking_t0:
+      status: SUCCESS
+      call_order: 2
+      ttft_ms: 7979.96
+      total_ms: 7979.96
+      prompt_tokens: 4205
+      cached_tokens: 2213
+      thoughts_tokens: 0
+      output_tokens: 343
+      output_chars: 701
+      history_messages: 23
+      history_chars: 7949
+    streaming_t0:
+      status: SUCCESS
+      call_order: 1
+      ttft_ms: 1564.01
+      total_ms: 5097.51
+      prompt_tokens: 4205
+      cached_tokens: 1829
+      thoughts_tokens: 0
+      output_tokens: 371
+      output_chars: 735
+      history_messages: 23
+      history_chars: 7949
+    blocking_default:
+      status: SUCCESS
+      call_order: 3
+      ttft_ms: 18985.59
+      total_ms: 18985.59
+      prompt_tokens: 4205
+      cached_tokens: 1829
+      thoughts_tokens: 2196
+      output_tokens: 259
+      output_chars: 547
+      history_messages: 23
+      history_chars: 7949
+    streaming_default:
+      status: SUCCESS
+      call_order: 4
+      ttft_ms: 12335.62
+      total_ms: 14141.69
+      prompt_tokens: 4205
+      cached_tokens: 1829
+      thoughts_tokens: 1118
+      output_tokens: 285
+      output_chars: 565
+      history_messages: 23
+      history_chars: 7949
+- turn: 13
+  user_sim_ms: 2476.03
+  user_chars: 94
+  user_text: 更新の削除を試す前に、デバイスマネージャーのグラフィックの所に黄色い「！」が付いているのを見つけました。これを元のバージョンに戻すか削除したいのですが、具体的な手順を教えていただけますか？
+  agent_canonical_chars: 678
+  history_chars_after_turn: 9456
+  variants:
+    blocking_t0:
+      status: SUCCESS
+      call_order: 2
+      ttft_ms: 5131.81
+      total_ms: 5131.81
+      prompt_tokens: 4622
+      cached_tokens: 2628
+      thoughts_tokens: 0
+      output_tokens: 350
+      output_chars: 719
+      history_messages: 25
+      history_chars: 8778
+    streaming_t0:
+      status: SUCCESS
+      call_order: 1
+      ttft_ms: 2334.89
+      total_ms: 5339.16
+      prompt_tokens: 4622
+      cached_tokens: 2215
+      thoughts_tokens: 0
+      output_tokens: 338
+      output_chars: 678
+      history_messages: 25
+      history_chars: 8778
+    blocking_default:
+      status: SUCCESS
+      call_order: 3
+      ttft_ms: 12521.51
+      total_ms: 12521.51
+      prompt_tokens: 4622
+      cached_tokens: 2215
+      thoughts_tokens: 1052
+      output_tokens: 288
+      output_chars: 598
+      history_messages: 25
+      history_chars: 8778
+    streaming_default:
+      status: SUCCESS
+      call_order: 4
+      ttft_ms: 5269.1
+      total_ms: 8102.01
+      prompt_tokens: 4622
+      cached_tokens: 2215
+      thoughts_tokens: 439
+      output_tokens: 322
+      output_chars: 653
+      history_messages: 25
+      history_chars: 8778
+- turn: 14
+  user_sim_ms: 3650.96
+  user_chars: 97
+  user_text: ドライバーの件とあわせてシステムファイルの修復も試したいです。管理者権限のコマンドプロンプトでsfc /scannowやDISMを実行する手順と、完了までの大体の所要時間を教えていただけますか？
+  agent_canonical_chars: 697
+  history_chars_after_turn: 10250
+  variants:
+    blocking_t0:
+      status: SUCCESS
+      call_order: 2
+      ttft_ms: 6441.64
+      total_ms: 6441.64
+      prompt_tokens: 5011
+      cached_tokens: 3016
+      thoughts_tokens: 0
+      output_tokens: 423
+      output_chars: 845
+      history_messages: 27
+      history_chars: 9553
+    streaming_t0:
+      status: SUCCESS
+      call_order: 1
+      ttft_ms: 1633.84
+      total_ms: 4523.06
+      prompt_tokens: 5011
+      cached_tokens: 2630
+      thoughts_tokens: 0
+      output_tokens: 371
+      output_chars: 697
+      history_messages: 27
+      history_chars: 9553
+    blocking_default:
+      status: SUCCESS
+      call_order: 3
+      ttft_ms: 19178.17
+      total_ms: 19178.17
+      prompt_tokens: 5011
+      cached_tokens: 2630
+      thoughts_tokens: 2106
+      output_tokens: 271
+      output_chars: 510
+      history_messages: 27
+      history_chars: 9553
+    streaming_default:
+      status: SUCCESS
+      call_order: 4
+      ttft_ms: 8447.89
+      total_ms: 11427.25
+      prompt_tokens: 5011
+      cached_tokens: 2630
+      thoughts_tokens: 656
+      output_tokens: 357
+      output_chars: 677
+      history_messages: 27
+      history_chars: 9553
+- turn: 15
+  user_sim_ms: 2889.55
+  user_chars: 84
+  user_text: コマンドを実行する前に、SSDのエラーも心配なのでchkdskを試したいです。SSDで実行する場合の安全なオプションや手順、気をつけるべき注意点を教えていただけますか？
+  agent_canonical_chars: 670
+  history_chars_after_turn: 11004
+  variants:
+    blocking_t0:
+      status: SUCCESS
+      call_order: 2
+      ttft_ms: 4655.88
+      total_ms: 4655.88
+      prompt_tokens: 5424
+      cached_tokens: 3428
+      thoughts_tokens: 0
+      output_tokens: 373
+      output_chars: 702
+      history_messages: 29
+      history_chars: 10334
+    streaming_t0:
+      status: SUCCESS
+      call_order: 1
+      ttft_ms: 1642.01
+      total_ms: 4906.86
+      prompt_tokens: 5424
+      cached_tokens: 3018
+      thoughts_tokens: 0
+      output_tokens: 355
+      output_chars: 670
+      history_messages: 29
+      history_chars: 10334
+    blocking_default:
+      status: SUCCESS
+      call_order: 3
+      ttft_ms: 11461.05
+      total_ms: 11461.05
+      prompt_tokens: 5424
+      cached_tokens: 3018
+      thoughts_tokens: 595
+      output_tokens: 300
+      output_chars: 565
+      history_messages: 29
+      history_chars: 10334
+    streaming_default:
+      status: SUCCESS
+      call_order: 4
+      ttft_ms: 12170.6
+      total_ms: 13750.8
+      prompt_tokens: 5424
+      cached_tokens: 3018
+      thoughts_tokens: 1368
+      output_tokens: 310
+      output_chars: 591
+      history_messages: 29
+      history_chars: 10334
+- turn: 16
+  user_sim_ms: 7332.81
+  user_chars: 87
+  user_text: 通常起動に戻したら無事にログインできたのですが、数分操作していると画面が固まってマウスも動かなくなってしまいます。何が原因か特定するための切り分け方法を教えていただけますか？
+  agent_canonical_chars: 698
+  history_chars_after_turn: 11789
+  variants:
+    blocking_t0:
+      status: SUCCESS
+      call_order: 2
+      ttft_ms: 5600.51
+      total_ms: 5600.51
+      prompt_tokens: 5822
+      cached_tokens: 3825
+      thoughts_tokens: 0
+      output_tokens: 380
+      output_chars: 709
+      history_messages: 31
+      history_chars: 11091
+    streaming_t0:
+      status: SUCCESS
+      call_order: 1
+      ttft_ms: 2219.58
+      total_ms: 5747.11
+      prompt_tokens: 5822
+      cached_tokens: 3430
+      thoughts_tokens: 0
+      output_tokens: 361
+      output_chars: 698
+      history_messages: 31
+      history_chars: 11091
+    blocking_default:
+      status: SUCCESS
+      call_order: 3
+      ttft_ms: 21035.9
+      total_ms: 21035.9
+      prompt_tokens: 5822
+      cached_tokens: 3430
+      thoughts_tokens: 1811
+      output_tokens: 327
+      output_chars: 620
+      history_messages: 31
+      history_chars: 11091
+    streaming_default:
+      status: SUCCESS
+      call_order: 4
+      ttft_ms: 10590.01
+      total_ms: 12299.42
+      prompt_tokens: 5822
+      cached_tokens: 3430
+      thoughts_tokens: 940
+      output_tokens: 298
+      output_chars: 582
+      history_messages: 31
+      history_chars: 11091
+- turn: 17
+  user_sim_ms: 5506.15
+  user_chars: 91
+  user_text: フリーズする前にタスクマネージャーを確認したいのですが、CPUやメモリ、ディスクが100%に張り付いている原因プロセスを素早く特定するには、どの項目をどのように見ればよいでしょうか？
+  agent_canonical_chars: 718
+  history_chars_after_turn: 12598
+  variants:
+    blocking_t0:
+      status: SUCCESS
+      call_order: 2
+      ttft_ms: 7706.56
+      total_ms: 7706.56
+      prompt_tokens: 6228
+      cached_tokens: 4230
+      thoughts_tokens: 0
+      output_tokens: 356
+      output_chars: 685
+      history_messages: 33
+      history_chars: 11880
+    streaming_t0:
+      status: SUCCESS
+      call_order: 1
+      ttft_ms: 1486.18
+      total_ms: 4722.49
+      prompt_tokens: 6228
+      cached_tokens: 3827
+      thoughts_tokens: 0
+      output_tokens: 354
+      output_chars: 718
+      history_messages: 33
+      history_chars: 11880
+    blocking_default:
+      status: SUCCESS
+      call_order: 3
+      ttft_ms: 16596.47
+      total_ms: 16596.47
+      prompt_tokens: 6228
+      cached_tokens: 3827
+      thoughts_tokens: 1233
+      output_tokens: 294
+      output_chars: 544
+      history_messages: 33
+      history_chars: 11880
+    streaming_default:
+      status: SUCCESS
+      call_order: 4
+      ttft_ms: 11404.22
+      total_ms: 12866.95
+      prompt_tokens: 6228
+      cached_tokens: 3827
+      thoughts_tokens: 891
+      output_tokens: 301
+      output_chars: 566
+      history_messages: 33
+      history_chars: 11880
+- turn: 18
+  user_sim_ms: 1618.13
+  user_chars: 87
+  user_text: 常駐ソフトが原因か切り分けたいので、msconfigを使ったクリーンブートを試してみたいです。Microsoft以外のサービスを止める具体的な設定手順を教えていただけますか？
+  agent_canonical_chars: 785
+  history_chars_after_turn: 13470
+  variants:
+    blocking_t0:
+      status: SUCCESS
+      call_order: 2
+      ttft_ms: 10033.08
+      total_ms: 10033.08
+      prompt_tokens: 6622
+      cached_tokens: 4623
+      thoughts_tokens: 0
+      output_tokens: 407
+      output_chars: 781
+      history_messages: 35
+      history_chars: 12685
+    streaming_t0:
+      status: SUCCESS
+      call_order: 1
+      ttft_ms: 2395.8
+      total_ms: 5823.84
+      prompt_tokens: 6622
+      cached_tokens: 4232
+      thoughts_tokens: 0
+      output_tokens: 394
+      output_chars: 785
+      history_messages: 35
+      history_chars: 12685
+    blocking_default:
+      status: SUCCESS
+      call_order: 3
+      ttft_ms: 8907.05
+      total_ms: 8907.05
+      prompt_tokens: 6622
+      cached_tokens: 4232
+      thoughts_tokens: 319
+      output_tokens: 384
+      output_chars: 741
+      history_messages: 35
+      history_chars: 12685
+    streaming_default:
+      status: SUCCESS
+      call_order: 4
+      ttft_ms: 11517.3
+      total_ms: 13426.34
+      prompt_tokens: 6622
+      cached_tokens: 4232
+      thoughts_tokens: 1202
+      output_tokens: 310
+      output_chars: 599
+      history_messages: 35
+      history_chars: 12685
+- turn: 19
+  user_sim_ms: 1931.48
+  user_chars: 82
+  user_text: 本体の底面がかなり熱くなっていて、ファンもずっと高速で回り続けています。熱暴走が原因の可能性はありますでしょうか？通気口などの安全な掃除方法もあれば教えてください。
+  agent_canonical_chars: 732
+  history_chars_after_turn: 14284
+  variants:
+    blocking_t0:
+      status: SUCCESS
+      call_order: 2
+      ttft_ms: 7319.42
+      total_ms: 7319.42
+      prompt_tokens: 7061
+      cached_tokens: 5061
+      thoughts_tokens: 0
+      output_tokens: 417
+      output_chars: 697
+      history_messages: 37
+      history_chars: 13552
+    streaming_t0:
+      status: SUCCESS
+      call_order: 1
+      ttft_ms: 4620.08
+      total_ms: 9231.44
+      prompt_tokens: 7061
+      cached_tokens: 4626
+      thoughts_tokens: 0
+      output_tokens: 442
+      output_chars: 732
+      history_messages: 37
+      history_chars: 13552
+    blocking_default:
+      status: SUCCESS
+      call_order: 3
+      ttft_ms: 10203.31
+      total_ms: 10203.31
+      prompt_tokens: 7061
+      cached_tokens: 4626
+      thoughts_tokens: 317
+      output_tokens: 369
+      output_chars: 613
+      history_messages: 37
+      history_chars: 13552
+    streaming_default:
+      status: SUCCESS
+      call_order: 4
+      ttft_ms: 5811.58
+      total_ms: 9242.91
+      prompt_tokens: 7061
+      cached_tokens: 4626
+      thoughts_tokens: 351
+      output_tokens: 358
+      output_chars: 586
+      history_messages: 37
+      history_chars: 13552
+- turn: 20
+  user_sim_ms: 2192.93
+  user_chars: 77
+  user_text: メモリ自体の故障や接触不良も疑っているのですが、Windowsメモリ診断ツールはどうやって実行すればよいでしょうか？また、診断結果はどこで確認できますか？
+  agent_canonical_chars: 810
+  history_chars_after_turn: 15171
+  variants:
+    blocking_t0:
+      status: SUCCESS
+      call_order: 2
+      ttft_ms: 8088.96
+      total_ms: 8088.96
+      prompt_tokens: 7539
+      cached_tokens: 5538
+      thoughts_tokens: 0
+      output_tokens: 432
+      output_chars: 854
+      history_messages: 39
+      history_chars: 14361
+    streaming_t0:
+      status: SUCCESS
+      call_order: 1
+      ttft_ms: 1641.41
+      total_ms: 5368.36
+      prompt_tokens: 7539
+      cached_tokens: 5064
+      thoughts_tokens: 0
+      output_tokens: 412
+      output_chars: 810
+      history_messages: 39
+      history_chars: 14361
+    blocking_default:
+      status: SUCCESS
+      call_order: 3
+      ttft_ms: 11514.82
+      total_ms: 11514.82
+      prompt_tokens: 7539
+      cached_tokens: 5064
+      thoughts_tokens: 750
+      output_tokens: 333
+      output_chars: 666
+      history_messages: 39
+      history_chars: 14361
+    streaming_default:
+      status: SUCCESS
+      call_order: 4
+      ttft_ms: 5394.05
+      total_ms: 8551.42
+      prompt_tokens: 7539
+      cached_tokens: 5064
+      thoughts_tokens: 337
+      output_tokens: 357
+      output_chars: 724
+      history_messages: 39
+      history_chars: 14361
+- turn: 21
+  user_sim_ms: 3186.26
+  user_chars: 99
+  user_text: メモリとあわせてSSDの寿命も心配です。専用ツールでS.M.A.R.T.情報を確認する場合、SSDの残り寿命や温度などはどのくらいの数値が出ていると危険と判断すべきでしょうか？目安を教えてください。
+  agent_canonical_chars: 846
+  history_chars_after_turn: 16116
+  variants:
+    blocking_t0:
+      status: SUCCESS
+      call_order: 2
+      ttft_ms: 9472.97
+      total_ms: 9472.97
+      prompt_tokens: 8005
+      cached_tokens: 6003
+      thoughts_tokens: 0
+      output_tokens: 445
+      output_chars: 759
+      history_messages: 41
+      history_chars: 15270
+    streaming_t0:
+      status: SUCCESS
+      call_order: 1
+      ttft_ms: 2285.71
+      total_ms: 9554.98
+      prompt_tokens: 8005
+      cached_tokens: 5541
+      thoughts_tokens: 0
+      output_tokens: 477
+      output_chars: 846
+      history_messages: 41
+      history_chars: 15270
+    blocking_default:
+      status: SUCCESS
+      call_order: 3
+      ttft_ms: 17217.96
+      total_ms: 17217.96
+      prompt_tokens: 8005
+      cached_tokens: 5541
+      thoughts_tokens: 1549
+      output_tokens: 345
+      output_chars: 598
+      history_messages: 41
+      history_chars: 15270
+    streaming_default:
+      status: SUCCESS
+      call_order: 4
+      ttft_ms: 16163.52
+      total_ms: 18244.38
+      prompt_tokens: 8005
+      cached_tokens: 5541
+      thoughts_tokens: 1605
+      output_tokens: 332
+      output_chars: 576
+      history_messages: 41
+      history_chars: 15270
+- turn: 22
+  user_sim_ms: 3360.62
+  user_chars: 100
+  user_text: フリーズ直前のエラーも調べたいのですが、イベントビューアーの「システム」ログからKernel-Power 41などの重大エラーを確認する手順を教えていただけますか？ログの絞り込み方なども知りたいです。
+  agent_canonical_chars: 972
+  history_chars_after_turn: 17188
+  variants:
+    blocking_t0:
+      status: SUCCESS
+      call_order: 2
+      ttft_ms: 6077.13
+      total_ms: 6077.13
+      prompt_tokens: 8531
+      cached_tokens: 6528
+      thoughts_tokens: 0
+      output_tokens: 454
+      output_chars: 852
+      history_messages: 43
+      history_chars: 16216
+    streaming_t0:
+      status: SUCCESS
+      call_order: 1
+      ttft_ms: 2282.54
+      total_ms: 7033.16
+      prompt_tokens: 8531
+      cached_tokens: 6007
+      thoughts_tokens: 0
+      output_tokens: 514
+      output_chars: 972
+      history_messages: 43
+      history_chars: 16216
+    blocking_default:
+      status: SUCCESS
+      call_order: 3
+      ttft_ms: 12763.49
+      total_ms: 12763.49
+      prompt_tokens: 8531
+      cached_tokens: 6007
+      thoughts_tokens: 926
+      output_tokens: 362
+      output_chars: 676
+      history_messages: 43
+      history_chars: 16216
+    streaming_default:
+      status: SUCCESS
+      call_order: 4
+      ttft_ms: 6530.82
+      total_ms: 10513.18
+      prompt_tokens: 8531
+      cached_tokens: 6007
+      thoughts_tokens: 525
+      output_tokens: 423
+      output_chars: 780
+      history_messages: 43
+      history_chars: 16216
+- turn: 23
+  user_sim_ms: 1653.85
+  user_chars: 83
+  user_text: 高速スタートアップを無効にするとフリーズや起動の不具合が改善すると聞いたのですが、効果はありますか？また、どこから設定を変更すればよいか具体的な手順を教えてください。
+  agent_canonical_chars: 816
+  history_chars_after_turn: 18087
+  variants:
+    blocking_t0:
+      status: SUCCESS
+      call_order: 2
+      ttft_ms: 5608.14
+      total_ms: 5608.14
+      prompt_tokens: 9088
+      cached_tokens: 7084
+      thoughts_tokens: 0
+      output_tokens: 391
+      output_chars: 757
+      history_messages: 45
+      history_chars: 17271
+    streaming_t0:
+      status: SUCCESS
+      call_order: 1
+      ttft_ms: 1487.77
+      total_ms: 5457.92
+      prompt_tokens: 9088
+      cached_tokens: 6532
+      thoughts_tokens: 0
+      output_tokens: 417
+      output_chars: 816
+      history_messages: 45
+      history_chars: 17271
+    blocking_default:
+      status: SUCCESS
+      call_order: 3
+      ttft_ms: 7242.62
+      total_ms: 7242.62
+      prompt_tokens: 9088
+      cached_tokens: 6532
+      thoughts_tokens: 324
+      output_tokens: 321
+      output_chars: 613
+      history_messages: 45
+      history_chars: 17271
+    streaming_default:
+      status: SUCCESS
+      call_order: 4
+      ttft_ms: 8026.49
+      total_ms: 10447.54
+      prompt_tokens: 9088
+      cached_tokens: 6532
+      thoughts_tokens: 759
+      output_tokens: 336
+      output_chars: 653
+      history_messages: 45
+      history_chars: 17271
+- turn: 24
+  user_sim_ms: 3169.34
+  user_chars: 82
+  user_text: スリープからの復帰時だけ画面が真っ暗になる症状も防ぎたいです。PCI Expressのリンク状態の電源管理など、電源プランの詳しい見直し手順を教えていただけますか？
+  agent_canonical_chars: 866
+  history_chars_after_turn: 19035
+  variants:
+    blocking_t0:
+      status: SUCCESS
+      call_order: 2
+      ttft_ms: 9923.59
+      total_ms: 9923.59
+      prompt_tokens: 9549
+      cached_tokens: 7545
+      thoughts_tokens: 0
+      output_tokens: 459
+      output_chars: 851
+      history_messages: 47
+      history_chars: 18169
+    streaming_t0:
+      status: SUCCESS
+      call_order: 1
+      ttft_ms: 1694.58
+      total_ms: 5881.68
+      prompt_tokens: 9549
+      cached_tokens: 7086
+      thoughts_tokens: 0
+      output_tokens: 468
+      output_chars: 866
+      history_messages: 47
+      history_chars: 18169
+    blocking_default:
+      status: SUCCESS
+      call_order: 3
+      ttft_ms: 14473.7
+      total_ms: 14473.7
+      prompt_tokens: 9549
+      cached_tokens: 7086
+      thoughts_tokens: 1411
+      output_tokens: 292
+      output_chars: 516
+      history_messages: 47
+      history_chars: 18169
+    streaming_default:
+      status: SUCCESS
+      call_order: 4
+      ttft_ms: 15572.57
+      total_ms: 17120.93
+      prompt_tokens: 9549
+      cached_tokens: 7086
+      thoughts_tokens: 1912
+      output_tokens: 307
+      output_chars: 559
+      history_messages: 47
+      history_chars: 18169
+- turn: 25
+  user_sim_ms: 2129.3
+  user_chars: 93
+  user_text: 公式サイトからBIOSやチップセットドライバーを最新にする手順を教えてほしいです。更新中に電源が切れると故障すると聞いて不安なのですが、安全に行うための対策も併せて教えていただけますか？
+  agent_canonical_chars: 898
+  history_chars_after_turn: 20026
+  variants:
+    blocking_t0:
+      status: SUCCESS
+      call_order: 2
+      ttft_ms: 5962.36
+      total_ms: 5962.36
+      prompt_tokens: 10060
+      cached_tokens: 8055
+      thoughts_tokens: 0
+      output_tokens: 441
+      output_chars: 836
+      history_messages: 49
+      history_chars: 19128
+    streaming_t0:
+      status: SUCCESS
+      call_order: 1
+      ttft_ms: 3833.35
+      total_ms: 8937.72
+      prompt_tokens: 10060
+      cached_tokens: 7547
+      thoughts_tokens: 0
+      output_tokens: 481
+      output_chars: 898
+      history_messages: 49
+      history_chars: 19128
+    blocking_default:
+      status: SUCCESS
+      call_order: 3
+      ttft_ms: 14256.61
+      total_ms: 14256.61
+      prompt_tokens: 10060
+      cached_tokens: 7547
+      thoughts_tokens: 1111
+      output_tokens: 289
+      output_chars: 569
+      history_messages: 49
+      history_chars: 19128
+    streaming_default:
+      status: SUCCESS
+      call_order: 4
+      ttft_ms: 10833.36
+      total_ms: 13190.82
+      prompt_tokens: 10060
+      cached_tokens: 7547
+      thoughts_tokens: 954
+      output_tokens: 287
+      output_chars: 563
+      history_messages: 49
+      history_chars: 19128
+- turn: 26
+  user_sim_ms: 1929.7
+  user_chars: 97
+  user_text: ドライバーを更新したのですが、またMEMORY_MANAGEMENTのエラーで青い画面になってしまいました。以前の安定していた状態に戻したいので、システムの復元を行う手順を教えていただけますか？
+  agent_canonical_chars: 810
+  history_chars_after_turn: 20933
+  variants:
+    blocking_t0:
+      status: SUCCESS
+      call_order: 2
+      ttft_ms: 5556.38
+      total_ms: 5556.38
+      prompt_tokens: 10582
+      cached_tokens: 8576
+      thoughts_tokens: 0
+      output_tokens: 416
+      output_chars: 819
+      history_messages: 51
+      history_chars: 20123
+    streaming_t0:
+      status: SUCCESS
+      call_order: 1
+      ttft_ms: 3258.94
+      total_ms: 6877.05
+      prompt_tokens: 10582
+      cached_tokens: 8058
+      thoughts_tokens: 0
+      output_tokens: 421
+      output_chars: 810
+      history_messages: 51
+      history_chars: 20123
+    blocking_default:
+      status: SUCCESS
+      call_order: 3
+      ttft_ms: 10927.93
+      total_ms: 10927.93
+      prompt_tokens: 10582
+      cached_tokens: 8058
+      thoughts_tokens: 733
+      output_tokens: 346
+      output_chars: 647
+      history_messages: 51
+      history_chars: 20123
+    streaming_default:
+      status: SUCCESS
+      call_order: 4
+      ttft_ms: 9653.46
+      total_ms: 11896.89
+      prompt_tokens: 10582
+      cached_tokens: 8058
+      thoughts_tokens: 904
+      output_tokens: 363
+      output_chars: 698
+      history_messages: 51
+      history_chars: 20123
+- turn: 27
+  user_sim_ms: 2234.38
+  user_chars: 86
+  user_text: 復元でも直らない場合を考えて、個人用ファイルを保持したままOSを再インストールする手順を教えていただけますか？その際、消えてしまうアプリや設定の具体的な範囲も知りたいです。
+  agent_canonical_chars: 831
+  history_chars_after_turn: 21850
+  variants:
+    blocking_t0:
+      status: SUCCESS
+      call_order: 2
+      ttft_ms: 6211.12
+      total_ms: 6211.12
+      prompt_tokens: 11048
+      cached_tokens: 9042
+      thoughts_tokens: 0
+      output_tokens: 498
+      output_chars: 958
+      history_messages: 53
+      history_chars: 21019
+    streaming_t0:
+      status: SUCCESS
+      call_order: 1
+      ttft_ms: 1525.56
+      total_ms: 5383.85
+      prompt_tokens: 11048
+      cached_tokens: 8578
+      thoughts_tokens: 0
+      output_tokens: 425
+      output_chars: 831
+      history_messages: 53
+      history_chars: 21019
+    blocking_default:
+      status: SUCCESS
+      call_order: 3
+      ttft_ms: 8800.48
+      total_ms: 8800.48
+      prompt_tokens: 11048
+      cached_tokens: 8578
+      thoughts_tokens: 394
+      output_tokens: 372
+      output_chars: 722
+      history_messages: 53
+      history_chars: 21019
+    streaming_default:
+      status: SUCCESS
+      call_order: 4
+      ttft_ms: 7861.3
+      total_ms: 10731.66
+      prompt_tokens: 11048
+      cached_tokens: 8578
+      thoughts_tokens: 653
+      output_tokens: 357
+      output_chars: 674
+      history_messages: 53
+      history_chars: 21019
+- turn: 28
+  user_sim_ms: 2100.45
+  user_chars: 90
+  user_text: 初期化の画面で「クラウドからダウンロード」と「ローカル再インストール」の選択肢が出ると知ったのですが、何が違うのでしょうか？今回の青い画面のエラーを直すにはどちらを選ぶべきですか？
+  agent_canonical_chars: 774
+  history_chars_after_turn: 22714
+  variants:
+    blocking_t0:
+      status: SUCCESS
+      call_order: 2
+      ttft_ms: 6046.03
+      total_ms: 6046.03
+      prompt_tokens: 11521
+      cached_tokens: 9514
+      thoughts_tokens: 0
+      output_tokens: 373
+      output_chars: 778
+      history_messages: 55
+      history_chars: 21940
+    streaming_t0:
+      status: SUCCESS
+      call_order: 1
+      ttft_ms: 1766.02
+      total_ms: 5559.43
+      prompt_tokens: 11521
+      cached_tokens: 9044
+      thoughts_tokens: 0
+      output_tokens: 377
+      output_chars: 774
+      history_messages: 55
+      history_chars: 21940
+    blocking_default:
+      status: SUCCESS
+      call_order: 3
+      ttft_ms: 9561.99
+      total_ms: 9561.99
+      prompt_tokens: 11521
+      cached_tokens: 9044
+      thoughts_tokens: 497
+      output_tokens: 282
+      output_chars: 590
+      history_messages: 55
+      history_chars: 21940
+    streaming_default:
+      status: SUCCESS
+      call_order: 4
+      ttft_ms: 12348.6
+      total_ms: 14531.67
+      prompt_tokens: 11521
+      cached_tokens: 9044
+      thoughts_tokens: 1077
+      output_tokens: 308
+      output_chars: 616
+      history_messages: 55
+      history_chars: 21940
+- turn: 29
+  user_sim_ms: 1799.84
+  user_chars: 89
+  user_text: もし初期化の途中で「問題が発生しました」とエラーが出て中断してしまった場合、別のPCを使って回復ドライブやUSBインストールメディアを作成して復旧する手順を教えていただけますか？
+  agent_canonical_chars: 955
+  history_chars_after_turn: 23758
+  variants:
+    blocking_t0:
+      status: SUCCESS
+      call_order: 2
+      ttft_ms: 6172.81
+      total_ms: 6172.81
+      prompt_tokens: 11939
+      cached_tokens: 9932
+      thoughts_tokens: 0
+      output_tokens: 437
+      output_chars: 855
+      history_messages: 57
+      history_chars: 22803
+    streaming_t0:
+      status: SUCCESS
+      call_order: 1
+      ttft_ms: 1433.55
+      total_ms: 6502.33
+      prompt_tokens: 11939
+      cached_tokens: 9515
+      thoughts_tokens: 0
+      output_tokens: 492
+      output_chars: 955
+      history_messages: 57
+      history_chars: 22803
+    blocking_default:
+      status: SUCCESS
+      call_order: 3
+      ttft_ms: 10076.92
+      total_ms: 10076.92
+      prompt_tokens: 11939
+      cached_tokens: 9515
+      thoughts_tokens: 360
+      output_tokens: 390
+      output_chars: 732
+      history_messages: 57
+      history_chars: 22803
+    streaming_default:
+      status: SUCCESS
+      call_order: 4
+      ttft_ms: 5711.35
+      total_ms: 9086.85
+      prompt_tokens: 11939
+      cached_tokens: 9515
+      thoughts_tokens: 372
+      output_tokens: 347
+      output_chars: 687
+      history_messages: 57
+      history_chars: 22803
+- turn: 30
+  user_sim_ms: 2692.29
+  user_chars: 90
+  user_text: 作成したUSBメディアからPCを起動させたいのですが、BIOS画面でのブート順序の変更手順を教えていただけますか？また、その際にセキュアブートの設定も変更が必要なのか知りたいです。
+  agent_canonical_chars: 916
+  history_chars_after_turn: 24764
+  variants:
+    blocking_t0:
+      status: SUCCESS
+      call_order: 2
+      ttft_ms: 5626.07
+      total_ms: 5626.07
+      prompt_tokens: 12478
+      cached_tokens: 10471
+      thoughts_tokens: 0
+      output_tokens: 431
+      output_chars: 873
+      history_messages: 59
+      history_chars: 23848
+    streaming_t0:
+      status: SUCCESS
+      call_order: 1
+      ttft_ms: 4042.78
+      total_ms: 6854.72
+      prompt_tokens: 12478
+      cached_tokens: 9935
+      thoughts_tokens: 0
+      output_tokens: 477
+      output_chars: 916
+      history_messages: 59
+      history_chars: 23848
+    blocking_default:
+      status: SUCCESS
+      call_order: 3
+      ttft_ms: 21986.38
+      total_ms: 21986.38
+      prompt_tokens: 12478
+      cached_tokens: 9935
+      thoughts_tokens: 2237
+      output_tokens: 299
+      output_chars: 573
+      history_messages: 59
+      history_chars: 23848
+    streaming_default:
+      status: SUCCESS
+      call_order: 4
+      ttft_ms: 6990.84
+      total_ms: 10813.85
+      prompt_tokens: 12478
+      cached_tokens: 9935
+      thoughts_tokens: 369
+      output_tokens: 352
+      output_chars: 689
+      history_messages: 59
+      history_chars: 23848
+- turn: 31
+  user_sim_ms: 2891.11
+  user_chars: 88
+  user_text: USBからのクリーンインストールを始める前に、Officeの再認証に必要なライセンスや、BitLocker回復キーの確認方法を教えていただけますか？スマホ等から確認できますか？
+  agent_canonical_chars: 882
+  history_chars_after_turn: 25734
+  variants:
+    blocking_t0:
+      status: SUCCESS
+      call_order: 2
+      ttft_ms: 6145.57
+      total_ms: 6145.57
+      prompt_tokens: 12995
+      cached_tokens: 10987
+      thoughts_tokens: 0
+      output_tokens: 416
+      output_chars: 916
+      history_messages: 61
+      history_chars: 24852
+    streaming_t0:
+      status: SUCCESS
+      call_order: 1
+      ttft_ms: 1848.99
+      total_ms: 5586.82
+      prompt_tokens: 12995
+      cached_tokens: 10473
+      thoughts_tokens: 0
+      output_tokens: 390
+      output_chars: 882
+      history_messages: 61
+      history_chars: 24852
+    blocking_default:
+      status: SUCCESS
+      call_order: 3
+      ttft_ms: 17177.94
+      total_ms: 17177.94
+      prompt_tokens: 12995
+      cached_tokens: 10473
+      thoughts_tokens: 1830
+      output_tokens: 244
+      output_chars: 515
+      history_messages: 61
+      history_chars: 24852
+    streaming_default:
+      status: SUCCESS
+      call_order: 4
+      ttft_ms: 5263.74
+      total_ms: 8454.08
+      prompt_tokens: 12995
+      cached_tokens: 10473
+      thoughts_tokens: 363
+      output_tokens: 356
+      output_chars: 775
+      history_messages: 61
+      history_chars: 24852
+- turn: 32
+  user_sim_ms: 4297.36
+  user_chars: 89
+  user_text: もし回復キーの入力画面が出てしまった場合、スマホからMicrosoftアカウントにサインインして、その48桁のBitLocker回復キーを探す具体的な手順を教えていただけますか？
+  agent_canonical_chars: 794
+  history_chars_after_turn: 26617
+  variants:
+    blocking_t0:
+      status: SUCCESS
+      call_order: 2
+      ttft_ms: 5311.29
+      total_ms: 5311.29
+      prompt_tokens: 13425
+      cached_tokens: 11417
+      thoughts_tokens: 0
+      output_tokens: 410
+      output_chars: 840
+      history_messages: 63
+      history_chars: 25823
+    streaming_t0:
+      status: SUCCESS
+      call_order: 1
+      ttft_ms: 2413.62
+      total_ms: 6651.83
+      prompt_tokens: 13425
+      cached_tokens: 10988
+      thoughts_tokens: 0
+      output_tokens: 388
+      output_chars: 794
+      history_messages: 63
+      history_chars: 25823
+    blocking_default:
+      status: SUCCESS
+      call_order: 3
+      ttft_ms: 17481.08
+      total_ms: 17481.08
+      prompt_tokens: 13425
+      cached_tokens: 10988
+      thoughts_tokens: 1709
+      output_tokens: 300
+      output_chars: 570
+      history_messages: 63
+      history_chars: 25823
+    streaming_default:
+      status: SUCCESS
+      call_order: 4
+      ttft_ms: 11870.84
+      total_ms: 13493.69
+      prompt_tokens: 13425
+      cached_tokens: 10988
+      thoughts_tokens: 1101
+      output_tokens: 309
+      output_chars: 594
+      history_messages: 63
+      history_chars: 25823
+- turn: 33
+  user_sim_ms: 2304.77
+  user_chars: 84
+  user_text: USBからOSの再インストールを試したのですが、途中で止まってしまいます。メモリやマザーボードなどハードウェアの故障でしょうか？診断テストの方法があれば教えてください。
+  agent_canonical_chars: 895
+  history_chars_after_turn: 27596
+  variants:
+    blocking_t0:
+      status: SUCCESS
+      call_order: 2
+      ttft_ms: 5400.07
+      total_ms: 5400.07
+      prompt_tokens: 13851
+      cached_tokens: 11843
+      thoughts_tokens: 0
+      output_tokens: 425
+      output_chars: 845
+      history_messages: 65
+      history_chars: 26701
+    streaming_t0:
+      status: SUCCESS
+      call_order: 1
+      ttft_ms: 1948.04
+      total_ms: 6308.15
+      prompt_tokens: 13851
+      cached_tokens: 11418
+      thoughts_tokens: 0
+      output_tokens: 431
+      output_chars: 895
+      history_messages: 65
+      history_chars: 26701
+    blocking_default:
+      status: SUCCESS
+      call_order: 3
+      ttft_ms: 11908.42
+      total_ms: 11908.42
+      prompt_tokens: 13851
+      cached_tokens: 11418
+      thoughts_tokens: 575
+      output_tokens: 349
+      output_chars: 703
+      history_messages: 65
+      history_chars: 26701
+    streaming_default:
+      status: SUCCESS
+      call_order: 4
+      ttft_ms: 7066.82
+      total_ms: 10664.29
+      prompt_tokens: 13851
+      cached_tokens: 11418
+      thoughts_tokens: 446
+      output_tokens: 364
+      output_chars: 746
+      history_messages: 65
+      history_chars: 26701
+- turn: 34
+  user_sim_ms: 3257.67
+  user_chars: 96
+  user_text: ハード自体の故障を切り分けるため、メーカー標準の診断テストを実行したいです。起動時のロゴ画面から診断機能（Diagnostics）を立ち上げてエラーコードを確認する手順を教えていただけますか？
+  agent_canonical_chars: 883
+  history_chars_after_turn: 28575
+  variants:
+    blocking_t0:
+      status: SUCCESS
+      call_order: 2
+      ttft_ms: 6858.01
+      total_ms: 6858.01
+      prompt_tokens: 14326
+      cached_tokens: 12318
+      thoughts_tokens: 0
+      output_tokens: 453
+      output_chars: 945
+      history_messages: 67
+      history_chars: 27692
+    streaming_t0:
+      status: SUCCESS
+      call_order: 1
+      ttft_ms: 1492.02
+      total_ms: 5749.0
+      prompt_tokens: 14326
+      cached_tokens: 11844
+      thoughts_tokens: 0
+      output_tokens: 446
+      output_chars: 883
+      history_messages: 67
+      history_chars: 27692
+    blocking_default:
+      status: SUCCESS
+      call_order: 3
+      ttft_ms: 17891.25
+      total_ms: 17891.25
+      prompt_tokens: 14326
+      cached_tokens: 11844
+      thoughts_tokens: 983
+      output_tokens: 331
+      output_chars: 654
+      history_messages: 67
+      history_chars: 27692
+    streaming_default:
+      status: SUCCESS
+      call_order: 4
+      ttft_ms: 15822.31
+      total_ms: 18197.08
+      prompt_tokens: 14326
+      cached_tokens: 11844
+      thoughts_tokens: 856
+      output_tokens: 361
+      output_chars: 713
+      history_messages: 67
+      history_chars: 27692
+- turn: 35
+  user_sim_ms: 1527.1
+  user_chars: 90
+  user_text: 診断テストを実行したところ、メモリモジュールの異常を示すエラーコードが表示されました。まだメーカー保証期間内だと思うのですが、修理の申し込み手順や必要なものを教えていただけますか？
+  agent_canonical_chars: 889
+  history_chars_after_turn: 29554
+  variants:
+    blocking_t0:
+      status: SUCCESS
+      call_order: 2
+      ttft_ms: 7399.15
+      total_ms: 7399.15
+      prompt_tokens: 14810
+      cached_tokens: 12801
+      thoughts_tokens: 0
+      output_tokens: 494
+      output_chars: 922
+      history_messages: 69
+      history_chars: 28665
+    streaming_t0:
+      status: SUCCESS
+      call_order: 1
+      ttft_ms: 2068.11
+      total_ms: 6738.79
+      prompt_tokens: 14810
+      cached_tokens: 12319
+      thoughts_tokens: 0
+      output_tokens: 466
+      output_chars: 889
+      history_messages: 69
+      history_chars: 28665
+    blocking_default:
+      status: SUCCESS
+      call_order: 3
+      ttft_ms: 6663.61
+      total_ms: 6663.61
+      prompt_tokens: 14810
+      cached_tokens: 12319
+      thoughts_tokens: 128
+      output_tokens: 375
+      output_chars: 693
+      history_messages: 69
+      history_chars: 28665
+    streaming_default:
+      status: SUCCESS
+      call_order: 4
+      ttft_ms: 7470.3
+      total_ms: 11524.92
+      prompt_tokens: 14810
+      cached_tokens: 12319
+      thoughts_tokens: 622
+      output_tokens: 434
+      output_chars: 812
+      history_messages: 69
+      history_chars: 28665
+- turn: 36
+  user_sim_ms: 2054.39
+  user_chars: 82
+  user_text: 購入して1年以内なので標準保証が使えると思うのですが、今回のメモリ故障は無償修理の対象になりますか？自然故障として扱われる具体的な基準や条件があれば教えてください。
+  agent_canonical_chars: 730
+  history_chars_after_turn: 30366
+  variants:
+    blocking_t0:
+      status: SUCCESS
+      call_order: 2
+      ttft_ms: 7329.97
+      total_ms: 7329.97
+      prompt_tokens: 15316
+      cached_tokens: 13307
+      thoughts_tokens: 0
+      output_tokens: 400
+      output_chars: 728
+      history_messages: 71
+      history_chars: 29636
+    streaming_t0:
+      status: SUCCESS
+      call_order: 1
+      ttft_ms: 2064.74
+      total_ms: 6277.05
+      prompt_tokens: 15316
+      cached_tokens: 12803
+      thoughts_tokens: 0
+      output_tokens: 399
+      output_chars: 730
+      history_messages: 71
+      history_chars: 29636
+    blocking_default:
+      status: SUCCESS
+      call_order: 3
+      ttft_ms: 9357.7
+      total_ms: 9357.7
+      prompt_tokens: 15316
+      cached_tokens: 12803
+      thoughts_tokens: 363
+      output_tokens: 395
+      output_chars: 710
+      history_messages: 71
+      history_chars: 29636
+    streaming_default:
+      status: SUCCESS
+      call_order: 4
+      ttft_ms: 6274.14
+      total_ms: 9703.68
+      prompt_tokens: 15316
+      cached_tokens: 12803
+      thoughts_tokens: 347
+      output_tokens: 380
+      output_chars: 691
+      history_messages: 71
+      history_chars: 29636
+- turn: 37
+  user_sim_ms: 1363.7
+  user_chars: 81
+  user_text: 念のため物損などの延長保証に入っていたかも確認したいのですが、本体のシリアル番号から現在の加入プランを調べていただくことはできますか？確認方法を教えてほしいです。
+  agent_canonical_chars: 658
+  history_chars_after_turn: 31105
+  variants:
+    blocking_t0:
+      status: SUCCESS
+      call_order: 2
+      ttft_ms: 6014.86
+      total_ms: 6014.86
+      prompt_tokens: 15754
+      cached_tokens: 13745
+      thoughts_tokens: 0
+      output_tokens: 431
+      output_chars: 798
+      history_messages: 73
+      history_chars: 30447
+    streaming_t0:
+      status: SUCCESS
+      call_order: 1
+      ttft_ms: 1445.71
+      total_ms: 4826.67
+      prompt_tokens: 15754
+      cached_tokens: 13308
+      thoughts_tokens: 0
+      output_tokens: 351
+      output_chars: 658
+      history_messages: 73
+      history_chars: 30447
+    blocking_default:
+      status: SUCCESS
+      call_order: 3
+      ttft_ms: 11907.46
+      total_ms: 11907.46
+      prompt_tokens: 15754
+      cached_tokens: 13308
+      thoughts_tokens: 353
+      output_tokens: 312
+      output_chars: 565
+      history_messages: 73
+      history_chars: 30447
+    streaming_default:
+      status: SUCCESS
+      call_order: 4
+      ttft_ms: 7865.96
+      total_ms: 11491.43
+      prompt_tokens: 15754
+      cached_tokens: 13308
+      thoughts_tokens: 236
+      output_tokens: 329
+      output_chars: 630
+      history_messages: 73
+      history_chars: 30447
+- turn: 38
+  user_sim_ms: 4182.7
+  user_chars: 76
+  user_text: 引き取り修理をお願いしたいのですが、自分でパソコンを梱包する必要がありますか？それとも集荷に来る宅配業者の方が専用の箱などを用意してくれるのでしょうか。
+  agent_canonical_chars: 681
+  history_chars_after_turn: 31862
+  variants:
+    blocking_t0:
+      status: SUCCESS
+      call_order: 2
+      ttft_ms: 6189.29
+      total_ms: 6189.29
+      prompt_tokens: 16138
+      cached_tokens: 14129
+      thoughts_tokens: 0
+      output_tokens: 360
+      output_chars: 644
+      history_messages: 75
+      history_chars: 31181
+    streaming_t0:
+      status: SUCCESS
+      call_order: 1
+      ttft_ms: 2992.51
+      total_ms: 6561.18
+      prompt_tokens: 16138
+      cached_tokens: 13745
+      thoughts_tokens: 0
+      output_tokens: 365
+      output_chars: 681
+      history_messages: 75
+      history_chars: 31181
+    blocking_default:
+      status: SUCCESS
+      call_order: 3
+      ttft_ms: 10073.63
+      total_ms: 10073.63
+      prompt_tokens: 16138
+      cached_tokens: 13745
+      thoughts_tokens: 316
+      output_tokens: 321
+      output_chars: 582
+      history_messages: 75
+      history_chars: 31181
+    streaming_default:
+      status: SUCCESS
+      call_order: 4
+      ttft_ms: 6815.64
+      total_ms: 9960.26
+      prompt_tokens: 16138
+      cached_tokens: 13745
+      thoughts_tokens: 300
+      output_tokens: 356
+      output_chars: 647
+      history_messages: 75
+      history_chars: 31181
+- turn: 39
+  user_sim_ms: 1833.4
+  user_chars: 78
+  user_text: 集荷の際にACアダプターやマウスなどの付属品も一緒に預ける必要がありますか？それともパソコン本体だけを渡せばよいのでしょうか、同梱のルールを教えてください。
+  agent_canonical_chars: 621
+  history_chars_after_turn: 32561
+  variants:
+    blocking_t0:
+      status: SUCCESS
+      call_order: 2
+      ttft_ms: 5292.61
+      total_ms: 5292.61
+      prompt_tokens: 16542
+      cached_tokens: 14533
+      thoughts_tokens: 0
+      output_tokens: 372
+      output_chars: 706
+      history_messages: 77
+      history_chars: 31940
+    streaming_t0:
+      status: SUCCESS
+      call_order: 1
+      ttft_ms: 2277.69
+      total_ms: 5419.76
+      prompt_tokens: 16542
+      cached_tokens: 14129
+      thoughts_tokens: 0
+      output_tokens: 333
+      output_chars: 621
+      history_messages: 77
+      history_chars: 31940
+    blocking_default:
+      status: SUCCESS
+      call_order: 3
+      ttft_ms: 10811.09
+      total_ms: 10811.09
+      prompt_tokens: 16542
+      cached_tokens: 14129
+      thoughts_tokens: 953
+      output_tokens: 254
+      output_chars: 509
+      history_messages: 77
+      history_chars: 31940
+    streaming_default:
+      status: SUCCESS
+      call_order: 4
+      ttft_ms: 5693.92
+      total_ms: 8806.94
+      prompt_tokens: 16542
+      cached_tokens: 14129
+      thoughts_tokens: 297
+      output_tokens: 348
+      output_chars: 647
+      history_messages: 77
+      history_chars: 31940
+- turn: 40
+  user_sim_ms: 1643.9
+  user_chars: 85
+  user_text: 修理の際、SSDのデータは初期化されてしまうのでしょうか？バックアップが取れていないので心配なのですが、データ消去に関する同意書などの手続きが必要なのかも教えてください。
+  agent_canonical_chars: 688
+  history_chars_after_turn: 33334
+  variants:
+    blocking_t0:
+      status: SUCCESS
+      call_order: 2
+      ttft_ms: 10593.91
+      total_ms: 10593.91
+      prompt_tokens: 16915
+      cached_tokens: 14906
+      thoughts_tokens: 0
+      output_tokens: 355
+      output_chars: 697
+      history_messages: 79
+      history_chars: 32646
+    streaming_t0:
+      status: SUCCESS
+      call_order: 1
+      ttft_ms: 4761.33
+      total_ms: 8484.41
+      prompt_tokens: 16915
+      cached_tokens: 14533
+      thoughts_tokens: 0
+      output_tokens: 352
+      output_chars: 688
+      history_messages: 79
+      history_chars: 32646
+    blocking_default:
+      status: SUCCESS
+      call_order: 3
+      ttft_ms: 11530.97
+      total_ms: 11530.97
+      prompt_tokens: 16915
+      cached_tokens: 14533
+      thoughts_tokens: 810
+      output_tokens: 287
+      output_chars: 570
+      history_messages: 79
+      history_chars: 32646
+    streaming_default:
+      status: SUCCESS
+      call_order: 4
+      ttft_ms: 8511.18
+      total_ms: 11751.0
+      prompt_tokens: 16915
+      cached_tokens: 14533
+      thoughts_tokens: 601
+      output_tokens: 308
+      output_chars: 604
+      history_messages: 79
+      history_chars: 32646
+- turn: 41
+  user_sim_ms: 2078.75
+  user_chars: 83
+  user_text: バックアップが取れていない大切なデータがあるのですが、修理と同時にそちらで有償のデータ復旧サービスを併用してお願いすることは可能でしょうか？対応可否を教えてください。
+  agent_canonical_chars: 687
+  history_chars_after_turn: 34104
+  variants:
+    blocking_t0:
+      status: SUCCESS
+      call_order: 2
+      ttft_ms: 6456.76
+      total_ms: 6456.76
+      prompt_tokens: 17309
+      cached_tokens: 15300
+      thoughts_tokens: 0
+      output_tokens: 397
+      output_chars: 763
+      history_messages: 81
+      history_chars: 33417
+    streaming_t0:
+      status: SUCCESS
+      call_order: 1
+      ttft_ms: 4437.73
+      total_ms: 8122.61
+      prompt_tokens: 17309
+      cached_tokens: 14906
+      thoughts_tokens: 0
+      output_tokens: 368
+      output_chars: 687
+      history_messages: 81
+      history_chars: 33417
+    blocking_default:
+      status: SUCCESS
+      call_order: 3
+      ttft_ms: 14540.5
+      total_ms: 14540.5
+      prompt_tokens: 17309
+      cached_tokens: 14906
+      thoughts_tokens: 1247
+      output_tokens: 293
+      output_chars: 544
+      history_messages: 81
+      history_chars: 33417
+    streaming_default:
+      status: SUCCESS
+      call_order: 4
+      ttft_ms: 5589.87
+      total_ms: 9084.96
+      prompt_tokens: 17309
+      cached_tokens: 14906
+      thoughts_tokens: 315
+      output_tokens: 349
+      output_chars: 653
+      history_messages: 81
+      history_chars: 33417
+- turn: 42
+  user_sim_ms: 1755.47
+  user_chars: 81
+  user_text: 仕事で使っているため修理期間中にPCがないと困るのですが、代替機やレンタルPCの貸出サービスなどは行っていますか？有償でも構わないので、利用可能か教えてください。
+  agent_canonical_chars: 700
+  history_chars_after_turn: 34885
+  variants:
+    blocking_t0:
+      status: SUCCESS
+      call_order: 2
+      ttft_ms: 6322.35
+      total_ms: 6322.35
+      prompt_tokens: 17721
+      cached_tokens: 15712
+      thoughts_tokens: 0
+      output_tokens: 382
+      output_chars: 699
+      history_messages: 83
+      history_chars: 34185
+    streaming_t0:
+      status: SUCCESS
+      call_order: 1
+      ttft_ms: 2164.86
+      total_ms: 6633.28
+      prompt_tokens: 17721
+      cached_tokens: 15300
+      thoughts_tokens: 0
+      output_tokens: 399
+      output_chars: 700
+      history_messages: 83
+      history_chars: 34185
+    blocking_default:
+      status: SUCCESS
+      call_order: 3
+      ttft_ms: 13783.0
+      total_ms: 13783.0
+      prompt_tokens: 17721
+      cached_tokens: 15300
+      thoughts_tokens: 960
+      output_tokens: 327
+      output_chars: 595
+      history_messages: 83
+      history_chars: 34185
+    streaming_default:
+      status: SUCCESS
+      call_order: 4
+      ttft_ms: 9935.13
+      total_ms: 11779.81
+      prompt_tokens: 17721
+      cached_tokens: 15300
+      thoughts_tokens: 675
+      output_tokens: 308
+      output_chars: 545
+      history_messages: 83
+      history_chars: 34185
+- turn: 43
+  user_sim_ms: 3129.71
+  user_chars: 91
+  user_text: PCが手元にない期間を短くしたいのですが、出張修理に切り替えることは可能でしょうか？また、利用できる条件や、自宅にエンジニアの方が来て当日に部品交換まで終わるのかも教えてほしいです。
+  agent_canonical_chars: 732
+  history_chars_after_turn: 35708
+  variants:
+    blocking_t0:
+      status: SUCCESS
+      call_order: 2
+      ttft_ms: 6118.69
+      total_ms: 6118.69
+      prompt_tokens: 18172
+      cached_tokens: 16163
+      thoughts_tokens: 0
+      output_tokens: 420
+      output_chars: 751
+      history_messages: 85
+      history_chars: 34976
+    streaming_t0:
+      status: SUCCESS
+      call_order: 1
+      ttft_ms: 2035.64
+      total_ms: 6589.72
+      prompt_tokens: 18172
+      cached_tokens: 15713
+      thoughts_tokens: 0
+      output_tokens: 390
+      output_chars: 732
+      history_messages: 85
+      history_chars: 34976
+    blocking_default:
+      status: SUCCESS
+      call_order: 3
+      ttft_ms: 11206.73
+      total_ms: 11206.73
+      prompt_tokens: 18172
+      cached_tokens: 15713
+      thoughts_tokens: 527
+      output_tokens: 366
+      output_chars: 647
+      history_messages: 85
+      history_chars: 34976
+    streaming_default:
+      status: SUCCESS
+      call_order: 4
+      ttft_ms: 12158.54
+      total_ms: 14541.26
+      prompt_tokens: 18172
+      cached_tokens: 15713
+      thoughts_tokens: 1035
+      output_tokens: 326
+      output_chars: 585
+      history_messages: 85
+      history_chars: 34976
+- turn: 44
+  user_sim_ms: 1753.45
+  user_chars: 86
+  user_text: もし水濡れなどで保証対象外と判定された場合、事前に見積もりの連絡はもらえるのでしょうか？また、金額を見て修理をキャンセルした際に診断料や返送費用がかかるかも教えてください。
+  agent_canonical_chars: 754
+  history_chars_after_turn: 36548
+  variants:
+    blocking_t0:
+      status: SUCCESS
+      call_order: 2
+      ttft_ms: 5859.54
+      total_ms: 5859.54
+      prompt_tokens: 18608
+      cached_tokens: 0
+      thoughts_tokens: 0
+      output_tokens: 399
+      output_chars: 728
+      history_messages: 87
+      history_chars: 35794
+    streaming_t0:
+      status: SUCCESS
+      call_order: 1
+      ttft_ms: 2023.26
+      total_ms: 6409.57
+      prompt_tokens: 18608
+      cached_tokens: 16163
+      thoughts_tokens: 0
+      output_tokens: 412
+      output_chars: 754
+      history_messages: 87
+      history_chars: 35794
+    blocking_default:
+      status: SUCCESS
+      call_order: 3
+      ttft_ms: 6981.55
+      total_ms: 6981.55
+      prompt_tokens: 18608
+      cached_tokens: 16163
+      thoughts_tokens: 0
+      output_tokens: 429
+      output_chars: 782
+      history_messages: 87
+      history_chars: 35794
+    streaming_default:
+      status: SUCCESS
+      call_order: 4
+      ttft_ms: 2734.16
+      total_ms: 6966.47
+      prompt_tokens: 18608
+      cached_tokens: 16163
+      thoughts_tokens: 0
+      output_tokens: 424
+      output_chars: 745
+      history_messages: 87
+      history_chars: 35794
+- turn: 45
+  user_sim_ms: 2023.61
+  user_chars: 85
+  user_text: もし修理代がかなり高額になってしまった場合、修理せずに御社の最新モデルへ特別割引で買い替えられるような下取り交換の制度はありますか？買い替えも視野に入れて検討したいです。
+  agent_canonical_chars: 781
+  history_chars_after_turn: 37414
+  variants:
+    blocking_t0:
+      status: SUCCESS
+      call_order: 2
+      ttft_ms: 6772.14
+      total_ms: 6772.14
+      prompt_tokens: 19065
+      cached_tokens: 17055
+      thoughts_tokens: 0
+      output_tokens: 425
+      output_chars: 796
+      history_messages: 89
+      history_chars: 36633
+    streaming_t0:
+      status: SUCCESS
+      call_order: 1
+      ttft_ms: 1737.26
+      total_ms: 6030.53
+      prompt_tokens: 19065
+      cached_tokens: 16600
+      thoughts_tokens: 0
+      output_tokens: 401
+      output_chars: 781
+      history_messages: 89
+      history_chars: 36633
+    blocking_default:
+      status: SUCCESS
+      call_order: 3
+      ttft_ms: 8218.59
+      total_ms: 8218.59
+      prompt_tokens: 19065
+      cached_tokens: 16600
+      thoughts_tokens: 0
+      output_tokens: 427
+      output_chars: 799
+      history_messages: 89
+      history_chars: 36633
+    streaming_default:
+      status: SUCCESS
+      call_order: 4
+      ttft_ms: 7804.03
+      total_ms: 11446.61
+      prompt_tokens: 19065
+      cached_tokens: 17055
+      thoughts_tokens: 349
+      output_tokens: 333
+      output_chars: 626
+      history_messages: 89
+      history_chars: 36633
+- turn: 46
+  user_sim_ms: 1688.69
+  user_chars: 81
+  user_text: 修理後に手元へ戻ってきた際、まず確認しておくべき動作チェック項目はありますか？また、もし同じ不具合が再発した場合の修理保証期間がどのくらいあるのかも知りたいです。
+  agent_canonical_chars: 845
+  history_chars_after_turn: 38340
+  variants:
+    blocking_t0:
+      status: SUCCESS
+      call_order: 2
+      ttft_ms: 9358.31
+      total_ms: 9358.31
+      prompt_tokens: 19512
+      cached_tokens: 17502
+      thoughts_tokens: 0
+      output_tokens: 444
+      output_chars: 785
+      history_messages: 91
+      history_chars: 37495
+    streaming_t0:
+      status: SUCCESS
+      call_order: 1
+      ttft_ms: 2582.66
+      total_ms: 7217.42
+      prompt_tokens: 19512
+      cached_tokens: 17056
+      thoughts_tokens: 0
+      output_tokens: 458
+      output_chars: 845
+      history_messages: 91
+      history_chars: 37495
+    blocking_default:
+      status: SUCCESS
+      call_order: 3
+      ttft_ms: 17289.02
+      total_ms: 17289.02
+      prompt_tokens: 19512
+      cached_tokens: 17056
+      thoughts_tokens: 1298
+      output_tokens: 330
+      output_chars: 590
+      history_messages: 91
+      history_chars: 37495
+    streaming_default:
+      status: SUCCESS
+      call_order: 4
+      ttft_ms: 12337.94
+      total_ms: 13979.1
+      prompt_tokens: 19512
+      cached_tokens: 17056
+      thoughts_tokens: 1180
+      output_tokens: 307
+      output_chars: 548
+      history_messages: 91
+      history_chars: 37495
+- turn: 47
+  user_sim_ms: 2338.08
+  user_chars: 74
+  user_text: 戻ってきたPCにUSBメモリからデータを復元したいのですが、感染防止のウイルススキャン手順や、元の場所に正しくフォルダを戻す際の注意点はありますか？
+  agent_canonical_chars: 898
+  history_chars_after_turn: 39312
+  variants:
+    blocking_t0:
+      status: SUCCESS
+      call_order: 2
+      ttft_ms: 6651.07
+      total_ms: 6651.07
+      prompt_tokens: 20008
+      cached_tokens: 17998
+      thoughts_tokens: 0
+      output_tokens: 404
+      output_chars: 805
+      history_messages: 93
+      history_chars: 38414
+    streaming_t0:
+      status: SUCCESS
+      call_order: 1
+      ttft_ms: 3007.89
+      total_ms: 7762.7
+      prompt_tokens: 20008
+      cached_tokens: 17504
+      thoughts_tokens: 0
+      output_tokens: 441
+      output_chars: 898
+      history_messages: 93
+      history_chars: 38414
+    blocking_default:
+      status: SUCCESS
+      call_order: 3
+      ttft_ms: 9484.79
+      total_ms: 9484.79
+      prompt_tokens: 20008
+      cached_tokens: 17504
+      thoughts_tokens: 370
+      output_tokens: 311
+      output_chars: 613
+      history_messages: 93
+      history_chars: 38414
+    streaming_default:
+      status: SUCCESS
+      call_order: 4
+      ttft_ms: 12327.96
+      total_ms: 14391.86
+      prompt_tokens: 20008
+      cached_tokens: 17504
+      thoughts_tokens: 1278
+      output_tokens: 322
+      output_chars: 636
+      history_messages: 93
+      history_chars: 38414
+- turn: 48
+  user_sim_ms: 2372.88
+  user_chars: 94
+  user_text: 今後また突然PCが動かなくなった時に備えたいのですが、外付けSSDへシステム全体のイメージバックアップを定期的に自動作成する設定やおすすめの手順はありますか？詳しく教えていただきたいです。
+  agent_canonical_chars: 918
+  history_chars_after_turn: 40324
+  variants:
+    blocking_t0:
+      status: SUCCESS
+      call_order: 2
+      ttft_ms: 6174.64
+      total_ms: 6174.64
+      prompt_tokens: 20495
+      cached_tokens: 18485
+      thoughts_tokens: 0
+      output_tokens: 509
+      output_chars: 989
+      history_messages: 95
+      history_chars: 39406
+    streaming_t0:
+      status: SUCCESS
+      call_order: 1
+      ttft_ms: 1911.86
+      total_ms: 6159.86
+      prompt_tokens: 20495
+      cached_tokens: 18000
+      thoughts_tokens: 0
+      output_tokens: 466
+      output_chars: 918
+      history_messages: 95
+      history_chars: 39406
+    blocking_default:
+      status: SUCCESS
+      call_order: 3
+      ttft_ms: 14571.36
+      total_ms: 14571.36
+      prompt_tokens: 20495
+      cached_tokens: 18000
+      thoughts_tokens: 1132
+      output_tokens: 335
+      output_chars: 649
+      history_messages: 95
+      history_chars: 39406
+    streaming_default:
+      status: SUCCESS
+      call_order: 4
+      ttft_ms: 12109.44
+      total_ms: 13740.32
+      prompt_tokens: 20495
+      cached_tokens: 18000
+      thoughts_tokens: 1150
+      output_tokens: 298
+      output_chars: 577
+      history_messages: 95
+      history_chars: 39406
+- turn: 49
+  user_sim_ms: 2013.5
+  user_chars: 92
+  user_text: 外付けSSDに加えてOneDrive等のクラウドも併用したいのですが、デスクトップや書類フォルダを自動同期して常時保護するおすすめの設定手順はありますか？詳しく教えていただきたいです。
+  agent_canonical_chars: 876
+  history_chars_after_turn: 41292
+  variants:
+    blocking_t0:
+      status: SUCCESS
+      call_order: 2
+      ttft_ms: 7558.59
+      total_ms: 7558.59
+      prompt_tokens: 21004
+      cached_tokens: 18994
+      thoughts_tokens: 0
+      output_tokens: 541
+      output_chars: 1057
+      history_messages: 97
+      history_chars: 40416
+    streaming_t0:
+      status: SUCCESS
+      call_order: 1
+      ttft_ms: 1756.51
+      total_ms: 6061.34
+      prompt_tokens: 21004
+      cached_tokens: 18487
+      thoughts_tokens: 0
+      output_tokens: 445
+      output_chars: 876
+      history_messages: 97
+      history_chars: 40416
+    blocking_default:
+      status: SUCCESS
+      call_order: 3
+      ttft_ms: 12284.43
+      total_ms: 12284.43
+      prompt_tokens: 21004
+      cached_tokens: 18487
+      thoughts_tokens: 777
+      output_tokens: 352
+      output_chars: 699
+      history_messages: 97
+      history_chars: 40416
+    streaming_default:
+      status: SUCCESS
+      call_order: 4
+      ttft_ms: 7605.62
+      total_ms: 10434.01
+      prompt_tokens: 21004
+      cached_tokens: 18487
+      thoughts_tokens: 668
+      output_tokens: 367
+      output_chars: 736
+      history_messages: 97
+      history_chars: 40416
+- turn: 50
+  user_sim_ms: 1740.45
+  user_chars: 87
+  user_text: バックアップ体制も整えられそうで安心しました！今回のトラブルを踏まえ、PCを長く安定して使うために普段から意識すべき日常メンテナンスのポイントを3つほど教えていただけますか？
+  agent_canonical_chars: 902
+  history_chars_after_turn: 42281
+  variants:
+    blocking_t0:
+      status: SUCCESS
+      call_order: 2
+      ttft_ms: 8073.82
+      total_ms: 8073.82
+      prompt_tokens: 21490
+      cached_tokens: 19480
+      thoughts_tokens: 0
+      output_tokens: 588
+      output_chars: 999
+      history_messages: 99
+      history_chars: 41379
+    streaming_t0:
+      status: SUCCESS
+      call_order: 1
+      ttft_ms: 4082.79
+      total_ms: 9553.78
+      prompt_tokens: 21490
+      cached_tokens: 18995
+      thoughts_tokens: 0
+      output_tokens: 549
+      output_chars: 902
+      history_messages: 99
+      history_chars: 41379
+    blocking_default:
+      status: SUCCESS
+      call_order: 3
+      ttft_ms: 16913.45
+      total_ms: 16913.45
+      prompt_tokens: 21490
+      cached_tokens: 18995
+      thoughts_tokens: 1316
+      output_tokens: 415
+      output_chars: 676
+      history_messages: 99
+      history_chars: 41379
+    streaming_default:
+      status: SUCCESS
+      call_order: 4
+      ttft_ms: 16498.16
+      total_ms: 18670.8
+      prompt_tokens: 21490
+      cached_tokens: 18995
+      thoughts_tokens: 1584
+      output_tokens: 354
+      output_chars: 591
+      history_messages: 99
+      history_chars: 41379
+timeline_snapshots:
+  turn_1:
+    blocking_t0:
+      overall_timing:
+        started_at: 2026-11-13 23:05:44.863 JST
+        first_token_at: 2026-11-13 23:05:50.281 JST
+        completed_at: 2026-11-13 23:05:50.281 JST
+        time_to_first_token_ms: 5418.03
+        stream_completed_ms: 5418.03
+        ttft_ms: 5418.03
+        total_ms: 5418.03
+      timeline_series:
+        gemini:
+        - t_ms: 0.0
+          chars: 0
+          event: start
+        - t_ms: 5418.03
+          chars: 0
+          event: blocking_wait_end
+        - t_ms: 5418.03
+          chars: 505
+          event: blocking_completed
+        client_output:
+        - t_ms: 0.0
+          chars: 0
+          event: start
+        - t_ms: 5418.03
+          chars: 0
+          event: blocking_wait_end
+        - t_ms: 5418.03
+          chars: 505
+          event: blocking_completed
+    streaming_t0:
+      overall_timing:
+        started_at: 2026-11-13 23:05:32.665 JST
+        first_token_at: 2026-11-13 23:05:43.214 JST
+        completed_at: 2026-11-13 23:05:44.860 JST
+        time_to_first_token_ms: 10548.86
+        stream_completed_ms: 12194.82
+        ttft_ms: 10548.86
+        total_ms: 12194.82
+      timeline_series:
+        gemini:
+        - t_ms: 0.0
+          chars: 0
+          event: start
+        - t_ms: 10548.86
+          chars: 0
+          event: thinking_end
+        - t_ms: 10548.86
+          chars: 52
+          event: chunk_1
+        - t_ms: 10671.18
+          chars: 99
+          event: chunk_2
+        - t_ms: 10836.13
+          chars: 153
+          event: chunk_3
+        - t_ms: 11030.7
+          chars: 208
+          event: chunk_4
+        - t_ms: 11183.97
+          chars: 258
+          event: chunk_5
+        - t_ms: 11280.85
+          chars: 300
+          event: chunk_6
+        - t_ms: 11466.92
+          chars: 359
+          event: chunk_7
+        - t_ms: 11595.51
+          chars: 407
+          event: chunk_8
+        - t_ms: 11753.89
+          chars: 458
+          event: chunk_9
+        - t_ms: 11998.58
+          chars: 517
+          event: chunk_10
+        - t_ms: 12178.72
+          chars: 563
+          event: chunk_11
+        client_output:
+        - t_ms: 0.0
+          chars: 0
+          event: start
+        - t_ms: 10548.86
+          chars: 0
+          event: thinking_end
+        - t_ms: 10548.86
+          chars: 52
+          event: chunk_1
+        - t_ms: 10671.18
+          chars: 99
+          event: chunk_2
+        - t_ms: 10836.13
+          chars: 153
+          event: chunk_3
+        - t_ms: 11030.7
+          chars: 208
+          event: chunk_4
+        - t_ms: 11183.97
+          chars: 258
+          event: chunk_5
+        - t_ms: 11280.85
+          chars: 300
+          event: chunk_6
+        - t_ms: 11466.92
+          chars: 359
+          event: chunk_7
+        - t_ms: 11595.51
+          chars: 407
+          event: chunk_8
+        - t_ms: 11753.89
+          chars: 458
+          event: chunk_9
+        - t_ms: 11998.58
+          chars: 517
+          event: chunk_10
+        - t_ms: 12178.72
+          chars: 563
+          event: chunk_11
+    blocking_default:
+      overall_timing:
+        started_at: 2026-11-13 23:05:44.864 JST
+        first_token_at: 2026-11-13 23:05:53.595 JST
+        completed_at: 2026-11-13 23:05:53.595 JST
+        time_to_first_token_ms: 8731.24
+        stream_completed_ms: 8731.24
+        ttft_ms: 8731.24
+        total_ms: 8731.24
+      timeline_series:
+        gemini:
+        - t_ms: 0.0
+          chars: 0
+          event: start
+        - t_ms: 8731.24
+          chars: 0
+          event: blocking_wait_end
+        - t_ms: 8731.24
+          chars: 484
+          event: blocking_completed
+        client_output:
+        - t_ms: 0.0
+          chars: 0
+          event: start
+        - t_ms: 8731.24
+          chars: 0
+          event: blocking_wait_end
+        - t_ms: 8731.24
+          chars: 484
+          event: blocking_completed
+    streaming_default:
+      overall_timing:
+        started_at: 2026-11-13 23:05:44.866 JST
+        first_token_at: 2026-11-13 23:05:55.277 JST
+        completed_at: 2026-11-13 23:05:56.595 JST
+        time_to_first_token_ms: 10410.51
+        stream_completed_ms: 11729.0
+        ttft_ms: 10410.51
+        total_ms: 11729.0
+      timeline_series:
+        gemini:
+        - t_ms: 0.0
+          chars: 0
+          event: start
+        - t_ms: 10410.51
+          chars: 0
+          event: thinking_end
+        - t_ms: 10410.51
+          chars: 35
+          event: chunk_1
+        - t_ms: 10523.5
+          chars: 78
+          event: chunk_2
+        - t_ms: 10639.16
+          chars: 126
+          event: chunk_3
+        - t_ms: 10791.0
+          chars: 171
+          event: chunk_4
+        - t_ms: 10882.23
+          chars: 215
+          event: chunk_5
+        - t_ms: 10992.6
+          chars: 261
+          event: chunk_6
+        - t_ms: 11119.24
+          chars: 303
+          event: chunk_7
+        - t_ms: 11241.21
+          chars: 343
+          event: chunk_8
+        - t_ms: 11357.89
+          chars: 385
+          event: chunk_9
+        - t_ms: 11502.57
+          chars: 431
+          event: chunk_10
+        - t_ms: 11601.83
+          chars: 480
+          event: chunk_11
+        - t_ms: 11712.33
+          chars: 513
+          event: chunk_12
+        client_output:
+        - t_ms: 0.0
+          chars: 0
+          event: start
+        - t_ms: 10410.51
+          chars: 0
+          event: thinking_end
+        - t_ms: 10410.51
+          chars: 35
+          event: chunk_1
+        - t_ms: 10523.5
+          chars: 78
+          event: chunk_2
+        - t_ms: 10639.16
+          chars: 126
+          event: chunk_3
+        - t_ms: 10791.0
+          chars: 171
+          event: chunk_4
+        - t_ms: 10882.23
+          chars: 215
+          event: chunk_5
+        - t_ms: 10992.6
+          chars: 261
+          event: chunk_6
+        - t_ms: 11119.24
+          chars: 303
+          event: chunk_7
+        - t_ms: 11241.21
+          chars: 343
+          event: chunk_8
+        - t_ms: 11357.89
+          chars: 385
+          event: chunk_9
+        - t_ms: 11502.57
+          chars: 431
+          event: chunk_10
+        - t_ms: 11601.83
+          chars: 480
+          event: chunk_11
+        - t_ms: 11712.33
+          chars: 513
+          event: chunk_12
+  turn_10:
+    blocking_t0:
+      overall_timing:
+        started_at: 2026-11-13 23:06:59.692 JST
+        first_token_at: 2026-11-13 23:07:05.326 JST
+        completed_at: 2026-11-13 23:07:05.326 JST
+        time_to_first_token_ms: 5634.6
+        stream_completed_ms: 5634.6
+        ttft_ms: 5634.6
+        total_ms: 5634.6
+      timeline_series:
+        gemini:
+        - t_ms: 0.0
+          chars: 0
+          event: start
+        - t_ms: 5634.6
+          chars: 0
+          event: blocking_wait_end
+        - t_ms: 5634.6
+          chars: 717
+          event: blocking_completed
+        client_output:
+        - t_ms: 0.0
+          chars: 0
+          event: start
+        - t_ms: 5634.6
+          chars: 0
+          event: blocking_wait_end
+        - t_ms: 5634.6
+          chars: 717
+          event: blocking_completed
+    streaming_t0:
+      overall_timing:
+        started_at: 2026-11-13 23:06:55.008 JST
+        first_token_at: 2026-11-13 23:06:56.090 JST
+        completed_at: 2026-11-13 23:06:59.689 JST
+        time_to_first_token_ms: 1082.12
+        stream_completed_ms: 4681.76
+        ttft_ms: 1082.12
+        total_ms: 4681.76
+      timeline_series:
+        gemini:
+        - t_ms: 0.0
+          chars: 0
+          event: start
+        - t_ms: 1082.12
+          chars: 0
+          event: thinking_end
+        - t_ms: 1082.12
+          chars: 1
+          event: chunk_1
+        - t_ms: 1202.19
+          chars: 35
+          event: chunk_2
+        - t_ms: 1450.03
+          chars: 81
+          event: chunk_3
+        - t_ms: 1665.53
+          chars: 126
+          event: chunk_4
+        - t_ms: 2065.6
+          chars: 177
+          event: chunk_5
+        - t_ms: 2306.27
+          chars: 220
+          event: chunk_6
+        - t_ms: 2430.47
+          chars: 270
+          event: chunk_7
+        - t_ms: 2606.35
+          chars: 311
+          event: chunk_8
+        - t_ms: 2890.56
+          chars: 369
+          event: chunk_9
+        - t_ms: 3086.0
+          chars: 418
+          event: chunk_10
+        - t_ms: 3369.22
+          chars: 471
+          event: chunk_11
+        - t_ms: 3564.9
+          chars: 525
+          event: chunk_12
+        - t_ms: 3949.7
+          chars: 578
+          event: chunk_13
+        - t_ms: 4255.03
+          chars: 639
+          event: chunk_14
+        - t_ms: 4576.7
+          chars: 691
+          event: chunk_15
+        - t_ms: 4672.25
+          chars: 716
+          event: chunk_16
+        client_output:
+        - t_ms: 0.0
+          chars: 0
+          event: start
+        - t_ms: 1082.12
+          chars: 0
+          event: thinking_end
+        - t_ms: 1082.12
+          chars: 1
+          event: chunk_1
+        - t_ms: 1202.19
+          chars: 35
+          event: chunk_2
+        - t_ms: 1450.03
+          chars: 81
+          event: chunk_3
+        - t_ms: 1665.53
+          chars: 126
+          event: chunk_4
+        - t_ms: 2065.6
+          chars: 177
+          event: chunk_5
+        - t_ms: 2306.27
+          chars: 220
+          event: chunk_6
+        - t_ms: 2430.47
+          chars: 270
+          event: chunk_7
+        - t_ms: 2606.35
+          chars: 311
+          event: chunk_8
+        - t_ms: 2890.56
+          chars: 369
+          event: chunk_9
+        - t_ms: 3086.0
+          chars: 418
+          event: chunk_10
+        - t_ms: 3369.22
+          chars: 471
+          event: chunk_11
+        - t_ms: 3564.9
+          chars: 525
+          event: chunk_12
+        - t_ms: 3949.7
+          chars: 578
+          event: chunk_13
+        - t_ms: 4255.03
+          chars: 639
+          event: chunk_14
+        - t_ms: 4576.7
+          chars: 691
+          event: chunk_15
+        - t_ms: 4672.25
+          chars: 716
+          event: chunk_16
+    blocking_default:
+      overall_timing:
+        started_at: 2026-11-13 23:06:59.698 JST
+        first_token_at: 2026-11-13 23:07:13.459 JST
+        completed_at: 2026-11-13 23:07:13.459 JST
+        time_to_first_token_ms: 13761.45
+        stream_completed_ms: 13761.45
+        ttft_ms: 13761.45
+        total_ms: 13761.45
+      timeline_series:
+        gemini:
+        - t_ms: 0.0
+          chars: 0
+          event: start
+        - t_ms: 13761.45
+          chars: 0
+          event: blocking_wait_end
+        - t_ms: 13761.45
+          chars: 546
+          event: blocking_completed
+        client_output:
+        - t_ms: 0.0
+          chars: 0
+          event: start
+        - t_ms: 13761.45
+          chars: 0
+          event: blocking_wait_end
+        - t_ms: 13761.45
+          chars: 546
+          event: blocking_completed
+    streaming_default:
+      overall_timing:
+        started_at: 2026-11-13 23:06:59.703 JST
+        first_token_at: 2026-11-13 23:07:06.637 JST
+        completed_at: 2026-11-13 23:07:09.426 JST
+        time_to_first_token_ms: 6933.57
+        stream_completed_ms: 9723.3
+        ttft_ms: 6933.57
+        total_ms: 9723.3
+      timeline_series:
+        gemini:
+        - t_ms: 0.0
+          chars: 0
+          event: start
+        - t_ms: 6933.57
+          chars: 0
+          event: thinking_end
+        - t_ms: 6933.57
+          chars: 53
+          event: chunk_1
+        - t_ms: 7130.21
+          chars: 97
+          event: chunk_2
+        - t_ms: 7537.04
+          chars: 147
+          event: chunk_3
+        - t_ms: 7696.44
+          chars: 194
+          event: chunk_4
+        - t_ms: 7904.38
+          chars: 238
+          event: chunk_5
+        - t_ms: 8115.81
+          chars: 288
+          event: chunk_6
+        - t_ms: 8443.16
+          chars: 339
+          event: chunk_7
+        - t_ms: 8639.74
+          chars: 388
+          event: chunk_8
+        - t_ms: 8985.37
+          chars: 439
+          event: chunk_9
+        - t_ms: 9345.27
+          chars: 494
+          event: chunk_10
+        - t_ms: 9525.08
+          chars: 547
+          event: chunk_11
+        - t_ms: 9708.42
+          chars: 578
+          event: chunk_12
+        client_output:
+        - t_ms: 0.0
+          chars: 0
+          event: start
+        - t_ms: 6933.57
+          chars: 0
+          event: thinking_end
+        - t_ms: 6933.57
+          chars: 53
+          event: chunk_1
+        - t_ms: 7130.21
+          chars: 97
+          event: chunk_2
+        - t_ms: 7537.04
+          chars: 147
+          event: chunk_3
+        - t_ms: 7696.44
+          chars: 194
+          event: chunk_4
+        - t_ms: 7904.38
+          chars: 238
+          event: chunk_5
+        - t_ms: 8115.81
+          chars: 288
+          event: chunk_6
+        - t_ms: 8443.16
+          chars: 339
+          event: chunk_7
+        - t_ms: 8639.74
+          chars: 388
+          event: chunk_8
+        - t_ms: 8985.37
+          chars: 439
+          event: chunk_9
+        - t_ms: 9345.27
+          chars: 494
+          event: chunk_10
+        - t_ms: 9525.08
+          chars: 547
+          event: chunk_11
+        - t_ms: 9708.42
+          chars: 578
+          event: chunk_12
+  turn_20:
+    blocking_t0:
+      overall_timing:
+        started_at: 2026-11-13 23:08:27.059 JST
+        first_token_at: 2026-11-13 23:08:35.148 JST
+        completed_at: 2026-11-13 23:08:35.148 JST
+        time_to_first_token_ms: 8088.96
+        stream_completed_ms: 8088.96
+        ttft_ms: 8088.96
+        total_ms: 8088.96
+      timeline_series:
+        gemini:
+        - t_ms: 0.0
+          chars: 0
+          event: start
+        - t_ms: 8088.96
+          chars: 0
+          event: blocking_wait_end
+        - t_ms: 8088.96
+          chars: 854
+          event: blocking_completed
+        client_output:
+        - t_ms: 0.0
+          chars: 0
+          event: start
+        - t_ms: 8088.96
+          chars: 0
+          event: blocking_wait_end
+        - t_ms: 8088.96
+          chars: 854
+          event: blocking_completed
+    streaming_t0:
+      overall_timing:
+        started_at: 2026-11-13 23:08:21.688 JST
+        first_token_at: 2026-11-13 23:08:23.330 JST
+        completed_at: 2026-11-13 23:08:27.056 JST
+        time_to_first_token_ms: 1641.41
+        stream_completed_ms: 5368.36
+        ttft_ms: 1641.41
+        total_ms: 5368.36
+      timeline_series:
+        gemini:
+        - t_ms: 0.0
+          chars: 0
+          event: start
+        - t_ms: 1641.41
+          chars: 0
+          event: thinking_end
+        - t_ms: 1641.41
+          chars: 3
+          event: chunk_1
+        - t_ms: 1878.41
+          chars: 31
+          event: chunk_2
+        - t_ms: 2101.75
+          chars: 73
+          event: chunk_3
+        - t_ms: 2400.21
+          chars: 125
+          event: chunk_4
+        - t_ms: 2585.82
+          chars: 182
+          event: chunk_5
+        - t_ms: 2802.33
+          chars: 230
+          event: chunk_6
+        - t_ms: 2995.19
+          chars: 277
+          event: chunk_7
+        - t_ms: 3199.04
+          chars: 323
+          event: chunk_8
+        - t_ms: 3446.83
+          chars: 376
+          event: chunk_9
+        - t_ms: 3624.08
+          chars: 418
+          event: chunk_10
+        - t_ms: 3881.79
+          chars: 468
+          event: chunk_11
+        - t_ms: 4045.22
+          chars: 517
+          event: chunk_12
+        - t_ms: 4214.88
+          chars: 568
+          event: chunk_13
+        - t_ms: 4575.66
+          chars: 640
+          event: chunk_14
+        - t_ms: 4813.19
+          chars: 694
+          event: chunk_15
+        - t_ms: 5035.94
+          chars: 739
+          event: chunk_16
+        - t_ms: 5228.84
+          chars: 790
+          event: chunk_17
+        - t_ms: 5359.16
+          chars: 810
+          event: chunk_18
+        client_output:
+        - t_ms: 0.0
+          chars: 0
+          event: start
+        - t_ms: 1641.41
+          chars: 0
+          event: thinking_end
+        - t_ms: 1641.41
+          chars: 3
+          event: chunk_1
+        - t_ms: 1878.41
+          chars: 31
+          event: chunk_2
+        - t_ms: 2101.75
+          chars: 73
+          event: chunk_3
+        - t_ms: 2400.21
+          chars: 125
+          event: chunk_4
+        - t_ms: 2585.82
+          chars: 182
+          event: chunk_5
+        - t_ms: 2802.33
+          chars: 230
+          event: chunk_6
+        - t_ms: 2995.19
+          chars: 277
+          event: chunk_7
+        - t_ms: 3199.04
+          chars: 323
+          event: chunk_8
+        - t_ms: 3446.83
+          chars: 376
+          event: chunk_9
+        - t_ms: 3624.08
+          chars: 418
+          event: chunk_10
+        - t_ms: 3881.79
+          chars: 468
+          event: chunk_11
+        - t_ms: 4045.22
+          chars: 517
+          event: chunk_12
+        - t_ms: 4214.88
+          chars: 568
+          event: chunk_13
+        - t_ms: 4575.66
+          chars: 640
+          event: chunk_14
+        - t_ms: 4813.19
+          chars: 694
+          event: chunk_15
+        - t_ms: 5035.94
+          chars: 739
+          event: chunk_16
+        - t_ms: 5228.84
+          chars: 790
+          event: chunk_17
+        - t_ms: 5359.16
+          chars: 810
+          event: chunk_18
+    blocking_default:
+      overall_timing:
+        started_at: 2026-11-13 23:08:27.071 JST
+        first_token_at: 2026-11-13 23:08:38.586 JST
+        completed_at: 2026-11-13 23:08:38.586 JST
+        time_to_first_token_ms: 11514.82
+        stream_completed_ms: 11514.82
+        ttft_ms: 11514.82
+        total_ms: 11514.82
+      timeline_series:
+        gemini:
+        - t_ms: 0.0
+          chars: 0
+          event: start
+        - t_ms: 11514.82
+          chars: 0
+          event: blocking_wait_end
+        - t_ms: 11514.82
+          chars: 666
+          event: blocking_completed
+        client_output:
+        - t_ms: 0.0
+          chars: 0
+          event: start
+        - t_ms: 11514.82
+          chars: 0
+          event: blocking_wait_end
+        - t_ms: 11514.82
+          chars: 666
+          event: blocking_completed
+    streaming_default:
+      overall_timing:
+        started_at: 2026-11-13 23:08:27.082 JST
+        first_token_at: 2026-11-13 23:08:32.477 JST
+        completed_at: 2026-11-13 23:08:35.634 JST
+        time_to_first_token_ms: 5394.05
+        stream_completed_ms: 8551.42
+        ttft_ms: 5394.05
+        total_ms: 8551.42
+      timeline_series:
+        gemini:
+        - t_ms: 0.0
+          chars: 0
+          event: start
+        - t_ms: 5394.05
+          chars: 0
+          event: thinking_end
+        - t_ms: 5394.05
+          chars: 34
+          event: chunk_1
+        - t_ms: 5701.2
+          chars: 93
+          event: chunk_2
+        - t_ms: 5870.98
+          chars: 140
+          event: chunk_3
+        - t_ms: 6052.29
+          chars: 191
+          event: chunk_4
+        - t_ms: 6227.31
+          chars: 239
+          event: chunk_5
+        - t_ms: 6494.34
+          chars: 284
+          event: chunk_6
+        - t_ms: 6766.25
+          chars: 338
+          event: chunk_7
+        - t_ms: 6975.99
+          chars: 383
+          event: chunk_8
+        - t_ms: 7163.52
+          chars: 439
+          event: chunk_9
+        - t_ms: 7392.86
+          chars: 507
+          event: chunk_10
+        - t_ms: 7666.21
+          chars: 560
+          event: chunk_11
+        - t_ms: 7904.49
+          chars: 610
+          event: chunk_12
+        - t_ms: 8213.67
+          chars: 666
+          event: chunk_13
+        - t_ms: 8537.35
+          chars: 724
+          event: chunk_14
+        client_output:
+        - t_ms: 0.0
+          chars: 0
+          event: start
+        - t_ms: 5394.05
+          chars: 0
+          event: thinking_end
+        - t_ms: 5394.05
+          chars: 34
+          event: chunk_1
+        - t_ms: 5701.2
+          chars: 93
+          event: chunk_2
+        - t_ms: 5870.98
+          chars: 140
+          event: chunk_3
+        - t_ms: 6052.29
+          chars: 191
+          event: chunk_4
+        - t_ms: 6227.31
+          chars: 239
+          event: chunk_5
+        - t_ms: 6494.34
+          chars: 284
+          event: chunk_6
+        - t_ms: 6766.25
+          chars: 338
+          event: chunk_7
+        - t_ms: 6975.99
+          chars: 383
+          event: chunk_8
+        - t_ms: 7163.52
+          chars: 439
+          event: chunk_9
+        - t_ms: 7392.86
+          chars: 507
+          event: chunk_10
+        - t_ms: 7666.21
+          chars: 560
+          event: chunk_11
+        - t_ms: 7904.49
+          chars: 610
+          event: chunk_12
+        - t_ms: 8213.67
+          chars: 666
+          event: chunk_13
+        - t_ms: 8537.35
+          chars: 724
+          event: chunk_14
+  turn_30:
+    blocking_t0:
+      overall_timing:
+        started_at: 2026-11-13 23:09:59.365 JST
+        first_token_at: 2026-11-13 23:10:04.991 JST
+        completed_at: 2026-11-13 23:10:04.991 JST
+        time_to_first_token_ms: 5626.07
+        stream_completed_ms: 5626.07
+        ttft_ms: 5626.07
+        total_ms: 5626.07
+      timeline_series:
+        gemini:
+        - t_ms: 0.0
+          chars: 0
+          event: start
+        - t_ms: 5626.07
+          chars: 0
+          event: blocking_wait_end
+        - t_ms: 5626.07
+          chars: 873
+          event: blocking_completed
+        client_output:
+        - t_ms: 0.0
+          chars: 0
+          event: start
+        - t_ms: 5626.07
+          chars: 0
+          event: blocking_wait_end
+        - t_ms: 5626.07
+          chars: 873
+          event: blocking_completed
+    streaming_t0:
+      overall_timing:
+        started_at: 2026-11-13 23:09:52.508 JST
+        first_token_at: 2026-11-13 23:09:56.551 JST
+        completed_at: 2026-11-13 23:09:59.362 JST
+        time_to_first_token_ms: 4042.78
+        stream_completed_ms: 6854.72
+        ttft_ms: 4042.78
+        total_ms: 6854.72
+      timeline_series:
+        gemini:
+        - t_ms: 0.0
+          chars: 0
+          event: start
+        - t_ms: 4042.78
+          chars: 0
+          event: thinking_end
+        - t_ms: 4042.78
+          chars: 30
+          event: chunk_1
+        - t_ms: 4043.34
+          chars: 77
+          event: chunk_2
+        - t_ms: 4043.85
+          chars: 119
+          event: chunk_3
+        - t_ms: 4044.27
+          chars: 172
+          event: chunk_4
+        - t_ms: 4044.69
+          chars: 231
+          event: chunk_5
+        - t_ms: 4045.08
+          chars: 274
+          event: chunk_6
+        - t_ms: 4045.52
+          chars: 328
+          event: chunk_7
+        - t_ms: 4046.09
+          chars: 368
+          event: chunk_8
+        - t_ms: 4190.59
+          chars: 403
+          event: chunk_9
+        - t_ms: 4516.57
+          chars: 444
+          event: chunk_10
+        - t_ms: 4692.67
+          chars: 505
+          event: chunk_11
+        - t_ms: 4908.45
+          chars: 561
+          event: chunk_12
+        - t_ms: 5267.59
+          chars: 609
+          event: chunk_13
+        - t_ms: 5536.79
+          chars: 656
+          event: chunk_14
+        - t_ms: 5700.8
+          chars: 698
+          event: chunk_15
+        - t_ms: 5955.79
+          chars: 748
+          event: chunk_16
+        - t_ms: 6252.5
+          chars: 794
+          event: chunk_17
+        - t_ms: 6572.91
+          chars: 849
+          event: chunk_18
+        - t_ms: 6753.2
+          chars: 899
+          event: chunk_19
+        - t_ms: 6838.99
+          chars: 916
+          event: chunk_20
+        client_output:
+        - t_ms: 0.0
+          chars: 0
+          event: start
+        - t_ms: 4042.78
+          chars: 0
+          event: thinking_end
+        - t_ms: 4042.78
+          chars: 30
+          event: chunk_1
+        - t_ms: 4043.34
+          chars: 77
+          event: chunk_2
+        - t_ms: 4043.85
+          chars: 119
+          event: chunk_3
+        - t_ms: 4044.27
+          chars: 172
+          event: chunk_4
+        - t_ms: 4044.69
+          chars: 231
+          event: chunk_5
+        - t_ms: 4045.08
+          chars: 274
+          event: chunk_6
+        - t_ms: 4045.52
+          chars: 328
+          event: chunk_7
+        - t_ms: 4046.09
+          chars: 368
+          event: chunk_8
+        - t_ms: 4190.59
+          chars: 403
+          event: chunk_9
+        - t_ms: 4516.57
+          chars: 444
+          event: chunk_10
+        - t_ms: 4692.67
+          chars: 505
+          event: chunk_11
+        - t_ms: 4908.45
+          chars: 561
+          event: chunk_12
+        - t_ms: 5267.59
+          chars: 609
+          event: chunk_13
+        - t_ms: 5536.79
+          chars: 656
+          event: chunk_14
+        - t_ms: 5700.8
+          chars: 698
+          event: chunk_15
+        - t_ms: 5955.79
+          chars: 748
+          event: chunk_16
+        - t_ms: 6252.5
+          chars: 794
+          event: chunk_17
+        - t_ms: 6572.91
+          chars: 849
+          event: chunk_18
+        - t_ms: 6753.2
+          chars: 899
+          event: chunk_19
+        - t_ms: 6838.99
+          chars: 916
+          event: chunk_20
+    blocking_default:
+      overall_timing:
+        started_at: 2026-11-13 23:09:59.385 JST
+        first_token_at: 2026-11-13 23:10:21.372 JST
+        completed_at: 2026-11-13 23:10:21.372 JST
+        time_to_first_token_ms: 21986.38
+        stream_completed_ms: 21986.38
+        ttft_ms: 21986.38
+        total_ms: 21986.38
+      timeline_series:
+        gemini:
+        - t_ms: 0.0
+          chars: 0
+          event: start
+        - t_ms: 21986.38
+          chars: 0
+          event: blocking_wait_end
+        - t_ms: 21986.38
+          chars: 573
+          event: blocking_completed
+        client_output:
+        - t_ms: 0.0
+          chars: 0
+          event: start
+        - t_ms: 21986.38
+          chars: 0
+          event: blocking_wait_end
+        - t_ms: 21986.38
+          chars: 573
+          event: blocking_completed
+    streaming_default:
+      overall_timing:
+        started_at: 2026-11-13 23:09:59.405 JST
+        first_token_at: 2026-11-13 23:10:06.396 JST
+        completed_at: 2026-11-13 23:10:10.219 JST
+        time_to_first_token_ms: 6990.84
+        stream_completed_ms: 10813.85
+        ttft_ms: 6990.84
+        total_ms: 10813.85
+      timeline_series:
+        gemini:
+        - t_ms: 0.0
+          chars: 0
+          event: start
+        - t_ms: 6990.84
+          chars: 0
+          event: thinking_end
+        - t_ms: 6990.84
+          chars: 15
+          event: chunk_1
+        - t_ms: 7145.03
+          chars: 59
+          event: chunk_2
+        - t_ms: 7354.32
+          chars: 123
+          event: chunk_3
+        - t_ms: 7682.57
+          chars: 177
+          event: chunk_4
+        - t_ms: 7884.51
+          chars: 215
+          event: chunk_5
+        - t_ms: 8063.2
+          chars: 257
+          event: chunk_6
+        - t_ms: 8251.11
+          chars: 319
+          event: chunk_7
+        - t_ms: 8524.87
+          chars: 364
+          event: chunk_8
+        - t_ms: 8744.36
+          chars: 409
+          event: chunk_9
+        - t_ms: 9014.92
+          chars: 447
+          event: chunk_10
+        - t_ms: 9236.49
+          chars: 497
+          event: chunk_11
+        - t_ms: 9665.16
+          chars: 535
+          event: chunk_12
+        - t_ms: 10230.73
+          chars: 575
+          event: chunk_13
+        - t_ms: 10433.61
+          chars: 631
+          event: chunk_14
+        - t_ms: 10780.76
+          chars: 689
+          event: chunk_15
+        client_output:
+        - t_ms: 0.0
+          chars: 0
+          event: start
+        - t_ms: 6990.84
+          chars: 0
+          event: thinking_end
+        - t_ms: 6990.84
+          chars: 15
+          event: chunk_1
+        - t_ms: 7145.03
+          chars: 59
+          event: chunk_2
+        - t_ms: 7354.32
+          chars: 123
+          event: chunk_3
+        - t_ms: 7682.57
+          chars: 177
+          event: chunk_4
+        - t_ms: 7884.51
+          chars: 215
+          event: chunk_5
+        - t_ms: 8063.2
+          chars: 257
+          event: chunk_6
+        - t_ms: 8251.11
+          chars: 319
+          event: chunk_7
+        - t_ms: 8524.87
+          chars: 364
+          event: chunk_8
+        - t_ms: 8744.36
+          chars: 409
+          event: chunk_9
+        - t_ms: 9014.92
+          chars: 447
+          event: chunk_10
+        - t_ms: 9236.49
+          chars: 497
+          event: chunk_11
+        - t_ms: 9665.16
+          chars: 535
+          event: chunk_12
+        - t_ms: 10230.73
+          chars: 575
+          event: chunk_13
+        - t_ms: 10433.61
+          chars: 631
+          event: chunk_14
+        - t_ms: 10780.76
+          chars: 689
+          event: chunk_15
+  turn_40:
+    blocking_t0:
+      overall_timing:
+        started_at: 2026-11-13 23:11:27.332 JST
+        first_token_at: 2026-11-13 23:11:37.926 JST
+        completed_at: 2026-11-13 23:11:37.926 JST
+        time_to_first_token_ms: 10593.91
+        stream_completed_ms: 10593.91
+        ttft_ms: 10593.91
+        total_ms: 10593.91
+      timeline_series:
+        gemini:
+        - t_ms: 0.0
+          chars: 0
+          event: start
+        - t_ms: 10593.91
+          chars: 0
+          event: blocking_wait_end
+        - t_ms: 10593.91
+          chars: 697
+          event: blocking_completed
+        client_output:
+        - t_ms: 0.0
+          chars: 0
+          event: start
+        - t_ms: 10593.91
+          chars: 0
+          event: blocking_wait_end
+        - t_ms: 10593.91
+          chars: 697
+          event: blocking_completed
+    streaming_t0:
+      overall_timing:
+        started_at: 2026-11-13 23:11:18.846 JST
+        first_token_at: 2026-11-13 23:11:23.607 JST
+        completed_at: 2026-11-13 23:11:27.330 JST
+        time_to_first_token_ms: 4761.33
+        stream_completed_ms: 8484.41
+        ttft_ms: 4761.33
+        total_ms: 8484.41
+      timeline_series:
+        gemini:
+        - t_ms: 0.0
+          chars: 0
+          event: start
+        - t_ms: 4761.33
+          chars: 0
+          event: thinking_end
+        - t_ms: 4761.33
+          chars: 36
+          event: chunk_1
+        - t_ms: 4995.02
+          chars: 82
+          event: chunk_2
+        - t_ms: 5299.7
+          chars: 135
+          event: chunk_3
+        - t_ms: 5576.87
+          chars: 177
+          event: chunk_4
+        - t_ms: 5931.27
+          chars: 221
+          event: chunk_5
+        - t_ms: 6115.77
+          chars: 274
+          event: chunk_6
+        - t_ms: 6367.68
+          chars: 319
+          event: chunk_7
+        - t_ms: 6678.97
+          chars: 373
+          event: chunk_8
+        - t_ms: 6973.51
+          chars: 425
+          event: chunk_9
+        - t_ms: 7179.72
+          chars: 473
+          event: chunk_10
+        - t_ms: 7588.19
+          chars: 525
+          event: chunk_11
+        - t_ms: 7872.2
+          chars: 571
+          event: chunk_12
+        - t_ms: 8244.74
+          chars: 626
+          event: chunk_13
+        - t_ms: 8474.84
+          chars: 688
+          event: chunk_14
+        client_output:
+        - t_ms: 0.0
+          chars: 0
+          event: start
+        - t_ms: 4761.33
+          chars: 0
+          event: thinking_end
+        - t_ms: 4761.33
+          chars: 36
+          event: chunk_1
+        - t_ms: 4995.02
+          chars: 82
+          event: chunk_2
+        - t_ms: 5299.7
+          chars: 135
+          event: chunk_3
+        - t_ms: 5576.87
+          chars: 177
+          event: chunk_4
+        - t_ms: 5931.27
+          chars: 221
+          event: chunk_5
+        - t_ms: 6115.77
+          chars: 274
+          event: chunk_6
+        - t_ms: 6367.68
+          chars: 319
+          event: chunk_7
+        - t_ms: 6678.97
+          chars: 373
+          event: chunk_8
+        - t_ms: 6973.51
+          chars: 425
+          event: chunk_9
+        - t_ms: 7179.72
+          chars: 473
+          event: chunk_10
+        - t_ms: 7588.19
+          chars: 525
+          event: chunk_11
+        - t_ms: 7872.2
+          chars: 571
+          event: chunk_12
+        - t_ms: 8244.74
+          chars: 626
+          event: chunk_13
+        - t_ms: 8474.84
+          chars: 688
+          event: chunk_14
+    blocking_default:
+      overall_timing:
+        started_at: 2026-11-13 23:11:27.354 JST
+        first_token_at: 2026-11-13 23:11:38.885 JST
+        completed_at: 2026-11-13 23:11:38.885 JST
+        time_to_first_token_ms: 11530.97
+        stream_completed_ms: 11530.97
+        ttft_ms: 11530.97
+        total_ms: 11530.97
+      timeline_series:
+        gemini:
+        - t_ms: 0.0
+          chars: 0
+          event: start
+        - t_ms: 11530.97
+          chars: 0
+          event: blocking_wait_end
+        - t_ms: 11530.97
+          chars: 570
+          event: blocking_completed
+        client_output:
+        - t_ms: 0.0
+          chars: 0
+          event: start
+        - t_ms: 11530.97
+          chars: 0
+          event: blocking_wait_end
+        - t_ms: 11530.97
+          chars: 570
+          event: blocking_completed
+    streaming_default:
+      overall_timing:
+        started_at: 2026-11-13 23:11:27.382 JST
+        first_token_at: 2026-11-13 23:11:35.893 JST
+        completed_at: 2026-11-13 23:11:39.133 JST
+        time_to_first_token_ms: 8511.18
+        stream_completed_ms: 11751.0
+        ttft_ms: 8511.18
+        total_ms: 11751.0
+      timeline_series:
+        gemini:
+        - t_ms: 0.0
+          chars: 0
+          event: start
+        - t_ms: 8511.18
+          chars: 0
+          event: thinking_end
+        - t_ms: 8511.18
+          chars: 9
+          event: chunk_1
+        - t_ms: 8627.44
+          chars: 53
+          event: chunk_2
+        - t_ms: 8880.54
+          chars: 107
+          event: chunk_3
+        - t_ms: 9030.7
+          chars: 151
+          event: chunk_4
+        - t_ms: 9392.49
+          chars: 211
+          event: chunk_5
+        - t_ms: 9658.0
+          chars: 248
+          event: chunk_6
+        - t_ms: 9916.95
+          chars: 303
+          event: chunk_7
+        - t_ms: 10233.33
+          chars: 353
+          event: chunk_8
+        - t_ms: 10511.76
+          chars: 404
+          event: chunk_9
+        - t_ms: 10718.65
+          chars: 459
+          event: chunk_10
+        - t_ms: 11163.56
+          chars: 509
+          event: chunk_11
+        - t_ms: 11418.33
+          chars: 555
+          event: chunk_12
+        - t_ms: 11732.63
+          chars: 604
+          event: chunk_13
+        client_output:
+        - t_ms: 0.0
+          chars: 0
+          event: start
+        - t_ms: 8511.18
+          chars: 0
+          event: thinking_end
+        - t_ms: 8511.18
+          chars: 9
+          event: chunk_1
+        - t_ms: 8627.44
+          chars: 53
+          event: chunk_2
+        - t_ms: 8880.54
+          chars: 107
+          event: chunk_3
+        - t_ms: 9030.7
+          chars: 151
+          event: chunk_4
+        - t_ms: 9392.49
+          chars: 211
+          event: chunk_5
+        - t_ms: 9658.0
+          chars: 248
+          event: chunk_6
+        - t_ms: 9916.95
+          chars: 303
+          event: chunk_7
+        - t_ms: 10233.33
+          chars: 353
+          event: chunk_8
+        - t_ms: 10511.76
+          chars: 404
+          event: chunk_9
+        - t_ms: 10718.65
+          chars: 459
+          event: chunk_10
+        - t_ms: 11163.56
+          chars: 509
+          event: chunk_11
+        - t_ms: 11418.33
+          chars: 555
+          event: chunk_12
+        - t_ms: 11732.63
+          chars: 604
+          event: chunk_13
+  turn_50:
+    blocking_t0:
+      overall_timing:
+        started_at: 2026-11-13 23:12:58.776 JST
+        first_token_at: 2026-11-13 23:13:06.850 JST
+        completed_at: 2026-11-13 23:13:06.850 JST
+        time_to_first_token_ms: 8073.82
+        stream_completed_ms: 8073.82
+        ttft_ms: 8073.82
+        total_ms: 8073.82
+      timeline_series:
+        gemini:
+        - t_ms: 0.0
+          chars: 0
+          event: start
+        - t_ms: 8073.82
+          chars: 0
+          event: blocking_wait_end
+        - t_ms: 8073.82
+          chars: 999
+          event: blocking_completed
+        client_output:
+        - t_ms: 0.0
+          chars: 0
+          event: start
+        - t_ms: 8073.82
+          chars: 0
+          event: blocking_wait_end
+        - t_ms: 8073.82
+          chars: 999
+          event: blocking_completed
+    streaming_t0:
+      overall_timing:
+        started_at: 2026-11-13 23:12:49.221 JST
+        first_token_at: 2026-11-13 23:12:53.304 JST
+        completed_at: 2026-11-13 23:12:58.775 JST
+        time_to_first_token_ms: 4082.79
+        stream_completed_ms: 9553.78
+        ttft_ms: 4082.79
+        total_ms: 9553.78
+      timeline_series:
+        gemini:
+        - t_ms: 0.0
+          chars: 0
+          event: start
+        - t_ms: 4082.79
+          chars: 0
+          event: thinking_end
+        - t_ms: 4082.79
+          chars: 3
+          event: chunk_1
+        - t_ms: 4272.84
+          chars: 27
+          event: chunk_2
+        - t_ms: 4576.5
+          chars: 68
+          event: chunk_3
+        - t_ms: 4777.87
+          chars: 108
+          event: chunk_4
+        - t_ms: 5070.88
+          chars: 162
+          event: chunk_5
+        - t_ms: 5216.32
+          chars: 202
+          event: chunk_6
+        - t_ms: 5467.54
+          chars: 243
+          event: chunk_7
+        - t_ms: 5685.03
+          chars: 283
+          event: chunk_8
+        - t_ms: 5965.1
+          chars: 329
+          event: chunk_9
+        - t_ms: 6184.96
+          chars: 362
+          event: chunk_10
+        - t_ms: 6533.24
+          chars: 405
+          event: chunk_11
+        - t_ms: 6737.34
+          chars: 444
+          event: chunk_12
+        - t_ms: 6983.59
+          chars: 483
+          event: chunk_13
+        - t_ms: 7212.2
+          chars: 521
+          event: chunk_14
+        - t_ms: 7419.62
+          chars: 559
+          event: chunk_15
+        - t_ms: 7637.02
+          chars: 593
+          event: chunk_16
+        - t_ms: 7936.34
+          chars: 633
+          event: chunk_17
+        - t_ms: 8150.22
+          chars: 665
+          event: chunk_18
+        - t_ms: 8407.27
+          chars: 714
+          event: chunk_19
+        - t_ms: 8687.6
+          chars: 755
+          event: chunk_20
+        - t_ms: 8899.6
+          chars: 802
+          event: chunk_21
+        - t_ms: 9191.69
+          chars: 848
+          event: chunk_22
+        - t_ms: 9483.62
+          chars: 893
+          event: chunk_23
+        - t_ms: 9538.3
+          chars: 902
+          event: chunk_24
+        client_output:
+        - t_ms: 0.0
+          chars: 0
+          event: start
+        - t_ms: 4082.79
+          chars: 0
+          event: thinking_end
+        - t_ms: 4082.79
+          chars: 3
+          event: chunk_1
+        - t_ms: 4272.84
+          chars: 27
+          event: chunk_2
+        - t_ms: 4576.5
+          chars: 68
+          event: chunk_3
+        - t_ms: 4777.87
+          chars: 108
+          event: chunk_4
+        - t_ms: 5070.88
+          chars: 162
+          event: chunk_5
+        - t_ms: 5216.32
+          chars: 202
+          event: chunk_6
+        - t_ms: 5467.54
+          chars: 243
+          event: chunk_7
+        - t_ms: 5685.03
+          chars: 283
+          event: chunk_8
+        - t_ms: 5965.1
+          chars: 329
+          event: chunk_9
+        - t_ms: 6184.96
+          chars: 362
+          event: chunk_10
+        - t_ms: 6533.24
+          chars: 405
+          event: chunk_11
+        - t_ms: 6737.34
+          chars: 444
+          event: chunk_12
+        - t_ms: 6983.59
+          chars: 483
+          event: chunk_13
+        - t_ms: 7212.2
+          chars: 521
+          event: chunk_14
+        - t_ms: 7419.62
+          chars: 559
+          event: chunk_15
+        - t_ms: 7637.02
+          chars: 593
+          event: chunk_16
+        - t_ms: 7936.34
+          chars: 633
+          event: chunk_17
+        - t_ms: 8150.22
+          chars: 665
+          event: chunk_18
+        - t_ms: 8407.27
+          chars: 714
+          event: chunk_19
+        - t_ms: 8687.6
+          chars: 755
+          event: chunk_20
+        - t_ms: 8899.6
+          chars: 802
+          event: chunk_21
+        - t_ms: 9191.69
+          chars: 848
+          event: chunk_22
+        - t_ms: 9483.62
+          chars: 893
+          event: chunk_23
+        - t_ms: 9538.3
+          chars: 902
+          event: chunk_24
+    blocking_default:
+      overall_timing:
+        started_at: 2026-11-13 23:12:58.807 JST
+        first_token_at: 2026-11-13 23:13:15.720 JST
+        completed_at: 2026-11-13 23:13:15.720 JST
+        time_to_first_token_ms: 16913.45
+        stream_completed_ms: 16913.45
+        ttft_ms: 16913.45
+        total_ms: 16913.45
+      timeline_series:
+        gemini:
+        - t_ms: 0.0
+          chars: 0
+          event: start
+        - t_ms: 16913.45
+          chars: 0
+          event: blocking_wait_end
+        - t_ms: 16913.45
+          chars: 676
+          event: blocking_completed
+        client_output:
+        - t_ms: 0.0
+          chars: 0
+          event: start
+        - t_ms: 16913.45
+          chars: 0
+          event: blocking_wait_end
+        - t_ms: 16913.45
+          chars: 676
+          event: blocking_completed
+    streaming_default:
+      overall_timing:
+        started_at: 2026-11-13 23:12:58.833 JST
+        first_token_at: 2026-11-13 23:13:15.331 JST
+        completed_at: 2026-11-13 23:13:17.504 JST
+        time_to_first_token_ms: 16498.16
+        stream_completed_ms: 18670.8
+        ttft_ms: 16498.16
+        total_ms: 18670.8
+      timeline_series:
+        gemini:
+        - t_ms: 0.0
+          chars: 0
+          event: start
+        - t_ms: 16498.16
+          chars: 0
+          event: thinking_end
+        - t_ms: 16498.16
+          chars: 8
+          event: chunk_1
+        - t_ms: 16606.53
+          chars: 54
+          event: chunk_2
+        - t_ms: 16716.91
+          chars: 100
+          event: chunk_3
+        - t_ms: 16901.57
+          chars: 141
+          event: chunk_4
+        - t_ms: 17007.92
+          chars: 180
+          event: chunk_5
+        - t_ms: 17130.79
+          chars: 222
+          event: chunk_6
+        - t_ms: 17320.89
+          chars: 262
+          event: chunk_7
+        - t_ms: 17432.47
+          chars: 307
+          event: chunk_8
+        - t_ms: 17544.88
+          chars: 342
+          event: chunk_9
+        - t_ms: 17755.3
+          chars: 389
+          event: chunk_10
+        - t_ms: 17902.81
+          chars: 432
+          event: chunk_11
+        - t_ms: 18170.8
+          chars: 474
+          event: chunk_12
+        - t_ms: 18347.95
+          chars: 522
+          event: chunk_13
+        - t_ms: 18528.65
+          chars: 561
+          event: chunk_14
+        - t_ms: 18626.98
+          chars: 591
+          event: chunk_15
+        client_output:
+        - t_ms: 0.0
+          chars: 0
+          event: start
+        - t_ms: 16498.16
+          chars: 0
+          event: thinking_end
+        - t_ms: 16498.16
+          chars: 8
+          event: chunk_1
+        - t_ms: 16606.53
+          chars: 54
+          event: chunk_2
+        - t_ms: 16716.91
+          chars: 100
+          event: chunk_3
+        - t_ms: 16901.57
+          chars: 141
+          event: chunk_4
+        - t_ms: 17007.92
+          chars: 180
+          event: chunk_5
+        - t_ms: 17130.79
+          chars: 222
+          event: chunk_6
+        - t_ms: 17320.89
+          chars: 262
+          event: chunk_7
+        - t_ms: 17432.47
+          chars: 307
+          event: chunk_8
+        - t_ms: 17544.88
+          chars: 342
+          event: chunk_9
+        - t_ms: 17755.3
+          chars: 389
+          event: chunk_10
+        - t_ms: 17902.81
+          chars: 432
+          event: chunk_11
+        - t_ms: 18170.8
+          chars: 474
+          event: chunk_12
+        - t_ms: 18347.95
+          chars: 522
+          event: chunk_13
+        - t_ms: 18528.65
+          chars: 561
+          event: chunk_14
+        - t_ms: 18626.98
+          chars: 591
+          event: chunk_15
