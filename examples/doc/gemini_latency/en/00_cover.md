@@ -12,96 +12,96 @@ from drawlib.shapes import rectangle
 from drawlib.styles import Styles
 from drawlib.text import text
 
-setup(width=100, height=58, dpi=150)
+setup(width=156, height=76, dpi=150)
 
 # Outer structural frame
-rectangle((50.0, 29.0), width=96.0, height=54.0, style=Styles.MutedDashed.patch(shape_r=2.0))
+rectangle((78.0, 38.0), width=152.0, height=72.0, style=Styles.MutedDashed.patch(shape_r=2.0))
 
 # Top Header Banner
-rectangle((50.0, 49.4), width=91.0, height=9.2, style=Styles.PrimaryNeutral.patch(shape_r=1.4))
+rectangle((78.0, 64.5), width=144.0, height=12.4, style=Styles.PrimaryNeutral.patch(shape_r=1.4))
 text(
-    (50.0, 51.4),
+    (78.0, 67.2),
     "Three Core Evaluation Pillars on Google AI Studio (gemini-3.8-flash)",
-    style=Styles.DarkBold.patch(text_size=11.0),
+    style=Styles.DarkBold.patch(text_size=11.5),
 )
 text(
-    (50.0, 47.4),
+    (78.0, 62.0),
     "google-genai SDK (api_key=GEMINI_KEY) | ThinkingConfig, Pydantic Partial JSON & 50-Turn PC Support",
     style=Styles.Dark.patch(text_size=10.0),
 )
 
 # Pillar 1: Delivery Mode & ThinkingConfig (Neutral)
-rectangle((50.0, 36.8), width=91.0, height=11.4, style=Styles.Neutral.patch(shape_r=1.4))
-phosphor.sliders_horizontal((7.6, 39.1), width=2.8, style=Styles.DarkBold)
+rectangle((78.0, 48.0), width=144.0, height=15.0, style=Styles.Neutral.patch(shape_r=1.4))
+phosphor.sliders_horizontal((10.5, 51.0), width=3.2, style=Styles.DarkBold)
 text(
-    (10.0, 39.1),
+    (13.8, 51.0),
     "1. Delivery & ThinkingConfig",
-    style=Styles.DarkBold.patch(text_size=10.4, halign="left"),
+    style=Styles.DarkBold.patch(text_size=10.5, halign="left"),
 )
 text(
-    (6.8, 34.5),
+    (9.5, 45.0),
     "Chapters 2–3 (18 Benchmark Runs)",
     style=Styles.Dark.patch(text_size=10.0, halign="left"),
 )
-line((39.2, 32.2), (39.2, 41.4), style=Styles.Muted)
+line((58.0, 41.8), (58.0, 54.2), style=Styles.Muted)
 text(
-    (40.8, 39.1),
+    (60.5, 51.0),
     "• Stream t=0 vs Block | TTFT scales linearly with internal reasoning tokens (ThTok)",
     style=Styles.DarkBold.patch(text_size=10.0, halign="left"),
 )
 text(
-    (40.8, 34.5),
+    (60.5, 45.0),
     "• Trade-off: Fixed t=0 risks multi-step math errors; Fixed low stalls routine turns",
     style=Styles.Dark.patch(text_size=10.0, halign="left"),
 )
 
 # Pillar 2: Adaptive Thinking Router (PrimaryFlat — Focal Point)
-rectangle((50.0, 23.4), width=91.0, height=11.4, style=Styles.PrimaryFlat.patch(shape_r=1.4))
-phosphor.star((7.6, 25.7), width=2.8, style=Styles.WhiteBold)
+rectangle((78.0, 30.5), width=144.0, height=15.0, style=Styles.PrimaryFlat.patch(shape_r=1.4))
+phosphor.star((10.5, 33.5), width=3.2, style=Styles.WhiteBold)
 text(
-    (10.0, 25.7),
+    (13.8, 33.5),
     "★2. Adaptive Router (Pattern A)",
-    style=Styles.WhiteBold.patch(text_size=10.4, halign="left"),
+    style=Styles.WhiteBold.patch(text_size=10.5, halign="left"),
 )
 text(
-    (6.8, 21.1),
+    (9.5, 27.5),
     "Chapter 4 (45 Runs + 8 Cold/Warm)",
     style=Styles.White.patch(text_size=10.0, halign="left"),
 )
-line((39.2, 18.8), (39.2, 28.0), style=Styles.White)
+line((58.0, 24.3), (58.0, 36.7), style=Styles.White)
 text(
-    (40.8, 25.7),
+    (60.5, 33.5),
     "• {thinking: bool, response: str} Partial JSON Stream + Parallel Stage-2 low",
     style=Styles.WhiteBold.patch(text_size=10.0, halign="left"),
 )
 text(
-    (40.8, 21.1),
+    (60.5, 27.5),
     "• 1-Call Direct Stream on Tiers 1–2 | 9/9 Routing | 3/3 PC Repair & Transfer Math",
     style=Styles.White.patch(text_size=10.0, halign="left"),
 )
 
 # Pillar 3: Multi-Turn Scalability & Context Caching (SecondaryNeutral)
-rectangle((50.0, 10.0), width=91.0, height=11.4, style=Styles.SecondaryNeutral.patch(shape_r=1.4))
-phosphor.database((7.6, 12.3), width=2.8, style=Styles.DarkBold)
+rectangle((78.0, 13.0), width=144.0, height=15.0, style=Styles.SecondaryNeutral.patch(shape_r=1.4))
+phosphor.database((10.5, 16.0), width=3.2, style=Styles.DarkBold)
 text(
-    (10.0, 12.3),
+    (13.8, 16.0),
     "3. 50-Turn & Implicit Caching",
-    style=Styles.DarkBold.patch(text_size=10.4, halign="left"),
+    style=Styles.DarkBold.patch(text_size=10.5, halign="left"),
 )
 text(
-    (6.8, 7.7),
+    (9.5, 10.0),
     "Chapter 5 (50 Turns × 4 = 200 Runs)",
     style=Styles.Dark.patch(text_size=10.0, halign="left"),
 )
-line((39.2, 5.4), (39.2, 14.6), style=Styles.Muted)
+line((58.0, 6.8), (58.0, 19.2), style=Styles.Muted)
 text(
-    (40.8, 12.3),
+    (60.5, 16.0),
     "• 50-turn PC troubleshooting customer-support dialogue with Auto Implicit Cache",
     style=Styles.DarkBold.patch(text_size=10.0, halign="left"),
 )
 text(
-    (40.8, 7.7),
-    "• High cache hit rate keeps Streaming t=0 TTFT scaling flat across 50 turns",
+    (60.5, 10.0),
+    "• High cache hit rate (up to 90.6%) keeps Streaming t=0 TTFT scaling flat across 50 turns",
     style=Styles.Dark.patch(text_size=10.0, halign="left"),
 )
 
@@ -115,7 +115,7 @@ save()
 This technical report presents a comprehensive empirical evaluation of **`gemini-3.8-flash`** on **Google AI Studio (`google-genai` SDK via `genai.Client(api_key=GEMINI_KEY)`)**, synthesizing **271 live API benchmark executions** recorded in `src/gemini_evaluation/` under a PC troubleshooting customer-support scenario. It establishes actionable architecture patterns that simultaneously achieve responsive Time to First Token (TTFT), multi-step mathematical accuracy, and flat latency scaling across 50-turn conversational histories.
 
 | Chapter | Title | Scope & Key Empirical Findings |
-| :--- | :--- | :--- |
+| :---: | :--- | :--- |
 | **Chapter 1** | **Executive Summary** | End-to-end architecture decision matrix, cross-benchmark latency comparisons, and production configuration guidelines. |
 | **Chapter 2** | **Background & Measurement Methodology** | Anatomy of the 3 LLM latency phases (Prefill, Thinking, Decoding), 2D trajectory charts (`Elapsed Time vs. Cumulative Characters`), Pydantic `response_schema` Cold vs. Warm FSM grammar compilation, incremental delta extraction via `pydantic_core.from_json(..., allow_partial="trailing-strings")`, and `ExecutionTracer` instrumentation. |
 | **Chapter 3** | **Parameters & Latency** | Empirical evaluation of Blocking (`generate_content`) vs. Streaming (`generate_content_stream`) across all 6 `ThinkingConfig` levels (`0`, `minimal`, `low`, `medium`, `high`, `default`), the linear scaling law of `thoughts_token_count`, and the speed-vs-accuracy trade-off across PC support query complexity Tiers 1–3. |

@@ -735,18 +735,18 @@ save()
 
 ## 5.5 Comprehensive 10-Turn Cohort Table & Production Guidelines for Multi-Turn Chat
 
-### 1. 10-Turn Cohort Summary Table (`Turns 1–10` through `Turns 41–50`)
+### 1. Cohort Summary Table (10-Turn Intervals: `Turns 1–10` through `Turns 41–50`)
 
 The table below summarizes input token growth, Implicit Context Cache hit rates, and latency across 10-turn cohorts and all 50 turns combined.
 
-| Turn Cohort & Troubleshooting Stage | Avg `prompt_tokens`<br>(Min–Max) | Avg `cached_tokens`<br>(`streaming_t0` Hit Rate) | `streaming_t0`<br>TTFT / Total (`ms`) | `blocking_t0`<br>TTFT = Total (`ms`) | Streaming TTFT Lead<br>(`streaming_t0 - blocking_t0`) | `streaming_default`<br>TTFT / Total (`ms`) [Avg ThTok] | `blocking_default`<br>Total (`ms`) [Avg ThTok] |
-| :--- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| **Turns 1–10**<br>(Power, Discharge, BIOS, Safe Mode) | `1,768 tok`<br>(`176–3,407`) | `177 tok`<br>(`10.0%`, active T8–9) | **`2,853`** / `5,910 ms`<br>(T2–10: `2,000 ms`) | `5,125 ms` | **`-2,272 ms`** (`-44.3%`) | `11,687` / `13,467 ms`<br>[`1,211 tok`] | `12,988 ms`<br>[`1,099 tok`] |
-| **Turns 11–20**<br>(Backup, Drivers, `sfc`, Memory Diag) | `5,635 tok`<br>(`3,817–7,539`) | `3,229 tok`<br>(`57.3%`) | **`2,180`** / `5,586 ms` | `6,742 ms` | **`-4,562 ms`** (`-67.7%`) | `9,357` / `11,643 ms`<br>[`828 tok`] | `14,398 ms`<br>[`1,154 tok`] |
-| **Turns 21–30**<br>(SSD SMART, Restore, USB Boot Media) | `10,280 tok`<br>(`8,005–12,478`) | `7,784 tok`<br>(`75.7%`) | **`2,361`** / `6,804 ms` | `6,666 ms` | **`-4,305 ms`** (`-64.6%`) | `9,969` / `12,658 ms`<br>[`913 tok`] | `12,731 ms`<br>[`954 tok`] |
-| **Turns 31–40**<br>(BitLocker, HW Diag, Pickup Repair) | `15,007 tok`<br>(`12,995–16,915`) | `12,556 tok`<br>(`83.7%`) | **`2,331`** / `6,260 ms` | `6,653 ms` | **`-4,322 ms`** (`-65.0%`) | `8,265` / `11,405 ms`<br>[`517 tok`] | `12,480 ms`<br>[`802 tok`] |
-| **Turns 41–50**<br>(Loaner PC, On-Site, Backup & Maint) | `19,338 tok`<br>(`17,309–21,490`) | `16,872 tok`<br>(**`87.2%`**) | **`2,574`** / `7,054 ms` | `6,935 ms` | **`-4,361 ms`** (`-62.9%`) | `9,910` / `12,504 ms`<br>[`823 tok`] | `12,527 ms`<br>[`763 tok`] |
-| **All 50 Turns** | **`10,406 tok`**<br>(`176–21,490`) | **`8,124 tok`**<br>(`78.1%` / Peak **`90.6%`**) | **`2,460`** / **`6,323 ms`**<br>(Median **`2,029 ms`**) | **`6,424 ms`** | **`-3,964 ms`** (**`-61.7%`**) | **`9,838`** / **`12,335 ms`**<br>[**`858 tok`**] | **`13,025 ms`**<br>[**`954 tok`**] |
+| Turn Cohort & Troubleshooting Stage | Avg `prompt_tokens` /<br>Cache (`Hit Rate`) | `streaming_t0`<br>TTFT / Total (`ms`) | `blocking_t0`<br>Total (`ms`) | Streaming Lead<br>(`str_t0 - blk_t0`) | `streaming_default`<br>TTFT / Total [ThTok] | `blocking_default`<br>Total [ThTok] |
+| :--- | ---: | ---: | ---: | ---: | ---: | ---: |
+| **Turns 1–10**<br>(Power, Discharge, BIOS, Safe Mode) | `1,768 tok` (`176–3,407`)<br>Cache: `177 tok` (`10.0%`) | **`2,853`** / `5,910`<br>(T2–10: `2,000`) | `5,125` | **`-2,272 ms`**<br>(`-44.3%`) | `11,687` / `13,467`<br>[`1,211 tok`] | `12,988`<br>[`1,099 tok`] |
+| **Turns 11–20**<br>(Backup, Drivers, `sfc`, Memory Diag) | `5,635 tok` (`3,817–7,539`)<br>Cache: `3,229 tok` (`57.3%`) | **`2,180`** / `5,586` | `6,742` | **`-4,562 ms`**<br>(`-67.7%`) | `9,357` / `11,643`<br>[`828 tok`] | `14,398`<br>[`1,154 tok`] |
+| **Turns 21–30**<br>(SSD SMART, Restore, USB Boot Media) | `10,280 tok` (`8,005–12,478`)<br>Cache: `7,784 tok` (`75.7%`) | **`2,361`** / `6,804` | `6,666` | **`-4,305 ms`**<br>(`-64.6%`) | `9,969` / `12,658`<br>[`913 tok`] | `12,731`<br>[`954 tok`] |
+| **Turns 31–40**<br>(BitLocker, HW Diag, Pickup Repair) | `15,007 tok` (`12,995–16,915`)<br>Cache: `12,556 tok` (`83.7%`) | **`2,331`** / `6,260` | `6,653` | **`-4,322 ms`**<br>(`-65.0%`) | `8,265` / `11,405`<br>[`517 tok`] | `12,480`<br>[`802 tok`] |
+| **Turns 41–50**<br>(Loaner PC, On-Site, Backup & Maint) | `19,338 tok` (`17,309–21,490`)<br>Cache: `16,872 tok` (**`87.2%`**) | **`2,574`** / `7,054` | `6,935` | **`-4,361 ms`**<br>(`-62.9%`) | `9,910` / `12,504`<br>[`823 tok`] | `12,527`<br>[`763 tok`] |
+| **All 50 Turns** | **`10,406 tok`** (`176–21,490`)<br>Cache: **`8,124 tok`** (`78.1%` / Peak **`90.6%`**) | **`2,460`** / **`6,323`**<br>(Median **`2,029`**) | **`6,424`** | **`-3,964 ms`**<br>(**`-61.7%`**) | **`9,838`** / **`12,335`**<br>[**`858 tok`**] | **`13,025`**<br>[**`954 tok`**] |
 
 ### 2. Production Architecture Guidelines for Multi-Turn Chat
 

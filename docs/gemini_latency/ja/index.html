@@ -11,9 +11,6 @@
 <!DOCTYPE html>
 <html lang="ja" dir="ltr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gemini 3.8 Flash レイテンシ・アーキテクチャ評価レポート</title>
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-S9N5BZ1VRC"></script>
     <script>
@@ -23,6 +20,9 @@
 
         gtag('config', 'G-S9N5BZ1VRC');
     </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gemini 3.8 Flash レイテンシ・アーキテクチャ評価レポート</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
@@ -88,34 +88,34 @@
 <table>
 <thead>
 <tr>
-<th style="text-align:left">章</th>
+<th style="text-align:center">章番号</th>
 <th style="text-align:left">タイトル</th>
 <th style="text-align:left">検証内容と主要インサイト</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td style="text-align:left"><strong>第1章</strong></td>
+<td style="text-align:center"><strong>第1章</strong></td>
 <td style="text-align:left"><strong>エグゼクティブサマリー</strong></td>
 <td style="text-align:left">全検証の結論マトリクス、主要ベンチマーク指標の横断比較、および本番システムに向けた推奨アーキテクチャ設計指針。</td>
 </tr>
 <tr>
-<td style="text-align:left"><strong>第2章</strong></td>
+<td style="text-align:center"><strong>第2章</strong></td>
 <td style="text-align:left"><strong>前提知識と測定方法</strong></td>
 <td style="text-align:left">LLM推論の3フェーズ（Prefill・Thinking・Decoding）、2次元トラジェクトリ（経過時間×累積出力文字数）、Pydantic <code>response_schema</code> の Cold/Warm 文法コンパイル特性と <code>pydantic_core.from_json(..., allow_partial=&quot;trailing-strings&quot;)</code> による逐次差分抽出、および <code>ExecutionTracer</code> の計測基盤。</td>
 </tr>
 <tr>
-<td style="text-align:left"><strong>第3章</strong></td>
+<td style="text-align:center"><strong>第3章</strong></td>
 <td style="text-align:left"><strong>パラメータとレイテンシー</strong></td>
 <td style="text-align:left">Blocking（<code>generate_content</code>）vs. Streaming（<code>generate_content_stream</code>）× <code>ThinkingConfig</code> 全6段階（<code>0</code>, <code>minimal</code>, <code>low</code>, <code>medium</code>, <code>high</code>, <code>default</code>）の実測比較、内部推論トークン数と TTFT の線形スケーリング則、およびPCサポート難易度3段階（Tier 1〜3）における速度と計算正確性のトレードオフ。</td>
 </tr>
 <tr>
-<td style="text-align:left"><strong>第4章</strong></td>
+<td style="text-align:center"><strong>第4章</strong></td>
 <td style="text-align:left"><strong>適応型 Thinking ルーター（Adaptive Thinking Router）</strong></td>
 <td style="text-align:left">固定設定の二律背反を解消する3つの適応型分岐方式（Pattern A: Pydantic 2フィールド統合ストリーム、Pattern B: 1フィールド分離ルーター、Pattern C: 非JSON先頭タグ）の45試行比較。分岐精度 <strong><code>100%</code></strong>・複雑計算 <strong><code>100%</code></strong> を達成する <strong>Pattern A</strong> の優位性。</td>
 </tr>
 <tr>
-<td style="text-align:left"><strong>第5章</strong></td>
+<td style="text-align:center"><strong>第5章</strong></td>
 <td style="text-align:left"><strong>マルチターンチャットでの挙動とコンテキストキャッシュ</strong></td>
 <td style="text-align:left">パソコンが動かなくなった顧客とPCサポート窓口による50ターン連続対話（計200実行）における4条件の推移比較。自動発動する暗黙的コンテキストキャッシュ（Implicit Context Caching）と平坦な TTFT スケーリング。</td>
 </tr>
@@ -431,7 +431,7 @@
 <th style="text-align:right">全体完了 (Total)</th>
 <th style="text-align:right">推論トークン (<code>ThTok</code>)</th>
 <th style="text-align:left">品質・スケーラビリティ評価</th>
-<th style="text-align:center">総合判定</th>
+<th style="text-align:center">判定</th>
 </tr>
 </thead>
 <tbody>
@@ -451,7 +451,7 @@
 <td style="text-align:right"><code>3,360 ms</code></td>
 <td style="text-align:right"><code>0 tok</code></td>
 <td style="text-align:left">全文完了まで <code>3.36秒</code> 画面無応答</td>
-<td style="text-align:center">バッチ向き</td>
+<td style="text-align:center">バッチ用</td>
 </tr>
 <tr>
 <td style="text-align:left">単発呼び出し</td>
@@ -478,7 +478,7 @@
 <td style="text-align:right"><code>8,843 ms</code></td>
 <td style="text-align:right">T1・2: <code>0</code><br>T3: <code>828 tok</code></td>
 <td style="text-align:left">分岐 <code>9/9</code>・計算 <code>3/3</code>。ただし構文保証なし・タグ露出リスクあり</td>
-<td style="text-align:center">不採用 (A統一)</td>
+<td style="text-align:center">不採用</td>
 </tr>
 <tr>
 <td style="text-align:left">適応型ルーター比較</td>
@@ -514,7 +514,7 @@
 <td style="text-align:right"><strong><code>6,323 ms</code></strong></td>
 <td style="text-align:right"><code>19 tok</code><br>(T2–50: <code>0</code>)</td>
 <td style="text-align:left">Blocking 比 <strong><code>-3,964 ms</code> (<code>-62%</code>)</strong> 高速。暗黙キャッシュ最大 <strong><code>90.6%</code></strong> ヒット</td>
-<td style="text-align:center"><strong>★長期対話推奨</strong></td>
+<td style="text-align:center"><strong>★長期推奨</strong></td>
 </tr>
 <tr>
 <td style="text-align:left">50ターン連続対話</td>
@@ -523,7 +523,7 @@
 <td style="text-align:right"><code>6,424 ms</code></td>
 <td style="text-align:right"><code>0 tok</code></td>
 <td style="text-align:left">平均 <code>753 文字</code> の生成完了まで毎ターン無応答で待機</td>
-<td style="text-align:center">バッチ向き</td>
+<td style="text-align:center">バッチ用</td>
 </tr>
 <tr>
 <td style="text-align:left">50ターン連続対話</td>
@@ -603,7 +603,7 @@
         <span class="mf">76.0</span><span class="p">,</span>
         <span class="mf">46.0</span><span class="p">,</span>
         <span class="s2">"Phase 2: Thinking (内部推論)"</span><span class="p">,</span>
-        <span class="s2">"thoughts_token_count 生成 (+9.5ms/tok)"</span><span class="p">,</span>
+        <span class="s2">"thoughts_token_count 生成 (+9.0ms/tok)"</span><span class="p">,</span>
         <span class="n">Styles</span><span class="o">.</span><span class="n">SecondaryNeutral</span><span class="p">,</span>
         <span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="p">,</span>
         <span class="n">Styles</span><span class="o">.</span><span class="n">Dark</span><span class="p">,</span>
@@ -632,13 +632,13 @@
     <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">),</span>
 <span class="p">)</span>
 
-<span class="c1"># Bottom Section: Side-by-Side 2D Trajectory Comparison (thinking=0)</span>
+<span class="c1"># Bottom Section: Side-by-Side 2D Trajectory Comparison (thinking=0, high-contrast pastel bands)</span>
 <span class="n">ex_block</span> <span class="o">=</span> <span class="n">load_thinking_timeline</span><span class="p">(</span><span class="s2">"blocking"</span><span class="p">,</span> <span class="s2">"0"</span><span class="p">)</span>
 <span class="n">ex_stream</span> <span class="o">=</span> <span class="n">load_thinking_timeline</span><span class="p">(</span><span class="s2">"streaming"</span><span class="p">,</span> <span class="s2">"0"</span><span class="p">)</span>
 
 <span class="n">draw_trajectory_panel</span><span class="p">(</span>
     <span class="n">x0</span><span class="o">=</span><span class="mf">15.0</span><span class="p">,</span>
-    <span class="n">y0</span><span class="o">=</span><span class="mf">12.5</span><span class="p">,</span>
+    <span class="n">y0</span><span class="o">=</span><span class="mf">12.6</span><span class="p">,</span>
     <span class="n">pw</span><span class="o">=</span><span class="mf">54.0</span><span class="p">,</span>
     <span class="n">ph</span><span class="o">=</span><span class="mf">23.5</span><span class="p">,</span>
     <span class="n">title</span><span class="o">=</span><span class="s2">"① Blocking: generate_content (thinking=0)"</span><span class="p">,</span>
@@ -653,7 +653,7 @@
 
 <span class="n">draw_trajectory_panel</span><span class="p">(</span>
     <span class="n">x0</span><span class="o">=</span><span class="mf">91.0</span><span class="p">,</span>
-    <span class="n">y0</span><span class="o">=</span><span class="mf">12.5</span><span class="p">,</span>
+    <span class="n">y0</span><span class="o">=</span><span class="mf">12.6</span><span class="p">,</span>
     <span class="n">pw</span><span class="o">=</span><span class="mf">54.0</span><span class="p">,</span>
     <span class="n">ph</span><span class="o">=</span><span class="mf">23.5</span><span class="p">,</span>
     <span class="n">title</span><span class="o">=</span><span class="s2">"★② Streaming: generate_content_stream (thinking=0)"</span><span class="p">,</span>
@@ -667,7 +667,7 @@
 <span class="p">)</span>
 
 <span class="n">text</span><span class="p">((</span><span class="mf">42.0</span><span class="p">,</span> <span class="mf">4.2</span><span class="p">),</span> <span class="s2">"経過時間 (ms) — 縦軸: 累積出力文字数"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">))</span>
-<span class="n">text</span><span class="p">((</span><span class="mf">118.0</span><span class="p">,</span> <span class="mf">4.2</span><span class="p">),</span> <span class="s2">"経過時間 (ms) — 紫帯: TTFT待機 / 青帯: ストリーム送出"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">))</span>
+<span class="n">text</span><span class="p">((</span><span class="mf">118.0</span><span class="p">,</span> <span class="mf">4.2</span><span class="p">),</span> <span class="s2">"経過時間 (ms) — 薄紫帯: TTFT待機 / 薄青帯: ストリーム送出"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">))</span>
 
 <span class="n">save</span><span class="p">()</span>
 </code></pre>
@@ -680,29 +680,30 @@
 <li><strong>Phase 1: Prefill（入力処理＋KVキャッシュ照合）</strong>：
 クライアントから送信された <code>system_instruction</code>、会話履歴 <code>history</code>、および最新のユーザー入力 <code>prompt</code>（合計 <code>prompt_token_count</code>）を Transformer レイヤーで並列処理し、Attention の Key-Value（KV）キャッシュを構築するフェーズである。Google AI Studio の <code>gemini-3.8-flash</code> では、過去の対話履歴プレフィックスがキャッシュにヒット（<code>cached_content_token_count</code>）した場合、該当トークン分の Prefill 計算がスキップされ、数万トークンの長大コンテキストでも初動遅延が最小化される（第5章で詳述）。</li>
 <li><strong>Phase 2: Thinking（内部推論トークン生成：<code>thoughts_token_count</code>）</strong>：
-<code>gemini-3.8-flash</code> のような推論（Reasoning / Thinking）対応モデルにおいて、ユーザーに見える回答本文（<code>chunk.text</code>）の最初の1トークン目を出力する<strong>前</strong>に、サーバー内部で多段階の思考プロセス（Chain-of-Thought）を自己回帰的に生成するフェーズである。ここで生成された推論トークン数はレスポンスの <code>usage_metadata.thoughts_token_count</code> に記録される。重要な仕様として、<strong>Thinking フェーズが進行している間は Streaming モードであってもクライアントへ可視テキストチャンクが一切届かない</strong>ため、内部推論に要した時間（実測で約 <strong><code>+9.5 ms / token</code></strong>）はすべて初回応答待機時間（TTFT）へ直列に上乗せされる。</li>
+<code>gemini-3.8-flash</code> のような推論（Reasoning / Thinking）対応モデルにおいて、ユーザーに見える回答本文（<code>chunk.text</code>）の最初の1トークン目を出力する<strong>前</strong>に、サーバー内部で多段階の思考プロセス（Chain-of-Thought）を自己回帰的に生成するフェーズである。ここで生成された推論トークン数はレスポンスの <code>usage_metadata.thoughts_token_count</code> に記録される。重要な仕様として、<strong>Thinking フェーズが進行している間は Streaming モードであってもクライアントへ可視テキストチャンクが一切届かない</strong>ため、内部推論に要した時間（実測で約 <strong><code>+9.0 ms / token</code></strong>）はすべて初回応答待機時間（TTFT）へ直列に上乗せされる。</li>
 <li><strong>Phase 3: Decoding（可視出力トークンの自己回帰生成：<code>output_token_count</code>）</strong>：
 Prefill と Thinking が完了した瞬間から、最終回答テキスト（<code>candidates_token_count</code> / <code>output_token_count</code>）を先頭から順に出力するフェーズである。</li>
 </ol>
 <h3>2. TTFT（Time to First Token）と Total 完了時間、および 2D トラジェクトリの重要性</h3>
 <p>上記の3フェーズを踏まえると、クライアント側で観測される2つの主要レイテンシ指標は次のように定式化される。</p>
-<p>$$\text{TTFT}<em>{\text{streaming}} = T</em>{\text{Network RTT}} + T_{\text{Prefill}} + T_{\text{Thinking}}$$</p>
-<p>$$\text{Total} = \text{TTFT}<em>{\text{blocking}} = T</em>{\text{Network RTT}} + T_{\text{Prefill}} + T_{\text{Thinking}} + T_{\text{Decoding}}$$</p>
+<pre><code class="language-text">TTFT_streaming = T_Network_RTT + T_Prefill + T_Thinking
+Total = TTFT_blocking = T_Network_RTT + T_Prefill + T_Thinking + T_Decoding
+</code></pre>
 <ul>
-<li><strong>TTFT（Time to First Token / <code>time_to_first_token_ms</code>）</strong>：リクエスト送信時刻（$t = 0\text{ ms}$）から、最初の非空テキストチャンクがクライアントに到着するまでの経過時間である。対話型 UI においてユーザーが「AI が反応した」と知覚する<strong>体感待ち時間</strong>そのものを表す。Blocking 呼び出しでは全文生成が終わるまでレスポンスが返らないため、常に $\text{TTFT} = \text{Total}$ となる。</li>
-<li><strong>Total Completion Time（全体完了時間 / <code>stream_completed_ms</code>）</strong>：リクエスト送信（$t = 0\text{ ms}$）から最終チャンク（EOF）の受信が完了するまでの合計時間である。</li>
+<li><strong>TTFT（Time to First Token / <code>time_to_first_token_ms</code>）</strong>：リクエスト送信時刻（<code>t = 0 ms</code>）から、最初の非空テキストチャンクがクライアントに到着するまでの経過時間である。対話型 UI においてユーザーが「AI が反応した」と知覚する<strong>体感待ち時間</strong>そのものを表す。Blocking 呼び出しでは全文生成が終わるまでレスポンスが返らないため、常に <code>TTFT = Total</code> となる。</li>
+<li><strong>Total Completion Time（全体完了時間 / <code>stream_completed_ms</code>）</strong>：リクエスト送信（<code>t = 0 ms</code>）から最終チャンク（EOF）の受信が完了するまでの合計時間である。</li>
 <li><strong>なぜ「2次元トラジェクトリ（経過時間 × 累積出力文字数）」が必要か</strong>：
 図2-1下段に示した実測比較（<code>thinking=0</code>）を見ると、完了時間（<code>Total</code>）だけを比較した場合は Blocking（<code>3,360 ms</code>）と Streaming（<code>3,192 ms</code>）は同水準に見える。しかし横軸に経過時間（<code>t_ms</code>）、縦軸にその時点で画面に表示された累積文字数（<code>chars</code>）をとった <strong>2次元トラジェクトリ</strong> を描くと、UX の決定的な違いが浮かび上がる。
 <ul>
-<li><strong>Blocking（図2-1左）</strong>：<code>0 ms</code> から <code>3,360 ms</code> まで縦軸 <code>y = 0</code>（画面白紙）のまま推移し、<code>3,360 ms</code> 時点で338文字が垂直ステップ状に一括出現する。</li>
-<li><strong>Streaming（図2-1右）</strong>：紫帯の Prefill 待機を終えた <strong><code>1,205 ms</code>（Blocking より <code>2,155 ms</code> / <code>64%</code> 早い時点）</strong> で最初のチャンクが立ち上がり、青帯の区間（<code>1,205 → 3,192 ms</code>）にわたって滑らかな右肩上がりの傾斜で373文字が逐次表示される。人間がテキストを読む速度（日本語で約400〜600文字/分＝1秒あたり7〜10文字）よりも Gemini 3.8 Flash のデコード速度（1秒あたり約180〜200文字）の方が圧倒的に速いため、<code>1,205 ms</code> 以降の生成時間はユーザーの読解時間の裏に完全に隠蔽される。さらに第4章で扱う「段階1の受付文表示＋段階2の並列推論連結」のようなマルチステージ挙動も、2次元トラジェクトリを用いることで「初動の立ち上がり → 読解中のプラトー → 本回答の急勾配ストリーム」として視覚的に厳密評価できる。</li>
+<li><strong>Blocking（図2-1左）</strong>：<code>0 ms</code> から <code>3,360 ms</code> まで縦軸 <code>y = 0 chars</code>（画面白紙）のまま推移し、<code>3,360 ms</code> 時点で338文字が垂直ステップ状に一括出現する。</li>
+<li><strong>Streaming（図2-1右）</strong>：薄紫帯の Prefill 待機を終えた <strong><code>1,205 ms</code>（Blocking より <code>2,155 ms</code> / <code>64%</code> 早い時点）</strong> で最初のチャンクが立ち上がり、薄青帯の区間（<code>1,205 → 3,192 ms</code>）にわたって滑らかな右肩上がりの傾斜で373文字が逐次表示される。人間がテキストを読む速度（日本語で約400〜600文字/分＝1秒あたり7〜10文字）よりも Gemini 3.8 Flash のデコード速度（1秒あたり約180〜200文字）の方が圧倒的に速いため、<code>1,205 ms</code> 以降の生成時間はユーザーの読解時間の裏に完全に隠蔽される。さらに第4章で扱う「段階1の受付文表示＋段階2の並列推論連結」のようなマルチステージ挙動も、2次元トラジェクトリを用いることで「初動の立ち上がり → 読解中のプラトー → 本回答の急勾配ストリーム」として視覚的に厳密評価できる。</li>
 </ul>
 </li>
 </ul>
 <hr />
 <h2>2.2 Blocking vs. Streaming API の実装方法（Google AI Studio <code>google-genai</code> SDK）</h2>
 <p>本検証プロジェクト（<code>src/gemini_evaluation/llm_call.py</code>）では、Google AI Studio の公式 Python SDK である <strong><code>google-genai</code></strong> を用い、環境変数 <code>GEMINI_KEY</code> によるシンプルな API キー認証（<code>genai.Client(api_key=GEMINI_KEY)</code>）と非同期クライアント（<code>client.aio</code>）で全計測を統一している。</p>
-<p>以下に、<code>gemini-3.8-flash</code> に対する <strong><code>ThinkingConfig</code> 全6段階の解決関数</strong> と、<strong>Blocking（<code>generate_content</code>）</strong> および <strong>Streaming（<code>generate_content_stream</code>）</strong> の標準呼び出し実装を示す。</p>
+<p>以下に、<code>gemini-3.8-flash</code> に対する <strong><code>ThinkingConfig</code> 全6段階の解決関数（<code>resolve_thinking_config</code>）</strong> と、<strong>Blocking（<code>generate_content</code>）</strong> および <strong>Streaming（<code>generate_content_stream</code>）</strong> の標準呼び出し実装を示す。</p>
 <pre><code class="language-python"><span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">AsyncIterator</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">contextlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">aclosing</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
@@ -715,7 +716,7 @@ Prefill と Thinking が完了した瞬間から、最終回答テキスト（<c
 <span class="n">client</span> <span class="o">=</span> <span class="n">genai</span><span class="o">.</span><span class="n">Client</span><span class="p">(</span><span class="n">api_key</span><span class="o">=</span><span class="n">GEMINI_KEY</span><span class="p">)</span>
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">build_thinking_config</span><span class="p">(</span><span class="n">thinking</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">types</span><span class="o">.</span><span class="n">GenerateContentConfig</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">resolve_thinking_config</span><span class="p">(</span><span class="n">thinking</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">types</span><span class="o">.</span><span class="n">GenerateContentConfig</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""6段階の thinking 指定 (0, minimal, low, medium, high, default) を GenerateContentConfig へ変換する。"""</span>
     <span class="k">if</span> <span class="n">thinking</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">thinking</span> <span class="o">==</span> <span class="s2">"default"</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">None</span>  <span class="c1"># サーバー既定の動的推論 (default)</span>
@@ -739,7 +740,7 @@ Prefill と Thinking が完了した瞬間から、最終回答テキスト（<c
     <span class="n">resp</span> <span class="o">=</span> <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">aio</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">generate_content</span><span class="p">(</span>
         <span class="n">model</span><span class="o">=</span><span class="n">MODEL</span><span class="p">,</span>
         <span class="n">contents</span><span class="o">=</span><span class="n">prompt</span><span class="p">,</span>
-        <span class="n">config</span><span class="o">=</span><span class="n">build_thinking_config</span><span class="p">(</span><span class="n">thinking</span><span class="p">),</span>
+        <span class="n">config</span><span class="o">=</span><span class="n">resolve_thinking_config</span><span class="p">(</span><span class="n">thinking</span><span class="p">),</span>
     <span class="p">)</span>
     <span class="k">return</span> <span class="n">resp</span><span class="o">.</span><span class="n">text</span> <span class="ow">or</span> <span class="s2">""</span>
 
@@ -749,7 +750,7 @@ Prefill と Thinking が完了した瞬間から、最終回答テキスト（<c
     <span class="n">stream</span> <span class="o">=</span> <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">aio</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">generate_content_stream</span><span class="p">(</span>
         <span class="n">model</span><span class="o">=</span><span class="n">MODEL</span><span class="p">,</span>
         <span class="n">contents</span><span class="o">=</span><span class="n">prompt</span><span class="p">,</span>
-        <span class="n">config</span><span class="o">=</span><span class="n">build_thinking_config</span><span class="p">(</span><span class="n">thinking</span><span class="p">),</span>
+        <span class="n">config</span><span class="o">=</span><span class="n">resolve_thinking_config</span><span class="p">(</span><span class="n">thinking</span><span class="p">),</span>
     <span class="p">)</span>
     <span class="k">async</span> <span class="k">with</span> <span class="n">aclosing</span><span class="p">(</span><span class="n">stream</span><span class="p">):</span>
         <span class="k">async</span> <span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="n">stream</span><span class="p">:</span>
@@ -762,7 +763,7 @@ Prefill と Thinking が完了した瞬間から、最終回答テキスト（<c
 <p>しかし、構造化出力をストリーミング（<code>generate_content_stream</code>）と組み合わせる際には、サーバー側の <strong>FSM（有限状態機械）文法コンパイル特性</strong> と、クライアント側の <strong>不完全 JSON 逐次パース手法</strong> の2点を正しく設計する必要がある。図2-2に、実機で計測した Cold vs. Warm スキーマコンパイル実験（<code>load_schema_experiment()</code>、全8試行）と、<code>pydantic_core.from_json(..., allow_partial=&quot;trailing-strings&quot;)</code> による逐次差分抽出パイプラインを示す。</p>
 <figure class="drawlib-image" style="text-align: center;">
   <img src="../images/02_background/ch02_pydantic_cold_warm_pipeline_ja.png" alt="02_background_2" style="width: 100%; max-width: 100%;" />
-  <figcaption class="drawlib-caption">図2-2: Pydantic response_schema の Cold (#1) vs. Warm (#2〜#4) コンパイル実験（2項目 vs. 6項目）と pydantic_core.from_json による逐次差分抽出パイプライン</figcaption>
+  <figcaption class="drawlib-caption">図2-2: Pydantic response_schema の Cold vs. Warm コンパイル実験（2項目 vs. 6項目、全8試行）と pydantic_core.from_json による逐次差分抽出パイプライン</figcaption>
 </figure>
 <details class="drawlib-code-details">
 <summary>Source Code</summary>
@@ -775,12 +776,12 @@ Prefill と Thinking が完了した瞬間から、最終回答テキスト（<c
 <span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.text</span><span class="w"> </span><span class="kn">import</span> <span class="n">text</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_schema_experiment</span>
 
-<span class="n">setup</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mi">158</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">90</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">150</span><span class="p">)</span>
+<span class="n">setup</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mi">158</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">92</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">150</span><span class="p">)</span>
 
 <span class="c1"># Outer structural frame</span>
-<span class="n">rectangle</span><span class="p">((</span><span class="mf">79.0</span><span class="p">,</span> <span class="mf">45.0</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">154.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">86.0</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">MutedDashed</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">2.0</span><span class="p">))</span>
+<span class="n">rectangle</span><span class="p">((</span><span class="mf">79.0</span><span class="p">,</span> <span class="mf">46.0</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">154.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">88.0</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">MutedDashed</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">2.0</span><span class="p">))</span>
 <span class="n">text</span><span class="p">(</span>
-    <span class="p">(</span><span class="mf">79.0</span><span class="p">,</span> <span class="mf">84.2</span><span class="p">),</span>
+    <span class="p">(</span><span class="mf">79.0</span><span class="p">,</span> <span class="mf">86.2</span><span class="p">),</span>
     <span class="s2">"Pydantic 構造化ストリーム：Cold vs. Warm スキーマコンパイルと不完全 JSON 逐次抽出機構"</span><span class="p">,</span>
     <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">11.5</span><span class="p">),</span>
 <span class="p">)</span>
@@ -790,74 +791,84 @@ Prefill と Thinking が完了した瞬間から、最終回答テキスト（<c
 <span class="n">by_key</span> <span class="o">=</span> <span class="p">{(</span><span class="nb">str</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="s2">"schema_label"</span><span class="p">]),</span> <span class="nb">int</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="s2">"run_index"</span><span class="p">])):</span> <span class="n">r</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">exp</span><span class="p">}</span>
 
 <span class="n">ordered_groups</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="p">(</span><span class="s2">"2F #1</span><span class="se">\n</span><span class="s2">(Cold)"</span><span class="p">,</span> <span class="p">[</span><span class="n">by_key</span><span class="p">[(</span><span class="s2">"minimal_2field"</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]]),</span>
-    <span class="p">(</span><span class="s2">"2F #2</span><span class="se">\n</span><span class="s2">(Warm)"</span><span class="p">,</span> <span class="p">[</span><span class="n">by_key</span><span class="p">[(</span><span class="s2">"minimal_2field"</span><span class="p">,</span> <span class="mi">2</span><span class="p">)]]),</span>
-    <span class="p">(</span><span class="s2">"2F #3–4</span><span class="se">\n</span><span class="s2">(Warm平均)"</span><span class="p">,</span> <span class="p">[</span><span class="n">by_key</span><span class="p">[(</span><span class="s2">"minimal_2field"</span><span class="p">,</span> <span class="mi">3</span><span class="p">)],</span> <span class="n">by_key</span><span class="p">[(</span><span class="s2">"minimal_2field"</span><span class="p">,</span> <span class="mi">4</span><span class="p">)]]),</span>
-    <span class="p">(</span><span class="s2">"6F #1</span><span class="se">\n</span><span class="s2">(Warm初)"</span><span class="p">,</span> <span class="p">[</span><span class="n">by_key</span><span class="p">[(</span><span class="s2">"rich_6field"</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]]),</span>
-    <span class="p">(</span><span class="s2">"6F #2–4</span><span class="se">\n</span><span class="s2">(Warm平均)"</span><span class="p">,</span> <span class="p">[</span><span class="n">by_key</span><span class="p">[(</span><span class="s2">"rich_6field"</span><span class="p">,</span> <span class="mi">2</span><span class="p">)],</span> <span class="n">by_key</span><span class="p">[(</span><span class="s2">"rich_6field"</span><span class="p">,</span> <span class="mi">3</span><span class="p">)],</span> <span class="n">by_key</span><span class="p">[(</span><span class="s2">"rich_6field"</span><span class="p">,</span> <span class="mi">4</span><span class="p">)]]),</span>
+    <span class="p">(</span><span class="s2">"2F #1"</span><span class="p">,</span> <span class="p">[</span><span class="n">by_key</span><span class="p">[(</span><span class="s2">"minimal_2field"</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]]),</span>
+    <span class="p">(</span><span class="s2">"2F #2-4"</span><span class="p">,</span> <span class="p">[</span><span class="n">by_key</span><span class="p">[(</span><span class="s2">"minimal_2field"</span><span class="p">,</span> <span class="mi">2</span><span class="p">)],</span> <span class="n">by_key</span><span class="p">[(</span><span class="s2">"minimal_2field"</span><span class="p">,</span> <span class="mi">3</span><span class="p">)],</span> <span class="n">by_key</span><span class="p">[(</span><span class="s2">"minimal_2field"</span><span class="p">,</span> <span class="mi">4</span><span class="p">)]]),</span>
+    <span class="p">(</span><span class="s2">"6F #1"</span><span class="p">,</span> <span class="p">[</span><span class="n">by_key</span><span class="p">[(</span><span class="s2">"rich_6field"</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]]),</span>
+    <span class="p">(</span><span class="s2">"6F #2-4"</span><span class="p">,</span> <span class="p">[</span><span class="n">by_key</span><span class="p">[(</span><span class="s2">"rich_6field"</span><span class="p">,</span> <span class="mi">2</span><span class="p">)],</span> <span class="n">by_key</span><span class="p">[(</span><span class="s2">"rich_6field"</span><span class="p">,</span> <span class="mi">3</span><span class="p">)],</span> <span class="n">by_key</span><span class="p">[(</span><span class="s2">"rich_6field"</span><span class="p">,</span> <span class="mi">4</span><span class="p">)]]),</span>
 <span class="p">]</span>
 <span class="n">cats</span> <span class="o">=</span> <span class="p">[</span><span class="n">lbl</span> <span class="k">for</span> <span class="n">lbl</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">ordered_groups</span><span class="p">]</span>
 <span class="n">ttft_vals</span> <span class="o">=</span> <span class="p">[</span><span class="nb">round</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="s2">"ttft_ms"</span><span class="p">])</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">rows</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">rows</span> <span class="ow">in</span> <span class="n">ordered_groups</span><span class="p">]</span>
 <span class="n">tot_vals</span> <span class="o">=</span> <span class="p">[</span><span class="nb">round</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="s2">"total_ms"</span><span class="p">])</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">rows</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">rows</span> <span class="ow">in</span> <span class="n">ordered_groups</span><span class="p">]</span>
 
-<span class="n">rectangle</span><span class="p">((</span><span class="mf">55.0</span><span class="p">,</span> <span class="mf">60.5</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">98.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">39.5</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Neutral</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">1.4</span><span class="p">))</span>
-<span class="n">rectangle</span><span class="p">((</span><span class="mf">55.0</span><span class="p">,</span> <span class="mf">60.2</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">95.6</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">37.4</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">WhiteFlat</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">1.0</span><span class="p">))</span>
+<span class="n">rectangle</span><span class="p">((</span><span class="mf">55.0</span><span class="p">,</span> <span class="mf">61.5</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">98.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">41.0</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Neutral</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">1.4</span><span class="p">))</span>
+<span class="n">rectangle</span><span class="p">((</span><span class="mf">55.0</span><span class="p">,</span> <span class="mf">61.2</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">95.6</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">38.8</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">WhiteFlat</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">1.0</span><span class="p">))</span>
 
-<span class="n">chart</span> <span class="o">=</span> <span class="n">BarChart</span><span class="p">(</span>
+<span class="n">text</span><span class="p">((</span><span class="mf">32.5</span><span class="p">,</span> <span class="mf">77.2</span><span class="p">),</span> <span class="s2">"① 初回チャンク到着 TTFT (ms)"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">9.8</span><span class="p">))</span>
+<span class="n">chart_ttft</span> <span class="o">=</span> <span class="n">BarChart</span><span class="p">(</span>
     <span class="n">axis_line_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Dark</span><span class="p">,</span>
-    <span class="n">axis_text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">),</span>
+    <span class="n">axis_text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">8.8</span><span class="p">),</span>
     <span class="n">grid_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">MutedDashed</span><span class="p">,</span>
-    <span class="n">value_text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">),</span>
+    <span class="n">value_text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">8.8</span><span class="p">),</span>
     <span class="n">value_format</span><span class="o">=</span><span class="s2">"</span><span class="si">{:,.0f}</span><span class="s2">"</span><span class="p">,</span>
-    <span class="n">width</span><span class="o">=</span><span class="mf">86.0</span><span class="p">,</span>
-    <span class="n">height</span><span class="o">=</span><span class="mf">25.0</span><span class="p">,</span>
+    <span class="n">width</span><span class="o">=</span><span class="mf">40.0</span><span class="p">,</span>
+    <span class="n">height</span><span class="o">=</span><span class="mf">23.5</span><span class="p">,</span>
     <span class="n">categories</span><span class="o">=</span><span class="n">cats</span><span class="p">,</span>
     <span class="n">orientation</span><span class="o">=</span><span class="s2">"vertical"</span><span class="p">,</span>
     <span class="n">bar_mode</span><span class="o">=</span><span class="s2">"group"</span><span class="p">,</span>
-    <span class="n">bar_width_ratio</span><span class="o">=</span><span class="mf">0.58</span><span class="p">,</span>
+    <span class="n">bar_width_ratio</span><span class="o">=</span><span class="mf">0.56</span><span class="p">,</span>
     <span class="n">bar_r</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="n">chart</span><span class="o">.</span><span class="n">configure_y_axis</span><span class="p">(</span><span class="n">min_value</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="mi">7500</span><span class="p">,</span> <span class="n">tick_step</span><span class="o">=</span><span class="mi">2500</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">"</span><span class="si">{:,.0f}</span><span class="s2">"</span><span class="p">)</span>
-<span class="n">chart</span><span class="o">.</span><span class="n">add_series</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"TTFT: 初回トークン (ms)"</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="n">ttft_vals</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryFlat</span><span class="p">)</span>
-<span class="n">chart</span><span class="o">.</span><span class="n">add_series</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"Total: 完了時間 (ms)"</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="n">tot_vals</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">SecondaryNeutral</span><span class="p">)</span>
-<span class="n">chart</span><span class="o">.</span><span class="n">draw</span><span class="p">(</span><span class="n">xy</span><span class="o">=</span><span class="p">(</span><span class="mf">14.5</span><span class="p">,</span> <span class="mf">47.2</span><span class="p">))</span>
-<span class="n">chart</span><span class="o">.</span><span class="n">draw_legend</span><span class="p">(</span>
-    <span class="n">xy</span><span class="o">=</span><span class="p">(</span><span class="mf">24.0</span><span class="p">,</span> <span class="mf">75.2</span><span class="p">),</span>
-    <span class="n">text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">),</span>
-    <span class="n">orientation</span><span class="o">=</span><span class="s2">"horizontal"</span><span class="p">,</span>
-    <span class="n">swatch_width</span><span class="o">=</span><span class="mf">3.2</span><span class="p">,</span>
-    <span class="n">swatch_height</span><span class="o">=</span><span class="mf">1.8</span><span class="p">,</span>
-    <span class="n">item_gap</span><span class="o">=</span><span class="mf">8.0</span><span class="p">,</span>
+<span class="n">chart_ttft</span><span class="o">.</span><span class="n">configure_y_axis</span><span class="p">(</span><span class="n">min_value</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="mi">4500</span><span class="p">,</span> <span class="n">tick_step</span><span class="o">=</span><span class="mi">1500</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">"</span><span class="si">{:,.0f}</span><span class="s2">"</span><span class="p">)</span>
+<span class="n">chart_ttft</span><span class="o">.</span><span class="n">add_series</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"TTFT (ms)"</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="n">ttft_vals</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryFlat</span><span class="p">)</span>
+<span class="n">chart_ttft</span><span class="o">.</span><span class="n">draw</span><span class="p">(</span><span class="n">xy</span><span class="o">=</span><span class="p">(</span><span class="mf">13.5</span><span class="p">,</span> <span class="mf">48.2</span><span class="p">))</span>
+
+<span class="n">text</span><span class="p">((</span><span class="mf">80.0</span><span class="p">,</span> <span class="mf">77.2</span><span class="p">),</span> <span class="s2">"② 全文完了時間 Total (ms)"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">9.8</span><span class="p">))</span>
+<span class="n">chart_tot</span> <span class="o">=</span> <span class="n">BarChart</span><span class="p">(</span>
+    <span class="n">axis_line_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Dark</span><span class="p">,</span>
+    <span class="n">axis_text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">8.8</span><span class="p">),</span>
+    <span class="n">grid_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">MutedDashed</span><span class="p">,</span>
+    <span class="n">value_text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">8.8</span><span class="p">),</span>
+    <span class="n">value_format</span><span class="o">=</span><span class="s2">"</span><span class="si">{:,.0f}</span><span class="s2">"</span><span class="p">,</span>
+    <span class="n">width</span><span class="o">=</span><span class="mf">40.0</span><span class="p">,</span>
+    <span class="n">height</span><span class="o">=</span><span class="mf">23.5</span><span class="p">,</span>
+    <span class="n">categories</span><span class="o">=</span><span class="n">cats</span><span class="p">,</span>
+    <span class="n">orientation</span><span class="o">=</span><span class="s2">"vertical"</span><span class="p">,</span>
+    <span class="n">bar_mode</span><span class="o">=</span><span class="s2">"group"</span><span class="p">,</span>
+    <span class="n">bar_width_ratio</span><span class="o">=</span><span class="mf">0.56</span><span class="p">,</span>
+    <span class="n">bar_r</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
 <span class="p">)</span>
+<span class="n">chart_tot</span><span class="o">.</span><span class="n">configure_y_axis</span><span class="p">(</span><span class="n">min_value</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="mi">7500</span><span class="p">,</span> <span class="n">tick_step</span><span class="o">=</span><span class="mi">2500</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">"</span><span class="si">{:,.0f}</span><span class="s2">"</span><span class="p">)</span>
+<span class="n">chart_tot</span><span class="o">.</span><span class="n">add_series</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"Total (ms)"</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="n">tot_vals</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">SecondaryNeutral</span><span class="p">)</span>
+<span class="n">chart_tot</span><span class="o">.</span><span class="n">draw</span><span class="p">(</span><span class="n">xy</span><span class="o">=</span><span class="p">(</span><span class="mf">61.0</span><span class="p">,</span> <span class="mf">48.2</span><span class="p">))</span>
 
 <span class="c1"># Right-side summary cards for Top Section</span>
-<span class="n">rectangle</span><span class="p">((</span><span class="mf">129.5</span><span class="p">,</span> <span class="mf">60.5</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">45.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">39.5</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryNeutral</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">1.4</span><span class="p">))</span>
-<span class="n">text</span><span class="p">((</span><span class="mf">129.5</span><span class="p">,</span> <span class="mf">76.8</span><span class="p">),</span> <span class="s2">"スキーマ検証 (8試行) の結論"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.4</span><span class="p">))</span>
+<span class="n">rectangle</span><span class="p">((</span><span class="mf">129.5</span><span class="p">,</span> <span class="mf">61.5</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">45.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">41.0</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryNeutral</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">1.4</span><span class="p">))</span>
+<span class="n">text</span><span class="p">((</span><span class="mf">129.5</span><span class="p">,</span> <span class="mf">78.2</span><span class="p">),</span> <span class="s2">"スキーマ検証 (8試行) の結論"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.4</span><span class="p">))</span>
 
 <span class="n">s_cards</span> <span class="o">=</span> <span class="p">[</span>
     <span class="p">(</span>
-        <span class="mf">68.2</span><span class="p">,</span>
-        <span class="s2">"1. Cold #1 文法コンパイル"</span><span class="p">,</span>
-        <span class="s2">"初回のみ FSM 構築で約+1.6秒</span><span class="se">\n</span><span class="s2">Cold TTFT 2,625 ms → Warm 975 ms"</span><span class="p">,</span>
+        <span class="mf">69.4</span><span class="p">,</span>
+        <span class="s2">"1. 新規スキーマ初回 (Cold)"</span><span class="p">,</span>
+        <span class="s2">"6F #1 は FSM 文法構築を伴い</span><span class="se">\n</span><span class="s2">TTFT 3,337 ms (確定 2,954 ms)"</span><span class="p">,</span>
         <span class="n">Styles</span><span class="o">.</span><span class="n">WhiteFlat</span><span class="p">,</span>
     <span class="p">),</span>
     <span class="p">(</span>
-        <span class="mf">56.6</span><span class="p">,</span>
-        <span class="s2">"2. Warm 時は -62.9% 短縮"</span><span class="p">,</span>
-        <span class="s2">"2F Warm (#2〜#4) 平均 975 ms</span><span class="se">\n</span><span class="s2">thinking 確定も平均 895 ms"</span><span class="p">,</span>
+        <span class="mf">57.5</span><span class="p">,</span>
+        <span class="s2">"2. Warm 時は -15.0% 短縮"</span><span class="p">,</span>
+        <span class="s2">"6F Warm (#2〜#4) 平均 2,837 ms</span><span class="se">\n</span><span class="s2">thinking 確定も平均 2,419 ms"</span><span class="p">,</span>
         <span class="n">Styles</span><span class="o">.</span><span class="n">WhiteFlat</span><span class="p">,</span>
     <span class="p">),</span>
     <span class="p">(</span>
-        <span class="mf">45.0</span><span class="p">,</span>
-        <span class="s2">"3. 2項目 vs 6項目は差 +58ms"</span><span class="p">,</span>
-        <span class="s2">"6F Warm 平均 TTFT 1,033 ms</span><span class="se">\n</span><span class="s2">フィールド定義順こそが決定要因"</span><span class="p">,</span>
+        <span class="mf">45.6</span><span class="p">,</span>
+        <span class="s2">"3. 2項目 vs 6項目は差 +93ms"</span><span class="p">,</span>
+        <span class="s2">"2F Warm 2,744 ms vs 6F 2,837 ms</span><span class="se">\n</span><span class="s2">フィールド定義順こそが決定要因"</span><span class="p">,</span>
         <span class="n">Styles</span><span class="o">.</span><span class="n">SecondaryNeutral</span><span class="p">,</span>
     <span class="p">),</span>
 <span class="p">]</span>
 <span class="k">for</span> <span class="n">cy</span><span class="p">,</span> <span class="n">ch</span><span class="p">,</span> <span class="n">cb</span><span class="p">,</span> <span class="n">cst</span> <span class="ow">in</span> <span class="n">s_cards</span><span class="p">:</span>
-    <span class="n">rectangle</span><span class="p">((</span><span class="mf">129.5</span><span class="p">,</span> <span class="n">cy</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">41.6</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">9.8</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">cst</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">0.9</span><span class="p">))</span>
-    <span class="n">text</span><span class="p">((</span><span class="mf">129.5</span><span class="p">,</span> <span class="n">cy</span> <span class="o">+</span> <span class="mf">2.4</span><span class="p">),</span> <span class="n">ch</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">))</span>
-    <span class="n">text</span><span class="p">((</span><span class="mf">129.5</span><span class="p">,</span> <span class="n">cy</span> <span class="o">-</span> <span class="mf">1.8</span><span class="p">),</span> <span class="n">cb</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Dark</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">))</span>
+    <span class="n">rectangle</span><span class="p">((</span><span class="mf">129.5</span><span class="p">,</span> <span class="n">cy</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">41.6</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">cst</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">0.9</span><span class="p">))</span>
+    <span class="n">text</span><span class="p">((</span><span class="mf">129.5</span><span class="p">,</span> <span class="n">cy</span> <span class="o">+</span> <span class="mf">2.4</span><span class="p">),</span> <span class="n">ch</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">9.8</span><span class="p">))</span>
+    <span class="n">text</span><span class="p">((</span><span class="mf">129.5</span><span class="p">,</span> <span class="n">cy</span> <span class="o">-</span> <span class="mf">1.8</span><span class="p">),</span> <span class="n">cb</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Dark</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">9.5</span><span class="p">))</span>
 
 <span class="c1"># ─── Bottom Section: pydantic_core.from_json Incremental Pipeline ────────────</span>
 <span class="n">rectangle</span><span class="p">((</span><span class="mf">79.0</span><span class="p">,</span> <span class="mf">20.8</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">146.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">34.0</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryNeutral</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">1.5</span><span class="p">))</span>
@@ -880,7 +891,7 @@ Prefill と Thinking が完了した瞬間から、最終回答テキスト（<c
         <span class="mf">60.0</span><span class="p">,</span>
         <span class="mf">33.0</span><span class="p">,</span>
         <span class="s2">"Step 2: bool確定と分岐"</span><span class="p">,</span>
-        <span class="s1">'入力: </span><span class="se">\'</span><span class="s1">{"thinking": false,</span><span class="se">\'\n</span><span class="s1">→ {</span><span class="se">\'</span><span class="s1">thinking</span><span class="se">\'</span><span class="s1">: False} (895ms)</span><span class="se">\n</span><span class="s1">true 時は即 Stage-2 並列起動'</span><span class="p">,</span>
+        <span class="s1">'入力: </span><span class="se">\'</span><span class="s1">{"thinking": false,</span><span class="se">\'\n</span><span class="s1">→ {</span><span class="se">\'</span><span class="s1">thinking</span><span class="se">\'</span><span class="s1">: False} (~2.5s)</span><span class="se">\n</span><span class="s1">true 時は即 Stage-2 並列起動'</span><span class="p">,</span>
         <span class="n">Styles</span><span class="o">.</span><span class="n">SecondaryNeutral</span><span class="p">,</span>
         <span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="p">,</span>
     <span class="p">),</span>
@@ -916,7 +927,7 @@ Prefill と Thinking が完了した瞬間から、最終回答テキスト（<c
 </details>
 <h3>1. サーバー側 Constrained Decoding（制約付きデコード）と Cold vs. Warm 文法コンパイル</h3>
 <p><code>response_mime_type=&quot;application/json&quot;</code> と <code>response_schema=AdaptiveStreamResponse</code> を指定すると、Google AI Studio バックエンドは与えられた Pydantic モデルの JSON Schema を解析し、デコーダ層で構文違反トークンの生成確率をマスクする <strong>有限状態機械（FSM: Finite-State Machine）文法</strong> へコンパイルする。これにより、マークダウンのコードフェンス混入や閉じ括弧漏れが数学的にゼロとなる。</p>
-<p>図2-2上段および下表は、最小2フィールドの <code>AdaptiveStreamResponse(thinking: bool, response: str)</code>（<code>minimal_2field</code>）と、<code>Literal</code> 列挙型2項目・真偽値・文字列リストを加えた拡張6フィールドの <code>RichStreamResponse</code>（<code>rich_6field</code>）に対して、同一プロンプトを4回連続実行した実測値（<code>src/gemini_evaluation/adaptive_thinking_log.json</code>）である。</p>
+<p>図2-2上段および下表は、最小2フィールドの <code>AdaptiveStreamResponse(thinking: bool, response: str)</code>（<code>minimal_2field</code>）と、<code>Literal</code> 列挙型2項目・真偽値・文字列リストを加えた拡張6フィールドの <code>RichStreamResponse</code>（<code>rich_6field</code>）に対して、同一プロンプトを4回連続実行した実測値（<code>src/gemini_evaluation/adaptive_thinking_log.json</code>）である。なお、すべての試行において先頭フィールド <code>thinking</code> の確定時刻（<code>flag_decided_ms</code>）は第2フィールド <code>response</code> の初回チャンク表示時刻（<code>ttft_ms</code>）以前に成立（<code>flag_decided_ms &lt;= ttft_ms &lt; total_ms</code>）している。</p>
 <table>
 <thead>
 <tr>
@@ -933,89 +944,89 @@ Prefill と Thinking が完了した瞬間から、最終回答テキスト（<c
 <tr>
 <td style="text-align:left"><strong><code>minimal_2field</code></strong> (<code>AdaptiveStreamResponse</code>)</td>
 <td style="text-align:center"><strong>#1</strong></td>
-<td style="text-align:center"><strong>Cold (初回)</strong></td>
-<td style="text-align:right"><code>3,215.9 ms</code></td>
-<td style="text-align:right"><strong><code>2,625.2 ms</code></strong></td>
-<td style="text-align:right"><code>3,190.7 ms</code></td>
-<td style="text-align:right"><code>237 字</code></td>
+<td style="text-align:center">Warm (本実験直後)</td>
+<td style="text-align:right"><code>2,562.2 ms</code></td>
+<td style="text-align:right"><strong><code>2,562.2 ms</code></strong></td>
+<td style="text-align:right"><code>5,319.0 ms</code></td>
+<td style="text-align:right"><code>496 字</code></td>
 </tr>
 <tr>
 <td style="text-align:left"><strong><code>minimal_2field</code></strong> (<code>AdaptiveStreamResponse</code>)</td>
 <td style="text-align:center"><strong>#2</strong></td>
 <td style="text-align:center">Warm</td>
-<td style="text-align:right"><code>752.6 ms</code></td>
-<td style="text-align:right"><strong><code>847.3 ms</code></strong></td>
-<td style="text-align:right"><code>1,488.1 ms</code></td>
-<td style="text-align:right"><code>239 字</code></td>
+<td style="text-align:right"><code>2,294.1 ms</code></td>
+<td style="text-align:right"><strong><code>2,294.1 ms</code></strong></td>
+<td style="text-align:right"><code>4,551.2 ms</code></td>
+<td style="text-align:right"><code>455 字</code></td>
 </tr>
 <tr>
 <td style="text-align:left"><strong><code>minimal_2field</code></strong> (<code>AdaptiveStreamResponse</code>)</td>
 <td style="text-align:center"><strong>#3</strong></td>
 <td style="text-align:center">Warm</td>
-<td style="text-align:right"><code>902.8 ms</code></td>
-<td style="text-align:right"><strong><code>918.0 ms</code></strong></td>
-<td style="text-align:right"><code>1,396.0 ms</code></td>
-<td style="text-align:right"><code>245 字</code></td>
+<td style="text-align:right"><code>2,194.2 ms</code></td>
+<td style="text-align:right"><strong><code>2,492.2 ms</code></strong></td>
+<td style="text-align:right"><code>4,950.2 ms</code></td>
+<td style="text-align:right"><code>579 字</code></td>
 </tr>
 <tr>
 <td style="text-align:left"><strong><code>minimal_2field</code></strong> (<code>AdaptiveStreamResponse</code>)</td>
 <td style="text-align:center"><strong>#4</strong></td>
 <td style="text-align:center">Warm</td>
-<td style="text-align:right"><code>1,029.2 ms</code></td>
-<td style="text-align:right"><strong><code>1,159.2 ms</code></strong></td>
-<td style="text-align:right"><code>1,604.6 ms</code></td>
-<td style="text-align:right"><code>244 字</code></td>
+<td style="text-align:right"><code>3,446.8 ms</code></td>
+<td style="text-align:right"><strong><code>3,446.8 ms</code></strong></td>
+<td style="text-align:right"><code>6,855.2 ms</code></td>
+<td style="text-align:right"><code>686 字</code></td>
 </tr>
 <tr>
 <td style="text-align:left"><strong><code>rich_6field</code></strong> (<code>RichStreamResponse</code>)</td>
 <td style="text-align:center"><strong>#1</strong></td>
-<td style="text-align:center">Warm基盤※</td>
-<td style="text-align:right"><code>865.5 ms</code></td>
-<td style="text-align:right"><strong><code>1,056.6 ms</code></strong></td>
-<td style="text-align:right"><code>1,759.3 ms</code></td>
-<td style="text-align:right"><code>250 字</code></td>
+<td style="text-align:center"><strong>Cold (新規初回)</strong></td>
+<td style="text-align:right"><code>2,954.3 ms</code></td>
+<td style="text-align:right"><strong><code>3,337.3 ms</code></strong></td>
+<td style="text-align:right"><code>6,517.4 ms</code></td>
+<td style="text-align:right"><code>507 字</code></td>
 </tr>
 <tr>
 <td style="text-align:left"><strong><code>rich_6field</code></strong> (<code>RichStreamResponse</code>)</td>
 <td style="text-align:center"><strong>#2</strong></td>
 <td style="text-align:center">Warm</td>
-<td style="text-align:right"><code>790.7 ms</code></td>
-<td style="text-align:right"><strong><code>976.8 ms</code></strong></td>
-<td style="text-align:right"><code>1,516.5 ms</code></td>
-<td style="text-align:right"><code>203 字</code></td>
+<td style="text-align:right"><code>2,157.1 ms</code></td>
+<td style="text-align:right"><strong><code>2,504.4 ms</code></strong></td>
+<td style="text-align:right"><code>4,526.9 ms</code></td>
+<td style="text-align:right"><code>360 字</code></td>
 </tr>
 <tr>
 <td style="text-align:left"><strong><code>rich_6field</code></strong> (<code>RichStreamResponse</code>)</td>
 <td style="text-align:center"><strong>#3</strong></td>
 <td style="text-align:center">Warm</td>
-<td style="text-align:right"><code>901.1 ms</code></td>
-<td style="text-align:right"><strong><code>1,127.6 ms</code></strong></td>
-<td style="text-align:right"><code>1,874.4 ms</code></td>
-<td style="text-align:right"><code>247 字</code></td>
+<td style="text-align:right"><code>2,780.6 ms</code></td>
+<td style="text-align:right"><strong><code>3,259.3 ms</code></strong></td>
+<td style="text-align:right"><code>5,838.9 ms</code></td>
+<td style="text-align:right"><code>422 字</code></td>
 </tr>
 <tr>
 <td style="text-align:left"><strong><code>rich_6field</code></strong> (<code>RichStreamResponse</code>)</td>
 <td style="text-align:center"><strong>#4</strong></td>
 <td style="text-align:center">Warm</td>
-<td style="text-align:right"><code>786.7 ms</code></td>
-<td style="text-align:right"><strong><code>995.9 ms</code></strong></td>
-<td style="text-align:right"><code>1,719.5 ms</code></td>
-<td style="text-align:right"><code>250 字</code></td>
+<td style="text-align:right"><code>2,320.5 ms</code></td>
+<td style="text-align:right"><strong><code>2,747.5 ms</code></strong></td>
+<td style="text-align:right"><code>6,504.9 ms</code></td>
+<td style="text-align:right"><code>679 字</code></td>
 </tr>
 </tbody>
 </table>
 <ul>
-<li><strong>Cold <code>#1</code> と Warm <code>#2〜#4</code> の差（<code>-62.9%</code> の高速化）</strong>：
-未知のスキーマを最初に送信した <code>minimal_2field #1</code>（Cold）では、サーバー側の FSM 文法コンパイルに約 <code>1.6 秒</code> を要し、<code>TTFT = 2,625.2 ms</code> となった。しかし直後の <strong><code>#2〜#4</code>（Warm）ではコンパイル済み文法キャッシュが適用され、平均 TTFT は <code>974.8 ms</code>（<code>847〜1,159 ms</code>、Cold 比 <code>-62.9%</code>）</strong>、<code>thinking</code> フラグ確定時刻（<code>flag_decided_ms</code>）も平均 <strong><code>894.9 ms</code></strong> へ劇的に短縮された。</li>
+<li><strong>新規スキーマ初回（Cold <code>#1</code>）と Warm <code>#2〜#4</code> の比較（<code>-15.0%</code> 短縮）</strong>：
+<code>minimal_2field</code>（<code>AdaptiveStreamResponse</code>）は直前の本実験（45試行）で既にコンパイル済みだったため <code>#1</code> から <code>2,562.2 ms</code>（<code>#2〜#4</code> 平均 <strong><code>2,744.4 ms</code></strong>、全4回平均 <code>2,698.8 ms</code>）で応答した。一方、新規の6フィールド構成 <code>rich_6field</code> を初めて送信した <strong><code>rich_6field #1</code>（Cold）では、FSM 文法コンパイルに伴い <code>TTFT = 3,337.3 ms</code>（<code>flag_decided_ms = 2,954.3 ms</code>）</strong> を要したが、直後の <strong><code>#2〜#4</code>（Warm）ではコンパイル済みキャッシュが適用され、平均 TTFT は <code>2,837.1 ms</code>（<code>2,504.4〜3,259.3 ms</code>、Cold 比 <code>-500.2 ms</code> / <code>-15.0%</code> 短縮）</strong>、<code>thinking</code> フラグ確定時刻も平均 <strong><code>2,419.4 ms</code></strong> へ短縮された。</li>
 <li><strong>フィールド数（2項目 vs. 6項目）よりも「フィールド定義順」が TTFT を支配する</strong>：
-Warm <code>#2〜#4</code> 同士を比較すると、2フィールド構成（平均 <code>974.8 ms</code>）と6フィールド構成（平均 <code>1,033.4 ms</code>）の TTFT 差はわずか <strong><code>+58.6 ms</code></strong> に過ぎない。これは <code>RichStreamResponse</code> において <strong><code>thinking: bool</code> を先頭（第1フィールド）に置き、短い固定列挙型（<code>category</code>, <code>urgency</code>, <code>needs_human_escalation</code>）の直後に <code>response: str</code> を配置し、可変長リスト <code>suggested_followups: list[str]</code> を <code>response</code> の後ろ（末尾）に配置したため</strong> である。JSON ストリーミングは定義順にトークンを生成するため、ルーティング用フラグを先頭、画面表示用の <code>response</code> を可変長配列の前に置くことが鉄則となる。</li>
+Warm <code>#2〜#4</code> 同士を比較すると、2フィールド構成（平均 <code>2,744.4 ms</code>）と6フィールド構成（平均 <code>2,837.1 ms</code>）の TTFT 差はわずか <strong><code>+92.7 ms</code>（<code>+3.4%</code>）</strong> に過ぎない。これは <code>RichStreamResponse</code> において <strong><code>thinking: bool</code> を先頭（第1フィールド）に置き、短い固定列挙型（<code>category</code>, <code>urgency</code>, <code>needs_human_escalation</code>）の直後に <code>response: str</code> を配置し、可変長リスト <code>suggested_followups: list[str]</code> を <code>response</code> の後ろ（末尾）に配置したため</strong> である。JSON ストリーミングは定義順にトークンを生成するため、ルーティング用フラグを先頭、画面表示用の <code>response</code> を可変長配列の前に置くことが鉄則となる。</li>
 </ul>
 <h3>2. <code>pydantic_core.from_json(..., allow_partial=&quot;trailing-strings&quot;)</code> による逐次差分抽出</h3>
 <p><code>generate_content_stream</code> で構造化 JSON を受信する際、ストリーム途中のチャンクには閉じ括弧のない JSON 断片（例：<code>'{&quot;thinking&quot;: false, &quot;response&quot;: &quot;いつもご利用'</code>）が入るため、SDK 標準の <code>chunk.parsed</code> はストリーム完了まで常に <code>None</code> となる。</p>
 <p>そこで <code>src/gemini_evaluation/adaptive_thinking.py</code> では、Pydantic v2 に標準搭載されている Rust 製パーサー <strong><code>pydantic_core.from_json(raw_bytes, allow_partial=&quot;trailing-strings&quot;)</code></strong> を用いてチャンク到着ごとに累積バッファを解析している。この方式は以下の決定的な利点を持つ。</p>
 <ol>
 <li><strong>未完プリミティブの安全な保留</strong>：<code>'{&quot;thinking&quot;: fa'</code> のように真偽値リテラルが途中で切れている段階では <code>{}</code> を返し、<code>false</code> または <code>true</code> が完結した瞬間に初めて <code>{'thinking': False}</code> を返すため、不完全なトークンによる誤分岐が起きない。</li>
-<li><strong>エスケープシーケンス分断への耐性と O(1) 差分スライス</strong>：<code>&quot;response&quot;</code> 文字列の末尾がバックスラッシュ <code>\</code>（例：<code>\n</code> の1文字目）で分断された場合も、未完の <code>\</code> を内部保留して確定済み文字のみを返す。そのため、既にクライアントへ送出した文字数 <code>emitted_resp_len</code> を記録しておき、<code>delta = resp_so_far[emitted_resp_len:]</code> をスライスするだけで、文字化けや JSON 構文漏出を一切起こさずにプレーンテキスト同等のストリーミング表示を実現できる。</li>
+<li><strong>エスケープシーケンス分断への耐性と <code>O(1)</code> 差分スライス</strong>：<code>&quot;response&quot;</code> 文字列の末尾がバックスラッシュ <code>\</code>（例：<code>\n</code> の1文字目）で分断された場合も、未完の <code>\</code> を内部保留して確定済み文字のみを返す。そのため、既にクライアントへ送出した文字数 <code>emitted_resp_len</code> を記録しておき、<code>delta = resp_so_far[emitted_resp_len:]</code> をスライスするだけで、文字化けや JSON 構文漏出を一切起こさずにプレーンテキスト同等のストリーミング表示を実現できる。</li>
 </ol>
 <pre><code class="language-python"><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseModel</span>
@@ -1023,7 +1034,7 @@ Warm <code>#2〜#4</code> 同士を比較すると、2フィールド構成（�
 
 
 <span class="k">class</span><span class="w"> </span><span class="nc">AdaptiveStreamResponse</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
-    <span class="n">thinking</span><span class="p">:</span> <span class="nb">bool</span>  <span class="c1"># 第1フィールド：約 750〜900 ms で確定するルーティングフラグ</span>
+    <span class="n">thinking</span><span class="p">:</span> <span class="nb">bool</span>  <span class="c1"># 第1フィールド：初回チャンク以前に確定するルーティングフラグ</span>
     <span class="n">response</span><span class="p">:</span> <span class="nb">str</span>   <span class="c1"># 第2フィールド：逐次ストリーム表示する回答本文（または受付1文）</span>
 
 
@@ -1236,7 +1247,7 @@ Warm <code>#2〜#4</code> 同士を比較すると、2フィールド構成（�
 <td style="text-align:left"><code>&quot;0&quot;</code></td>
 <td style="text-align:left"><code>ThinkingConfig(thinking_budget=0)</code></td>
 <td style="text-align:left"><strong><code>0 tok</code></strong></td>
-<td style="text-align:left">推論トークン上限を <code>0</code> に固定。内部思考を完全にスキップし、最速の TTFT（約 <code>1,205〜1,546 ms</code>）を実現する。挨拶・定型案内・分類ルーターに最適。</td>
+<td style="text-align:left">推論トークン上限を <strong>0 tok</strong> に固定。内部思考を完全にスキップし、最速の TTFT（約 <code>1,205〜1,546 ms</code>）を実現する。挨拶・定型案内・分類ルーターに最適。</td>
 </tr>
 <tr>
 <td style="text-align:left"><strong><code>1</code></strong> （または <code>&quot;minimal&quot;</code>）</td>
@@ -1475,7 +1486,7 @@ Warm <code>#2〜#4</code> 同士を比較すると、2フィールド構成（�
 </table>
 <p>この計測結果から、以下の2つの重要な知見が得られる。</p>
 <ol>
-<li><strong><code>thinking_config</code> 省略時（<code>default</code>）の隠れた待機コスト</strong>：パラメータを指定しない場合、定型的な質問であっても <code>467〜1,006 トークン</code> の内部推論が自動的に実行され、最初の1文字が返るまでに <code>7.5〜10.4 秒</code> を要する。<code>thinking=0</code> を明示指定するだけで推論トークンは <code>0</code> となり、Streaming TTFT は <strong><code>10,430 ms</code> から <code>1,205 ms</code> へと 88% 短縮</strong> される。</li>
+<li><strong><code>thinking_config</code> 省略時（<code>default</code>）の隠れた待機コスト</strong>：パラメータを指定しない場合、定型的な質問であっても <code>467〜1,006 トークン</code> の内部推論が自動的に実行され、最初の1文字が返るまでに <code>7.5〜10.4 秒</code> を要する。<code>thinking=0</code> を明示指定するだけで推論トークンは <strong>0 tok</strong> となり、Streaming TTFT は <strong><code>10,430 ms</code> から <code>1,205 ms</code> へと 88% 短縮</strong> される。</li>
 <li><strong>Blocking と Streaming の体感差が最大化するのは <code>thinking=0</code> 領域</strong>：<code>thinking=0</code> において、Blocking は全文生成完了まで <code>3,360 ms</code> 待つのに対し、Streaming は <strong><code>1,205 ms</code></strong> で最初のチャンクを表示開始でき、体感待ち時間を <strong>64% 短縮</strong> できる。</li>
 </ol>
 <hr />
@@ -1736,7 +1747,7 @@ Warm <code>#2〜#4</code> 同士を比較すると、2フィールド構成（�
 </details>
 <h3>線形回帰分析から導かれる3つの法則</h3>
 <ol>
-<li><strong>TTFT の厳密な1次関数則（$\text{TTFT} \approx 1,500\text{ ms} + 9.0\text{ ms} \times \text{ThTok}$）</strong>：
+<li><strong>TTFT の厳密な1次関数則（<code>TTFT ≈ 1,500 ms + 9.0 ms × ThTok</code>）</strong>：
 <ul>
 <li>図3-3の全プロットは、ネットワーク揺らぎを除き、切片 <strong><code>約 1,500 ms</code></strong>（ネットワーク往復＋プロンプトのプリフィル処理＋最初の1トークン生成時間）、傾き <strong><code>約 9.0 ms / token</code></strong> の直線上に極めて高い相関で並んでいる。</li>
 <li>傾き <code>9.0 ms / token</code> の逆数をとると <strong><code>約 110 tokens/秒</code></strong> となり、<code>gemini-3.8-flash</code> が内部スクラッチパッド上で推論トークンを自己回帰デコードする速度を示している。</li>
@@ -1876,14 +1887,14 @@ Warm <code>#2〜#4</code> 同士を比較すると、2フィールド構成（�
         <span class="mf">23.8</span><span class="p">,</span>
         <span class="s2">"T3_2: 500GB バックアップ"</span><span class="p">,</span>
         <span class="s2">"USB2.0: 240分 / Gen2: 35分</span><span class="se">\n</span><span class="s2">短縮: 205分 (3時間25分)"</span><span class="p">,</span>
-        <span class="s2">"大容量300GBと小ファイル200GBをインターフェース別</span><span class="se">\n</span><span class="s2">速度で除算し、検証時間(15分/5分)を加算して差分算出"</span><span class="p">,</span>
+        <span class="s2">"大容量300GBと小ファイル200GBをインターフェース別</span><span class="se">\n</span><span class="s2">速度で除算(各項目分未満切捨)+検証時間(15分/5分)加算"</span><span class="p">,</span>
         <span class="s2">"205分短縮 (完全検証)</span><span class="se">\n</span><span class="s2">(673〜755 tok)"</span><span class="p">,</span>
     <span class="p">),</span>
     <span class="p">(</span>
         <span class="mf">14.2</span><span class="p">,</span>
         <span class="s2">"T3_3: 3台PC保守2年試算"</span><span class="p">,</span>
         <span class="s2">"保守50,400+増設29,400+</span><span class="se">\n</span><span class="s2">クラウド13,800=93,600円"</span><span class="p">,</span>
-        <span class="s2">"3台×24ヶ月保守+スポット割引(-6,600)+16GB増設</span><span class="se">\n</span><span class="s2">3台分(-1,800)+1年目・2年目クラウド料金の総和"</span><span class="p">,</span>
+        <span class="s2">"3台×24ヶ月保守+訪問修理2回(割引-6,600)+16GB増設</span><span class="se">\n</span><span class="s2">3台分(割引-1,800)+1・2年目クラウド料金の総和"</span><span class="p">,</span>
         <span class="s2">"93,600円 (完全検証)</span><span class="se">\n</span><span class="s2">(674〜827 tok)"</span><span class="p">,</span>
     <span class="p">),</span>
 <span class="p">]</span>
@@ -1919,14 +1930,14 @@ Warm <code>#2〜#4</code> 同士を比較すると、2フィールド構成（�
 </li>
 <li><strong><code>T3_2</code>（500GB SSD データのバックアップ転送時間比較）</strong>：
 <ul>
-<li>USB 2.0 HDD：動画300GB（<code>300,000 MB ÷ 40 MB/s = 125 分</code>）＋ 写真・書類200GB（<code>200,000 MB ÷ 32 MB/s = 100 分</code>）＋ 整合性チェック <code>15 分</code> ＝ <strong><code>240 分</code>（4時間）</strong>。</li>
-<li>USB 3.2 Gen2 SSD：動画300GB（<code>300,000 MB ÷ 400 MB/s = 12.5 分 → 12 分</code>）＋ 写真・書類200GB（<code>200,000 MB ÷ 180 MB/s = 18.5 分 → 18 分</code>）＋ 整合性チェック <code>5 分</code> ＝ <strong><code>35 分</code></strong>。短縮時間は <strong><code>205 分</code>（3時間25分）</strong>。</li>
+<li>USB 2.0 HDD：動画300GB（<code>300,000 MB ÷ 40 MB/s = 7,500 秒 = 125 分</code>）＋ 写真・書類200GB（<code>192,000 MB ÷ 32 MB/s = 6,000 秒 = 100 分</code>）＋ 整合性チェック <code>15 分</code> ＝ <strong><code>240 分</code>（4時間）</strong>。</li>
+<li>USB 3.2 Gen2 SSD（プロンプトの「各項目で分未満切り捨て」指定に基づく）：動画300GB（<code>300,000 MB ÷ 400 MB/s = 750 秒 = 12.5 分 → 切り捨て 12 分</code>）＋ 写真・書類200GB（<code>199,800 MB ÷ 180 MB/s = 1,110 秒 = 18.5 分 → 切り捨て 18 分</code>）＋ 整合性チェック <code>5 分</code> ＝ <strong><code>35 分</code></strong>。短縮時間は <strong><code>205 分</code>（3時間25分）</strong>。</li>
 </ul>
 </li>
 <li><strong><code>T3_3</code>（3台PCの保守契約・メモリ増設・クラウドバックアップ2年間総額試算）</strong>：
 <ul>
-<li>基本保守（<code>600 円 × 3台 × 24ヶ月 = 43,200 円</code>）＋ 訪問修理2回（<code>3,600 円 × 2 = 7,200 円</code>）＝ <code>50,400 円</code>。</li>
-<li>16GBメモリ増設3台（<code>9,800 円 × 3 = 29,400 円</code>）。</li>
+<li>基本保守（<code>600 円 × 3台 × 24ヶ月 = 43,200 円</code>）＋ 訪問修理2回（通常 <code>6,900 円 × 2 = 13,800 円</code> − 保守契約スポット割引 <code>6,600 円</code> ＝ <code>3,600 円 × 2 = 7,200 円</code>）＝ <code>50,400 円</code>。</li>
+<li>16GBメモリ増設3台（通常 <code>10,400 円 × 3 = 31,200 円</code> − 3台同時増設割引 <code>1,800 円</code> ＝ <code>9,800 円 × 3 = 29,400 円</code>）。</li>
 <li>クラウドバックアップ（1年目 <code>550 円 × 12 = 6,600 円</code> ＋ 2年目 <code>600 円 × 12 = 7,200 円</code> ＝ <code>13,800 円</code>）。2年間総額は <strong><code>93,600 円</code></strong>。</li>
 </ul>
 </li>
@@ -2154,12 +2165,12 @@ Warm <code>#2〜#4</code> 同士を比較すると、2フィールド構成（�
 <span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.text</span><span class="w"> </span><span class="kn">import</span> <span class="n">text</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_adaptive_runs</span>
 
-<span class="n">setup</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mi">172</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">92</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">150</span><span class="p">)</span>
+<span class="n">setup</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mi">172</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">112</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">150</span><span class="p">)</span>
 
 <span class="c1"># Outer structural frame</span>
-<span class="n">rectangle</span><span class="p">((</span><span class="mf">86.0</span><span class="p">,</span> <span class="mf">46.0</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">168.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">88.0</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">MutedDashed</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">2.0</span><span class="p">))</span>
+<span class="n">rectangle</span><span class="p">((</span><span class="mf">86.0</span><span class="p">,</span> <span class="mf">56.0</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">168.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">108.0</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">MutedDashed</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">2.0</span><span class="p">))</span>
 <span class="n">text</span><span class="p">(</span>
-    <span class="p">(</span><span class="mf">86.0</span><span class="p">,</span> <span class="mf">85.8</span><span class="p">),</span>
+    <span class="p">(</span><span class="mf">86.0</span><span class="p">,</span> <span class="mf">105.8</span><span class="p">),</span>
     <span class="s2">"全45実行ベンチマーク：難易度ティア別の平均 TTFT (左) と 平均完了時間 Total (右)"</span><span class="p">,</span>
     <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">12.0</span><span class="p">),</span>
 <span class="p">)</span>
@@ -2183,15 +2194,15 @@ Warm <code>#2〜#4</code> 同士を比較すると、2フィールド構成（�
 
 
 <span class="c1"># 2-row Legend at top</span>
-<span class="n">rectangle</span><span class="p">((</span><span class="mf">86.0</span><span class="p">,</span> <span class="mf">77.2</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">160.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">9.2</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Neutral</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">1.2</span><span class="p">))</span>
+<span class="n">rectangle</span><span class="p">((</span><span class="mf">86.0</span><span class="p">,</span> <span class="mf">97.2</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">160.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">9.2</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Neutral</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">1.2</span><span class="p">))</span>
 
 <span class="n">leg_row1</span> <span class="o">=</span> <span class="p">[</span>
     <span class="p">(</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryFlat</span><span class="p">,</span> <span class="s2">"★ Pattern A: 2F統合 {thinking, response} [推奨]"</span><span class="p">),</span>
     <span class="p">(</span><span class="mf">92.0</span><span class="p">,</span> <span class="n">Styles</span><span class="o">.</span><span class="n">TealFlat</span><span class="p">,</span> <span class="s2">"Pattern C: 先頭タグ [DIRECT]/[THINK]"</span><span class="p">),</span>
 <span class="p">]</span>
 <span class="k">for</span> <span class="n">lx</span><span class="p">,</span> <span class="n">st</span><span class="p">,</span> <span class="n">ltxt</span> <span class="ow">in</span> <span class="n">leg_row1</span><span class="p">:</span>
-    <span class="n">rectangle</span><span class="p">((</span><span class="n">lx</span><span class="p">,</span> <span class="mf">79.3</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">3.6</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">st</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">0.3</span><span class="p">))</span>
-    <span class="n">text</span><span class="p">((</span><span class="n">lx</span> <span class="o">+</span> <span class="mf">2.8</span><span class="p">,</span> <span class="mf">79.3</span><span class="p">),</span> <span class="n">ltxt</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">halign</span><span class="o">=</span><span class="s2">"left"</span><span class="p">))</span>
+    <span class="n">rectangle</span><span class="p">((</span><span class="n">lx</span><span class="p">,</span> <span class="mf">99.3</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">3.6</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">st</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">0.3</span><span class="p">))</span>
+    <span class="n">text</span><span class="p">((</span><span class="n">lx</span> <span class="o">+</span> <span class="mf">2.8</span><span class="p">,</span> <span class="mf">99.3</span><span class="p">),</span> <span class="n">ltxt</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">halign</span><span class="o">=</span><span class="s2">"left"</span><span class="p">))</span>
 
 <span class="n">leg_row2</span> <span class="o">=</span> <span class="p">[</span>
     <span class="p">(</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">Styles</span><span class="o">.</span><span class="n">SuccessFlat</span><span class="p">,</span> <span class="s2">"Base 0: 固定 thinking=0 (内部検算なし)"</span><span class="p">),</span>
@@ -2199,27 +2210,27 @@ Warm <code>#2〜#4</code> 同士を比較すると、2フィールド構成（�
     <span class="p">(</span><span class="mf">118.0</span><span class="p">,</span> <span class="n">Styles</span><span class="o">.</span><span class="n">DangerFlat</span><span class="p">,</span> <span class="s2">"Pattern B: 1F直列ルーター (常時2回呼出)"</span><span class="p">),</span>
 <span class="p">]</span>
 <span class="k">for</span> <span class="n">lx</span><span class="p">,</span> <span class="n">st</span><span class="p">,</span> <span class="n">ltxt</span> <span class="ow">in</span> <span class="n">leg_row2</span><span class="p">:</span>
-    <span class="n">rectangle</span><span class="p">((</span><span class="n">lx</span><span class="p">,</span> <span class="mf">75.1</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">3.6</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">st</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">0.3</span><span class="p">))</span>
-    <span class="n">text</span><span class="p">((</span><span class="n">lx</span> <span class="o">+</span> <span class="mf">2.8</span><span class="p">,</span> <span class="mf">75.1</span><span class="p">),</span> <span class="n">ltxt</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Dark</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">halign</span><span class="o">=</span><span class="s2">"left"</span><span class="p">))</span>
+    <span class="n">rectangle</span><span class="p">((</span><span class="n">lx</span><span class="p">,</span> <span class="mf">95.1</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">3.6</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">st</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">0.3</span><span class="p">))</span>
+    <span class="n">text</span><span class="p">((</span><span class="n">lx</span> <span class="o">+</span> <span class="mf">2.8</span><span class="p">,</span> <span class="mf">95.1</span><span class="p">),</span> <span class="n">ltxt</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Dark</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">halign</span><span class="o">=</span><span class="s2">"left"</span><span class="p">))</span>
 
 <span class="c1"># Left Panel: Average TTFT (ms)</span>
-<span class="n">rectangle</span><span class="p">((</span><span class="mf">45.5</span><span class="p">,</span> <span class="mf">42.0</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">79.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">56.0</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">WhiteFlat</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">1.4</span><span class="p">,</span> <span class="n">line_width</span><span class="o">=</span><span class="mf">0.8</span><span class="p">))</span>
-<span class="n">text</span><span class="p">((</span><span class="mf">45.5</span><span class="p">,</span> <span class="mf">66.8</span><span class="p">),</span> <span class="s2">"① 初回トークン到着時間：平均 TTFT (ms)"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">11.0</span><span class="p">))</span>
+<span class="n">rectangle</span><span class="p">((</span><span class="mf">45.5</span><span class="p">,</span> <span class="mf">52.0</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">79.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">76.0</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">WhiteFlat</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">1.4</span><span class="p">,</span> <span class="n">line_width</span><span class="o">=</span><span class="mf">0.8</span><span class="p">))</span>
+<span class="n">text</span><span class="p">((</span><span class="mf">45.5</span><span class="p">,</span> <span class="mf">86.8</span><span class="p">),</span> <span class="s2">"① 初回トークン到着時間：平均 TTFT (ms)"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">11.0</span><span class="p">))</span>
 
 <span class="n">chart_ttft</span> <span class="o">=</span> <span class="n">BarChart</span><span class="p">(</span>
     <span class="n">axis_line_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Dark</span><span class="p">,</span>
-    <span class="n">axis_text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">),</span>
+    <span class="n">axis_text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">9.5</span><span class="p">),</span>
     <span class="n">grid_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">MutedDashed</span><span class="p">,</span>
-    <span class="n">value_text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">),</span>
-    <span class="n">width</span><span class="o">=</span><span class="mf">54.0</span><span class="p">,</span>
-    <span class="n">height</span><span class="o">=</span><span class="mf">46.0</span><span class="p">,</span>
+    <span class="n">value_text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">8.6</span><span class="p">),</span>
+    <span class="n">width</span><span class="o">=</span><span class="mf">52.0</span><span class="p">,</span>
+    <span class="n">height</span><span class="o">=</span><span class="mf">64.0</span><span class="p">,</span>
     <span class="n">categories</span><span class="o">=</span><span class="n">categories</span><span class="p">,</span>
     <span class="n">orientation</span><span class="o">=</span><span class="s2">"horizontal"</span><span class="p">,</span>
     <span class="n">bar_mode</span><span class="o">=</span><span class="s2">"group"</span><span class="p">,</span>
-    <span class="n">bar_width_ratio</span><span class="o">=</span><span class="mf">0.82</span><span class="p">,</span>
+    <span class="n">bar_width_ratio</span><span class="o">=</span><span class="mf">0.74</span><span class="p">,</span>
     <span class="n">bar_r</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="n">chart_ttft</span><span class="o">.</span><span class="n">configure_x_axis</span><span class="p">(</span><span class="n">min_value</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="mi">13000</span><span class="p">,</span> <span class="n">tick_step</span><span class="o">=</span><span class="mi">3000</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">"</span><span class="si">{:,.0f}</span><span class="s2">"</span><span class="p">)</span>
+<span class="n">chart_ttft</span><span class="o">.</span><span class="n">configure_x_axis</span><span class="p">(</span><span class="n">min_value</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="mi">15000</span><span class="p">,</span> <span class="n">tick_step</span><span class="o">=</span><span class="mi">5000</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">"</span><span class="si">{:,.0f}</span><span class="s2">"</span><span class="p">)</span>
 <span class="n">chart_ttft</span><span class="o">.</span><span class="n">add_series</span><span class="p">(</span><span class="s2">"pat_a"</span><span class="p">,</span> <span class="n">calc_means</span><span class="p">(</span><span class="s2">"pat_a_pydantic_2f"</span><span class="p">,</span> <span class="s2">"ttft_ms"</span><span class="p">),</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryFlat</span><span class="p">)</span>
 <span class="n">chart_ttft</span><span class="o">.</span><span class="n">add_series</span><span class="p">(</span><span class="s2">"pat_c"</span><span class="p">,</span> <span class="n">calc_means</span><span class="p">(</span><span class="s2">"pat_c_tag"</span><span class="p">,</span> <span class="s2">"ttft_ms"</span><span class="p">),</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">TealFlat</span><span class="p">)</span>
 <span class="n">chart_ttft</span><span class="o">.</span><span class="n">add_series</span><span class="p">(</span><span class="s2">"base_0"</span><span class="p">,</span> <span class="n">calc_means</span><span class="p">(</span><span class="s2">"base_0"</span><span class="p">,</span> <span class="s2">"ttft_ms"</span><span class="p">),</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">SuccessFlat</span><span class="p">)</span>
@@ -2228,23 +2239,23 @@ Warm <code>#2〜#4</code> 同士を比較すると、2フィールド構成（�
 <span class="n">chart_ttft</span><span class="o">.</span><span class="n">draw</span><span class="p">(</span><span class="n">xy</span><span class="o">=</span><span class="p">(</span><span class="mf">24.5</span><span class="p">,</span> <span class="mf">17.5</span><span class="p">))</span>
 
 <span class="c1"># Right Panel: Average Total Completion Time (ms)</span>
-<span class="n">rectangle</span><span class="p">((</span><span class="mf">126.5</span><span class="p">,</span> <span class="mf">42.0</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">79.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">56.0</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">WhiteFlat</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">1.4</span><span class="p">,</span> <span class="n">line_width</span><span class="o">=</span><span class="mf">0.8</span><span class="p">))</span>
-<span class="n">text</span><span class="p">((</span><span class="mf">126.5</span><span class="p">,</span> <span class="mf">66.8</span><span class="p">),</span> <span class="s2">"② 全文ストリーミング完了：平均 Total (ms)"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">11.0</span><span class="p">))</span>
+<span class="n">rectangle</span><span class="p">((</span><span class="mf">126.5</span><span class="p">,</span> <span class="mf">52.0</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">79.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">76.0</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">WhiteFlat</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">1.4</span><span class="p">,</span> <span class="n">line_width</span><span class="o">=</span><span class="mf">0.8</span><span class="p">))</span>
+<span class="n">text</span><span class="p">((</span><span class="mf">126.5</span><span class="p">,</span> <span class="mf">86.8</span><span class="p">),</span> <span class="s2">"② 全文ストリーミング完了：平均 Total (ms)"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">11.0</span><span class="p">))</span>
 
 <span class="n">chart_tot</span> <span class="o">=</span> <span class="n">BarChart</span><span class="p">(</span>
     <span class="n">axis_line_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Dark</span><span class="p">,</span>
-    <span class="n">axis_text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">),</span>
+    <span class="n">axis_text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">9.5</span><span class="p">),</span>
     <span class="n">grid_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">MutedDashed</span><span class="p">,</span>
-    <span class="n">value_text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">),</span>
-    <span class="n">width</span><span class="o">=</span><span class="mf">54.0</span><span class="p">,</span>
-    <span class="n">height</span><span class="o">=</span><span class="mf">46.0</span><span class="p">,</span>
+    <span class="n">value_text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">8.6</span><span class="p">),</span>
+    <span class="n">width</span><span class="o">=</span><span class="mf">52.0</span><span class="p">,</span>
+    <span class="n">height</span><span class="o">=</span><span class="mf">64.0</span><span class="p">,</span>
     <span class="n">categories</span><span class="o">=</span><span class="n">categories</span><span class="p">,</span>
     <span class="n">orientation</span><span class="o">=</span><span class="s2">"horizontal"</span><span class="p">,</span>
     <span class="n">bar_mode</span><span class="o">=</span><span class="s2">"group"</span><span class="p">,</span>
-    <span class="n">bar_width_ratio</span><span class="o">=</span><span class="mf">0.82</span><span class="p">,</span>
+    <span class="n">bar_width_ratio</span><span class="o">=</span><span class="mf">0.74</span><span class="p">,</span>
     <span class="n">bar_r</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="n">chart_tot</span><span class="o">.</span><span class="n">configure_x_axis</span><span class="p">(</span><span class="n">min_value</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="mi">22000</span><span class="p">,</span> <span class="n">tick_step</span><span class="o">=</span><span class="mi">5000</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">"</span><span class="si">{:,.0f}</span><span class="s2">"</span><span class="p">)</span>
+<span class="n">chart_tot</span><span class="o">.</span><span class="n">configure_x_axis</span><span class="p">(</span><span class="n">min_value</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="mi">24000</span><span class="p">,</span> <span class="n">tick_step</span><span class="o">=</span><span class="mi">8000</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">"</span><span class="si">{:,.0f}</span><span class="s2">"</span><span class="p">)</span>
 <span class="n">chart_tot</span><span class="o">.</span><span class="n">add_series</span><span class="p">(</span><span class="s2">"pat_a"</span><span class="p">,</span> <span class="n">calc_means</span><span class="p">(</span><span class="s2">"pat_a_pydantic_2f"</span><span class="p">,</span> <span class="s2">"total_ms"</span><span class="p">),</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryFlat</span><span class="p">)</span>
 <span class="n">chart_tot</span><span class="o">.</span><span class="n">add_series</span><span class="p">(</span><span class="s2">"pat_c"</span><span class="p">,</span> <span class="n">calc_means</span><span class="p">(</span><span class="s2">"pat_c_tag"</span><span class="p">,</span> <span class="s2">"total_ms"</span><span class="p">),</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">TealFlat</span><span class="p">)</span>
 <span class="n">chart_tot</span><span class="o">.</span><span class="n">add_series</span><span class="p">(</span><span class="s2">"base_0"</span><span class="p">,</span> <span class="n">calc_means</span><span class="p">(</span><span class="s2">"base_0"</span><span class="p">,</span> <span class="s2">"total_ms"</span><span class="p">),</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">SuccessFlat</span><span class="p">)</span>
@@ -2346,7 +2357,7 @@ Warm <code>#2〜#4</code> 同士を比較すると、2フィールド構成（�
     <span class="n">grid_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">MutedDashed</span><span class="p">,</span>
     <span class="n">width</span><span class="o">=</span><span class="mf">102.0</span><span class="p">,</span>
     <span class="n">height</span><span class="o">=</span><span class="mf">52.0</span><span class="p">,</span>
-    <span class="n">default_radius</span><span class="o">=</span><span class="mf">1.2</span><span class="p">,</span>
+    <span class="n">default_radius</span><span class="o">=</span><span class="mf">1.25</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="n">chart</span><span class="o">.</span><span class="n">configure_x_axis</span><span class="p">(</span>
     <span class="n">label</span><span class="o">=</span><span class="s2">"初回トークン到着時間 TTFT (ms)"</span><span class="p">,</span>
@@ -2605,19 +2616,19 @@ Warm <code>#2〜#4</code> 同士を比較すると、2フィールド構成（�
 <span class="p">)</span>
 
 <span class="c1"># Shared Legend Bar</span>
-<span class="n">rectangle</span><span class="p">((</span><span class="mf">86.0</span><span class="p">,</span> <span class="mf">82.8</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">160.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">5.2</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Neutral</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">1.0</span><span class="p">))</span>
+<span class="n">rectangle</span><span class="p">((</span><span class="mf">86.0</span><span class="p">,</span> <span class="mf">82.8</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">162.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">5.2</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Neutral</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">1.0</span><span class="p">))</span>
 
 <span class="n">leg_items</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="p">(</span><span class="mf">9.5</span><span class="p">,</span> <span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryBold</span><span class="p">,</span> <span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryFlat</span><span class="p">,</span> <span class="s2">"★ Pattern A (2F統合)"</span><span class="p">),</span>
-    <span class="p">(</span><span class="mf">45.5</span><span class="p">,</span> <span class="n">Styles</span><span class="o">.</span><span class="n">TealBold</span><span class="p">,</span> <span class="n">Styles</span><span class="o">.</span><span class="n">TealFlat</span><span class="p">,</span> <span class="s2">"Pattern C (先頭タグ)"</span><span class="p">),</span>
-    <span class="p">(</span><span class="mf">78.5</span><span class="p">,</span> <span class="n">Styles</span><span class="o">.</span><span class="n">SuccessBold</span><span class="p">,</span> <span class="n">Styles</span><span class="o">.</span><span class="n">SuccessFlat</span><span class="p">,</span> <span class="s2">"Base 0 (固定0)"</span><span class="p">),</span>
-    <span class="p">(</span><span class="mf">114.0</span><span class="p">,</span> <span class="n">Styles</span><span class="o">.</span><span class="n">WarningBold</span><span class="p">,</span> <span class="n">Styles</span><span class="o">.</span><span class="n">WarningFlat</span><span class="p">,</span> <span class="s2">"Base Low (固定low)"</span><span class="p">),</span>
-    <span class="p">(</span><span class="mf">145.0</span><span class="p">,</span> <span class="n">Styles</span><span class="o">.</span><span class="n">DangerBold</span><span class="p">,</span> <span class="n">Styles</span><span class="o">.</span><span class="n">DangerFlat</span><span class="p">,</span> <span class="s2">"Pattern B (1F直列)"</span><span class="p">),</span>
+    <span class="p">(</span><span class="mf">8.5</span><span class="p">,</span> <span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryBold</span><span class="p">,</span> <span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryFlat</span><span class="p">,</span> <span class="s2">"★ Pattern A (2F統合)"</span><span class="p">),</span>
+    <span class="p">(</span><span class="mf">44.5</span><span class="p">,</span> <span class="n">Styles</span><span class="o">.</span><span class="n">TealBold</span><span class="p">,</span> <span class="n">Styles</span><span class="o">.</span><span class="n">TealFlat</span><span class="p">,</span> <span class="s2">"Pattern C (先頭タグ)"</span><span class="p">),</span>
+    <span class="p">(</span><span class="mf">77.5</span><span class="p">,</span> <span class="n">Styles</span><span class="o">.</span><span class="n">SuccessBold</span><span class="p">,</span> <span class="n">Styles</span><span class="o">.</span><span class="n">SuccessFlat</span><span class="p">,</span> <span class="s2">"Base 0 (固定0)"</span><span class="p">),</span>
+    <span class="p">(</span><span class="mf">110.5</span><span class="p">,</span> <span class="n">Styles</span><span class="o">.</span><span class="n">WarningBold</span><span class="p">,</span> <span class="n">Styles</span><span class="o">.</span><span class="n">WarningFlat</span><span class="p">,</span> <span class="s2">"Base Low (固定low)"</span><span class="p">),</span>
+    <span class="p">(</span><span class="mf">142.5</span><span class="p">,</span> <span class="n">Styles</span><span class="o">.</span><span class="n">DangerBold</span><span class="p">,</span> <span class="n">Styles</span><span class="o">.</span><span class="n">DangerFlat</span><span class="p">,</span> <span class="s2">"Pattern B (1F直列)"</span><span class="p">),</span>
 <span class="p">]</span>
 <span class="k">for</span> <span class="n">lx</span><span class="p">,</span> <span class="n">lst</span><span class="p">,</span> <span class="n">cst</span><span class="p">,</span> <span class="n">ltxt</span> <span class="ow">in</span> <span class="n">leg_items</span><span class="p">:</span>
     <span class="n">line</span><span class="p">((</span><span class="n">lx</span><span class="p">,</span> <span class="mf">82.8</span><span class="p">),</span> <span class="p">(</span><span class="n">lx</span> <span class="o">+</span> <span class="mf">3.4</span><span class="p">,</span> <span class="mf">82.8</span><span class="p">),</span> <span class="n">style</span><span class="o">=</span><span class="n">lst</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">line_width</span><span class="o">=</span><span class="mf">2.2</span><span class="p">))</span>
     <span class="n">circle</span><span class="p">((</span><span class="n">lx</span> <span class="o">+</span> <span class="mf">1.7</span><span class="p">,</span> <span class="mf">82.8</span><span class="p">),</span> <span class="n">radius</span><span class="o">=</span><span class="mf">0.75</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">cst</span><span class="p">)</span>
-    <span class="n">text</span><span class="p">((</span><span class="n">lx</span> <span class="o">+</span> <span class="mf">4.3</span><span class="p">,</span> <span class="mf">82.8</span><span class="p">),</span> <span class="n">ltxt</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">halign</span><span class="o">=</span><span class="s2">"left"</span><span class="p">))</span>
+    <span class="n">text</span><span class="p">((</span><span class="n">lx</span> <span class="o">+</span> <span class="mf">4.3</span><span class="p">,</span> <span class="mf">82.8</span><span class="p">),</span> <span class="n">ltxt</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">9.6</span><span class="p">,</span> <span class="n">halign</span><span class="o">=</span><span class="s2">"left"</span><span class="p">))</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">draw_multi_trajectory_panel</span><span class="p">(</span>
@@ -2696,14 +2707,14 @@ Warm <code>#2〜#4</code> 同士を比較すると、2フィールド構成（�
 
 <span class="c1"># Callouts inside Left Panel</span>
 <span class="n">rectangle</span><span class="p">((</span><span class="mf">39.5</span><span class="p">,</span> <span class="mf">55.5</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">42.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryNeutral</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">0.9</span><span class="p">))</span>
-<span class="n">text</span><span class="p">((</span><span class="mf">39.5</span><span class="p">,</span> <span class="mf">57.8</span><span class="p">),</span> <span class="s2">"★ Pattern A: 2,243 ms 開始"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">))</span>
-<span class="n">text</span><span class="p">((</span><span class="mf">39.5</span><span class="p">,</span> <span class="mf">53.4</span><span class="p">),</span> <span class="s2">"4,629 ms で全5方式最速完了!"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">))</span>
-<span class="n">line</span><span class="p">((</span><span class="mf">33.2</span><span class="p">,</span> <span class="mf">50.5</span><span class="p">),</span> <span class="p">(</span><span class="n">px_l</span><span class="p">(</span><span class="mf">4629.0</span><span class="p">),</span> <span class="n">py_l</span><span class="p">(</span><span class="mf">482.0</span><span class="p">)),</span> <span class="n">arrow_head</span><span class="o">=</span><span class="s2">"-&gt;"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">line_width</span><span class="o">=</span><span class="mf">1.5</span><span class="p">))</span>
+<span class="n">text</span><span class="p">((</span><span class="mf">39.5</span><span class="p">,</span> <span class="mf">57.8</span><span class="p">),</span> <span class="s2">"★ Pattern A: 2,243 ms 開始"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">9.6</span><span class="p">))</span>
+<span class="n">text</span><span class="p">((</span><span class="mf">39.5</span><span class="p">,</span> <span class="mf">53.4</span><span class="p">),</span> <span class="s2">"4,629 ms で全5方式最速完了!"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">9.6</span><span class="p">))</span>
+<span class="n">line</span><span class="p">((</span><span class="mf">34.0</span><span class="p">,</span> <span class="mf">50.5</span><span class="p">),</span> <span class="p">(</span><span class="n">px_l</span><span class="p">(</span><span class="mf">4629.0</span><span class="p">),</span> <span class="n">py_l</span><span class="p">(</span><span class="mf">482.0</span><span class="p">)),</span> <span class="n">arrow_head</span><span class="o">=</span><span class="s2">"-&gt;"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">line_width</span><span class="o">=</span><span class="mf">1.5</span><span class="p">))</span>
 
-<span class="n">rectangle</span><span class="p">((</span><span class="mf">55.5</span><span class="p">,</span> <span class="mf">26.5</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">39.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">9.2</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">WhiteFlat</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span> <span class="n">line_width</span><span class="o">=</span><span class="mf">0.7</span><span class="p">))</span>
-<span class="n">text</span><span class="p">((</span><span class="mf">55.5</span><span class="p">,</span> <span class="mf">28.6</span><span class="p">),</span> <span class="s2">"Base Low: 5,901 ms まで無応答"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">WarningBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">))</span>
-<span class="n">text</span><span class="p">((</span><span class="mf">55.5</span><span class="p">,</span> <span class="mf">24.4</span><span class="p">),</span> <span class="s2">"不要思考 423 tok で初動が 2.6倍遅延"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Dark</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">))</span>
-<span class="n">line</span><span class="p">((</span><span class="mf">41.0</span><span class="p">,</span> <span class="mf">26.5</span><span class="p">),</span> <span class="p">(</span><span class="n">px_l</span><span class="p">(</span><span class="mf">5901.0</span><span class="p">),</span> <span class="n">py_l</span><span class="p">(</span><span class="mf">40.0</span><span class="p">)),</span> <span class="n">arrow_head</span><span class="o">=</span><span class="s2">"-&gt;"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">WarningBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">line_width</span><span class="o">=</span><span class="mf">1.4</span><span class="p">))</span>
+<span class="n">rectangle</span><span class="p">((</span><span class="mf">55.5</span><span class="p">,</span> <span class="mf">29.0</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">41.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">9.4</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">WhiteFlat</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span> <span class="n">line_width</span><span class="o">=</span><span class="mf">0.7</span><span class="p">))</span>
+<span class="n">text</span><span class="p">((</span><span class="mf">55.5</span><span class="p">,</span> <span class="mf">31.2</span><span class="p">),</span> <span class="s2">"Base Low: 5,901 ms まで無応答"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">WarningBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">9.5</span><span class="p">))</span>
+<span class="n">text</span><span class="p">((</span><span class="mf">55.5</span><span class="p">,</span> <span class="mf">26.8</span><span class="p">),</span> <span class="s2">"不要思考 423 tok で初動が 2.6倍遅延"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Dark</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">9.4</span><span class="p">))</span>
+<span class="n">line</span><span class="p">((</span><span class="n">px_l</span><span class="p">(</span><span class="mf">5901.0</span><span class="p">),</span> <span class="mf">24.3</span><span class="p">),</span> <span class="p">(</span><span class="n">px_l</span><span class="p">(</span><span class="mf">5901.0</span><span class="p">),</span> <span class="n">py_l</span><span class="p">(</span><span class="mf">40.0</span><span class="p">)),</span> <span class="n">arrow_head</span><span class="o">=</span><span class="s2">"-&gt;"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">WarningBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">line_width</span><span class="o">=</span><span class="mf">1.4</span><span class="p">))</span>
 
 <span class="c1"># Right Panel: T3_1 (Complex Math, thinking=true)</span>
 <span class="n">px_r</span><span class="p">,</span> <span class="n">py_r</span> <span class="o">=</span> <span class="n">draw_multi_trajectory_panel</span><span class="p">(</span>
@@ -2721,15 +2732,15 @@ Warm <code>#2〜#4</code> 同士を比較すると、2フィールド構成（�
 <span class="p">)</span>
 
 <span class="c1"># Callouts inside Right Panel</span>
-<span class="n">rectangle</span><span class="p">((</span><span class="mf">124.0</span><span class="p">,</span> <span class="mf">55.5</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">45.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">10.6</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryNeutral</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">0.9</span><span class="p">))</span>
-<span class="n">text</span><span class="p">((</span><span class="mf">124.0</span><span class="p">,</span> <span class="mf">58.0</span><span class="p">),</span> <span class="s2">"① 2,120 ms 受付1文 + Stage 2 並列起動"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">))</span>
-<span class="n">text</span><span class="p">((</span><span class="mf">124.0</span><span class="p">,</span> <span class="mf">53.2</span><span class="p">),</span> <span class="s2">"Base Low (8.95s) の 6.8秒画面凍結を解消!"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">))</span>
+<span class="n">rectangle</span><span class="p">((</span><span class="mf">124.5</span><span class="p">,</span> <span class="mf">55.5</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">48.5</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">10.6</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryNeutral</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">0.9</span><span class="p">))</span>
+<span class="n">text</span><span class="p">((</span><span class="mf">124.5</span><span class="p">,</span> <span class="mf">58.0</span><span class="p">),</span> <span class="s2">"① 2,120 ms 受付1文 + Stage 2 並列起動"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">9.5</span><span class="p">))</span>
+<span class="n">text</span><span class="p">((</span><span class="mf">124.5</span><span class="p">,</span> <span class="mf">53.2</span><span class="p">),</span> <span class="s2">"Base Low (8.95s) の 6.8秒画面凍結を解消!"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">9.5</span><span class="p">))</span>
 <span class="n">line</span><span class="p">((</span><span class="mf">108.0</span><span class="p">,</span> <span class="mf">50.2</span><span class="p">),</span> <span class="p">(</span><span class="n">px_r</span><span class="p">(</span><span class="mf">2120.0</span><span class="p">),</span> <span class="n">py_r</span><span class="p">(</span><span class="mf">60.0</span><span class="p">)),</span> <span class="n">arrow_head</span><span class="o">=</span><span class="s2">"-&gt;"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">line_width</span><span class="o">=</span><span class="mf">1.5</span><span class="p">))</span>
 
-<span class="n">rectangle</span><span class="p">((</span><span class="mf">137.5</span><span class="p">,</span> <span class="mf">27.5</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">42.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">WhiteFlat</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span> <span class="n">line_width</span><span class="o">=</span><span class="mf">0.7</span><span class="p">))</span>
-<span class="n">text</span><span class="p">((</span><span class="mf">137.5</span><span class="p">,</span> <span class="mf">29.8</span><span class="p">),</span> <span class="s2">"② 10,948 ms〜 Stage 2 (859 tok) 連結"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">))</span>
-<span class="n">text</span><span class="p">((</span><span class="mf">137.5</span><span class="p">,</span> <span class="mf">25.4</span><span class="p">),</span> <span class="s2">"26,200円修理がお得を 16,650 ms で完結"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Dark</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">))</span>
-<span class="n">line</span><span class="p">((</span><span class="mf">129.0</span><span class="p">,</span> <span class="mf">32.5</span><span class="p">),</span> <span class="p">(</span><span class="n">px_r</span><span class="p">(</span><span class="mf">10948.0</span><span class="p">),</span> <span class="n">py_r</span><span class="p">(</span><span class="mf">90.0</span><span class="p">)),</span> <span class="n">arrow_head</span><span class="o">=</span><span class="s2">"-&gt;"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">line_width</span><span class="o">=</span><span class="mf">1.5</span><span class="p">))</span>
+<span class="n">rectangle</span><span class="p">((</span><span class="mf">137.5</span><span class="p">,</span> <span class="mf">29.5</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">44.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">9.6</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">WhiteFlat</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span> <span class="n">line_width</span><span class="o">=</span><span class="mf">0.7</span><span class="p">))</span>
+<span class="n">text</span><span class="p">((</span><span class="mf">137.5</span><span class="p">,</span> <span class="mf">31.8</span><span class="p">),</span> <span class="s2">"② 10,948 ms〜 Stage 2 (859 tok) 連結"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">9.5</span><span class="p">))</span>
+<span class="n">text</span><span class="p">((</span><span class="mf">137.5</span><span class="p">,</span> <span class="mf">27.3</span><span class="p">),</span> <span class="s2">"26,200円修理がお得を 16,650 ms で完結"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Dark</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">9.4</span><span class="p">))</span>
+<span class="n">line</span><span class="p">((</span><span class="n">px_r</span><span class="p">(</span><span class="mf">10948.0</span><span class="p">),</span> <span class="mf">24.7</span><span class="p">),</span> <span class="p">(</span><span class="n">px_r</span><span class="p">(</span><span class="mf">10948.0</span><span class="p">),</span> <span class="n">py_r</span><span class="p">(</span><span class="mf">90.0</span><span class="p">)),</span> <span class="n">arrow_head</span><span class="o">=</span><span class="s2">"-&gt;"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">line_width</span><span class="o">=</span><span class="mf">1.5</span><span class="p">))</span>
 
 <span class="c1"># Bottom summary banner</span>
 <span class="n">rectangle</span><span class="p">((</span><span class="mf">86.0</span><span class="p">,</span> <span class="mf">6.0</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">160.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">6.4</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryNeutral</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">1.2</span><span class="p">))</span>
@@ -2753,7 +2764,7 @@ Warm <code>#2〜#4</code> 同士を比較すると、2フィールド構成（�
 </li>
 <li><strong>右パネル <code>T3_1</code>（<code>thinking=true</code>：PC修理 vs. 買い替え3年比較）における <code>6.8 秒</code> の画面凍結解消</strong>：
 <ul>
-<li>Base Low（黄線）は <strong><code>8,950 ms</code> にわたり累積文字数 <code>0</code> のまま画面が凍結</strong> し、Pattern B（赤線）はさらに遅い <strong><code>11,226 ms</code></strong> まで1文字も表示されない。</li>
+<li>Base Low（黄線）は <strong><code>8,950 ms</code> にわたり累積文字数 0 文字のまま画面が凍結</strong> し、Pattern B（赤線）はさらに遅い <strong><code>11,226 ms</code></strong> まで1文字も表示されない。</li>
 <li>対して Pattern A（青太線）は、<strong><code>2,078 ms</code></strong> で <code>&quot;thinking&quot;: true</code> を検知した瞬間にバックグラウンドで Stage 2（<code>thinking=low</code>）を非同期起動しつつ、Stage 1 のブリッジメッセージ（59文字）を <strong><code>2,120 ms</code></strong> で即座に画面へ表示する。これにより、Base Low と比較して <strong><code>6,830 ms</code>（約 <code>6.8 秒</code>）もの無応答フリーズを完全に解消</strong> している。ユーザーがブリッジ文を読んでいる間に Stage 2 が <code>859 トークン</code> の内部推論を終え、<strong><code>10,948 ms</code></strong> から本計算のストリームが滑らかに立ち上がって <strong><code>16,650 ms</code></strong> に正確な試算結果（<code>修理の方が 26,200 円安い</code>）を完結させている。</li>
 </ul>
 </li>
@@ -2761,7 +2772,7 @@ Warm <code>#2〜#4</code> 同士を比較すると、2フィールド構成（�
 <hr />
 <h2>4.4 Google AI Studio 実装コードと総合評価スコアカード</h2>
 <h3>Pattern A の Google AI Studio (<code>google-genai</code>) リファレンス実装</h3>
-<p><code>google-genai</code> SDK のストリーミング時は <code>chunk.parsed</code> がストリーム途中で常に <code>None</code> となるため、Pydantic v2 標準同梱の <code>pydantic_core.from_json(..., allow_partial=&quot;trailing-strings&quot;)</code> を用いて不完全な JSON バッファから安全に <code>thinking</code> フラグとエスケープ解決済みの <code>response</code> デルタを抽出する（<code>src/gemini_evaluation/adaptive_thinking.py</code>）。</p>
+<p><code>google-genai</code> SDK のストリーミング時は <code>chunk.parsed</code> がストリーム途中で常に <code>None</code> となるため、Pydantic v2 標準同梱の <code>pydantic_core.from_json(..., allow_partial=&quot;trailing-strings&quot;)</code> を用いて不完全な JSON バッファから安全に <code>thinking</code> フラグとエスケープ解決済みの <code>response</code> デルタを抽出する（<code>src/gemini_evaluation/adaptive_thinking.py</code>）。なお、本番環境では <code>genai.Client</code> インスタンスをアプリケーション起動時に1度だけ生成して再利用し、<code>finally</code> ブロックで Stage-2 バックグラウンドタスクの確実なクリーンアップを行う。</p>
 <pre><code class="language-python"><span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">AsyncIterator</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">contextlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">aclosing</span>
@@ -2778,7 +2789,7 @@ Warm <code>#2〜#4</code> 同士を比較すると、2フィールド構成（�
 <span class="k">class</span><span class="w"> </span><span class="nc">AdaptiveStreamResponse</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Pattern A 用の最小2フィールド構造化ストリーミングスキーマ。"""</span>
 
-    <span class="n">thinking</span><span class="p">:</span> <span class="nb">bool</span>  <span class="c1"># 第1フィールド：約 0.7〜1.1 秒で確定するルーティングフラグ</span>
+    <span class="n">thinking</span><span class="p">:</span> <span class="nb">bool</span>  <span class="c1"># 第1フィールド：初回チャンク以前に確定するルーティングフラグ</span>
     <span class="n">response</span><span class="p">:</span> <span class="nb">str</span>   <span class="c1"># 第2フィールド：thinking=False 時は回答全文、True 時は受付1文</span>
 
 
@@ -2794,11 +2805,10 @@ Warm <code>#2〜#4</code> 同士を比較すると、2フィールド構成（�
 
 
 <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">stream_adaptive_router</span><span class="p">(</span>
-    <span class="n">api_key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">client</span><span class="p">:</span> <span class="n">genai</span><span class="o">.</span><span class="n">Client</span><span class="p">,</span>
     <span class="n">prompt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AsyncIterator</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">"""Pattern A: 2フィールド統合 Pydantic ストリーム + Stage 2 並列チェイニング。"""</span>
-    <span class="n">client</span> <span class="o">=</span> <span class="n">genai</span><span class="o">.</span><span class="n">Client</span><span class="p">(</span><span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span><span class="p">)</span>
     <span class="n">stage2_queue</span><span class="p">:</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">Queue</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="ne">BaseException</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">Queue</span><span class="p">()</span>
     <span class="n">stage2_task</span><span class="p">:</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">Task</span><span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
 
@@ -2830,61 +2840,66 @@ Warm <code>#2〜#4</code> 同士を比較すると、2フィールド構成（�
     <span class="n">emitted_len</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="n">decided_thinking</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
 
-    <span class="n">st1</span> <span class="o">=</span> <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">aio</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">generate_content_stream</span><span class="p">(</span>
-        <span class="n">model</span><span class="o">=</span><span class="n">MODEL</span><span class="p">,</span>
-        <span class="n">contents</span><span class="o">=</span><span class="n">prompt</span><span class="p">,</span>
-        <span class="n">config</span><span class="o">=</span><span class="n">types</span><span class="o">.</span><span class="n">GenerateContentConfig</span><span class="p">(</span>
-            <span class="n">system_instruction</span><span class="o">=</span><span class="p">(</span>
-                <span class="s2">"挨拶や定型手続き案内では thinking: false とし response に回答全文を出力してください。"</span>
-                <span class="s2">"複数条件の数値計算・比較では thinking: true とし response に1文の受付メッセージのみを出力してください。"</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">st1</span> <span class="o">=</span> <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">aio</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">generate_content_stream</span><span class="p">(</span>
+            <span class="n">model</span><span class="o">=</span><span class="n">MODEL</span><span class="p">,</span>
+            <span class="n">contents</span><span class="o">=</span><span class="n">prompt</span><span class="p">,</span>
+            <span class="n">config</span><span class="o">=</span><span class="n">types</span><span class="o">.</span><span class="n">GenerateContentConfig</span><span class="p">(</span>
+                <span class="n">system_instruction</span><span class="o">=</span><span class="p">(</span>
+                    <span class="s2">"挨拶や定型手続き案内では thinking: false とし response に回答全文を出力してください。"</span>
+                    <span class="s2">"複数条件の数値計算・比較では thinking: true とし response に1文の受付メッセージのみを出力してください。"</span>
+                <span class="p">),</span>
+                <span class="n">response_mime_type</span><span class="o">=</span><span class="s2">"application/json"</span><span class="p">,</span>
+                <span class="n">response_schema</span><span class="o">=</span><span class="n">AdaptiveStreamResponse</span><span class="p">,</span>
+                <span class="n">thinking_config</span><span class="o">=</span><span class="n">types</span><span class="o">.</span><span class="n">ThinkingConfig</span><span class="p">(</span><span class="n">thinking_budget</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
+                <span class="n">temperature</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
             <span class="p">),</span>
-            <span class="n">response_mime_type</span><span class="o">=</span><span class="s2">"application/json"</span><span class="p">,</span>
-            <span class="n">response_schema</span><span class="o">=</span><span class="n">AdaptiveStreamResponse</span><span class="p">,</span>
-            <span class="n">thinking_config</span><span class="o">=</span><span class="n">types</span><span class="o">.</span><span class="n">ThinkingConfig</span><span class="p">(</span><span class="n">thinking_budget</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
-            <span class="n">temperature</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
-        <span class="p">),</span>
-    <span class="p">)</span>
-    <span class="k">async</span> <span class="k">with</span> <span class="n">aclosing</span><span class="p">(</span><span class="n">st1</span><span class="p">):</span>
-        <span class="k">async</span> <span class="k">for</span> <span class="n">ch1</span> <span class="ow">in</span> <span class="n">st1</span><span class="p">:</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">ch1</span><span class="o">.</span><span class="n">text</span><span class="p">:</span>
-                <span class="k">continue</span>
-            <span class="n">json_buf</span> <span class="o">+=</span> <span class="n">ch1</span><span class="o">.</span><span class="n">text</span>
-            <span class="n">partial</span> <span class="o">=</span> <span class="n">parse_partial_json_dict</span><span class="p">(</span><span class="n">json_buf</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">partial</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">continue</span>
+        <span class="p">)</span>
+        <span class="k">async</span> <span class="k">with</span> <span class="n">aclosing</span><span class="p">(</span><span class="n">st1</span><span class="p">):</span>
+            <span class="k">async</span> <span class="k">for</span> <span class="n">ch1</span> <span class="ow">in</span> <span class="n">st1</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">ch1</span><span class="o">.</span><span class="n">text</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="n">json_buf</span> <span class="o">+=</span> <span class="n">ch1</span><span class="o">.</span><span class="n">text</span>
+                <span class="n">partial</span> <span class="o">=</span> <span class="n">parse_partial_json_dict</span><span class="p">(</span><span class="n">json_buf</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">partial</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">continue</span>
 
-            <span class="c1"># 1) thinking フラグが確定した瞬間に1度だけ判定し、True なら Stage 2 を並列起動</span>
-            <span class="k">if</span> <span class="n">decided_thinking</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">partial</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"thinking"</span><span class="p">),</span> <span class="nb">bool</span><span class="p">):</span>
-                <span class="n">decided_thinking</span> <span class="o">=</span> <span class="n">partial</span><span class="p">[</span><span class="s2">"thinking"</span><span class="p">]</span>
-                <span class="k">if</span> <span class="n">decided_thinking</span><span class="p">:</span>
-                    <span class="n">stage2_task</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span><span class="n">_produce_stage2</span><span class="p">())</span>
+                <span class="c1"># 1) thinking フラグが確定した瞬間に1度だけ判定し、True なら Stage 2 を並列起動</span>
+                <span class="k">if</span> <span class="n">decided_thinking</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">partial</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"thinking"</span><span class="p">),</span> <span class="nb">bool</span><span class="p">):</span>
+                    <span class="n">decided_thinking</span> <span class="o">=</span> <span class="n">partial</span><span class="p">[</span><span class="s2">"thinking"</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="n">decided_thinking</span><span class="p">:</span>
+                        <span class="n">stage2_task</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span><span class="n">_produce_stage2</span><span class="p">())</span>
 
-            <span class="c1"># 2) response の未送出デルタを即時 yield</span>
-            <span class="n">resp_so_far</span> <span class="o">=</span> <span class="n">partial</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"response"</span><span class="p">)</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">resp_so_far</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">resp_so_far</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">emitted_len</span><span class="p">:</span>
-                <span class="n">delta</span> <span class="o">=</span> <span class="n">resp_so_far</span><span class="p">[</span><span class="n">emitted_len</span><span class="p">:]</span>
-                <span class="n">emitted_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">resp_so_far</span><span class="p">)</span>
-                <span class="k">yield</span> <span class="n">delta</span>
+                <span class="c1"># 2) response の未送出デルタを即時 yield</span>
+                <span class="n">resp_so_far</span> <span class="o">=</span> <span class="n">partial</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"response"</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">resp_so_far</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">resp_so_far</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">emitted_len</span><span class="p">:</span>
+                    <span class="n">delta</span> <span class="o">=</span> <span class="n">resp_so_far</span><span class="p">[</span><span class="n">emitted_len</span><span class="p">:]</span>
+                    <span class="n">emitted_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">resp_so_far</span><span class="p">)</span>
+                    <span class="k">yield</span> <span class="n">delta</span>
 
-    <span class="c1"># 3) EOF で Pydantic スキーマ完全検証を実行</span>
-    <span class="n">final_obj</span> <span class="o">=</span> <span class="n">AdaptiveStreamResponse</span><span class="o">.</span><span class="n">model_validate_json</span><span class="p">(</span><span class="n">json_buf</span><span class="p">)</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">final_obj</span><span class="o">.</span><span class="n">response</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">emitted_len</span><span class="p">:</span>
-        <span class="k">yield</span> <span class="n">final_obj</span><span class="o">.</span><span class="n">response</span><span class="p">[</span><span class="n">emitted_len</span><span class="p">:]</span>
+        <span class="c1"># 3) EOF で Pydantic スキーマ完全検証を実行</span>
+        <span class="n">final_obj</span> <span class="o">=</span> <span class="n">AdaptiveStreamResponse</span><span class="o">.</span><span class="n">model_validate_json</span><span class="p">(</span><span class="n">json_buf</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">final_obj</span><span class="o">.</span><span class="n">response</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">emitted_len</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="n">final_obj</span><span class="o">.</span><span class="n">response</span><span class="p">[</span><span class="n">emitted_len</span><span class="p">:]</span>
 
-    <span class="c1"># 4) thinking=True の場合は並列実行中の Stage 2 ストリームをシームレスに連結</span>
-    <span class="k">if</span> <span class="n">decided_thinking</span> <span class="ow">and</span> <span class="n">stage2_task</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">yield</span> <span class="s2">"</span><span class="se">\n\n</span><span class="s2">"</span>
-        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
-            <span class="n">item</span> <span class="o">=</span> <span class="k">await</span> <span class="n">stage2_queue</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
-            <span class="k">if</span> <span class="n">item</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">break</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="ne">BaseException</span><span class="p">):</span>
-                <span class="k">raise</span> <span class="n">item</span>
-            <span class="k">yield</span> <span class="n">item</span>
-        <span class="k">await</span> <span class="n">stage2_task</span>
+        <span class="c1"># 4) thinking=True の場合は並列実行中の Stage 2 ストリームをシームレスに連結</span>
+        <span class="k">if</span> <span class="n">decided_thinking</span> <span class="ow">and</span> <span class="n">stage2_task</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="s2">"</span><span class="se">\n\n</span><span class="s2">"</span>
+            <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="n">item</span> <span class="o">=</span> <span class="k">await</span> <span class="n">stage2_queue</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">item</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">break</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="ne">BaseException</span><span class="p">):</span>
+                    <span class="k">raise</span> <span class="n">item</span>
+                <span class="k">yield</span> <span class="n">item</span>
+            <span class="k">await</span> <span class="n">stage2_task</span>
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="c1"># 呼び出し側の中断や例外発生時に未完了の Stage 2 タスクを確実にキャンセル</span>
+        <span class="k">if</span> <span class="n">stage2_task</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">stage2_task</span><span class="o">.</span><span class="n">done</span><span class="p">():</span>
+            <span class="n">stage2_task</span><span class="o">.</span><span class="n">cancel</span><span class="p">()</span>
 </code></pre>
 <blockquote>
-<p><strong>Pydantic スキーマの Cold/Warm 特性とフィールド定義順のベストプラクティス</strong>：<code>load_schema_experiment()</code>（<code>src/gemini_evaluation/adaptive_thinking_log.json</code>）の実測により、未知の JSON スキーマを初回送信した際（Cold <code>#1</code>：<code>AdaptiveStreamResponse</code> <code>2,562 ms</code>、<code>RichStreamResponse</code> <code>3,337 ms</code>）にはサーバー側の制約付きデコード文法（FSM）コンパイルが走るが、<strong>2回目以降（Warm <code>#2〜#4</code>）は文法キャッシュが効いて 2フィールド版（TTFT <code>2,294〜3,447 ms</code>・平均 <code>2,744 ms</code>）と 6フィールド版（TTFT <code>2,504〜3,259 ms</code>・平均 <code>2,837 ms</code>）がほぼ同等の速度で推移する</strong>ことが確認された。分類タグ等を加えた6フィールドの <code>RichStreamResponse</code> でも、<code>thinking: bool</code> を先頭・可変長リストを <code>response: str</code> の後ろに配置すれば Warm 時の <code>flag_decided_ms</code> は <code>2,157〜2,781 ms</code> と劣化しない。本番環境ではコンテナ起動時に1回ダミーウォームアップを実行しておくことで Cold 遅延を完全に排除できる。</p>
+<p><strong>Pydantic スキーマの Cold/Warm 特性とフィールド定義順のベストプラクティス</strong>：第2章（2.3節）の <code>load_schema_experiment()</code>（<code>src/gemini_evaluation/adaptive_thinking_log.json</code>）で詳述したとおり、新規の JSON スキーマを初回送信した際（<code>RichStreamResponse #1 (Cold)</code>：<code>TTFT 3,337.3 ms</code>、<code>flag_decided_ms 2,954.3 ms</code>）にはサーバー側の制約付きデコード文法（FSM）コンパイルが走るが、<strong>2回目以降（Warm <code>#2〜#4</code>）は文法キャッシュが適用され、6フィールド版（TTFT <code>2,504.4〜3,259.3 ms</code>・平均 <code>2,837.1 ms</code>、Cold 比 <code>-15.0%</code> 短縮）と2フィールド版（Warm <code>#2〜#4</code> 平均 <code>2,744.4 ms</code>）がわずか <code>+92.7 ms</code>（<code>+3.4%</code>）差のほぼ同等の速度で推移する</strong>。分類タグ等を加えた6フィールドの <code>RichStreamResponse</code> でも、<code>thinking: bool</code> を先頭・可変長リストを <code>response: str</code> の後ろに配置すれば Warm 時の <code>flag_decided_ms</code> は平均 <code>2,419.4 ms</code>（<code>2,157.1〜2,780.6 ms</code>）と高速である。本番環境ではコンテナ起動時に1回ダミーウォームアップを実行しておくことで Cold 遅延を完全に排除できる。</p>
 </blockquote>
 <h3>全5方式の総合評価スコアカード</h3>
 <table>
@@ -2901,11 +2916,11 @@ Warm <code>#2〜#4</code> 同士を比較すると、2フィールド構成（�
 <tbody>
 <tr>
 <td style="text-align:left"><strong>全9問平均 TTFT</strong></td>
-<td style="text-align:center"><strong><code>2,340 ms</code> (◎ <code>&lt; 2.5s</code>)</strong></td>
-<td style="text-align:center"><strong><code>1,879 ms</code> (◎ <code>&lt; 2.5s</code>)</strong></td>
-<td style="text-align:center"><code>6,177 ms</code> (× <code>&gt; 3.5s</code>)</td>
-<td style="text-align:center"><code>6,290 ms</code> (× <code>&gt; 3.5s</code>)</td>
-<td style="text-align:center"><code>1,879 ms</code> (◎ <code>&lt; 2.5s</code>)</td>
+<td style="text-align:center"><strong><code>2,340 ms</code> (優良 <code>&lt; 2.5s</code>)</strong></td>
+<td style="text-align:center"><strong><code>1,879 ms</code> (優良 <code>&lt; 2.5s</code>)</strong></td>
+<td style="text-align:center"><code>6,177 ms</code> (不可 <code>&gt; 3.5s</code>)</td>
+<td style="text-align:center"><code>6,290 ms</code> (不可 <code>&gt; 3.5s</code>)</td>
+<td style="text-align:center"><code>1,879 ms</code> (優良 <code>&lt; 2.5s</code>)</td>
 </tr>
 <tr>
 <td style="text-align:left"><strong>Tier 1–2 平均 TTFT / 完了</strong></td>
@@ -2949,11 +2964,11 @@ Warm <code>#2〜#4</code> 同士を比較すると、2フィールド構成（�
 </tr>
 <tr>
 <td style="text-align:left"><strong>デコーダ層の型保証・拡張性</strong></td>
-<td style="text-align:center"><strong>◎（Constrained Decoding）</strong></td>
-<td style="text-align:center">×（タグ露出・履歴ドリフト懸念）</td>
-<td style="text-align:center">△（ルーターのみ型保証）</td>
-<td style="text-align:center">－（平文）</td>
-<td style="text-align:center">－（平文）</td>
+<td style="text-align:center"><strong>優良（Constrained Decoding）</strong></td>
+<td style="text-align:center">不可（タグ露出・履歴ドリフト懸念）</td>
+<td style="text-align:center">一部のみ（ルーターのみ型保証）</td>
+<td style="text-align:center">なし（平文）</td>
+<td style="text-align:center">なし（平文）</td>
 </tr>
 <tr>
 <td style="text-align:left"><strong>総合判定</strong></td>
@@ -3126,7 +3141,7 @@ Warm <code>#2〜#4</code> 同士を比較すると、2フィールド構成（�
 </code></pre>
 </details>
 <hr />
-<h2>5.1 50ターン連続PCサポートチャットベンチマークの設計と評価手法</h2>
+<h2>5.1 マルチターン（50ターン連続）PCサポートチャットベンチマークの設計と評価手法</h2>
 <h3>1. <code>google-genai</code> におけるマルチターン履歴送信の構造</h3>
 <p>ステートレスな LLM API でマルチターン対話を実装する場合、アプリケーション側で過去の対話履歴 <code>history: list[types.Content]</code>（<code>role=&quot;user&quot;</code> および <code>role=&quot;model&quot;</code> の交互配列）を保持し、毎ターンのリクエスト時に過去の全履歴リストの末尾へ新規ユーザー発言を結合して <code>contents</code> へ渡す構造となる（<code>src/gemini_evaluation/llm_call.py</code>）。</p>
 <pre><code class="language-python"><span class="kn">from</span><span class="w"> </span><span class="nn">google</span><span class="w"> </span><span class="kn">import</span> <span class="n">genai</span>
@@ -3178,7 +3193,7 @@ Turn 1（<code>176 prompt_tokens</code>）から Turn 50（<code>21,490 prompt_t
 <td style="text-align:left"><code>thinking_budget=0</code></td>
 <td style="text-align:right"><strong><code>2,460 ms</code></strong> (<code>2,029 ms</code>)</td>
 <td style="text-align:right"><strong><code>6,323 ms</code></strong></td>
-<td style="text-align:right"><code>19 tok</code> (T2–50: <code>0</code>)</td>
+<td style="text-align:right"><code>19 tok</code> (T2–50: <code>0 tok</code>)</td>
 <td style="text-align:left"><strong>★第一推奨</strong>：毎ターン <strong><code>3,964 ms</code> (<code>3.96秒</code> / <code>62%</code>)</strong> 早く表示開始</td>
 </tr>
 <tr>
@@ -3352,7 +3367,7 @@ Turn 1（<code>176 prompt_tokens</code>）から Turn 50（<code>21,490 prompt_t
     <span class="p">(</span>
         <span class="mf">13.0</span><span class="p">,</span>
         <span class="s2">"4. 未キャッシュ差分は約2,400 tokで一定"</span><span class="p">,</span>
-        <span class="s2">"新規 Prefill 計算対象が ~2,400 tok の一定</span><span class="se">\n</span><span class="s2">帯域に封じ込められ O(1) スケーリングを実現"</span><span class="p">,</span>
+        <span class="s2">"新規 Prefill 計算対象が ~2,400 tok の一定</span><span class="se">\n</span><span class="s2">帯域に抑えられ定数時間 O(1) 応答を実現"</span><span class="p">,</span>
     <span class="p">),</span>
 <span class="p">]</span>
 
@@ -3374,8 +3389,8 @@ Turn 9 以降、会話履歴が伸びるにつれてキャッシュヒット数�
 図5-2の紫破線が示す通り、毎ターン新たに Prefill 計算が必要となる未キャッシュトークン数（<code>prompt_tokens - cached_tokens</code>）は、Turn 9 以降 <strong><code>約 2,340〜2,540 tokens</code>（<code>blocking_t0</code> では <code>約 1,980〜2,010 tokens</code>）</strong> の極めてフラットな一定幅に完全に封じ込められている。</li>
 </ol>
 <hr />
-<h2>5.3 50ターンにわたるレイテンシ推移とスケーリング特性</h2>
-<p>暗黙的コンテキストキャッシュが過去の履歴トークンの 85〜90% 以上の KV キャッシュを再利用するため、<strong><code>streaming_t0</code>（Streaming × <code>thinking=0</code>）の初回応答時間（TTFT）は履歴が <code>21,490 tokens</code> まで膨らんでも約 <code>2.0〜2.5 秒</code> の安定した帯域を維持する</strong>。具体的には、ウォームアップ後の Turn 11〜20 平均 <strong><code>2,180 ms</code></strong> から Turn 41〜50 平均 <strong><code>2,574 ms</code></strong> への推移（<code>+13,700 tokens</code> の増加に対してわずか <code>+394 ms</code>、傾き <strong><code>+29 ms / 1,000 input tokens</code></strong>）に留まっている。</p>
+<h2>5.3 長期対話（全50ターン）にわたるレイテンシ推移とスケーリング特性</h2>
+<p>暗黙的コンテキストキャッシュが過去の履歴トークンの <strong><code>85〜90% 以上</code></strong> の KV キャッシュを再利用するため、<strong><code>streaming_t0</code>（Streaming × <code>thinking=0</code>）の初回応答時間（TTFT）は履歴が <code>21,490 tokens</code> まで膨らんでも約 <code>2.0〜2.5 秒</code> の安定した帯域を維持する</strong>。具体的には、ウォームアップ後の Turn 11〜20 平均 <strong><code>2,180 ms</code></strong> から Turn 41〜50 平均 <strong><code>2,574 ms</code></strong> への推移（<code>+13,700 tokens</code> の増加に対してわずか <code>+394 ms</code>、傾き <strong><code>+29 ms / 1,000 input tokens</code></strong>）に留まっている。</p>
 <figure class="drawlib-image" style="text-align: center;">
   <img src="../images/05_multiturn_behavior/ch5_latency_evolution_2panel_ja.png" alt="05_multiturn_behavior_3" style="width: 100%; max-width: 100%;" />
   <figcaption class="drawlib-caption">図5-3: Turn 1〜50 におけるレイテンシ推移の2パネル比較（左：thinking=0 の安定スケーリング、右：thinking=default の思考トークン変動と遅延膨張）</figcaption>
@@ -3750,89 +3765,82 @@ Turn 9 以降、会話履歴が伸びるにつれてキャッシュヒット数�
 </li>
 <li><strong>右パネル：Turn 1・Turn 25・Turn 50 を通じたストリーム軌跡の比較</strong>：
 <ul>
-<li><strong>Turn 1（<code>176 tok</code>・キャッシュ <code>0%</code>・電源が入らない初回相談）</strong>：初回コールドリクエストを除けば、<code>blocking_t0</code>（紫実線）は <code>5,418 ms</code> まで <code>0 文字</code> のまま待機してから <code>505 文字</code> を一括出力し、<code>streaming_default</code>（赤破線）は <code>1,087 思考トークン</code> のため <strong><code>10,411 ms</code></strong> まで画面が停止する。</li>
+<li><strong>Turn 1（<code>176 tok</code>・キャッシュ <code>0%</code>・電源が入らない初回相談）</strong>：初回コールドリクエストを除けば、<code>blocking_t0</code>（紫実線）は <code>5,418 ms</code> まで <strong>0文字</strong> のまま待機してから <code>505 文字</code> を一括出力し、<code>streaming_default</code>（赤破線）は <code>1,087 思考トークン</code> のため <strong><code>10,411 ms</code></strong> まで画面が停止する。</li>
 <li><strong>Turn 25（<code>10,060 tok</code>・キャッシュ <code>7,547 tok [75.0%]</code>・BIOS/チップセット更新手順）</strong>：履歴が57倍以上に増えた中盤でも、<code>streaming_t0</code>（青実線）は <strong><code>3,833 ms</code></strong> からストリームを開始し、<code>898 文字</code> を滑らかに出力して <code>blocking_t0</code>（<code>5,962 ms</code>）に対し <strong><code>2,129 ms</code>（<code>36%</code>）早く</strong> 初回応答を届けている。</li>
 <li><strong>Turn 50（<code>21,490 tok</code>・キャッシュ <code>18,995 tok [88.4%]</code>・日常メンテナンス総括）</strong>：履歴が122倍に達した最終ターンにおいても、暗黙キャッシュが約 <code>19,000 tokens</code> をヒットするため、<code>streaming_t0</code> は <strong><code>4,083 ms</code></strong> で初回チャンクを送出し、<code>blocking_t0</code>（<code>8,074 ms</code>）に対して <strong><code>3,991 ms</code>（<code>49%</code>）先行</strong> して <code>902 文字</code> を完走している（一方 <code>streaming_default</code> は <code>1,584 思考トークン</code> により <code>16,498 ms</code> まで無応答となる）。</li>
 </ul>
 </li>
 </ol>
 <hr />
-<h2>5.5 10ターン区間別の包括的統計テーブルとマルチターン本番設計ガイドライン</h2>
-<h3>1. 10ターン区間別（Cohort）パフォーマンス集計表</h3>
+<h2>5.5 区間別（10ターンごと）の包括的統計テーブルとマルチターン本番設計ガイドライン</h2>
+<h3>1. 区間別（10ターンごと）パフォーマンス集計表</h3>
 <p>全50ターンを10ターンごとの5コホート（<code>Turns 1–10</code> 〜 <code>Turns 41–50</code>）および全50ターン平均で集計した包括的ベンチマーク結果を下表に示す。</p>
 <table>
 <thead>
 <tr>
 <th style="text-align:left">ターン区間・主な相談トピック</th>
-<th style="text-align:right">平均入力 <code>prompt_tokens</code><br>(最小〜最大)</th>
-<th style="text-align:right">平均キャッシュ <code>cached_tokens</code><br>(<code>streaming_t0</code> ヒット率)</th>
+<th style="text-align:right">平均入力 (<code>prompt</code>) /<br>キャッシュ (<code>ヒット率</code>)</th>
 <th style="text-align:right"><code>streaming_t0</code><br>TTFT / Total (<code>ms</code>)</th>
-<th style="text-align:right"><code>blocking_t0</code><br>TTFT = Total (<code>ms</code>)</th>
-<th style="text-align:right">Streaming 先行幅<br>(<code>streaming_t0 - blocking_t0</code>)</th>
-<th style="text-align:right"><code>streaming_default</code><br>TTFT / Total (<code>ms</code>) [平均思考 tok]</th>
-<th style="text-align:right"><code>blocking_default</code><br>Total (<code>ms</code>) [平均思考 tok]</th>
+<th style="text-align:right"><code>blocking_t0</code><br>Total (<code>ms</code>)</th>
+<th style="text-align:right">Streaming 先行幅<br>(<code>str_t0 - blk_t0</code>)</th>
+<th style="text-align:right"><code>streaming_default</code><br>TTFT / Total [思考]</th>
+<th style="text-align:right"><code>blocking_default</code><br>Total [思考]</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td style="text-align:left"><strong>Turns 1–10</strong><br>(電源・放電・BIOS・セーフモード)</td>
-<td style="text-align:right"><code>1,768 tok</code><br>(<code>176〜3,407</code>)</td>
-<td style="text-align:right"><code>177 tok</code><br>(<code>10.0%</code>・T8–9発動)</td>
-<td style="text-align:right"><strong><code>2,853</code></strong> / <code>5,910 ms</code><br>(T2–10: <code>2,000 ms</code>)</td>
-<td style="text-align:right"><code>5,125 ms</code></td>
-<td style="text-align:right"><strong><code>-2,272 ms</code></strong> (<code>-44.3%</code>)</td>
-<td style="text-align:right"><code>11,687</code> / <code>13,467 ms</code><br>[<code>1,211 tok</code>]</td>
-<td style="text-align:right"><code>12,988 ms</code><br>[<code>1,099 tok</code>]</td>
+<td style="text-align:right"><code>1,768 tok</code> (<code>176〜3,407</code>)<br>Cache: <code>177 tok</code> (<code>10.0%</code>)</td>
+<td style="text-align:right"><strong><code>2,853</code></strong> / <code>5,910</code><br>(T2–10: <code>2,000</code>)</td>
+<td style="text-align:right"><code>5,125</code></td>
+<td style="text-align:right"><strong><code>-2,272 ms</code></strong><br>(<code>-44.3%</code>)</td>
+<td style="text-align:right"><code>11,687</code> / <code>13,467</code><br>[<code>1,211 tok</code>]</td>
+<td style="text-align:right"><code>12,988</code><br>[<code>1,099 tok</code>]</td>
 </tr>
 <tr>
 <td style="text-align:left"><strong>Turns 11–20</strong><br>(データ退避・ドライバ・メモリ診断)</td>
-<td style="text-align:right"><code>5,635 tok</code><br>(<code>3,817〜7,539</code>)</td>
-<td style="text-align:right"><code>3,229 tok</code><br>(<code>57.3%</code>)</td>
-<td style="text-align:right"><strong><code>2,180</code></strong> / <code>5,586 ms</code></td>
-<td style="text-align:right"><code>6,742 ms</code></td>
-<td style="text-align:right"><strong><code>-4,562 ms</code></strong> (<code>-67.7%</code>)</td>
-<td style="text-align:right"><code>9,357</code> / <code>11,643 ms</code><br>[<code>828 tok</code>]</td>
-<td style="text-align:right"><code>14,398 ms</code><br>[<code>1,154 tok</code>]</td>
+<td style="text-align:right"><code>5,635 tok</code> (<code>3,817〜7,539</code>)<br>Cache: <code>3,229 tok</code> (<code>57.3%</code>)</td>
+<td style="text-align:right"><strong><code>2,180</code></strong> / <code>5,586</code></td>
+<td style="text-align:right"><code>6,742</code></td>
+<td style="text-align:right"><strong><code>-4,562 ms</code></strong><br>(<code>-67.7%</code>)</td>
+<td style="text-align:right"><code>9,357</code> / <code>11,643</code><br>[<code>828 tok</code>]</td>
+<td style="text-align:right"><code>14,398</code><br>[<code>1,154 tok</code>]</td>
 </tr>
 <tr>
 <td style="text-align:left"><strong>Turns 21–30</strong><br>(SSD診断・復元・USB回復メディア)</td>
-<td style="text-align:right"><code>10,280 tok</code><br>(<code>8,005〜12,478</code>)</td>
-<td style="text-align:right"><code>7,784 tok</code><br>(<code>75.7%</code>)</td>
-<td style="text-align:right"><strong><code>2,361</code></strong> / <code>6,804 ms</code></td>
-<td style="text-align:right"><code>6,666 ms</code></td>
-<td style="text-align:right"><strong><code>-4,305 ms</code></strong> (<code>-64.6%</code>)</td>
-<td style="text-align:right"><code>9,969</code> / <code>12,658 ms</code><br>[<code>913 tok</code>]</td>
-<td style="text-align:right"><code>12,731 ms</code><br>[<code>954 tok</code>]</td>
+<td style="text-align:right"><code>10,280 tok</code> (<code>8,005〜12,478</code>)<br>Cache: <code>7,784 tok</code> (<code>75.7%</code>)</td>
+<td style="text-align:right"><strong><code>2,361</code></strong> / <code>6,804</code></td>
+<td style="text-align:right"><code>6,666</code></td>
+<td style="text-align:right"><strong><code>-4,305 ms</code></strong><br>(<code>-64.6%</code>)</td>
+<td style="text-align:right"><code>9,969</code> / <code>12,658</code><br>[<code>913 tok</code>]</td>
+<td style="text-align:right"><code>12,731</code><br>[<code>954 tok</code>]</td>
 </tr>
 <tr>
 <td style="text-align:left"><strong>Turns 31–40</strong><br>(BitLocker・メーカー診断・引取修理)</td>
-<td style="text-align:right"><code>15,007 tok</code><br>(<code>12,995〜16,915</code>)</td>
-<td style="text-align:right"><code>12,556 tok</code><br>(<code>83.7%</code>)</td>
-<td style="text-align:right"><strong><code>2,331</code></strong> / <code>6,260 ms</code></td>
-<td style="text-align:right"><code>6,653 ms</code></td>
-<td style="text-align:right"><strong><code>-4,322 ms</code></strong> (<code>-65.0%</code>)</td>
-<td style="text-align:right"><code>8,265</code> / <code>11,405 ms</code><br>[<code>517 tok</code>]</td>
-<td style="text-align:right"><code>12,480 ms</code><br>[<code>802 tok</code>]</td>
+<td style="text-align:right"><code>15,007 tok</code> (<code>12,995〜16,915</code>)<br>Cache: <code>12,556 tok</code> (<code>83.7%</code>)</td>
+<td style="text-align:right"><strong><code>2,331</code></strong> / <code>6,260</code></td>
+<td style="text-align:right"><code>6,653</code></td>
+<td style="text-align:right"><strong><code>-4,322 ms</code></strong><br>(<code>-65.0%</code>)</td>
+<td style="text-align:right"><code>8,265</code> / <code>11,405</code><br>[<code>517 tok</code>]</td>
+<td style="text-align:right"><code>12,480</code><br>[<code>802 tok</code>]</td>
 </tr>
 <tr>
 <td style="text-align:left"><strong>Turns 41–50</strong><br>(代替機・出張修理・バックアップ総括)</td>
-<td style="text-align:right"><code>19,338 tok</code><br>(<code>17,309〜21,490</code>)</td>
-<td style="text-align:right"><code>16,872 tok</code><br>(<strong><code>87.2%</code></strong>)</td>
-<td style="text-align:right"><strong><code>2,574</code></strong> / <code>7,054 ms</code></td>
-<td style="text-align:right"><code>6,935 ms</code></td>
-<td style="text-align:right"><strong><code>-4,361 ms</code></strong> (<code>-62.9%</code>)</td>
-<td style="text-align:right"><code>9,910</code> / <code>12,504 ms</code><br>[<code>823 tok</code>]</td>
-<td style="text-align:right"><code>12,527 ms</code><br>[<code>763 tok</code>]</td>
+<td style="text-align:right"><code>19,338 tok</code> (<code>17,309〜21,490</code>)<br>Cache: <code>16,872 tok</code> (<strong><code>87.2%</code></strong>)</td>
+<td style="text-align:right"><strong><code>2,574</code></strong> / <code>7,054</code></td>
+<td style="text-align:right"><code>6,935</code></td>
+<td style="text-align:right"><strong><code>-4,361 ms</code></strong><br>(<code>-62.9%</code>)</td>
+<td style="text-align:right"><code>9,910</code> / <code>12,504</code><br>[<code>823 tok</code>]</td>
+<td style="text-align:right"><code>12,527</code><br>[<code>763 tok</code>]</td>
 </tr>
 <tr>
 <td style="text-align:left"><strong>全50ターン平均</strong></td>
-<td style="text-align:right"><strong><code>10,406 tok</code></strong><br>(<code>176〜21,490</code>)</td>
-<td style="text-align:right"><strong><code>8,124 tok</code></strong><br>(<code>78.1%</code> / 最大 <strong><code>90.6%</code></strong>)</td>
-<td style="text-align:right"><strong><code>2,460</code></strong> / <strong><code>6,323 ms</code></strong><br>(中央値 <strong><code>2,029 ms</code></strong>)</td>
-<td style="text-align:right"><strong><code>6,424 ms</code></strong></td>
-<td style="text-align:right"><strong><code>-3,964 ms</code></strong> (<strong><code>-61.7%</code></strong>)</td>
-<td style="text-align:right"><strong><code>9,838</code></strong> / <strong><code>12,335 ms</code></strong><br>[<strong><code>858 tok</code></strong>]</td>
-<td style="text-align:right"><strong><code>13,025 ms</code></strong><br>[<strong><code>954 tok</code></strong>]</td>
+<td style="text-align:right"><strong><code>10,406 tok</code></strong> (<code>176〜21,490</code>)<br>Cache: <strong><code>8,124 tok</code></strong> (<code>78.1%</code> / 最大**<code>90.6%</code>**)</td>
+<td style="text-align:right"><strong><code>2,460</code></strong> / <strong><code>6,323</code></strong><br>(中央値 <strong><code>2,029</code></strong>)</td>
+<td style="text-align:right"><strong><code>6,424</code></strong></td>
+<td style="text-align:right"><strong><code>-3,964 ms</code></strong><br>(<strong><code>-61.7%</code></strong>)</td>
+<td style="text-align:right"><strong><code>9,838</code></strong> / <strong><code>12,335</code></strong><br>[<strong><code>858 tok</code></strong>]</td>
+<td style="text-align:right"><strong><code>13,025</code></strong><br>[<strong><code>954 tok</code></strong>]</td>
 </tr>
 </tbody>
 </table>

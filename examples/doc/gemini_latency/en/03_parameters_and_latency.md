@@ -423,13 +423,13 @@ save()
 
 ### Three Empirical Laws from the Regression Analysis
 
-1. **Strict Linear Scaling ($\text{TTFT} \approx 1,500\text{ ms} + 9.0\text{ ms} \times \text{ThTok}$)**:
+1. **Strict Linear Scaling (`TTFT ≈ 1,500 ms + 9.0 ms × ThTok`)**:
    - Every streaming execution aligns along a linear trajectory with an intercept of **`~1,500 ms`** (network RTT + prompt prefill + first token generation) and a slope of **`~9.0 ms / token`**.
    - Taking the reciprocal of `9.0 ms / token` shows that `gemini-3.8-flash` generates internal reasoning tokens at **`~110 tokens/sec`**.
 2. **Why `default`, `medium`, and `high` Vary Across Runs**:
    - Because `LOW`, `MEDIUM`, `HIGH`, and `default` act as soft complexity priors rather than rigid token caps, the actual `thoughts_tokens` sampled on a given call varies dynamically (`351–1,006 tokens`).
 3. **Deterministic Low Latency Requires `thinking=0`**:
-   - Only `thinking=0` clamps `thoughts_tokens` at `0`, eliminating multi-second reasoning overhead and locking TTFT into **`1.2–1.5 s`**.
+   - Only `thinking=0` clamps `thoughts_tokens` at `0 tok`, eliminating multi-second reasoning overhead and locking TTFT into **`1.2–1.5 s`**.
 
 ---
 
@@ -521,7 +521,7 @@ t3_rows = [
         23.8,
         "T3_2: 500GB Transfer",
         "USB2.0: 240m / Gen2: 35m\nSaved: 205 min (3h 25m)",
-        "Divide 300GB video & 200GB small files by interface speeds\nand add verification times (15m vs 5m) before subtracting",
+        "Divide 300GB video & 200GB small files by interface speeds\n(floor per item) and add verification times (15m vs 5m)",
         "205 min (Verified)\n(673–755 tok)",
     ),
     (
@@ -561,11 +561,11 @@ Inspecting the benchmark prompts in `src/gemini_evaluation/benchmark_adaptive_th
    - **Repair Option**: Motherboard repair (`29,800 yen`) + 1TB SSD replacement (`9,800 yen`) + monthly support plan (`1,000 yen × 36 months = 36,000 yen`) = **`75,600 yen`**.
    - **Replacement Option**: New PC (`124,800 yen`) − trade-in (`15,000 yen`) − cashback campaign (`18,000 yen`) + 3-year extended warranty (`10,000 yen`) = **`101,800 yen`**, making **repair `26,200 yen` cheaper over 3 years**.
 2. **`T3_2` (500GB SSD Backup Transfer Time Comparison)**:
-   - **USB 2.0 External HDD**: 300GB video (`300,000 MB ÷ 40 MB/s = 125 min`) + 200GB small files (`200,000 MB ÷ 32 MB/s = 100 min`) + verification (`15 min`) = **`240 min` (4 hours)**.
-   - **USB 3.2 Gen2 External SSD**: 300GB video (`300,000 MB ÷ 400 MB/s = 12.5 → 12 min`) + 200GB small files (`200,000 MB ÷ 180 MB/s = 18.5 → 18 min`) + verification (`5 min`) = **`35 min`**, saving **`205 min` (3 hours 25 minutes)**.
+   - **USB 2.0 External HDD**: 300GB video (`300,000 MB ÷ 40 MB/s = 7,500 s = 125 min`) + 200GB small files (`192,000 MB ÷ 32 MB/s = 6,000 s = 100 min`) + verification (`15 min`) = **`240 min` (4 hours)**.
+   - **USB 3.2 Gen2 External SSD** (floor-rounded per item as specified in the prompt): 300GB video (`300,000 MB ÷ 400 MB/s = 750 s = 12.5 → 12 min`) + 200GB small files (`199,800 MB ÷ 180 MB/s = 1,110 s = 18.5 → 18 min`) + verification (`5 min`) = **`35 min`**, saving **`205 min` (3 hours 25 minutes)**.
 3. **`T3_3` (2-Year 3-PC Maintenance, RAM Upgrade, and Cloud Backup Cost Simulation)**:
-   - **Maintenance & On-Site Repair**: `600 yen × 3 PCs × 24 months = 43,200 yen` + 2 on-site repairs (`3,600 yen × 2 = 7,200 yen`) = `50,400 yen`.
-   - **16GB RAM Upgrades (3 PCs)**: `9,800 yen × 3 = 29,400 yen`.
+   - **Maintenance & On-Site Repair**: `600 yen × 3 PCs × 24 months = 43,200 yen` + 2 on-site repairs (standard `6,900 yen × 2 = 13,800 yen` − maintenance spot discount `6,600 yen` = `3,600 yen × 2 = 7,200 yen`) = `50,400 yen`.
+   - **16GB RAM Upgrades (3 PCs)**: Standard `10,400 yen × 3 = 31,200 yen` − simultaneous 3-PC discount `1,800 yen` = `9,800 yen × 3 = 29,400 yen`.
    - **Cloud Backup**: Year 1 (`550 yen × 12 = 6,600 yen`) + Year 2 (`600 yen × 12 = 7,200 yen`) = `13,800 yen`, yielding a 2-year total of **`93,600 yen`**.
 
 In Chapter 4, we design and benchmark the **Adaptive Thinking Router Pattern** to combine fast `thinking=0` responsiveness on Tiers 1–2 with parallel `thinking=low` scratchpad verification on Tier 3.

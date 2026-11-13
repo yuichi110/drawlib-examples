@@ -524,7 +524,7 @@ html[data-theme="dark"] .lang-dropdown-menu {
 @media print {
     @page {
         size: A4;
-        margin: 18mm 16mm;
+        margin: 14mm 12mm;
     }
 
     * {
@@ -537,6 +537,7 @@ html[data-theme="dark"] .lang-dropdown-menu {
         margin: 0;
         padding: 0;
         overflow-x: hidden;
+        font-variant-numeric: tabular-nums;
     }
 
     .main-container {
@@ -569,34 +570,37 @@ html[data-theme="dark"] .lang-dropdown-menu {
     }
 
     code {
-        font-size: 0.84em;
-        padding: 0.12rem 0.32rem;
+        font-size: 0.85em;
+        padding: 0.08rem 0.26rem;
         overflow-wrap: break-word;
-        word-break: break-word;
+        word-break: normal;
+        font-variant-numeric: tabular-nums;
     }
 
     pre {
-        padding: 0.85rem 1rem;
+        padding: 0.8rem 0.95rem;
     }
 
     pre, pre code {
         white-space: pre-wrap !important;
         word-wrap: break-word !important;
-        word-break: break-word !important;
+        word-break: normal !important;
         overflow: visible !important;
         overflow-x: visible !important;
-        font-size: 0.75rem !important;
+        font-size: 0.74rem !important;
         line-height: 1.45 !important;
+        font-variant-numeric: tabular-nums;
     }
 
     table {
         width: 100%;
         max-width: 100%;
-        font-size: 0.76rem;
-        line-height: 1.45;
+        font-size: 0.71rem;
+        line-height: 1.4;
         overflow: visible;
         break-inside: auto;
         page-break-inside: auto;
+        table-layout: auto;
     }
 
     thead {
@@ -609,15 +613,20 @@ html[data-theme="dark"] .lang-dropdown-menu {
     }
 
     th, td {
-        padding: 0.42rem 0.55rem;
+        padding: 0.32rem 0.38rem;
         vertical-align: top;
         overflow-wrap: break-word;
+        word-break: normal;
+    }
+
+    th:first-child, td:first-child {
+        min-width: 4.5rem;
     }
 
     th code, td code {
         font-size: 0.82em;
-        padding: 0.08rem 0.22rem;
-        overflow-wrap: normal;
+        padding: 0.04rem 0.16rem;
+        overflow-wrap: break-word;
         word-break: normal;
     }
 

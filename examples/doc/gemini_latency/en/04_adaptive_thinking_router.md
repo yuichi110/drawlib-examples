@@ -205,12 +205,12 @@ from drawlib.styles import Styles
 from drawlib.text import text
 from drawlib.utils import load_adaptive_runs
 
-setup(width=172, height=92, dpi=150)
+setup(width=172, height=112, dpi=150)
 
 # Outer structural frame
-rectangle((86.0, 46.0), width=168.0, height=88.0, style=Styles.MutedDashed.patch(shape_r=2.0))
+rectangle((86.0, 56.0), width=168.0, height=108.0, style=Styles.MutedDashed.patch(shape_r=2.0))
 text(
-    (86.0, 85.8),
+    (86.0, 105.8),
     "45-Run Empirical Benchmark: Mean TTFT (Left) & Mean Total Completion Time (Right) by Tier",
     style=Styles.DarkBold.patch(text_size=12.0),
 )
@@ -234,15 +234,15 @@ def calc_means(m_key: str, metric: str) -> list[float]:
 
 
 # 2-row Legend at top
-rectangle((86.0, 77.2), width=160.0, height=9.2, style=Styles.Neutral.patch(shape_r=1.2))
+rectangle((86.0, 97.2), width=160.0, height=9.2, style=Styles.Neutral.patch(shape_r=1.2))
 
 leg_row1 = [
     (10.0, Styles.PrimaryFlat, "★ Pattern A: 2-Field {thinking, response} [Recommended]"),
     (95.0, Styles.TealFlat, "Pattern C: Tag Prefix [DIRECT]/[THINK]"),
 ]
 for lx, st, ltxt in leg_row1:
-    rectangle((lx, 79.3), width=3.6, height=2.0, style=st.patch(shape_r=0.3))
-    text((lx + 2.8, 79.3), ltxt, style=Styles.DarkBold.patch(text_size=10.0, halign="left"))
+    rectangle((lx, 99.3), width=3.6, height=2.0, style=st.patch(shape_r=0.3))
+    text((lx + 2.8, 99.3), ltxt, style=Styles.DarkBold.patch(text_size=10.0, halign="left"))
 
 leg_row2 = [
     (10.0, Styles.SuccessFlat, "Base 0: Fixed thinking=0 (Unverified)"),
@@ -250,27 +250,27 @@ leg_row2 = [
     (116.0, Styles.DangerFlat, "Pattern B: 1-Field Sequential Router"),
 ]
 for lx, st, ltxt in leg_row2:
-    rectangle((lx, 75.1), width=3.6, height=2.0, style=st.patch(shape_r=0.3))
-    text((lx + 2.8, 75.1), ltxt, style=Styles.Dark.patch(text_size=10.0, halign="left"))
+    rectangle((lx, 95.1), width=3.6, height=2.0, style=st.patch(shape_r=0.3))
+    text((lx + 2.8, 95.1), ltxt, style=Styles.Dark.patch(text_size=10.0, halign="left"))
 
 # Left Panel: Average TTFT (ms)
-rectangle((45.5, 42.0), width=79.0, height=56.0, style=Styles.WhiteFlat.patch(shape_r=1.4, line_width=0.8))
-text((45.5, 66.8), "(1) Mean Time to First Token: TTFT (ms)", style=Styles.PrimaryBold.patch(text_size=11.0))
+rectangle((45.5, 52.0), width=79.0, height=76.0, style=Styles.WhiteFlat.patch(shape_r=1.4, line_width=0.8))
+text((45.5, 86.8), "(1) Mean Time to First Token: TTFT (ms)", style=Styles.PrimaryBold.patch(text_size=11.0))
 
 chart_ttft = BarChart(
     axis_line_style=Styles.Dark,
-    axis_text_style=Styles.DarkBold.patch(text_size=10.0),
+    axis_text_style=Styles.DarkBold.patch(text_size=9.5),
     grid_style=Styles.MutedDashed,
-    value_text_style=Styles.DarkBold.patch(text_size=10.0),
-    width=54.0,
-    height=46.0,
+    value_text_style=Styles.DarkBold.patch(text_size=8.6),
+    width=52.0,
+    height=64.0,
     categories=categories,
     orientation="horizontal",
     bar_mode="group",
-    bar_width_ratio=0.82,
+    bar_width_ratio=0.74,
     bar_r=0.3,
 )
-chart_ttft.configure_x_axis(min_value=0, max_value=13000, tick_step=3000, format="{:,.0f}")
+chart_ttft.configure_x_axis(min_value=0, max_value=15000, tick_step=5000, format="{:,.0f}")
 chart_ttft.add_series("pat_a", calc_means("pat_a_pydantic_2f", "ttft_ms"), style=Styles.PrimaryFlat)
 chart_ttft.add_series("pat_c", calc_means("pat_c_tag", "ttft_ms"), style=Styles.TealFlat)
 chart_ttft.add_series("base_0", calc_means("base_0", "ttft_ms"), style=Styles.SuccessFlat)
@@ -279,23 +279,23 @@ chart_ttft.add_series("pat_b", calc_means("pat_b_pydantic_1f", "ttft_ms"), style
 chart_ttft.draw(xy=(24.5, 17.5))
 
 # Right Panel: Average Total Completion Time (ms)
-rectangle((126.5, 42.0), width=79.0, height=56.0, style=Styles.WhiteFlat.patch(shape_r=1.4, line_width=0.8))
-text((126.5, 66.8), "(2) Mean Stream Completion: Total (ms)", style=Styles.DarkBold.patch(text_size=11.0))
+rectangle((126.5, 52.0), width=79.0, height=76.0, style=Styles.WhiteFlat.patch(shape_r=1.4, line_width=0.8))
+text((126.5, 86.8), "(2) Mean Stream Completion: Total (ms)", style=Styles.DarkBold.patch(text_size=11.0))
 
 chart_tot = BarChart(
     axis_line_style=Styles.Dark,
-    axis_text_style=Styles.DarkBold.patch(text_size=10.0),
+    axis_text_style=Styles.DarkBold.patch(text_size=9.5),
     grid_style=Styles.MutedDashed,
-    value_text_style=Styles.DarkBold.patch(text_size=10.0),
-    width=54.0,
-    height=46.0,
+    value_text_style=Styles.DarkBold.patch(text_size=8.6),
+    width=52.0,
+    height=64.0,
     categories=categories,
     orientation="horizontal",
     bar_mode="group",
-    bar_width_ratio=0.82,
+    bar_width_ratio=0.74,
     bar_r=0.3,
 )
-chart_tot.configure_x_axis(min_value=0, max_value=22000, tick_step=5000, format="{:,.0f}")
+chart_tot.configure_x_axis(min_value=0, max_value=24000, tick_step=8000, format="{:,.0f}")
 chart_tot.add_series("pat_a", calc_means("pat_a_pydantic_2f", "total_ms"), style=Styles.PrimaryFlat)
 chart_tot.add_series("pat_c", calc_means("pat_c_tag", "total_ms"), style=Styles.TealFlat)
 chart_tot.add_series("base_0", calc_means("base_0", "total_ms"), style=Styles.SuccessFlat)
@@ -394,7 +394,7 @@ chart = ScatterChart(
     grid_style=Styles.MutedDashed,
     width=102.0,
     height=52.0,
-    default_radius=1.2,
+    default_radius=1.25,
 )
 chart.configure_x_axis(
     label="Time to First Token TTFT (ms)",
@@ -512,19 +512,19 @@ text(
 )
 
 # Shared Legend Bar
-rectangle((86.0, 82.8), width=160.0, height=5.2, style=Styles.Neutral.patch(shape_r=1.0))
+rectangle((86.0, 82.8), width=162.0, height=5.2, style=Styles.Neutral.patch(shape_r=1.0))
 
 leg_items = [
-    (9.5, Styles.PrimaryBold, Styles.PrimaryFlat, "★ Pattern A (2-Field)"),
-    (46.0, Styles.TealBold, Styles.TealFlat, "Pattern C (Tag)"),
+    (8.5, Styles.PrimaryBold, Styles.PrimaryFlat, "★ Pattern A (2-Field)"),
+    (45.0, Styles.TealBold, Styles.TealFlat, "Pattern C (Tag)"),
     (75.5, Styles.SuccessBold, Styles.SuccessFlat, "Base 0 (Fixed 0)"),
-    (112.5, Styles.WarningBold, Styles.WarningFlat, "Base Low (Fixed low)"),
-    (145.0, Styles.DangerBold, Styles.DangerFlat, "Pattern B (1F)"),
+    (111.5, Styles.WarningBold, Styles.WarningFlat, "Base Low (Fixed low)"),
+    (143.5, Styles.DangerBold, Styles.DangerFlat, "Pattern B (1F)"),
 ]
 for lx, lst, cst, ltxt in leg_items:
     line((lx, 82.8), (lx + 3.4, 82.8), style=lst.patch(line_width=2.2))
     circle((lx + 1.7, 82.8), radius=0.75, style=cst)
-    text((lx + 4.3, 82.8), ltxt, style=Styles.DarkBold.patch(text_size=10.0, halign="left"))
+    text((lx + 4.3, 82.8), ltxt, style=Styles.DarkBold.patch(text_size=9.6, halign="left"))
 
 
 def draw_multi_trajectory_panel(
@@ -603,14 +603,14 @@ px_l, py_l = draw_multi_trajectory_panel(
 
 # Callouts inside Left Panel
 rectangle((39.5, 55.5), width=42.0, height=10.0, style=Styles.PrimaryNeutral.patch(shape_r=0.9))
-text((39.5, 57.8), "★ Pattern A: Starts at 2,243 ms", style=Styles.PrimaryBold.patch(text_size=10.0))
-text((39.5, 53.4), "Finishes first at 4,629 ms!", style=Styles.DarkBold.patch(text_size=10.0))
-line((33.2, 50.5), (px_l(4629.0), py_l(482.0)), arrow_head="->", style=Styles.PrimaryBold.patch(line_width=1.5))
+text((39.5, 57.8), "★ Pattern A: Starts at 2,243 ms", style=Styles.PrimaryBold.patch(text_size=9.6))
+text((39.5, 53.4), "Finishes first at 4,629 ms!", style=Styles.DarkBold.patch(text_size=9.6))
+line((34.0, 50.5), (px_l(4629.0), py_l(482.0)), arrow_head="->", style=Styles.PrimaryBold.patch(line_width=1.5))
 
-rectangle((55.5, 26.5), width=39.0, height=9.2, style=Styles.WhiteFlat.patch(shape_r=0.9, line_width=0.7))
-text((55.5, 28.6), "Base Low: Blank until 5,901 ms", style=Styles.WarningBold.patch(text_size=10.0))
-text((55.5, 24.4), "Wastes 423 reasoning tokens", style=Styles.Dark.patch(text_size=10.0))
-line((41.0, 26.5), (px_l(5901.0), py_l(40.0)), arrow_head="->", style=Styles.WarningBold.patch(line_width=1.4))
+rectangle((55.5, 29.0), width=41.0, height=9.4, style=Styles.WhiteFlat.patch(shape_r=0.9, line_width=0.7))
+text((55.5, 31.2), "Base Low: Blank until 5,901 ms", style=Styles.WarningBold.patch(text_size=9.5))
+text((55.5, 26.8), "Wastes 423 reasoning tokens", style=Styles.Dark.patch(text_size=9.4))
+line((px_l(5901.0), 24.3), (px_l(5901.0), py_l(40.0)), arrow_head="->", style=Styles.WarningBold.patch(line_width=1.4))
 
 # Right Panel: T3_1 (Complex Math, thinking=true)
 px_r, py_r = draw_multi_trajectory_panel(
@@ -628,15 +628,15 @@ px_r, py_r = draw_multi_trajectory_panel(
 )
 
 # Callouts inside Right Panel
-rectangle((124.5, 55.5), width=46.0, height=10.6, style=Styles.PrimaryNeutral.patch(shape_r=0.9))
-text((124.5, 58.0), "(1) Bridge at 2,120 ms + Parallel Stage 2", style=Styles.PrimaryBold.patch(text_size=10.0))
-text((124.5, 53.2), "Eliminates 6.8s freeze vs Base Low!", style=Styles.DarkBold.patch(text_size=10.0))
+rectangle((124.5, 55.5), width=48.5, height=10.6, style=Styles.PrimaryNeutral.patch(shape_r=0.9))
+text((124.5, 58.0), "(1) Bridge at 2,120 ms + Parallel Stage 2", style=Styles.PrimaryBold.patch(text_size=9.5))
+text((124.5, 53.2), "Eliminates 6.8s freeze vs Base Low!", style=Styles.DarkBold.patch(text_size=9.5))
 line((108.0, 50.2), (px_r(2120.0), py_r(60.0)), arrow_head="->", style=Styles.PrimaryBold.patch(line_width=1.5))
 
-rectangle((137.0, 27.5), width=43.0, height=10.0, style=Styles.WhiteFlat.patch(shape_r=0.9, line_width=0.7))
-text((137.0, 29.8), "(2) Stage 2 Chains at 10,948 ms (859 tok)", style=Styles.PrimaryBold.patch(text_size=10.0))
-text((137.0, 25.4), "Verified 26,200 yen finishes at 16,650 ms", style=Styles.Dark.patch(text_size=10.0))
-line((129.0, 32.5), (px_r(10948.0), py_r(90.0)), arrow_head="->", style=Styles.PrimaryBold.patch(line_width=1.5))
+rectangle((137.0, 29.5), width=44.0, height=9.6, style=Styles.WhiteFlat.patch(shape_r=0.9, line_width=0.7))
+text((137.0, 31.8), "(2) Stage 2 Chains at 10,948 ms (859 tok)", style=Styles.PrimaryBold.patch(text_size=9.5))
+text((137.0, 27.3), "Verified 26,200 yen finishes at 16,650 ms", style=Styles.Dark.patch(text_size=9.4))
+line((px_r(10948.0), 24.7), (px_r(10948.0), py_r(90.0)), arrow_head="->", style=Styles.PrimaryBold.patch(line_width=1.5))
 
 # Bottom summary banner
 rectangle((86.0, 6.0), width=160.0, height=6.4, style=Styles.PrimaryNeutral.patch(shape_r=1.2))
@@ -656,7 +656,7 @@ save()
    - Pattern A (thick blue curve) resolves `"thinking": false` at `2,068 ms`, begins streaming `"response"` deltas at **`2,243 ms`**, and completes at **`4,629 ms`**, finishing first among all five methods.
    - Because the Pydantic schema guides the model to produce a well-structured, concise 482-character troubleshooting guide, Pattern A finishes **`1,285 ms` faster than Pattern C (`5,914 ms`)** and **`2,981 ms` faster than Base 0 (`7,610 ms`)**.
 2. **Right Panel (`T3_1`: Complex Math, `thinking=true`) — Eliminating `6.8 s` of Blank-Screen Freeze via Parallel Stage-2 Chaining**:
-   - Fixed `base_low` (yellow curve) leaves the user staring at `0 chars` for **`8,950 ms`**, while sequential Pattern B (red curve) freezes for **`11,226 ms`**.
+   - Fixed `base_low` (yellow curve) leaves the user staring at **0 characters** for **`8,950 ms`**, while sequential Pattern B (red curve) freezes for **`11,226 ms`**.
    - Pattern A (thick blue curve) resolves `"thinking": true` at **`2,078 ms`**, immediately launches Stage 2 (`thinking=low`) in the background via `asyncio.create_task()`, and streams the 59-character bridge message at **`2,120 ms`**—**eliminating `6,830 ms` (`6.8 s`) of blank-screen freeze** compared to `base_low`. While the user reads the bridge message, Stage 2 completes `859` internal reasoning tokens in parallel and seamlessly resumes streaming the verified calculation at **`10,948 ms`**, finishing at **`16,650 ms`** with 100% mathematical consistency (`26,200 yen` repair advantage).
 
 ---
@@ -665,7 +665,7 @@ save()
 
 ### Clean Google AI Studio (`google-genai`) Implementation of Pattern A
 
-Because `chunk.parsed` remains `None` on intermediate chunks during `generate_content_stream`, Pattern A uses `pydantic_core.from_json(..., allow_partial="trailing-strings")` to safely extract the boolean `thinking` flag and escape-decoded `response` deltas on every chunk (`src/gemini_evaluation/adaptive_thinking.py`):
+Because `chunk.parsed` remains `None` on intermediate chunks during `generate_content_stream`, Pattern A uses `pydantic_core.from_json(..., allow_partial="trailing-strings")` to safely extract the boolean `thinking` flag and escape-decoded `response` deltas on every chunk (`src/gemini_evaluation/adaptive_thinking.py`). In production, instantiate `genai.Client` once at application startup and pass it into `stream_adaptive_router`, using a `finally` block to ensure any background Stage-2 task is cancelled if the caller disconnects early:
 
 ```python
 import asyncio
@@ -684,7 +684,7 @@ MODEL = "gemini-3.8-flash"
 class AdaptiveStreamResponse(BaseModel):
     """Minimal 2-field Pydantic streaming schema for Pattern A."""
 
-    thinking: bool  # Field 1: Resolved at ~0.7–1.1s to trigger routing
+    thinking: bool  # Field 1: Resolved prior to first visible chunk to trigger routing
     response: str   # Field 2: Full answer if thinking=False, or 1-sentence bridge if True
 
 
@@ -700,11 +700,10 @@ def parse_partial_json_dict(raw_buf: str) -> dict[str, Any] | None:
 
 
 async def stream_adaptive_router(
-    api_key: str,
+    client: genai.Client,
     prompt: str,
 ) -> AsyncIterator[str]:
     """Pattern A: 2-Field Integrated Pydantic Stream + Parallel Stage-2 Chaining."""
-    client = genai.Client(api_key=api_key)
     stage2_queue: asyncio.Queue[str | BaseException | None] = asyncio.Queue()
     stage2_task: asyncio.Task[None] | None = None
 
@@ -736,61 +735,66 @@ async def stream_adaptive_router(
     emitted_len = 0
     decided_thinking: bool | None = None
 
-    st1 = await client.aio.models.generate_content_stream(
-        model=MODEL,
-        contents=prompt,
-        config=types.GenerateContentConfig(
-            system_instruction=(
-                "For greetings or standard procedures, set thinking: false and output the full answer in response. "
-                "For multi-condition financial math, set thinking: true and output only a 1-sentence bridge message."
+    try:
+        st1 = await client.aio.models.generate_content_stream(
+            model=MODEL,
+            contents=prompt,
+            config=types.GenerateContentConfig(
+                system_instruction=(
+                    "For greetings or standard procedures, set thinking: false and output the full answer in response. "
+                    "For multi-condition financial math, set thinking: true and output only a 1-sentence bridge message."
+                ),
+                response_mime_type="application/json",
+                response_schema=AdaptiveStreamResponse,
+                thinking_config=types.ThinkingConfig(thinking_budget=0),
+                temperature=0.2,
             ),
-            response_mime_type="application/json",
-            response_schema=AdaptiveStreamResponse,
-            thinking_config=types.ThinkingConfig(thinking_budget=0),
-            temperature=0.2,
-        ),
-    )
-    async with aclosing(st1):
-        async for ch1 in st1:
-            if not ch1.text:
-                continue
-            json_buf += ch1.text
-            partial = parse_partial_json_dict(json_buf)
-            if partial is None:
-                continue
+        )
+        async with aclosing(st1):
+            async for ch1 in st1:
+                if not ch1.text:
+                    continue
+                json_buf += ch1.text
+                partial = parse_partial_json_dict(json_buf)
+                if partial is None:
+                    continue
 
-            # 1) Inspect thinking flag once resolved; launch Stage 2 in parallel if True
-            if decided_thinking is None and isinstance(partial.get("thinking"), bool):
-                decided_thinking = partial["thinking"]
-                if decided_thinking:
-                    stage2_task = asyncio.create_task(_produce_stage2())
+                # 1) Inspect thinking flag once resolved; launch Stage 2 in parallel if True
+                if decided_thinking is None and isinstance(partial.get("thinking"), bool):
+                    decided_thinking = partial["thinking"]
+                    if decided_thinking:
+                        stage2_task = asyncio.create_task(_produce_stage2())
 
-            # 2) Yield newly decoded response slice immediately
-            resp_so_far = partial.get("response")
-            if isinstance(resp_so_far, str) and len(resp_so_far) > emitted_len:
-                delta = resp_so_far[emitted_len:]
-                emitted_len = len(resp_so_far)
-                yield delta
+                # 2) Yield newly decoded response slice immediately
+                resp_so_far = partial.get("response")
+                if isinstance(resp_so_far, str) and len(resp_so_far) > emitted_len:
+                    delta = resp_so_far[emitted_len:]
+                    emitted_len = len(resp_so_far)
+                    yield delta
 
-    # 3) Validate complete JSON payload at EOF
-    final_obj = AdaptiveStreamResponse.model_validate_json(json_buf)
-    if len(final_obj.response) > emitted_len:
-        yield final_obj.response[emitted_len:]
+        # 3) Validate complete JSON payload at EOF
+        final_obj = AdaptiveStreamResponse.model_validate_json(json_buf)
+        if len(final_obj.response) > emitted_len:
+            yield final_obj.response[emitted_len:]
 
-    # 4) Seamlessly chain parallel Stage-2 stream when thinking=True
-    if decided_thinking and stage2_task is not None:
-        yield "\n\n"
-        while True:
-            item = await stage2_queue.get()
-            if item is None:
-                break
-            if isinstance(item, BaseException):
-                raise item
-            yield item
-        await stage2_task
+        # 4) Seamlessly chain parallel Stage-2 stream when thinking=True
+        if decided_thinking and stage2_task is not None:
+            yield "\n\n"
+            while True:
+                item = await stage2_queue.get()
+                if item is None:
+                    break
+                if isinstance(item, BaseException):
+                    raise item
+                yield item
+            await stage2_task
+    finally:
+        # Ensure background Stage-2 task is cancelled if caller breaks early or an error occurs
+        if stage2_task is not None and not stage2_task.done():
+            stage2_task.cancel()
 ```
 
-> **Schema Cold-vs-Warm Compilation & Field Ordering Best Practices**: Empirical measurements in `load_schema_experiment()` (`src/gemini_evaluation/adaptive_thinking_log.json`) show that the first request with a new JSON schema (`Cold #1`: `2,562 ms` for `AdaptiveStreamResponse`, `3,337 ms` for `RichStreamResponse`) incurs a one-time finite-state-machine (FSM) grammar compilation pass. Subsequent warm calls (`Warm #2–#4`) hit the server's grammar cache (`2,294–3,447 ms` TTFT, `2,744 ms` mean for 2-field; `2,504–3,259 ms` TTFT, `2,837 ms` mean for 6-field). Expanding the schema to 6 fields (`RichStreamResponse`) maintains an equivalent warm `flag_decided_ms` (`2,157–2,781 ms`) provided `thinking: bool` is placed first and variable-length lists (`suggested_followups: list[str]`) are placed **after** `response: str`. Running a single dummy warmup call at application startup eliminates cold-start latency completely.
+> **Schema Cold-vs-Warm Compilation & Field Ordering Best Practices**: As detailed in Section 2.3 (`load_schema_experiment()`, `src/gemini_evaluation/adaptive_thinking_log.json`), the first invocation of a new JSON schema (`RichStreamResponse #1 (Cold)`: `3,337.3 ms` TTFT, `2,954.3 ms` `flag_decided_ms`) incurs a one-time finite-state-machine (FSM) grammar compilation pass. Subsequent warm calls (`Warm #2–#4`) hit the server's grammar cache, dropping 6-field average TTFT by **`-15.0%` to `2,837.1 ms` (`2,504.4–3,259.3 ms`)**—within **`+92.7 ms` (`+3.4%`)** of the 2-field warm average (`2,744.4 ms`). Expanding the schema to 6 fields (`RichStreamResponse`) maintains an average warm `flag_decided_ms` of `2,419.4 ms` (`2,157.1–2,780.6 ms`) provided `thinking: bool` is placed first and variable-length lists (`suggested_followups: list[str]`) are placed **after** `response: str`. Running a single dummy warmup call at application startup eliminates cold-start latency completely.
 
 ### Comprehensive Evaluation Scorecard across All 5 Methods
 

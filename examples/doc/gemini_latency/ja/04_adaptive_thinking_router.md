@@ -205,12 +205,12 @@ from drawlib.styles import Styles
 from drawlib.text import text
 from drawlib.utils import load_adaptive_runs
 
-setup(width=172, height=92, dpi=150)
+setup(width=172, height=112, dpi=150)
 
 # Outer structural frame
-rectangle((86.0, 46.0), width=168.0, height=88.0, style=Styles.MutedDashed.patch(shape_r=2.0))
+rectangle((86.0, 56.0), width=168.0, height=108.0, style=Styles.MutedDashed.patch(shape_r=2.0))
 text(
-    (86.0, 85.8),
+    (86.0, 105.8),
     "全45実行ベンチマーク：難易度ティア別の平均 TTFT (左) と 平均完了時間 Total (右)",
     style=Styles.DarkBold.patch(text_size=12.0),
 )
@@ -234,15 +234,15 @@ def calc_means(m_key: str, metric: str) -> list[float]:
 
 
 # 2-row Legend at top
-rectangle((86.0, 77.2), width=160.0, height=9.2, style=Styles.Neutral.patch(shape_r=1.2))
+rectangle((86.0, 97.2), width=160.0, height=9.2, style=Styles.Neutral.patch(shape_r=1.2))
 
 leg_row1 = [
     (10.0, Styles.PrimaryFlat, "★ Pattern A: 2F統合 {thinking, response} [推奨]"),
     (92.0, Styles.TealFlat, "Pattern C: 先頭タグ [DIRECT]/[THINK]"),
 ]
 for lx, st, ltxt in leg_row1:
-    rectangle((lx, 79.3), width=3.6, height=2.0, style=st.patch(shape_r=0.3))
-    text((lx + 2.8, 79.3), ltxt, style=Styles.DarkBold.patch(text_size=10.0, halign="left"))
+    rectangle((lx, 99.3), width=3.6, height=2.0, style=st.patch(shape_r=0.3))
+    text((lx + 2.8, 99.3), ltxt, style=Styles.DarkBold.patch(text_size=10.0, halign="left"))
 
 leg_row2 = [
     (10.0, Styles.SuccessFlat, "Base 0: 固定 thinking=0 (内部検算なし)"),
@@ -250,27 +250,27 @@ leg_row2 = [
     (118.0, Styles.DangerFlat, "Pattern B: 1F直列ルーター (常時2回呼出)"),
 ]
 for lx, st, ltxt in leg_row2:
-    rectangle((lx, 75.1), width=3.6, height=2.0, style=st.patch(shape_r=0.3))
-    text((lx + 2.8, 75.1), ltxt, style=Styles.Dark.patch(text_size=10.0, halign="left"))
+    rectangle((lx, 95.1), width=3.6, height=2.0, style=st.patch(shape_r=0.3))
+    text((lx + 2.8, 95.1), ltxt, style=Styles.Dark.patch(text_size=10.0, halign="left"))
 
 # Left Panel: Average TTFT (ms)
-rectangle((45.5, 42.0), width=79.0, height=56.0, style=Styles.WhiteFlat.patch(shape_r=1.4, line_width=0.8))
-text((45.5, 66.8), "① 初回トークン到着時間：平均 TTFT (ms)", style=Styles.PrimaryBold.patch(text_size=11.0))
+rectangle((45.5, 52.0), width=79.0, height=76.0, style=Styles.WhiteFlat.patch(shape_r=1.4, line_width=0.8))
+text((45.5, 86.8), "① 初回トークン到着時間：平均 TTFT (ms)", style=Styles.PrimaryBold.patch(text_size=11.0))
 
 chart_ttft = BarChart(
     axis_line_style=Styles.Dark,
-    axis_text_style=Styles.DarkBold.patch(text_size=10.0),
+    axis_text_style=Styles.DarkBold.patch(text_size=9.5),
     grid_style=Styles.MutedDashed,
-    value_text_style=Styles.DarkBold.patch(text_size=10.0),
-    width=54.0,
-    height=46.0,
+    value_text_style=Styles.DarkBold.patch(text_size=8.6),
+    width=52.0,
+    height=64.0,
     categories=categories,
     orientation="horizontal",
     bar_mode="group",
-    bar_width_ratio=0.82,
+    bar_width_ratio=0.74,
     bar_r=0.3,
 )
-chart_ttft.configure_x_axis(min_value=0, max_value=13000, tick_step=3000, format="{:,.0f}")
+chart_ttft.configure_x_axis(min_value=0, max_value=15000, tick_step=5000, format="{:,.0f}")
 chart_ttft.add_series("pat_a", calc_means("pat_a_pydantic_2f", "ttft_ms"), style=Styles.PrimaryFlat)
 chart_ttft.add_series("pat_c", calc_means("pat_c_tag", "ttft_ms"), style=Styles.TealFlat)
 chart_ttft.add_series("base_0", calc_means("base_0", "ttft_ms"), style=Styles.SuccessFlat)
@@ -279,23 +279,23 @@ chart_ttft.add_series("pat_b", calc_means("pat_b_pydantic_1f", "ttft_ms"), style
 chart_ttft.draw(xy=(24.5, 17.5))
 
 # Right Panel: Average Total Completion Time (ms)
-rectangle((126.5, 42.0), width=79.0, height=56.0, style=Styles.WhiteFlat.patch(shape_r=1.4, line_width=0.8))
-text((126.5, 66.8), "② 全文ストリーミング完了：平均 Total (ms)", style=Styles.DarkBold.patch(text_size=11.0))
+rectangle((126.5, 52.0), width=79.0, height=76.0, style=Styles.WhiteFlat.patch(shape_r=1.4, line_width=0.8))
+text((126.5, 86.8), "② 全文ストリーミング完了：平均 Total (ms)", style=Styles.DarkBold.patch(text_size=11.0))
 
 chart_tot = BarChart(
     axis_line_style=Styles.Dark,
-    axis_text_style=Styles.DarkBold.patch(text_size=10.0),
+    axis_text_style=Styles.DarkBold.patch(text_size=9.5),
     grid_style=Styles.MutedDashed,
-    value_text_style=Styles.DarkBold.patch(text_size=10.0),
-    width=54.0,
-    height=46.0,
+    value_text_style=Styles.DarkBold.patch(text_size=8.6),
+    width=52.0,
+    height=64.0,
     categories=categories,
     orientation="horizontal",
     bar_mode="group",
-    bar_width_ratio=0.82,
+    bar_width_ratio=0.74,
     bar_r=0.3,
 )
-chart_tot.configure_x_axis(min_value=0, max_value=22000, tick_step=5000, format="{:,.0f}")
+chart_tot.configure_x_axis(min_value=0, max_value=24000, tick_step=8000, format="{:,.0f}")
 chart_tot.add_series("pat_a", calc_means("pat_a_pydantic_2f", "total_ms"), style=Styles.PrimaryFlat)
 chart_tot.add_series("pat_c", calc_means("pat_c_tag", "total_ms"), style=Styles.TealFlat)
 chart_tot.add_series("base_0", calc_means("base_0", "total_ms"), style=Styles.SuccessFlat)
@@ -394,7 +394,7 @@ chart = ScatterChart(
     grid_style=Styles.MutedDashed,
     width=102.0,
     height=52.0,
-    default_radius=1.2,
+    default_radius=1.25,
 )
 chart.configure_x_axis(
     label="初回トークン到着時間 TTFT (ms)",
@@ -514,19 +514,19 @@ text(
 )
 
 # Shared Legend Bar
-rectangle((86.0, 82.8), width=160.0, height=5.2, style=Styles.Neutral.patch(shape_r=1.0))
+rectangle((86.0, 82.8), width=162.0, height=5.2, style=Styles.Neutral.patch(shape_r=1.0))
 
 leg_items = [
-    (9.5, Styles.PrimaryBold, Styles.PrimaryFlat, "★ Pattern A (2F統合)"),
-    (45.5, Styles.TealBold, Styles.TealFlat, "Pattern C (先頭タグ)"),
-    (78.5, Styles.SuccessBold, Styles.SuccessFlat, "Base 0 (固定0)"),
-    (114.0, Styles.WarningBold, Styles.WarningFlat, "Base Low (固定low)"),
-    (145.0, Styles.DangerBold, Styles.DangerFlat, "Pattern B (1F直列)"),
+    (8.5, Styles.PrimaryBold, Styles.PrimaryFlat, "★ Pattern A (2F統合)"),
+    (44.5, Styles.TealBold, Styles.TealFlat, "Pattern C (先頭タグ)"),
+    (77.5, Styles.SuccessBold, Styles.SuccessFlat, "Base 0 (固定0)"),
+    (110.5, Styles.WarningBold, Styles.WarningFlat, "Base Low (固定low)"),
+    (142.5, Styles.DangerBold, Styles.DangerFlat, "Pattern B (1F直列)"),
 ]
 for lx, lst, cst, ltxt in leg_items:
     line((lx, 82.8), (lx + 3.4, 82.8), style=lst.patch(line_width=2.2))
     circle((lx + 1.7, 82.8), radius=0.75, style=cst)
-    text((lx + 4.3, 82.8), ltxt, style=Styles.DarkBold.patch(text_size=10.0, halign="left"))
+    text((lx + 4.3, 82.8), ltxt, style=Styles.DarkBold.patch(text_size=9.6, halign="left"))
 
 
 def draw_multi_trajectory_panel(
@@ -605,14 +605,14 @@ px_l, py_l = draw_multi_trajectory_panel(
 
 # Callouts inside Left Panel
 rectangle((39.5, 55.5), width=42.0, height=10.0, style=Styles.PrimaryNeutral.patch(shape_r=0.9))
-text((39.5, 57.8), "★ Pattern A: 2,243 ms 開始", style=Styles.PrimaryBold.patch(text_size=10.0))
-text((39.5, 53.4), "4,629 ms で全5方式最速完了!", style=Styles.DarkBold.patch(text_size=10.0))
-line((33.2, 50.5), (px_l(4629.0), py_l(482.0)), arrow_head="->", style=Styles.PrimaryBold.patch(line_width=1.5))
+text((39.5, 57.8), "★ Pattern A: 2,243 ms 開始", style=Styles.PrimaryBold.patch(text_size=9.6))
+text((39.5, 53.4), "4,629 ms で全5方式最速完了!", style=Styles.DarkBold.patch(text_size=9.6))
+line((34.0, 50.5), (px_l(4629.0), py_l(482.0)), arrow_head="->", style=Styles.PrimaryBold.patch(line_width=1.5))
 
-rectangle((55.5, 26.5), width=39.0, height=9.2, style=Styles.WhiteFlat.patch(shape_r=0.9, line_width=0.7))
-text((55.5, 28.6), "Base Low: 5,901 ms まで無応答", style=Styles.WarningBold.patch(text_size=10.0))
-text((55.5, 24.4), "不要思考 423 tok で初動が 2.6倍遅延", style=Styles.Dark.patch(text_size=10.0))
-line((41.0, 26.5), (px_l(5901.0), py_l(40.0)), arrow_head="->", style=Styles.WarningBold.patch(line_width=1.4))
+rectangle((55.5, 29.0), width=41.0, height=9.4, style=Styles.WhiteFlat.patch(shape_r=0.9, line_width=0.7))
+text((55.5, 31.2), "Base Low: 5,901 ms まで無応答", style=Styles.WarningBold.patch(text_size=9.5))
+text((55.5, 26.8), "不要思考 423 tok で初動が 2.6倍遅延", style=Styles.Dark.patch(text_size=9.4))
+line((px_l(5901.0), 24.3), (px_l(5901.0), py_l(40.0)), arrow_head="->", style=Styles.WarningBold.patch(line_width=1.4))
 
 # Right Panel: T3_1 (Complex Math, thinking=true)
 px_r, py_r = draw_multi_trajectory_panel(
@@ -630,15 +630,15 @@ px_r, py_r = draw_multi_trajectory_panel(
 )
 
 # Callouts inside Right Panel
-rectangle((124.0, 55.5), width=45.0, height=10.6, style=Styles.PrimaryNeutral.patch(shape_r=0.9))
-text((124.0, 58.0), "① 2,120 ms 受付1文 + Stage 2 並列起動", style=Styles.PrimaryBold.patch(text_size=10.0))
-text((124.0, 53.2), "Base Low (8.95s) の 6.8秒画面凍結を解消!", style=Styles.DarkBold.patch(text_size=10.0))
+rectangle((124.5, 55.5), width=48.5, height=10.6, style=Styles.PrimaryNeutral.patch(shape_r=0.9))
+text((124.5, 58.0), "① 2,120 ms 受付1文 + Stage 2 並列起動", style=Styles.PrimaryBold.patch(text_size=9.5))
+text((124.5, 53.2), "Base Low (8.95s) の 6.8秒画面凍結を解消!", style=Styles.DarkBold.patch(text_size=9.5))
 line((108.0, 50.2), (px_r(2120.0), py_r(60.0)), arrow_head="->", style=Styles.PrimaryBold.patch(line_width=1.5))
 
-rectangle((137.5, 27.5), width=42.0, height=10.0, style=Styles.WhiteFlat.patch(shape_r=0.9, line_width=0.7))
-text((137.5, 29.8), "② 10,948 ms〜 Stage 2 (859 tok) 連結", style=Styles.PrimaryBold.patch(text_size=10.0))
-text((137.5, 25.4), "26,200円修理がお得を 16,650 ms で完結", style=Styles.Dark.patch(text_size=10.0))
-line((129.0, 32.5), (px_r(10948.0), py_r(90.0)), arrow_head="->", style=Styles.PrimaryBold.patch(line_width=1.5))
+rectangle((137.5, 29.5), width=44.0, height=9.6, style=Styles.WhiteFlat.patch(shape_r=0.9, line_width=0.7))
+text((137.5, 31.8), "② 10,948 ms〜 Stage 2 (859 tok) 連結", style=Styles.PrimaryBold.patch(text_size=9.5))
+text((137.5, 27.3), "26,200円修理がお得を 16,650 ms で完結", style=Styles.Dark.patch(text_size=9.4))
+line((px_r(10948.0), 24.7), (px_r(10948.0), py_r(90.0)), arrow_head="->", style=Styles.PrimaryBold.patch(line_width=1.5))
 
 # Bottom summary banner
 rectangle((86.0, 6.0), width=160.0, height=6.4, style=Styles.PrimaryNeutral.patch(shape_r=1.2))
@@ -658,7 +658,7 @@ save()
    - Pattern A（青太線）は `2,068 ms` で `"thinking": false` を確定し、**`2,243 ms`** から `"response"` フィールドのストリーミングを開始して **`4,629 ms` でストリーム完了** し、全5方式で最も早く回答を完結させている。
    - これは Pydantic JSON スキーマによって簡潔で構造化された手順案内（`482 文字`）が出力されるためであり、Pattern C（`5,914 ms` 完了）や Base 0（`7,610 ms` 完了）、Base Low（`12,158 ms` 完了）よりも圧倒的に歯切れよく完了する。
 2. **右パネル `T3_1`（`thinking=true`：PC修理 vs. 買い替え3年比較）における `6.8 秒` の画面凍結解消**：
-   - Base Low（黄線）は **`8,950 ms` にわたり累積文字数 `0` のまま画面が凍結** し、Pattern B（赤線）はさらに遅い **`11,226 ms`** まで1文字も表示されない。
+   - Base Low（黄線）は **`8,950 ms` にわたり累積文字数 0 文字のまま画面が凍結** し、Pattern B（赤線）はさらに遅い **`11,226 ms`** まで1文字も表示されない。
    - 対して Pattern A（青太線）は、**`2,078 ms`** で `"thinking": true` を検知した瞬間にバックグラウンドで Stage 2（`thinking=low`）を非同期起動しつつ、Stage 1 のブリッジメッセージ（59文字）を **`2,120 ms`** で即座に画面へ表示する。これにより、Base Low と比較して **`6,830 ms`（約 `6.8 秒`）もの無応答フリーズを完全に解消** している。ユーザーがブリッジ文を読んでいる間に Stage 2 が `859 トークン` の内部推論を終え、**`10,948 ms`** から本計算のストリームが滑らかに立ち上がって **`16,650 ms`** に正確な試算結果（`修理の方が 26,200 円安い`）を完結させている。
 
 ---
@@ -667,7 +667,7 @@ save()
 
 ### Pattern A の Google AI Studio (`google-genai`) リファレンス実装
 
-`google-genai` SDK のストリーミング時は `chunk.parsed` がストリーム途中で常に `None` となるため、Pydantic v2 標準同梱の `pydantic_core.from_json(..., allow_partial="trailing-strings")` を用いて不完全な JSON バッファから安全に `thinking` フラグとエスケープ解決済みの `response` デルタを抽出する（`src/gemini_evaluation/adaptive_thinking.py`）。
+`google-genai` SDK のストリーミング時は `chunk.parsed` がストリーム途中で常に `None` となるため、Pydantic v2 標準同梱の `pydantic_core.from_json(..., allow_partial="trailing-strings")` を用いて不完全な JSON バッファから安全に `thinking` フラグとエスケープ解決済みの `response` デルタを抽出する（`src/gemini_evaluation/adaptive_thinking.py`）。なお、本番環境では `genai.Client` インスタンスをアプリケーション起動時に1度だけ生成して再利用し、`finally` ブロックで Stage-2 バックグラウンドタスクの確実なクリーンアップを行う。
 
 ```python
 import asyncio
@@ -686,7 +686,7 @@ MODEL = "gemini-3.8-flash"
 class AdaptiveStreamResponse(BaseModel):
     """Pattern A 用の最小2フィールド構造化ストリーミングスキーマ。"""
 
-    thinking: bool  # 第1フィールド：約 0.7〜1.1 秒で確定するルーティングフラグ
+    thinking: bool  # 第1フィールド：初回チャンク以前に確定するルーティングフラグ
     response: str   # 第2フィールド：thinking=False 時は回答全文、True 時は受付1文
 
 
@@ -702,11 +702,10 @@ def parse_partial_json_dict(raw_buf: str) -> dict[str, Any] | None:
 
 
 async def stream_adaptive_router(
-    api_key: str,
+    client: genai.Client,
     prompt: str,
 ) -> AsyncIterator[str]:
     """Pattern A: 2フィールド統合 Pydantic ストリーム + Stage 2 並列チェイニング。"""
-    client = genai.Client(api_key=api_key)
     stage2_queue: asyncio.Queue[str | BaseException | None] = asyncio.Queue()
     stage2_task: asyncio.Task[None] | None = None
 
@@ -738,72 +737,77 @@ async def stream_adaptive_router(
     emitted_len = 0
     decided_thinking: bool | None = None
 
-    st1 = await client.aio.models.generate_content_stream(
-        model=MODEL,
-        contents=prompt,
-        config=types.GenerateContentConfig(
-            system_instruction=(
-                "挨拶や定型手続き案内では thinking: false とし response に回答全文を出力してください。"
-                "複数条件の数値計算・比較では thinking: true とし response に1文の受付メッセージのみを出力してください。"
+    try:
+        st1 = await client.aio.models.generate_content_stream(
+            model=MODEL,
+            contents=prompt,
+            config=types.GenerateContentConfig(
+                system_instruction=(
+                    "挨拶や定型手続き案内では thinking: false とし response に回答全文を出力してください。"
+                    "複数条件の数値計算・比較では thinking: true とし response に1文の受付メッセージのみを出力してください。"
+                ),
+                response_mime_type="application/json",
+                response_schema=AdaptiveStreamResponse,
+                thinking_config=types.ThinkingConfig(thinking_budget=0),
+                temperature=0.2,
             ),
-            response_mime_type="application/json",
-            response_schema=AdaptiveStreamResponse,
-            thinking_config=types.ThinkingConfig(thinking_budget=0),
-            temperature=0.2,
-        ),
-    )
-    async with aclosing(st1):
-        async for ch1 in st1:
-            if not ch1.text:
-                continue
-            json_buf += ch1.text
-            partial = parse_partial_json_dict(json_buf)
-            if partial is None:
-                continue
+        )
+        async with aclosing(st1):
+            async for ch1 in st1:
+                if not ch1.text:
+                    continue
+                json_buf += ch1.text
+                partial = parse_partial_json_dict(json_buf)
+                if partial is None:
+                    continue
 
-            # 1) thinking フラグが確定した瞬間に1度だけ判定し、True なら Stage 2 を並列起動
-            if decided_thinking is None and isinstance(partial.get("thinking"), bool):
-                decided_thinking = partial["thinking"]
-                if decided_thinking:
-                    stage2_task = asyncio.create_task(_produce_stage2())
+                # 1) thinking フラグが確定した瞬間に1度だけ判定し、True なら Stage 2 を並列起動
+                if decided_thinking is None and isinstance(partial.get("thinking"), bool):
+                    decided_thinking = partial["thinking"]
+                    if decided_thinking:
+                        stage2_task = asyncio.create_task(_produce_stage2())
 
-            # 2) response の未送出デルタを即時 yield
-            resp_so_far = partial.get("response")
-            if isinstance(resp_so_far, str) and len(resp_so_far) > emitted_len:
-                delta = resp_so_far[emitted_len:]
-                emitted_len = len(resp_so_far)
-                yield delta
+                # 2) response の未送出デルタを即時 yield
+                resp_so_far = partial.get("response")
+                if isinstance(resp_so_far, str) and len(resp_so_far) > emitted_len:
+                    delta = resp_so_far[emitted_len:]
+                    emitted_len = len(resp_so_far)
+                    yield delta
 
-    # 3) EOF で Pydantic スキーマ完全検証を実行
-    final_obj = AdaptiveStreamResponse.model_validate_json(json_buf)
-    if len(final_obj.response) > emitted_len:
-        yield final_obj.response[emitted_len:]
+        # 3) EOF で Pydantic スキーマ完全検証を実行
+        final_obj = AdaptiveStreamResponse.model_validate_json(json_buf)
+        if len(final_obj.response) > emitted_len:
+            yield final_obj.response[emitted_len:]
 
-    # 4) thinking=True の場合は並列実行中の Stage 2 ストリームをシームレスに連結
-    if decided_thinking and stage2_task is not None:
-        yield "\n\n"
-        while True:
-            item = await stage2_queue.get()
-            if item is None:
-                break
-            if isinstance(item, BaseException):
-                raise item
-            yield item
-        await stage2_task
+        # 4) thinking=True の場合は並列実行中の Stage 2 ストリームをシームレスに連結
+        if decided_thinking and stage2_task is not None:
+            yield "\n\n"
+            while True:
+                item = await stage2_queue.get()
+                if item is None:
+                    break
+                if isinstance(item, BaseException):
+                    raise item
+                yield item
+            await stage2_task
+    finally:
+        # 呼び出し側の中断や例外発生時に未完了の Stage 2 タスクを確実にキャンセル
+        if stage2_task is not None and not stage2_task.done():
+            stage2_task.cancel()
 ```
 
-> **Pydantic スキーマの Cold/Warm 特性とフィールド定義順のベストプラクティス**：`load_schema_experiment()`（`src/gemini_evaluation/adaptive_thinking_log.json`）の実測により、未知の JSON スキーマを初回送信した際（Cold `#1`：`AdaptiveStreamResponse` `2,562 ms`、`RichStreamResponse` `3,337 ms`）にはサーバー側の制約付きデコード文法（FSM）コンパイルが走るが、**2回目以降（Warm `#2〜#4`）は文法キャッシュが効いて 2フィールド版（TTFT `2,294〜3,447 ms`・平均 `2,744 ms`）と 6フィールド版（TTFT `2,504〜3,259 ms`・平均 `2,837 ms`）がほぼ同等の速度で推移する**ことが確認された。分類タグ等を加えた6フィールドの `RichStreamResponse` でも、`thinking: bool` を先頭・可変長リストを `response: str` の後ろに配置すれば Warm 時の `flag_decided_ms` は `2,157〜2,781 ms` と劣化しない。本番環境ではコンテナ起動時に1回ダミーウォームアップを実行しておくことで Cold 遅延を完全に排除できる。
+> **Pydantic スキーマの Cold/Warm 特性とフィールド定義順のベストプラクティス**：第2章（2.3節）の `load_schema_experiment()`（`src/gemini_evaluation/adaptive_thinking_log.json`）で詳述したとおり、新規の JSON スキーマを初回送信した際（`RichStreamResponse #1 (Cold)`：`TTFT 3,337.3 ms`、`flag_decided_ms 2,954.3 ms`）にはサーバー側の制約付きデコード文法（FSM）コンパイルが走るが、**2回目以降（Warm `#2〜#4`）は文法キャッシュが適用され、6フィールド版（TTFT `2,504.4〜3,259.3 ms`・平均 `2,837.1 ms`、Cold 比 `-15.0%` 短縮）と2フィールド版（Warm `#2〜#4` 平均 `2,744.4 ms`）がわずか `+92.7 ms`（`+3.4%`）差のほぼ同等の速度で推移する**。分類タグ等を加えた6フィールドの `RichStreamResponse` でも、`thinking: bool` を先頭・可変長リストを `response: str` の後ろに配置すれば Warm 時の `flag_decided_ms` は平均 `2,419.4 ms`（`2,157.1〜2,780.6 ms`）と高速である。本番環境ではコンテナ起動時に1回ダミーウォームアップを実行しておくことで Cold 遅延を完全に排除できる。
 
 ### 全5方式の総合評価スコアカード
 
 | 評価項目 | ★ Pattern A (`pat_a_pydantic_2f`)<br>`{thinking, response}` 統合 | Pattern C (`pat_c_tag`)<br>`[DIRECT]` / `[THINK]` タグ | Pattern B (`pat_b_pydantic_1f`)<br>`{thinking}` 直列ルーター | Base Low (`base_low`)<br>固定 `thinking=low` | Base 0 (`base_0`)<br>固定 `thinking=0` |
 | :--- | :---: | :---: | :---: | :---: | :---: |
-| **全9問平均 TTFT** | **`2,340 ms` (◎ `< 2.5s`)** | **`1,879 ms` (◎ `< 2.5s`)** | `6,177 ms` (× `> 3.5s`) | `6,290 ms` (× `> 3.5s`) | `1,879 ms` (◎ `< 2.5s`) |
+| **全9問平均 TTFT** | **`2,340 ms` (優良 `< 2.5s`)** | **`1,879 ms` (優良 `< 2.5s`)** | `6,177 ms` (不可 `> 3.5s`) | `6,290 ms` (不可 `> 3.5s`) | `1,879 ms` (優良 `< 2.5s`) |
 | **Tier 1–2 平均 TTFT / 完了** | **`2,354 ms` / `4,808 ms` (最速完了)** | `1,920 ms` / `5,030 ms` | `3,522 ms` / `7,760 ms` | `4,791 ms` / `8,189 ms` | `1,887 ms` / `5,371 ms` |
 | **Tier 3 平均 TTFT（最大）** | **`2,314 ms` (`2,456 ms`)** | `1,795 ms` (`1,939 ms`) | `11,488 ms` (`12,590 ms`) | `9,289 ms` (`12,155 ms`) | `1,863 ms` (`2,235 ms`) |
 | **ルーティング正解率** | **`9 / 9` (`100%`)** | **`9 / 9` (`100%`)** | **`9 / 9` (`100%`)** | 固定（常時思考） | 固定（思考なし） |
 | **Tier 3 複雑計算検証** | **`3 / 3` (`100%` 事前検算)** | **`3 / 3` (`100%` 事前検算)** | **`3 / 3` (`100%` 事前検算)** | **`3 / 3` (`100%` 事前検算)** | **自己回帰リスク（事前検算なし）** |
 | **API 呼び出し回数 (T1–2 / T3)** | **`1.0 回` / `2.0 回`** | `1.0 回` / `2.0 回` | `2.0 回` / `2.0 回` | `1.0 回` / `1.0 回` | `1.0 回` / `1.0 回` |
-| **デコーダ層の型保証・拡張性** | **◎（Constrained Decoding）** | ×（タグ露出・履歴ドリフト懸念） | △（ルーターのみ型保証） | －（平文） | －（平文） |
+| **デコーダ層の型保証・拡張性** | **優良（Constrained Decoding）** | 不可（タグ露出・履歴ドリフト懸念） | 一部のみ（ルーターのみ型保証） | なし（平文） | なし（平文） |
 | **総合判定** | **★ 本番標準採用（推奨）** | 不採用（型安全性ゆえAへ統一） | 不採用（直列2回遅延） | 非推奨（最大 `12.2s` 凍結） | 不採用（複雑計算リスク） |
 

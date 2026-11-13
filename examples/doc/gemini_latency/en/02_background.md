@@ -43,7 +43,7 @@ phases = [
         76.0,
         46.0,
         "Phase 2: Thinking (Reasoning)",
-        "thoughts_token_count (+9.5 ms/tok)",
+        "thoughts_token_count (+9.0 ms/tok)",
         Styles.SecondaryNeutral,
         Styles.DarkBold,
         Styles.Dark,
@@ -72,13 +72,13 @@ text(
     style=Styles.DarkBold.patch(text_size=10.0),
 )
 
-# Bottom Section: Side-by-Side 2D Trajectory Comparison (thinking=0)
+# Bottom Section: Side-by-Side 2D Trajectory Comparison (thinking=0, high-contrast pastel bands)
 ex_block = load_thinking_timeline("blocking", "0")
 ex_stream = load_thinking_timeline("streaming", "0")
 
 draw_trajectory_panel(
     x0=15.0,
-    y0=12.5,
+    y0=12.6,
     pw=54.0,
     ph=23.5,
     title="1. Blocking: generate_content (thinking=0)",
@@ -93,7 +93,7 @@ draw_trajectory_panel(
 
 draw_trajectory_panel(
     x0=91.0,
-    y0=12.5,
+    y0=12.6,
     pw=54.0,
     ph=23.5,
     title="★2. Streaming: generate_content_stream (thinking=0)",
@@ -107,7 +107,7 @@ draw_trajectory_panel(
 )
 
 text((42.0, 4.2), "Elapsed Time (ms) — Y-Axis: Cumulative Chars", style=Styles.DarkBold.patch(text_size=10.0))
-text((118.0, 4.2), "Elapsed Time (ms) — Purple: TTFT Wait / Blue: Streaming", style=Styles.DarkBold.patch(text_size=10.0))
+text((118.0, 4.2), "Elapsed Time (ms) — Pastel Purple: TTFT Wait / Pastel Blue: Streaming", style=Styles.DarkBold.patch(text_size=10.0))
 
 save()
 ```
@@ -123,7 +123,7 @@ To diagnose and optimize latency in conversational LLM applications, engineers m
 1. **Phase 1: Prefill (Input Token Processing & KV Cache Lookup)**:
    The server processes the input payload—comprising `system_instruction`, multi-turn conversation `history`, and the latest user `prompt` (`prompt_token_count`)—in parallel across Transformer layers to populate the Attention Key-Value (KV) cache. On Google AI Studio (`gemini-3.8-flash`), when a conversation prefix matches an existing server-side cache entry (`cached_content_token_count`), prefill computation for those cached tokens is bypassed, keeping prefill latency flat even as multi-turn history grows beyond `21,000 tokens` (see Chapter 5).
 2. **Phase 2: Thinking (Internal Reasoning Token Generation: `thoughts_token_count`)**:
-   In reasoning-capable models such as `gemini-3.8-flash`, before emitting the very first visible response token (`chunk.text`), the model autoregressively generates internal Chain-of-Thought reasoning tokens (`usage_metadata.thoughts_token_count`). Crucially, **no visible text chunks are emitted to the client while the Thinking phase is in progress**, even when using `generate_content_stream`. Every internal reasoning token adds approximately **`+9.5 ms`** directly to the initial wait time (TTFT).
+   In reasoning-capable models such as `gemini-3.8-flash`, before emitting the very first visible response token (`chunk.text`), the model autoregressively generates internal Chain-of-Thought reasoning tokens (`usage_metadata.thoughts_token_count`). Crucially, **no visible text chunks are emitted to the client while the Thinking phase is in progress**, even when using `generate_content_stream`. Every internal reasoning token adds approximately **`+9.0 ms`** directly to the initial wait time (TTFT).
 3. **Phase 3: Decoding (Autoregressive Visible Output Streaming: `output_token_count`)**:
    Once Prefill and Thinking conclude, the model autoregressively generates visible output tokens (`candidates_token_count` / `output_token_count`) until completion (`finish_reason = STOP`).
 
@@ -131,22 +131,23 @@ To diagnose and optimize latency in conversational LLM applications, engineers m
 
 From these three phases, the two fundamental client-side latency metrics are defined as:
 
-$$\text{TTFT}_{\text{streaming}} = T_{\text{Network RTT}} + T_{\text{Prefill}} + T_{\text{Thinking}}$$
+```text
+TTFT_streaming = T_Network_RTT + T_Prefill + T_Thinking
+Total = TTFT_blocking = T_Network_RTT + T_Prefill + T_Thinking + T_Decoding
+```
 
-$$\text{Total} = \text{TTFT}_{\text{blocking}} = T_{\text{Network RTT}} + T_{\text{Prefill}} + T_{\text{Thinking}} + T_{\text{Decoding}}$$
-
-- **TTFT (Time to First Token / `time_to_first_token_ms`)**: Elapsed time from request initiation ($t = 0\text{ ms}$) until the first non-empty visible text chunk arrives at the client. TTFT directly governs **perceived responsiveness** in interactive UIs. In Blocking mode (`generate_content`), the response is withheld until decoding finishes, forcing $\text{TTFT} = \text{Total}$.
-- **Total Completion Time (`stream_completed_ms`)**: Elapsed time from request initiation ($t = 0\text{ ms}$) until the final chunk (EOF) is received.
+- **TTFT (Time to First Token / `time_to_first_token_ms`)**: Elapsed time from request initiation (`t = 0 ms`) until the first non-empty visible text chunk arrives at the client. TTFT directly governs **perceived responsiveness** in interactive UIs. In Blocking mode (`generate_content`), the response is withheld until decoding finishes, forcing `TTFT = Total`.
+- **Total Completion Time (`stream_completed_ms`)**: Elapsed time from request initiation (`t = 0 ms`) until the final chunk (EOF) is received.
 - **Why 2D Trajectory Charts (`Elapsed Time [ms] vs. Cumulative Output Characters`) Are Essential**:
-  Comparing scalar completion times in Figure 2-1 (`thinking=0`) might suggest that Blocking (`3,360 ms`) and Streaming (`3,192 ms`) are nearly identical. However, plotting **Elapsed Time ($x$-axis) against Cumulative Visible Characters ($y$-axis)** reveals a stark difference in user experience:
-  - **Blocking (Figure 2-1 Left)**: The UI remains frozen at $y = 0\text{ chars}$ for the entire **`3,360 ms`**, after which all 338 characters appear as a single vertical step function.
-  - **Streaming (Figure 2-1 Right)**: Visible text begins rendering at **`1,205 ms` (`2,155 ms` or `64%` earlier than Blocking)** right after the purple prefill band, then climbs smoothly across the blue decoding band (`1,205 → 3,192 ms`) at `~190 chars/s`—far exceeding human reading speed (`~10 chars/s`). Thus, the entire decoding phase is hidden behind the user's reading time. Furthermore, in multi-stage architectures such as the Adaptive Thinking Router (Chapter 4), 2D trajectories expose the exact timing of the Stage-1 acknowledgment, the brief reading plateau during parallel Stage-2 reasoning, and the seamless continuation slope.
+  Comparing scalar completion times in Figure 2-1 (`thinking=0`) might suggest that Blocking (`3,360 ms`) and Streaming (`3,192 ms`) are nearly identical. However, plotting **Elapsed Time (x-axis) against Cumulative Visible Characters (y-axis)** reveals a stark difference in user experience:
+  - **Blocking (Figure 2-1 Left)**: The UI remains frozen at `y = 0 chars` for the entire **`3,360 ms`**, after which all 338 characters appear as a single vertical step function.
+  - **Streaming (Figure 2-1 Right)**: Visible text begins rendering at **`1,205 ms` (`2,155 ms` or `64%` earlier than Blocking)** right after the pastel-purple prefill band, then climbs smoothly across the pastel-blue decoding band (`1,205 → 3,192 ms`) at `~190 chars/s`—far exceeding human reading speed (`~10 chars/s`). Thus, the entire decoding phase is hidden behind the user's reading time. Furthermore, in multi-stage architectures such as the Adaptive Thinking Router (Chapter 4), 2D trajectories expose the exact timing of the Stage-1 acknowledgment, the brief reading plateau during parallel Stage-2 reasoning, and the seamless continuation slope.
 
 ---
 
 ## 2.2 Blocking vs. Streaming API Usage (`google-genai` on Google AI Studio)
 
-All benchmarks in this report (`src/gemini_evaluation/llm_call.py`) use the official **`google-genai`** SDK against **Google AI Studio** (`genai.Client(api_key=GEMINI_KEY)`) and `gemini-3.8-flash` via `asyncio` (`client.aio`). Below is the reference implementation for resolving all six `ThinkingConfig` options and invoking Blocking (`generate_content`) versus Streaming (`generate_content_stream`).
+All benchmarks in this report (`src/gemini_evaluation/llm_call.py`) use the official **`google-genai`** SDK against **Google AI Studio** (`genai.Client(api_key=GEMINI_KEY)`) and `gemini-3.8-flash` via `asyncio` (`client.aio`). Below is the reference implementation (`resolve_thinking_config`) for resolving all six `ThinkingConfig` options and invoking Blocking (`generate_content`) versus Streaming (`generate_content_stream`).
 
 ```python
 from collections.abc import AsyncIterator
@@ -161,7 +162,7 @@ MODEL = "gemini-3.8-flash"
 client = genai.Client(api_key=GEMINI_KEY)
 
 
-def build_thinking_config(thinking: str | int | None = 0) -> types.GenerateContentConfig | None:
+def resolve_thinking_config(thinking: str | int | None = 0) -> types.GenerateContentConfig | None:
     """Map the 6 thinking options (0, minimal, low, medium, high, default) to GenerateContentConfig."""
     if thinking is None or thinking == "default":
         return None  # Server default dynamic thinking
@@ -185,7 +186,7 @@ async def generate_text_blocking(prompt: str, thinking: str | int | None = 0) ->
     resp = await client.aio.models.generate_content(
         model=MODEL,
         contents=prompt,
-        config=build_thinking_config(thinking),
+        config=resolve_thinking_config(thinking),
     )
     return resp.text or ""
 
@@ -195,7 +196,7 @@ async def stream_text_progressive(prompt: str, thinking: str | int | None = 0) -
     stream = await client.aio.models.generate_content_stream(
         model=MODEL,
         contents=prompt,
-        config=build_thinking_config(thinking),
+        config=resolve_thinking_config(thinking),
     )
     async with aclosing(stream):
         async for chunk in stream:
@@ -209,9 +210,9 @@ async def stream_text_progressive(prompt: str, thinking: str | int | None = 0) -
 
 When building an adaptive router that decides whether a query requires deep reasoning (`thinking: bool`) while simultaneously streaming the user-facing reply (`response: str`), passing `response_mime_type="application/json"` and `response_schema=AdaptiveStreamResponse` to `GenerateContentConfig` enables **Constrained Decoding**.
 
-To achieve sub-second streaming TTFT with structured JSON, engineers must understand two critical mechanics: **(1) Cold vs. Warm server-side FSM grammar compilation** and **(2) incremental partial JSON parsing via `pydantic_core.from_json`**. Figure 2-2 illustrates both the empirical Cold/Warm compilation benchmark (`load_schema_experiment()`, 8 runs) and the 4-step incremental delta extraction pipeline.
+To achieve low streaming TTFT with structured JSON, engineers must understand two critical mechanics: **(1) Cold vs. Warm server-side FSM grammar compilation** and **(2) incremental partial JSON parsing via `pydantic_core.from_json`**. Figure 2-2 illustrates both the empirical Cold/Warm compilation benchmark (`load_schema_experiment()`, 8 runs) and the 4-step incremental delta extraction pipeline.
 
-```drawlib align=center code=fold width=100% file=ch02_pydantic_cold_warm_pipeline.png caption="Figure 2-2: Pydantic response_schema Cold (#1) vs. Warm (#2–#4) Compilation Benchmark (2-Field vs. 6-Field) and Incremental Partial JSON Extraction Pipeline via pydantic_core.from_json"
+```drawlib align=center code=fold width=100% file=ch02_pydantic_cold_warm_pipeline.png caption="Figure 2-2: Pydantic response_schema Cold vs. Warm Compilation Benchmark (2-Field vs. 6-Field, 8 Runs) and Incremental Partial JSON Extraction Pipeline via pydantic_core.from_json"
 from drawlib.canvas import save, setup
 from drawlib.charts.bar import BarChart
 from drawlib.icons import phosphor
@@ -221,12 +222,12 @@ from drawlib.styles import Styles
 from drawlib.text import text
 from drawlib.utils import load_schema_experiment
 
-setup(width=158, height=90, dpi=150)
+setup(width=158, height=92, dpi=150)
 
 # Outer structural frame
-rectangle((79.0, 45.0), width=154.0, height=86.0, style=Styles.MutedDashed.patch(shape_r=2.0))
+rectangle((79.0, 46.0), width=154.0, height=88.0, style=Styles.MutedDashed.patch(shape_r=2.0))
 text(
-    (79.0, 84.2),
+    (79.0, 86.2),
     "Pydantic Structured Streaming: Cold vs. Warm Schema Compilation & Partial JSON Pipeline",
     style=Styles.DarkBold.patch(text_size=11.5),
 )
@@ -236,74 +237,84 @@ exp = load_schema_experiment()
 by_key = {(str(r["schema_label"]), int(r["run_index"])): r for r in exp}
 
 ordered_groups = [
-    ("2F #1\n(Cold)", [by_key[("minimal_2field", 1)]]),
-    ("2F #2\n(Warm)", [by_key[("minimal_2field", 2)]]),
-    ("2F #3–4\n(Warm Avg)", [by_key[("minimal_2field", 3)], by_key[("minimal_2field", 4)]]),
-    ("6F #1\n(Warm 1st)", [by_key[("rich_6field", 1)]]),
-    ("6F #2–4\n(Warm Avg)", [by_key[("rich_6field", 2)], by_key[("rich_6field", 3)], by_key[("rich_6field", 4)]]),
+    ("2F #1", [by_key[("minimal_2field", 1)]]),
+    ("2F #2-4", [by_key[("minimal_2field", 2)], by_key[("minimal_2field", 3)], by_key[("minimal_2field", 4)]]),
+    ("6F #1", [by_key[("rich_6field", 1)]]),
+    ("6F #2-4", [by_key[("rich_6field", 2)], by_key[("rich_6field", 3)], by_key[("rich_6field", 4)]]),
 ]
 cats = [lbl for lbl, _ in ordered_groups]
 ttft_vals = [round(sum(float(r["ttft_ms"]) for r in rows) / len(rows), 0) for _, rows in ordered_groups]
 tot_vals = [round(sum(float(r["total_ms"]) for r in rows) / len(rows), 0) for _, rows in ordered_groups]
 
-rectangle((55.0, 60.5), width=98.0, height=39.5, style=Styles.Neutral.patch(shape_r=1.4))
-rectangle((55.0, 60.2), width=95.6, height=37.4, style=Styles.WhiteFlat.patch(shape_r=1.0))
+rectangle((55.0, 61.5), width=98.0, height=41.0, style=Styles.Neutral.patch(shape_r=1.4))
+rectangle((55.0, 61.2), width=95.6, height=38.8, style=Styles.WhiteFlat.patch(shape_r=1.0))
 
-chart = BarChart(
+text((32.5, 77.2), "1. First Chunk Arrival: TTFT (ms)", style=Styles.PrimaryBold.patch(text_size=9.8))
+chart_ttft = BarChart(
     axis_line_style=Styles.Dark,
-    axis_text_style=Styles.DarkBold.patch(text_size=10.0),
+    axis_text_style=Styles.DarkBold.patch(text_size=8.8),
     grid_style=Styles.MutedDashed,
-    value_text_style=Styles.DarkBold.patch(text_size=10.0),
+    value_text_style=Styles.DarkBold.patch(text_size=8.8),
     value_format="{:,.0f}",
-    width=86.0,
-    height=25.0,
+    width=40.0,
+    height=23.5,
     categories=cats,
     orientation="vertical",
     bar_mode="group",
-    bar_width_ratio=0.58,
+    bar_width_ratio=0.56,
     bar_r=0.3,
 )
-chart.configure_y_axis(min_value=0, max_value=7500, tick_step=2500, format="{:,.0f}")
-chart.add_series(name="TTFT: First Token (ms)", values=ttft_vals, style=Styles.PrimaryFlat)
-chart.add_series(name="Total: Completion (ms)", values=tot_vals, style=Styles.SecondaryNeutral)
-chart.draw(xy=(14.5, 47.2))
-chart.draw_legend(
-    xy=(24.0, 75.2),
-    text_style=Styles.DarkBold.patch(text_size=10.0),
-    orientation="horizontal",
-    swatch_width=3.2,
-    swatch_height=1.8,
-    item_gap=8.0,
+chart_ttft.configure_y_axis(min_value=0, max_value=4500, tick_step=1500, format="{:,.0f}")
+chart_ttft.add_series(name="TTFT (ms)", values=ttft_vals, style=Styles.PrimaryFlat)
+chart_ttft.draw(xy=(13.5, 48.2))
+
+text((80.0, 77.2), "2. Stream Completion: Total (ms)", style=Styles.DarkBold.patch(text_size=9.8))
+chart_tot = BarChart(
+    axis_line_style=Styles.Dark,
+    axis_text_style=Styles.DarkBold.patch(text_size=8.8),
+    grid_style=Styles.MutedDashed,
+    value_text_style=Styles.DarkBold.patch(text_size=8.8),
+    value_format="{:,.0f}",
+    width=40.0,
+    height=23.5,
+    categories=cats,
+    orientation="vertical",
+    bar_mode="group",
+    bar_width_ratio=0.56,
+    bar_r=0.3,
 )
+chart_tot.configure_y_axis(min_value=0, max_value=7500, tick_step=2500, format="{:,.0f}")
+chart_tot.add_series(name="Total (ms)", values=tot_vals, style=Styles.SecondaryNeutral)
+chart_tot.draw(xy=(61.0, 48.2))
 
 # Right-side summary cards for Top Section
-rectangle((129.5, 60.5), width=45.0, height=39.5, style=Styles.PrimaryNeutral.patch(shape_r=1.4))
-text((129.5, 76.8), "Schema Experiment Insights", style=Styles.DarkBold.patch(text_size=10.4))
+rectangle((129.5, 61.5), width=45.0, height=41.0, style=Styles.PrimaryNeutral.patch(shape_r=1.4))
+text((129.5, 78.2), "Schema Experiment Insights", style=Styles.DarkBold.patch(text_size=10.4))
 
 s_cards = [
     (
-        68.2,
+        69.4,
         "1. Cold #1 FSM Compilation",
-        "1st call incurs ~1.6s FSM build\nCold TTFT 2,625 ms → Warm 975 ms",
+        "6F #1 incurs FSM grammar build:\nTTFT 3,337 ms (flag at 2,954 ms)",
         Styles.WhiteFlat,
     ),
     (
-        56.6,
-        "2. -62.9% Faster Once Warm",
-        "2F Warm (#2–#4) avg TTFT 975 ms\nFlag decided at avg 895 ms",
+        57.5,
+        "2. -15.0% Faster Once Warm",
+        "6F Warm (#2–#4) avg TTFT 2,837 ms\nFlag decided at avg 2,419 ms",
         Styles.WhiteFlat,
     ),
     (
-        45.0,
-        "3. 2F vs 6F Differs by +58ms",
-        "6F Warm avg TTFT is 1,033 ms\nField order governs streaming TTFT",
+        45.6,
+        "3. 2F vs 6F Differs by +93ms",
+        "2F Warm 2,744 ms vs 6F 2,837 ms\nField order governs streaming TTFT",
         Styles.SecondaryNeutral,
     ),
 ]
 for cy, ch, cb, cst in s_cards:
-    rectangle((129.5, cy), width=41.6, height=9.8, style=cst.patch(shape_r=0.9))
-    text((129.5, cy + 2.4), ch, style=Styles.DarkBold.patch(text_size=10.0))
-    text((129.5, cy - 1.8), cb, style=Styles.Dark.patch(text_size=10.0))
+    rectangle((129.5, cy), width=41.6, height=10.0, style=cst.patch(shape_r=0.9))
+    text((129.5, cy + 2.4), ch, style=Styles.DarkBold.patch(text_size=9.8))
+    text((129.5, cy - 1.8), cb, style=Styles.Dark.patch(text_size=9.5))
 
 # ─── Bottom Section: pydantic_core.from_json Incremental Pipeline ────────────
 rectangle((79.0, 20.8), width=146.0, height=34.0, style=Styles.PrimaryNeutral.patch(shape_r=1.5))
@@ -326,7 +337,7 @@ p_steps = [
         60.0,
         33.0,
         "Step 2: Lock Bool & Branch",
-        'Input: \'{"thinking": false,\'\n→ {\'thinking\': False} (895ms)\nIf True: spawn Stage-2 task',
+        'Input: \'{"thinking": false,\'\n→ {\'thinking\': False} (~2.5s)\nIf True: spawn Stage-2 task',
         Styles.SecondaryNeutral,
         Styles.DarkBold,
     ),
@@ -364,23 +375,23 @@ save()
 
 When `response_mime_type="application/json"` and `response_schema=AdaptiveStreamResponse` are supplied, Google AI Studio compiles the Pydantic `BaseModel`'s JSON Schema into a **finite-state machine (FSM) token mask** that constrains token sampling at every decoding step, guaranteeing `100%` syntactic validity.
 
-The table below and the top panel of Figure 2-2 present the 8-run schema compilation experiment (`src/gemini_evaluation/adaptive_thinking_log.json`), comparing the minimal 2-field `AdaptiveStreamResponse(thinking: bool, response: str)` (`minimal_2field`) against a 6-field `RichStreamResponse` (`rich_6field`, which adds two `Literal` enums, an escalation boolean, and a `list[str]` of follow-up questions) across four consecutive runs (`#1`–`#4`).
+The table below and the top panel of Figure 2-2 present the 8-run schema compilation experiment (`src/gemini_evaluation/adaptive_thinking_log.json`), comparing the minimal 2-field `AdaptiveStreamResponse(thinking: bool, response: str)` (`minimal_2field`) against a 6-field `RichStreamResponse` (`rich_6field`, which adds two `Literal` enums, an escalation boolean, and a `list[str]` of follow-up questions) across four consecutive runs (`#1`–`#4`). Across all 8 runs, the leading `thinking` field is resolved at or before the first visible `response` text chunk (`flag_decided_ms <= ttft_ms < total_ms`).
 
 | Schema Variant (`schema_label`) | Run | Cache State | Flag Decided (`flag_decided_ms`) | First Token (`ttft_ms`) | Total Time (`total_ms`) | Output Chars |
 | :--- | :-: | :-: | ---: | ---: | ---: | ---: |
-| **`minimal_2field`** (`AdaptiveStreamResponse`) | **#1** | **Cold (1st)** | `3,215.9 ms` | **`2,625.2 ms`** | `3,190.7 ms` | `237 chars` |
-| **`minimal_2field`** (`AdaptiveStreamResponse`) | **#2** | Warm | `752.6 ms` | **`847.3 ms`** | `1,488.1 ms` | `239 chars` |
-| **`minimal_2field`** (`AdaptiveStreamResponse`) | **#3** | Warm | `902.8 ms` | **`918.0 ms`** | `1,396.0 ms` | `245 chars` |
-| **`minimal_2field`** (`AdaptiveStreamResponse`) | **#4** | Warm | `1,029.2 ms` | **`1,159.2 ms`** | `1,604.6 ms` | `244 chars` |
-| **`rich_6field`** (`RichStreamResponse`) | **#1** | Warm Engine* | `865.5 ms` | **`1,056.6 ms`** | `1,759.3 ms` | `250 chars` |
-| **`rich_6field`** (`RichStreamResponse`) | **#2** | Warm | `790.7 ms` | **`976.8 ms`** | `1,516.5 ms` | `203 chars` |
-| **`rich_6field`** (`RichStreamResponse`) | **#3** | Warm | `901.1 ms` | **`1,127.6 ms`** | `1,874.4 ms` | `247 chars` |
-| **`rich_6field`** (`RichStreamResponse`) | **#4** | Warm | `786.7 ms` | **`995.9 ms`** | `1,719.5 ms` | `250 chars` |
+| **`minimal_2field`** (`AdaptiveStreamResponse`) | **#1** | Warm (Post-Main) | `2,562.2 ms` | **`2,562.2 ms`** | `5,319.0 ms` | `496 chars` |
+| **`minimal_2field`** (`AdaptiveStreamResponse`) | **#2** | Warm | `2,294.1 ms` | **`2,294.1 ms`** | `4,551.2 ms` | `455 chars` |
+| **`minimal_2field`** (`AdaptiveStreamResponse`) | **#3** | Warm | `2,194.2 ms` | **`2,492.2 ms`** | `4,950.2 ms` | `579 chars` |
+| **`minimal_2field`** (`AdaptiveStreamResponse`) | **#4** | Warm | `3,446.8 ms` | **`3,446.8 ms`** | `6,855.2 ms` | `686 chars` |
+| **`rich_6field`** (`RichStreamResponse`) | **#1** | **Cold (1st New)** | `2,954.3 ms` | **`3,337.3 ms`** | `6,517.4 ms` | `507 chars` |
+| **`rich_6field`** (`RichStreamResponse`) | **#2** | Warm | `2,157.1 ms` | **`2,504.4 ms`** | `4,526.9 ms` | `360 chars` |
+| **`rich_6field`** (`RichStreamResponse`) | **#3** | Warm | `2,780.6 ms` | **`3,259.3 ms`** | `5,838.9 ms` | `422 chars` |
+| **`rich_6field`** (`RichStreamResponse`) | **#4** | Warm | `2,320.5 ms` | **`2,747.5 ms`** | `6,504.9 ms` | `679 chars` |
 
-- **Cold `#1` vs. Warm `#2–#4` (`-62.9%` TTFT Reduction)**:
-  On the very first cold invocation (`minimal_2field #1`), compiling the JSON Schema into a constrained-decoding FSM adds a one-time `~1.6 s` overhead (`Cold #1 TTFT = 2,625.2 ms`). On subsequent calls (`#2–#4`), the compiled grammar is served from cache, dropping average TTFT to **`974.8 ms` (`847–1,159 ms`, `-62.9%`)** and resolving the `thinking` boolean at an average of **`894.9 ms`**.
+- **Cold `#1` vs. Warm `#2–#4` (`-15.0%` TTFT Reduction)**:
+  Because `minimal_2field` (`AdaptiveStreamResponse`) was already compiled during the preceding 45-run benchmark, `#1` started warm at `2,562.2 ms` (`#2–#4` warm average **`2,744.4 ms`**, 4-run average `2,698.8 ms`). In contrast, when the newly introduced 6-field schema (`rich_6field`) was sent for the very first time in **`rich_6field #1` (Cold)**, FSM grammar compilation resulted in **`TTFT = 3,337.3 ms`** (`flag_decided_ms = 2,954.3 ms`). On subsequent warm runs (`#2–#4`), the cached grammar dropped average TTFT to **`2,837.1 ms` (`2,504.4–3,259.3 ms`, `-500.2 ms` or `-15.0%` faster)** and resolved `thinking` at an average of **`2,419.4 ms`**.
 - **Why Field Declaration Order—Not Field Count—Governs Streaming TTFT**:
-  Once warm (`#2–#4`), expanding from 2 fields (`974.8 ms`) to 6 fields (`1,033.4 ms`) adds only **`+58.6 ms`** to TTFT. Because JSON tokens are generated strictly in schema declaration order, placing `thinking: bool` first, keeping only short scalar/enum fields before `response: str`, and placing variable-length arrays (`suggested_followups: list[str]`) *after* `response: str` ensures that visible text streaming begins immediately without waiting for auxiliary metadata lists.
+  Once warm (`#2–#4`), expanding from 2 fields (`2,744.4 ms`) to 6 fields (`2,837.1 ms`) adds only **`+92.7 ms` (`+3.4%`)** to TTFT. Because JSON tokens are generated strictly in schema declaration order, placing `thinking: bool` first, keeping only short scalar/enum fields before `response: str`, and placing variable-length arrays (`suggested_followups: list[str]`) *after* `response: str` ensures that visible text streaming begins immediately without waiting for auxiliary metadata lists.
 
 ### 2. Incremental Delta Extraction via `pydantic_core.from_json(..., allow_partial="trailing-strings")`
 
@@ -389,7 +400,7 @@ During `generate_content_stream`, intermediate chunks contain unclosed JSON frag
 To extract both the `thinking` flag and progressive `response` string deltas without waiting for EOF, `src/gemini_evaluation/adaptive_thinking.py` uses Pydantic v2's Rust parser **`pydantic_core.from_json(raw_bytes, allow_partial="trailing-strings")`**:
 
 1. **Safe Holding of Incomplete Primitives**: When the buffer ends mid-token (`'{"thinking": fa'`), `allow_partial="trailing-strings"` withholds the incomplete key-value pair and returns `{}`. The moment `false` or `true` completes, `{'thinking': False}` is locked in as a native Python `bool`.
-2. **Escape-Safe String Slicing**: If a chunk boundary splits a JSON escape sequence at the end of `"response"` (e.g., `'..."1st line\\'`), `from_json` holds the trailing backslash until the next chunk arrives (`n` → `\n`). Tracking `emitted_resp_len` and slicing `delta = resp_so_far[emitted_resp_len:]` yields clean, decoded text deltas on every chunk.
+2. **Escape-Safe `O(1)` String Slicing**: If a chunk boundary splits a JSON escape sequence at the end of `"response"` (e.g., `'..."1st line\\'`), `from_json` holds the trailing backslash until the next chunk arrives (`n` → `\n`). Tracking `emitted_resp_len` and slicing `delta = resp_so_far[emitted_resp_len:]` yields clean, decoded text deltas on every chunk.
 
 ```python
 from typing import Any
@@ -398,7 +409,7 @@ from pydantic_core import from_json
 
 
 class AdaptiveStreamResponse(BaseModel):
-    thinking: bool  # Field 1: Routing boolean resolved at ~750–900 ms
+    thinking: bool  # Field 1: Routing boolean resolved prior to first visible chunk
     response: str   # Field 2: Incrementally streamed full answer or 1-sentence ack
 
 
