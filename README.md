@@ -12,11 +12,8 @@ drawlib-examples/
 ├── portal/                         # Static portal overlay (docs/index.html & image galleries)
 ├── examples/                       # Source of Truth (organized by drawlib project type)
 │   ├── doc/
-│   │   ├── dogfooding/             # Bilingual (EN/JA) architectural whitepaper
-│   │   ├── gemini_latency/         # Bilingual (EN/JA) Gemini 3.8 Flash latency & architecture report
-│   │   └── quickstart/             # Bilingual (EN/JA) 16-chapter onboarding handbook
+│   │   └── gemini_latency/         # Bilingual (EN/JA) Gemini 3.8 Flash latency & architecture report
 │   ├── slide/
-│   │   ├── about-drawlib/          # Bilingual (EN/JA) 16:9 showcase presentation deck
 │   │   └── ddos-incident-response/ # 16:9 cloud security postmortem deck
 │   └── images/
 │       ├── animation/              # AI-authored web & social animations (APNG, WebP & GIF)
@@ -25,7 +22,7 @@ drawlib-examples/
 └── docs/                           # Generated GitHub Pages output (100% build artifact)
 ```
 
-*(Note: External `site`, `catalog`, and `engine` showcases linked directly from `portal/index.html` include the official Drawlib portals — [Drawlib Documentation](https://www.drawlib.com/), [Drawlib Architecture](https://www.drawlib.com/architecture/), [Drawlib API Specification](https://www.drawlib.com/api/), and [PNI Software Health Diagnostic Report (Drawlib Audit)](https://www.drawlib.com/reports/pni-full-audit/) maintained in [`yuichi110/drawlib`](https://github.com/yuichi110/drawlib) — as well as 6 multi-language OSS showcase suites:)*
+*(Note: External `site`, `catalog`, `doc`, `slide`, and `engine` showcases linked directly from `portal/index.html` include the official Drawlib portals — [Drawlib Documentation](https://www.drawlib.com/), [Drawlib Architecture](https://www.drawlib.com/architecture/), [Drawlib API Specification](https://www.drawlib.com/api/), [Drawlib Quickstart Onboarding Guide](https://www.drawlib.com/quickstart/en/index.html), [About Drawlib — Official Showcase Deck](https://www.drawlib.com/about-drawlib/en/index.html), and [PNI Software Health Diagnostic Report (Drawlib Audit)](https://www.drawlib.com/reports/pni-full-audit/) maintained in [`yuichi110/drawlib`](https://github.com/yuichi110/drawlib) — as well as 6 multi-language OSS showcase suites:)*
 
 | Language | Target OSS | Portal Hub | User Guide (`site`) | Architecture (`site`) | API Reference (`catalog`) | Health Audit (`pni501`) | Repository |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
