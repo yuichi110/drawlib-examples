@@ -1,6 +1,6 @@
 # 2. 前提知識と測定方法
 
-本章では、第3章以降の実機ベンチマーク結果を正確に読み解くための技術的な前提知識と計測メソドロジーを定義する。前半（2.1〜2.2節）では、`gemini-3.8-flash` の推論レイテンシを構成する3つの内部フェーズ（**Prefill・Thinking・Decoding**）と、単一の平均値では捉えられない体感差を可視化する **2次元トラジェクトリ（経過時間 × 累積出力文字数）**、および Google AI Studio（`google-genai` SDK）における Blocking / Streaming 実装パターンを解説する。後半（2.3〜2.4節）では、適応型 Thinking ルーターの基盤となる **Pydantic 構造化出力（`response_schema`）の Cold/Warm 文法コンパイル特性** と **`pydantic_core.from_json(..., allow_partial="trailing-strings")` による不完全 JSON 逐次差分抽出**、そしてマイクロ秒精度で全イベントを記録する **`ExecutionTracer`**（`src/gemini_evaluation/tracer.py`）の設計を詳述する。
+本章では、第3章以降の実機ベンチマーク結果を正確に読み解くための技術的な前提知識と計測メソドロジーを定義する。前半（2.1〜2.2節）では、`gemini-3.8-flash` の推論レイテンシを構成する3つの内部フェーズ（**Prefill・Thinking・Decoding**）と、単一の平均値では捉えられない体感差を可視化する **2次元トラジェクトリ（経過時間 × 累積出力文字数）**、および Google AI Studio（`google-genai` SDK）における Blocking / Streaming 実装パターンを解説する。後半（2.3〜2.5節）では、適応型 Thinking ルーターの基盤となる **Pydantic 構造化出力（`response_schema`）の Cold/Warm 文法コンパイル特性** と **`pydantic_core.from_json(..., allow_partial="trailing-strings")` による不完全 JSON 逐次差分抽出**、マイクロ秒精度で全イベントを記録する **`ExecutionTracer`**（`src/gemini_evaluation/tracer.py`）の設計、そして **現行 Gemini 3.5 / 3.8 / 4 シリーズ全モデルの分類と `ThinkingConfig`・Context Caching 仕様の実機比較検証** を詳述する。
 
 ```drawlib align=center code=fold width=100% file=ch02_latency_phases_trajectory_ja.png caption="図2-1: LLM推論の3フェーズ構造（Prefill → Thinking → Decoding）と Blocking vs. Streaming の2次元トラジェクトリ比較（thinking=0 実測値）"
 from drawlib.canvas import save, setup
@@ -149,7 +149,7 @@ Total = TTFT_blocking = T_Network_RTT + T_Prefill + T_Thinking + T_Decoding
 
 本検証プロジェクト（`src/gemini_evaluation/llm_call.py`）では、Google AI Studio の公式 Python SDK である **`google-genai`** を用い、環境変数 `GEMINI_KEY` によるシンプルな API キー認証（`genai.Client(api_key=GEMINI_KEY)`）と非同期クライアント（`client.aio`）で全計測を統一している。
 
-以下に、`gemini-3.8-flash` に対する **`ThinkingConfig` 全6段階の解決関数（`resolve_thinking_config`）** と、**Blocking（`generate_content`）** および **Streaming（`generate_content_stream`）** の標準呼び出し実装を示す。
+以下に、`gemini-3.8-flash` に対する **`ThinkingConfig` 全6段階の解決関数（`resolve_thinking_config`）** と、**Blocking（`generate_content`）** および **Streaming（`generate_content_stream`）** の標準呼び出し実装を示す（※`gemini-3.8-flash` 固有の `thinking_level` / `thinking_budget` の仕様詳細および他モデルとの違いは **2.5節** で詳述する）。
 
 ```python
 from collections.abc import AsyncIterator
@@ -164,41 +164,47 @@ MODEL = "gemini-3.8-flash"
 client = genai.Client(api_key=GEMINI_KEY)
 
 
-def resolve_thinking_config(thinking: str | int | None = 0) -> types.GenerateContentConfig | None:
-    """6段階の thinking 指定 (0, minimal, low, medium, high, default) を GenerateContentConfig へ変換する。"""
+def resolve_thinking_config(thinking: str | int | None = 0) -> types.ThinkingConfig | None:
+    """6段階の thinking 指定 (0, minimal, low, medium, high, default) を ThinkingConfig へ変換する。
+    ※ gemini-3.8-flash では ThinkingLevel.MINIMAL が非対応 (400エラー) かつ ThinkingLevel.LOW が
+      思考トークン 0 となるため、ベンチマーク上の 0 / minimal / low には後方互換の thinking_budget を割り当てて段階計測している（2.5節参照）。
+    """
     if thinking is None or thinking == "default":
-        return None  # サーバー既定の動的推論 (default)
-    if thinking in (0, "0"):
-        return types.GenerateContentConfig(
-            thinking_config=types.ThinkingConfig(thinking_budget=0)
-        )
+        return None  # サーバー既定の動的推論 (gemini-3.8-flash の既定は medium)
+    if isinstance(thinking, int):
+        return types.ThinkingConfig(thinking_budget=thinking)
+    key = str(thinking).strip().lower()
+    if key == "0":
+        return types.ThinkingConfig(thinking_budget=0)
+    if key == "minimal":
+        return types.ThinkingConfig(thinking_budget=256)
+    if key == "low":
+        return types.ThinkingConfig(thinking_budget=4096)
     level_map = {
-        "minimal": types.ThinkingLevel.MINIMAL,
-        "low": types.ThinkingLevel.LOW,
         "medium": types.ThinkingLevel.MEDIUM,
         "high": types.ThinkingLevel.HIGH,
     }
-    return types.GenerateContentConfig(
-        thinking_config=types.ThinkingConfig(thinking_level=level_map[str(thinking).lower()])
-    )
+    return types.ThinkingConfig(thinking_level=level_map[key])
 
 
 # 2. Blocking 呼び出し (全文生成完了まで待機: TTFT == Total)
 async def generate_text_blocking(prompt: str, thinking: str | int | None = 0) -> str:
+    cfg = resolve_thinking_config(thinking)
     resp = await client.aio.models.generate_content(
         model=MODEL,
         contents=prompt,
-        config=resolve_thinking_config(thinking),
+        config=types.GenerateContentConfig(thinking_config=cfg) if cfg else None,
     )
     return resp.text or ""
 
 
 # 3. Streaming 呼び出し (TTFT 到達直後からチャンクを逐次 yield)
 async def stream_text_progressive(prompt: str, thinking: str | int | None = 0) -> AsyncIterator[str]:
+    cfg = resolve_thinking_config(thinking)
     stream = await client.aio.models.generate_content_stream(
         model=MODEL,
         contents=prompt,
-        config=resolve_thinking_config(thinking),
+        config=types.GenerateContentConfig(thinking_config=cfg) if cfg else None,
     )
     async with aclosing(stream):
         async for chunk in stream:
@@ -445,3 +451,78 @@ def parse_partial_json_dict(raw_buf: str) -> dict[str, Any] | None:
 | **トークン使用量内訳** | `prompt_token_count` / `cached_content_token_count` / `thoughts_token_count` / `output_token_count` | `usage_metadata` から抽出した入力トークン数、暗黙キャッシュヒットトークン数、内部推論トークン数、および可視出力トークン数。 |
 
 すべての計測結果は人間が読みやすい YAML（`*_log.yaml`）およびプログラム処理用の JSON / JSONL（`*_log.json`、`*_runs.jsonl`、`*_turns.jsonl`）として保存され、本レポート内のすべての Drawlib チャートは `examples/doc/gemini_latency/utils.py` のローダー関数を介してこれらの実測ログから直接描画されている。
+
+---
+
+## 2.5 Gemini 3.5 / 3.8 / 4 シリーズのモデル分類と API オプション仕様の網羅検証
+
+本レポートの第3章〜第5章では **`gemini-3.8-flash`** をベンチマーク対象モデルとして使用しているが、Google AI Studio（Gemini API）では **Gemini 3.5 / 3.8 シリーズ** から最新の **Gemini 4 シリーズ（`Hydrogen` / `Argon` / `Carbon`）** にかけて、`ThinkingConfig`（`thinking_level` と `thinking_budget` の扱い）や **Context Caching（Explicit / Implicit キャッシュとマルチターン末尾再処理ウィンドウ）**、サンプリングパラメータの仕様が大きく変化している。
+
+本節では、公式ドキュメントの仕様と実機 API（`client.models.get()` および `generate_content()`）による検証結果を突き合わせ、**現行モデルの選び分け**と**モデル別の利用可能オプション・実測挙動**を3つの詳細な一覧表（表2-5A〜表2-5C）に整理する。
+
+### 1. 現行モデルの分類・ポジショニングと選び分け指針（表2-5A）
+
+現在（2026年11月時点）、旧世代の `gemini-2.5-flash`（`gemini-3.5-flash-lite` へ自動転送）、`gemini-2.5-pro`（`gemini-3.8-flash` へ自動転送）、および `gemini-3.5-flash`（`gemini-3.6-flash` へ自動転送）はすべて Deprecated（非推奨）となっている。一方で **Gemini 4 世代には「Lite」相当の超軽量モデルがまだ存在しない**ため、音声（Live / TTS）や画像生成（Nano Banana 系）の専用モデルを除けば、テキスト・マルチモーダル生成は実質的に下表の **現行 5 モデル（`3.5-flash-lite`、`3.8-flash`、`4-hydrogen`、`4-argon`、`4-carbon`）** から選択すれば全領域をカバーできる。
+
+| モデルID (`model`) | 提供状態・世代 | 価格 (Input / Output 1M tok) | コンテキスト枠 / 単発出力上限 | 既定 `thinking_level` | ポジショニングと実務上の選択基準 |
+| :--- | :---: | :--- | :--- | :---: | :--- |
+| **`gemini-3.5-flash`** | Deprecated<br>*(3.6-flash へ自動転送)* | $1.50 / $7.50<br>*(3.6-flash 価格)* | 入力 `1,048,576`<br>出力 `65,536` (個別枠) | `medium` | **【旧世代 Flash（非推奨）】**<br>・現在はリクエストが自動的に `gemini-3.6-flash` へルーティングされる。<br>・新規開発では選ぶ必要はなく、`gemini-4-hydrogen` または `gemini-3.8-flash` へ移行する。 |
+| **`gemini-3.5-flash-lite`** | **現役 Stable**<br>*(3.x 最新 Lite)* | **$0.30 / $2.50** | 入力 `1,048,576`<br>出力 `65,536` (個別枠) | **`minimal`**<br>*(思考 0 tok)* | **【最速・最安の軽量ワークホース（Lite 枠）】**<br>・Gemini 4 世代に Lite が存在しないため、**新規開発の軽量・高スループット枠における公式推奨モデル**（`2.5-flash` の公式移行先）。<br>・既定の `minimal` で思考トークン `0` の最速応答を返しつつ、サブエージェントの自律計画時のみ `medium` / `high` で思考させる使い分けに最適。 |
+| **`gemini-3.8-flash`** | **現役 Stable**<br>*(本レポート検証対象)* | **$1.50 / $7.50** | 入力 `1,048,576`<br>出力 `65,536` (個別枠) | `medium` | **【3.x 世代の最終完成版 Flash】**<br>・`2.5-pro` の公式移行先。基本は同価格の後継 `gemini-4-hydrogen` への移行が推奨される。<br>・ただし **① `thinking_level="low"`（または `thinking_budget=0`）で思考トークンを完全に `0`（低遅延）にしたい場合**、および **② Explicit Context Caching（`caches.create`）を利用したい場合** は `4-hydrogen` が非対応のため、あえて `3.8-flash` を選択する明確なメリットがある。 |
+| **`gemini-4-hydrogen`** | **現役 Stable**<br>*(Flash 後継推奨)* | **$1.50 / $7.50**<br>*(Free / Paid 両対応)* | **統合 1M 枠 (`1,048,576`)**<br>単発出力 `65,536`<br>*(Long Decode 最大 1M)* | **`high`** | **【Gemini 4 標準メインストリーム】**<br>・`3.8-flash` と同価格で推論・コーディング能力が向上した現行の基本推奨モデル。<br>・常時思考型（思考 0 トークン化は不可）であり、Hydrogen 専用の最高推論レベル **`xhigh`** と **Long Decode（`automatic_continuation=True` による最大 1M トークン連続出力）** に対応する。 |
+| **`gemini-4-argon`** | **現役 Stable**<br>*(Paid Tier 限定)* | **$2.00 / $10.00**<br>*(2026/12/1 以降 $4 / $20)* | **統合 1M 枠 (`1,048,576`)**<br>REST 単発 `32,768` / Stream `65,536`<br>*(Long Decode 最大 1M)* | `medium` | **【高効率フロンティア推論（Pro 相当枠）】**<br>・`hydrogen` では解けない高度なソフトウェア設計・数学・複雑なマルチステップ推論向け。<br>・`carbon` に迫る推論精度を維持しつつ、1ターンあたりの思考トークン消費量と応答レイテンシを抑えたバランス型上位モデル。 |
+| **`gemini-4-carbon`** | **現役 Stable**<br>*(Paid Tier 限定)* | **$2.00 / $10.00**<br>*(2026/12/1 以降 $4 / $20)* | **統合 1M 枠 (`1,048,576`)**<br>REST 単発 `32,768` / Stream `65,536`<br>*(Long Decode 最大 1M)* | `medium` | **【最高峰フロンティア推論（最難関タスク枠）】**<br>・1ターンあたり最も多くの思考トークンを投入し、難解なバグ解析・科学推論・サイバーセキュリティ防御など、レイテンシよりも**回答の到達精度が最優先**される場面の最終選択肢。 |
+
+---
+
+### 2. モデル別 `ThinkingConfig`（`thinking_level` vs. `thinking_budget`）仕様と実機検証マトリクス（表2-5B）
+
+Gemini API における内部推論（Thinking）の制御パラメータには、Gemini 2.5 世代で導入された数値上限指定の **`thinking_budget`** と、Gemini 3 以降で導入された抽象度指定の **`thinking_level`** の2種類が存在する。
+
+ここで最も重要な設計原則として、**`thinking_budget` は Gemini 3 以降の全モデルにおいて公式に非推奨（Deprecated）** であり、**「思考をオフ（0トークン化）または最小化したい場合は `thinking_budget=0` ではなく、各モデルがサポートする最小の `thinking_level`（`minimal` または `low`）を指定する」** のが正規の仕様である（なお、同一リクエスト内で `thinking_level` と `thinking_budget` を同時指定すると全モデルで `400` エラーとなる）。
+
+下表（表2-5B）に、各モデルに対して `thinking_level` 全5種類（`minimal`, `low`, `medium`, `high`, `xhigh`）および後方互換の `thinking_budget`（`0`, `256`, `4096`）を送信した際の実機 API 挙動と生成された思考トークン数（`usage_metadata.thoughts_token_count`：単純な1問1答プロンプト／複雑な5人座席配置パズルプロンプト）を示す。
+
+| 指定パラメータ (`ThinkingConfig`) | `gemini-3.5-flash`<br>*(3.6-flash へ自動転送)* | `gemini-3.5-flash-lite`<br>*(現役 Lite)* | `gemini-3.8-flash`<br>*(本レポート検証対象)* | `gemini-4-hydrogen`<br>*(4 標準モデル)* | `gemini-4-argon` /<br>`gemini-4-carbon` |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **サポートされる `thinking_level`** | **`minimal`, `low`, `medium`, `high`** (4段階) | **`minimal`, `low`, `medium`, `high`** (4段階) | **`low`, `medium`, `high`** (3段階) | **`low`, `medium`, `high`, `xhigh`** (4段階) | **`low`, `medium`, `high`** (3段階) |
+| **未指定 (`None` / デフォルト)** | 既定 = **`medium`**<br>単純: `69 tok`<br>複雑: `2,711 tok` | 既定 = **`minimal`**<br>単純: **`0 tok` (`None`)**<br>複雑: **`0 tok` (`None`)** | 既定 = **`medium`**<br>単純: `0 tok` (`None`)<br>複雑: `1,303 tok` | 既定 = **`high`**<br>単純: `68 tok`<br>複雑: `1,286 tok` | 既定 = **`medium`**<br>複雑推論で動的思考 |
+| **`thinking_level="minimal"`** | ✅ **対応（思考オフ相当）**<br>単純: **`0 tok`**<br>複雑: **`0 tok`** | ✅ **対応（既定・思考オフ）**<br>単純: **`0 tok`**<br>複雑: **`0 tok`** | ❌ **`400 INVALID_ARGUMENT`**<br>*(MINIMAL is not supported)* | ❌ **`400 INVALID_ARGUMENT`**<br>*(MINIMAL is not supported)* | ❌ **`400 INVALID_ARGUMENT`**<br>*(MINIMAL is not supported)* |
+| **`thinking_level="low"`** | ✅ **対応（軽量〜中程度思考）**<br>単純: `70 tok`<br>複雑: `2,051 tok` | ✅ **対応（極小思考）**<br>単純: `41 tok`<br>複雑: **`0 tok`** | ✅ **対応（実質思考オフ）**<br>単純: **`0 tok`**<br>複雑: **`0 tok`** | ✅ **対応（最小レベル・常時思考）**<br>単純: `35 tok`<br>複雑: `1,324 tok` | ✅ **対応（最小レベル）**<br>単純: **`0 tok`**<br>複雑: 軽量思考 |
+| **`thinking_level="medium"`** | ✅ **対応（既定）**<br>単純: `73 tok`<br>複雑: `2,613 tok` | ✅ **対応（本格思考開始）**<br>単純: `53 tok`<br>複雑: `4,175 tok` | ✅ **対応（既定）**<br>単純: `0 tok`<br>複雑: `1,403 tok` | ✅ **対応**<br>単純: `36 tok`<br>複雑: `1,528 tok` | ✅ **対応（既定）** |
+| **`thinking_level="high"`** | ✅ **対応**<br>単純: `70 tok`<br>複雑: `3,921 tok` | ✅ **対応**<br>単純: `58 tok`<br>複雑: `4,224 tok` | ✅ **対応**<br>単純: `61 tok`<br>複雑: `1,636 tok` | ✅ **対応（既定）**<br>単純: `67 tok`<br>複雑: `1,217 tok` | ✅ **対応** |
+| **`thinking_level="xhigh"`** | ❌ **`400 INVALID_ARGUMENT`**<br>*(XHIGH is not supported)* | ❌ **`400 INVALID_ARGUMENT`**<br>*(XHIGH is not supported)* | ❌ **`400 INVALID_ARGUMENT`**<br>*(XHIGH is not supported)* | ✅ **対応（Hydrogen 専用）**<br>単純: `84 tok`<br>複雑: **`3,376 tok`** | ❌ **`400 INVALID_ARGUMENT`**<br>*(XHIGH is not supported)* |
+| **`thinking_budget=0`**<br>*(非推奨・レガシー指定)* | ⚠️ 後方互換で動作<br>単純: **`0 tok`** / 複雑: **`0 tok`** | ❌ **`400 INVALID_ARGUMENT`**<br>*(0 指定はエラーで拒否)* | ⚠️ 後方互換で動作<br>単純: **`0 tok`** / 複雑: **`0 tok`**<br>*(本検証の `"0"` で使用)* | ⚠️ **`low` に強制変換（警告）**<br>単純: `32 tok` / 複雑: `1,398 tok`<br>*(思考 0 にはならない)* | ⚠️ 最寄りの `thinking_level` に自動変換（思考オフ不可） |
+| **`thinking_budget=256`**<br>*(非推奨・レガシー指定)* | ⚠️ 上限256を超えて思考<br>単純: `63 tok` / 複雑: `1,486 tok` | ⚠️ 上限256を超えて思考<br>単純: `50 tok` / 複雑: `2,009 tok` | ⚠️ 後方互換で動作<br>単純: **`0 tok`** / 複雑: **`0 tok`**<br>*(本検証の `"minimal"` で使用)* | ⚠️ `thinking_level` に丸め込み<br>単純: `69 tok` / 複雑: `1,346 tok` | ⚠️ 最寄りの `thinking_level` に自動変換 |
+| **`thinking_budget=4096`**<br>*(非推奨・レガシー指定)* | ⚠️ `medium`〜`high` 相当<br>単純: `68 tok` / 複雑: `3,355 tok` | ⚠️ `medium` 相当<br>単純: `62 tok` / 複雑: `3,449 tok` | ⚠️ **中間思考量を生成**<br>単純: `0 tok` / 複雑: **`351〜673 tok`**<br>*(本検証の `"low"` で使用)* | ⚠️ `thinking_level` に丸め込み<br>複雑: `1,471 tok` | ⚠️ 最寄りの `thinking_level` に自動変換 |
+
+#### 表2-5B から導かれる重要な実装上の注意点
+
+1. **モデルによって「思考オフ（`0 tok`）」を実現する正規の指定方法が異なる**：
+   - **`gemini-3.5-flash-lite` / `gemini-3.5-flash`（`3.6-flash`）**：`thinking_level="minimal"` を指定する（特に `3.5-flash-lite` はデフォルトが `"minimal"` のため未指定でも `0 tok` となる一方、**`thinking_budget=0` を渡すと `400 INVALID_ARGUMENT` でクラッシュする**ため注意が必要である）。
+   - **`gemini-3.8-flash`**：`"minimal"` が廃止（`400` エラー）された代わりに、**`thinking_level="low"` が実質的な思考オフ（実測 `0 tok`）として機能**する。
+   - **`gemini-4-hydrogen`**：公式仕様として「思考の無効化は不可（cannot disable thinking）」と定められており、`thinking_level="low"` や `thinking_budget=0` を渡しても必ず思考トークン（複雑問題で約 `1,300〜1,400 tok`）が生成される。
+2. **本レポートの検証コード（`src/gemini_evaluation/llm_call.py`）における 6 段階ラベルの定義理由**：
+   - 表2-5B の `gemini-3.8-flash` 列から分かるとおり、`gemini-3.8-flash` の公式 `thinking_level` は `low`（実測 `0 tok`）の次がいきなり `medium`（実測 `1,300〜1,400 tok`）へ跳躍する。
+   - そこで第3章〜第4章のベンチマークでは、「思考ゼロ（`0 tok`）」と「深い思考（`1,300+ tok`）」の間にある **中程度の思考トークン領域（`350〜670 tok` 帯）でのレイテンシと計算精度の推移**を精密に測定するため、`resolve_thinking_config()` において `"0"` → `thinking_budget=0`（実測 `0 tok`）、`"minimal"` → `thinking_budget=256`（実測 `0 tok`）、`"low"` → `thinking_budget=4096`（実測 `351〜673 tok`）、`"medium"` → `ThinkingLevel.MEDIUM`、`"high"` → `ThinkingLevel.HIGH`、`"default"` → `None`（サーバー既定＝`medium`）というマッピングを採用している。
+
+---
+
+### 3. Context Caching（暗黙・明示キャッシュ）および API 制約の世代間比較（表2-5C）
+
+長大なシステムプロンプトやマルチターン対話履歴の Prefill コスト・TTFT を削減する **Context Caching** や、サンプリング系パラメータの扱いについても、Gemini 3.5 / 3.8 / 4 で下表（表2-5C）の仕様差が存在する。
+
+| 機能・パラメータ項目 | `gemini-3.5-flash` / `gemini-3.5-flash-lite` | `gemini-3.8-flash`<br>*(本レポート検証対象)* | `gemini-4-hydrogen` / `argon` / `carbon` |
+| :--- | :--- | :--- | :--- |
+| **Implicit Context Caching**<br>*(暗黙的キャッシュ：自動適用)* | ✅ **デフォルト ON**（設定不要）<br>・公称最小入力トークン数：`4,096 tok`<br>・キャッシュヒット分は Prefill 計算をスキップし入力単価を大幅割引 | ✅ **デフォルト ON**（設定不要）<br>・公称最小入力トークン数：`4,096 tok`<br>・**実測では総入力が `2,048 tok` を超えた直後の Turn 8（`2,686 tok`）からキャッシュヒット開始**（第5章参照） | ✅ **デフォルト ON**（設定不要・**95% 割引**）<br>・公称最小入力トークン数：`4,096 tok`<br>・**マルチターン時の「末尾 2,050 トークン再処理ルール」が公式ドキュメントに明文化** |
+| **マルチターン対話におけるキャッシュ境界の内部アルゴリズム**<br>*(なぜ約 2,050 tok から始まり末尾が非キャッシュで残るのか)* | プレフィックス一致に対してキャッシュが自動構築されるが、直近ターンの末尾ウィンドウは通常レートで再処理される。 | 第5章の50ターン連続対話ベンチマークにて、**Turn 8（`2,686 prompt_tokens`）で `703 cached_tokens` が初発動し、以降 Turn 50 まで常に `Prompt - Cached ≈ 2,000 tokens`（末尾約2,000トークン）が非キャッシュとして残る**挙動を実測確認。 | Gemini 4 公式ドキュメントにて以下の内部仕様が正式に明記された：<br>*"新規リクエストの増分（モデル出力・思考・関数結果を含む）が **2,050 トークン以上** の場合のみ前回リクエスト全体がキャッシュされ、**2,050 トークン未満の増分では前回リクエストの末尾 2,050 トークンを通常入力レートで再処理する**"* |
+| **Explicit Context Caching**<br>(`client.caches.create` / `createCachedContent`) | ✅ **サポート** (`v1beta`)<br>・任意の TTL を指定して明示的にキャッシュオブジェクトを作成・再利用可能 | ✅ **サポート** (`v1beta`)<br>・`models.get` の `supported_actions` に `createCachedContent` を含む | ❌ **廃止（全モデル非サポート・エラー）**<br>・`createCachedContent` は削除され、Implicit Caching のみに完全一本化 |
+| **サンプリングパラメータ**<br>(`temperature`, `top_p`, `top_k`, `candidate_count`) | ⚠️ **Deprecated（非推奨・API側で無視）**<br>・`candidate_count` は非対応 | ⚠️ **Deprecated（非推奨・API側で無視）**<br>・推論品質維持のためデフォルト値固定（リクエストから削除推奨） | ⚠️ **Deprecated（非推奨・API側で無視）**<br>・有効範囲内の値は無視され、範囲外の値を渡すと `400` バリデーションエラー |
+| **Model ロールでのプリフィル終了**<br>(`contents` 末尾が `role="model"`) | ❌ **`400 INVALID_ARGUMENT` エラー**<br>*(3.6-flash / 3.5-flash-lite 以降で禁止)* | ❌ **`400 INVALID_ARGUMENT` エラー**<br>・出力形式の強制には `system_instruction` または `response_schema` を使用する | ❌ **`400 INVALID_ARGUMENT` エラー** |
+
+#### 表2-5C から導かれるコンテキストキャッシュの重要インサイト
+
+公式ドキュメントの一覧表では、Gemini 3.8 や Gemini 4 の Implicit Context Caching の最小入力トークン数は **`4,096 tokens`** と記載されている。しかし第5章の実機50ターン検証（`gemini-3.8-flash`）では、`4,096 tokens` 未満である **Turn 8（`prompt_token_count = 2,686`）の時点で既に `cached_content_token_count = 703` のキャッシュヒットが自動的に始まっている**。
+
+この一見矛盾する現象は、Gemini 4 の公式リリースノートで明文化された **「1ターンあたりの増分が 2,050 トークン未満のマルチターン対話では、前回リクエストの末尾 2,050 トークンを通常レートで再処理し、それより前のプレフィックスをキャッシュする」** という内部ルールによって完全に説明できる。すなわち、総入力トークン数が **`2,048〜2,050 tokens` の末尾再処理ウィンドウを超えた瞬間（Turn 7 の `2,298 tok` → Turn 8 の `2,686 tok`）から、末尾約 `2,000 tokens` を除いた先頭プレフィックス部分（`2,686 - 2,000 ≈ 686〜703 tok`）がキャッシュにヒットし始める** ためである（詳細は第5章 5.2節で検証する）。
+

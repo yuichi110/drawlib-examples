@@ -101,56 +101,56 @@ def load_thinking_benchmark_all() -> list[dict[str, Any]]:
 
 _CANONICAL_ADAPTIVE_45: list[tuple[str, str, bool, str, int, int, int]] = [
     # (prompt_id, tier, expected_thinking, method_key, ttft_ms, total_ms, thoughts_tokens)
-    ("T1_1", "tier1_simple", False, "base_0", 1548, 3477, 0),
-    ("T1_1", "tier1_simple", False, "base_low", 3572, 5361, 112),
-    ("T1_1", "tier1_simple", False, "pat_a_pydantic_2f", 2980, 4768, 0),
-    ("T1_1", "tier1_simple", False, "pat_b_pydantic_1f", 3103, 5451, 0),
-    ("T1_1", "tier1_simple", False, "pat_c_tag", 2248, 4230, 0),
-    ("T1_2", "tier1_simple", False, "base_0", 1940, 3267, 0),
-    ("T1_2", "tier1_simple", False, "base_low", 4244, 5274, 152),
-    ("T1_2", "tier1_simple", False, "pat_a_pydantic_2f", 2020, 3522, 0),
-    ("T1_2", "tier1_simple", False, "pat_b_pydantic_1f", 3332, 4837, 0),
-    ("T1_2", "tier1_simple", False, "pat_c_tag", 2217, 3139, 0),
-    ("T1_3", "tier1_simple", False, "base_0", 1671, 4578, 0),
-    ("T1_3", "tier1_simple", False, "base_low", 2928, 4823, 81),
-    ("T1_3", "tier1_simple", False, "pat_a_pydantic_2f", 2222, 4347, 0),
-    ("T1_3", "tier1_simple", False, "pat_b_pydantic_1f", 2982, 5650, 0),
-    ("T1_3", "tier1_simple", False, "pat_c_tag", 1561, 3581, 0),
-    ("T2_1", "tier2_procedure", False, "base_0", 2336, 7610, 0),
-    ("T2_1", "tier2_procedure", False, "base_low", 5901, 12158, 423),
-    ("T2_1", "tier2_procedure", False, "pat_a_pydantic_2f", 2243, 4629, 0),
-    ("T2_1", "tier2_procedure", False, "pat_b_pydantic_1f", 3647, 10879, 0),
-    ("T2_1", "tier2_procedure", False, "pat_c_tag", 1899, 5914, 0),
-    ("T2_2", "tier2_procedure", False, "base_0", 1748, 7837, 0),
-    ("T2_2", "tier2_procedure", False, "base_low", 6349, 11836, 389),
-    ("T2_2", "tier2_procedure", False, "pat_a_pydantic_2f", 2126, 6073, 0),
-    ("T2_2", "tier2_procedure", False, "pat_b_pydantic_1f", 3897, 10757, 0),
-    ("T2_2", "tier2_procedure", False, "pat_c_tag", 1910, 7448, 0),
-    ("T2_3", "tier2_procedure", False, "base_0", 2076, 5454, 0),
-    ("T2_3", "tier2_procedure", False, "base_low", 5750, 9683, 304),
-    ("T2_3", "tier2_procedure", False, "pat_a_pydantic_2f", 2531, 5509, 0),
-    ("T2_3", "tier2_procedure", False, "pat_b_pydantic_1f", 4169, 8988, 0),
-    ("T2_3", "tier2_procedure", False, "pat_c_tag", 1687, 5869, 0),
-    ("T3_1", "tier3_complex", True, "base_0", 1515, 7895, 0),
-    ("T3_1", "tier3_complex", True, "base_low", 8950, 17058, 790),
-    ("T3_1", "tier3_complex", True, "pat_a_pydantic_2f", 2120, 16650, 859),
-    ("T3_1", "tier3_complex", True, "pat_b_pydantic_1f", 11226, 20762, 628),
-    ("T3_1", "tier3_complex", True, "pat_c_tag", 1613, 16499, 828),
-    ("T3_2", "tier3_complex", True, "base_0", 2235, 9017, 0),
-    ("T3_2", "tier3_complex", True, "base_low", 12155, 19297, 755),
-    ("T3_2", "tier3_complex", True, "pat_a_pydantic_2f", 2456, 19344, 951),
-    ("T3_2", "tier3_complex", True, "pat_b_pydantic_1f", 12590, 18325, 673),
-    ("T3_2", "tier3_complex", True, "pat_c_tag", 1834, 15826, 755),
-    ("T3_3", "tier3_complex", True, "base_0", 1840, 8443, 0),
-    ("T3_3", "tier3_complex", True, "base_low", 6762, 13384, 674),
-    ("T3_3", "tier3_complex", True, "pat_a_pydantic_2f", 2365, 20707, 893),
-    ("T3_3", "tier3_complex", True, "pat_b_pydantic_1f", 10649, 18167, 583),
-    ("T3_3", "tier3_complex", True, "pat_c_tag", 1939, 17085, 827),
+    ("T1_1", "tier1_simple", False, "base_low", 1533, 5741, 0),
+    ("T1_1", "tier1_simple", False, "base_high", 13039, 17434, 921),
+    ("T1_1", "tier1_simple", False, "pat_a_pydantic_2f", 2234, 4536, 0),
+    ("T1_1", "tier1_simple", False, "pat_b_pydantic_1f", 3837, 6992, 49),
+    ("T1_1", "tier1_simple", False, "pat_c_tag", 2087, 6318, 56),
+    ("T1_2", "tier1_simple", False, "base_low", 2595, 4746, 53),
+    ("T1_2", "tier1_simple", False, "base_high", 10501, 13758, 852),
+    ("T1_2", "tier1_simple", False, "pat_a_pydantic_2f", 2144, 2614, 34),
+    ("T1_2", "tier1_simple", False, "pat_b_pydantic_1f", 4145, 6945, 28),
+    ("T1_2", "tier1_simple", False, "pat_c_tag", 2272, 3390, 45),
+    ("T1_3", "tier1_simple", False, "base_low", 2428, 9769, 0),
+    ("T1_3", "tier1_simple", False, "base_high", 12708, 19842, 1117),
+    ("T1_3", "tier1_simple", False, "pat_a_pydantic_2f", 2190, 3987, 0),
+    ("T1_3", "tier1_simple", False, "pat_b_pydantic_1f", 5077, 10777, 153),
+    ("T1_3", "tier1_simple", False, "pat_c_tag", 2347, 4115, 37),
+    ("T2_1", "tier2_procedure", False, "base_low", 1331, 9477, 0),
+    ("T2_1", "tier2_procedure", False, "base_high", 11964, 20864, 991),
+    ("T2_1", "tier2_procedure", False, "pat_a_pydantic_2f", 2174, 5764, 46),
+    ("T2_1", "tier2_procedure", False, "pat_b_pydantic_1f", 4197, 13589, 42),
+    ("T2_1", "tier2_procedure", False, "pat_c_tag", 2531, 8426, 35),
+    ("T2_2", "tier2_procedure", False, "base_low", 2923, 15001, 0),
+    ("T2_2", "tier2_procedure", False, "base_high", 13417, 25827, 1153),
+    ("T2_2", "tier2_procedure", False, "pat_a_pydantic_2f", 2870, 3811, 0),
+    ("T2_2", "tier2_procedure", False, "pat_b_pydantic_1f", 5210, 14835, 42),
+    ("T2_2", "tier2_procedure", False, "pat_c_tag", 3242, 8318, 58),
+    ("T2_3", "tier2_procedure", False, "base_low", 2576, 14011, 0),
+    ("T2_3", "tier2_procedure", False, "base_high", 11229, 22851, 1019),
+    ("T2_3", "tier2_procedure", False, "pat_a_pydantic_2f", 3489, 5398, 0),
+    ("T2_3", "tier2_procedure", False, "pat_b_pydantic_1f", 5481, 14097, 60),
+    ("T2_3", "tier2_procedure", False, "pat_c_tag", 2913, 11215, 64),
+    ("T3_1", "tier3_complex", True, "base_low", 2922, 13899, 0),
+    ("T3_1", "tier3_complex", True, "base_high", 14104, 23247, 1466),
+    ("T3_1", "tier3_complex", True, "pat_a_pydantic_2f", 1795, 21482, 902),
+    ("T3_1", "tier3_complex", True, "pat_b_pydantic_1f", 16402, 26659, 1538),
+    ("T3_1", "tier3_complex", True, "pat_c_tag", 3250, 21309, 1309),
+    ("T3_2", "tier3_complex", True, "base_low", 1392, 9583, 0),
+    ("T3_2", "tier3_complex", True, "base_high", 16510, 27861, 1882),
+    ("T3_2", "tier3_complex", True, "pat_a_pydantic_2f", 2728, 27017, 1591),
+    ("T3_2", "tier3_complex", True, "pat_b_pydantic_1f", 24231, 35330, 2346),
+    ("T3_2", "tier3_complex", True, "pat_c_tag", 5654, 31139, 2073),
+    ("T3_3", "tier3_complex", True, "base_low", 1693, 7729, 0),
+    ("T3_3", "tier3_complex", True, "base_high", 11965, 18577, 1295),
+    ("T3_3", "tier3_complex", True, "pat_a_pydantic_2f", 1870, 16240, 674),
+    ("T3_3", "tier3_complex", True, "pat_b_pydantic_1f", 15222, 20844, 1362),
+    ("T3_3", "tier3_complex", True, "pat_c_tag", 2073, 18607, 806),
 ]
 
 
 def load_adaptive_runs() -> list[dict[str, Any]]:
-    """Load all 45 compact run summaries matching the Chapter 4 benchmark matrix."""
+    """Load all 45 compact run summaries matching the Chapter 4 benchmark matrix (`low` -> `high`)."""
     runs: list[dict[str, Any]] = []
     for pid, tier, exp_th, m_key, ttft, total, th_tok in _CANONICAL_ADAPTIVE_45:
         runs.append(
@@ -160,8 +160,8 @@ def load_adaptive_runs() -> list[dict[str, Any]]:
                 "expected_thinking": exp_th,
                 "method_key": m_key,
                 "status": "SUCCESS",
-                "thinking_triggered": True if m_key == "base_low" else (False if m_key == "base_0" else exp_th),
-                "routing_correct": None if m_key in {"base_0", "base_low"} else True,
+                "thinking_triggered": True if m_key == "base_high" else (False if m_key == "base_low" else exp_th),
+                "routing_correct": None if m_key in {"base_low", "base_high"} else True,
                 "gemini_calls": 2 if (m_key == "pat_b_pydantic_1f" or (exp_th and m_key in {"pat_a_pydantic_2f", "pat_c_tag"})) else 1,
                 "ttft_ms": float(ttft),
                 "total_ms": float(total),
@@ -191,14 +191,14 @@ def _make_linear_points(t_start: float, t_end: float, c_start: int, c_end: int, 
 
 
 def load_adaptive_trajectory(prompt_id: str, method_key: str) -> dict[str, Any]:
-    """Load timeline trajectory for `(prompt_id, method_key)` matching the Chapter 4 table and annotations."""
+    """Load timeline trajectory for `(prompt_id, method_key)` matching the Chapter 4 (`low` -> `high`) benchmark."""
     if prompt_id == "T2_1":
         specs = {
-            "pat_a_pydantic_2f": (2243.0, 4629.0, 482, 10),
-            "pat_c_tag": (1899.0, 5914.0, 1042, 16),
-            "base_0": (2336.0, 7610.0, 1580, 22),
-            "pat_b_pydantic_1f": (3647.0, 10879.0, 1590, 24),
-            "base_low": (5901.0, 12158.0, 1540, 22),
+            "pat_a_pydantic_2f": (2174.0, 5764.0, 626, 12),
+            "pat_c_tag": (2531.0, 8426.0, 975, 16),
+            "base_low": (1331.0, 9477.0, 1539, 20),
+            "pat_b_pydantic_1f": (4197.0, 13589.0, 1530, 22),
+            "base_high": (11964.0, 20864.0, 1501, 22),
         }
         t0, t1, chars, n_steps = specs[method_key]
         pts = _make_linear_points(t0, t1, 0, chars, steps=n_steps)
@@ -206,21 +206,21 @@ def load_adaptive_trajectory(prompt_id: str, method_key: str) -> dict[str, Any]:
 
     if prompt_id == "T3_1":
         if method_key == "pat_a_pydantic_2f":
-            pts = [{"t_ms": 0.0, "chars": 0}, {"t_ms": 2120.0, "chars": 0}, {"t_ms": 2120.0, "chars": 59}, {"t_ms": 10948.0, "chars": 90}]
+            pts = [{"t_ms": 0.0, "chars": 0}, {"t_ms": 1795.0, "chars": 0}, {"t_ms": 1795.0, "chars": 58}, {"t_ms": 11615.0, "chars": 90}]
             for i in range(1, 17):
                 frac = i / 16.0
-                pts.append({"t_ms": round(10948.0 + (16650.0 - 10948.0) * frac, 1), "chars": int(round(90 + (1520 - 90) * frac))})
-            return {"gemini": pts, "client_output": pts, "ttft_ms": 2120.0, "total_ms": 16650.0}
+                pts.append({"t_ms": round(11615.0 + (21482.0 - 11615.0) * frac, 1), "chars": int(round(90 + (1826 - 90) * frac))})
+            return {"gemini": pts, "client_output": pts, "ttft_ms": 1795.0, "total_ms": 21482.0}
         if method_key == "pat_c_tag":
-            pts = [{"t_ms": 0.0, "chars": 0}, {"t_ms": 1613.0, "chars": 0}, {"t_ms": 1613.0, "chars": 56}, {"t_ms": 9420.0, "chars": 88}]
+            pts = [{"t_ms": 0.0, "chars": 0}, {"t_ms": 3250.0, "chars": 0}, {"t_ms": 3250.0, "chars": 58}, {"t_ms": 12630.0, "chars": 90}]
             for i in range(1, 17):
                 frac = i / 16.0
-                pts.append({"t_ms": round(9420.0 + (16499.0 - 9420.0) * frac, 1), "chars": int(round(88 + (1510 - 88) * frac))})
-            return {"gemini": pts, "client_output": pts, "ttft_ms": 1613.0, "total_ms": 16499.0}
+                pts.append({"t_ms": round(12630.0 + (21309.0 - 12630.0) * frac, 1), "chars": int(round(90 + (1867 - 90) * frac))})
+            return {"gemini": pts, "client_output": pts, "ttft_ms": 3250.0, "total_ms": 21309.0}
         specs_t3 = {
-            "base_0": (1515.0, 7895.0, 1516, 20),
-            "base_low": (8950.0, 17058.0, 1603, 20),
-            "pat_b_pydantic_1f": (11226.0, 20762.0, 1490, 20),
+            "base_low": (2922.0, 13899.0, 1656, 20),
+            "base_high": (14104.0, 23247.0, 1692, 20),
+            "pat_b_pydantic_1f": (16402.0, 26659.0, 1660, 20),
         }
         t0, t1, chars, n_steps = specs_t3[method_key]
         pts = _make_linear_points(t0, t1, 0, chars, steps=n_steps)
@@ -245,6 +245,7 @@ def load_multiturn_turns() -> list[dict[str, Any]]:
             gem = v_tr.get("breakdown", {}).get("gemini", {})
             gem_req = gem.get("request", {})
             gem_resp = gem.get("response", {})
+            adap = v_tr.get("adaptive", {})
             fin_txt = str(v_tr.get("final_output", {}).get("text", ""))
             variants_out[v_key] = {
                 "status": v_tr.get("status", "UNKNOWN"),
@@ -258,10 +259,15 @@ def load_multiturn_turns() -> list[dict[str, Any]]:
                 "output_chars": len(fin_txt),
                 "history_messages": int(gem_req.get("history_message_count") or 0),
                 "history_chars": int(gem_req.get("history_total_chars") or 0),
+                "thinking_triggered": bool(adap.get("thinking_triggered", False)),
+                "gemini_call_count": int(adap.get("gemini_call_count", 1) or 1),
+                "stage1_cached_tokens": int(adap.get("stage1_cached_tokens", 0) or 0),
+                "stage2_cached_tokens": int(adap.get("stage2_cached_tokens", 0) or 0),
             }
         rows.append(
             {
                 "turn": t_num,
+                "expected_thinking": bool(rec.get("expected_thinking", False)),
                 "user_sim_ms": float(u_sim.get("duration_ms", 0.0)),
                 "user_chars": len(str(rec.get("canonical_user", ""))),
                 "agent_chars": len(str(rec.get("canonical_agent", ""))),
@@ -386,3 +392,10 @@ def draw_trajectory_panel(
         f"{lbl_ttft} / {lbl_tot}",
         style=Styles.DarkBold.patch(text_size=9.6),
     )
+
+
+def load_cross_model_thinking_benchmark() -> dict[str, Any]:
+    """Load the 5-model × thinking_level × 10-query (5 simple + 5 complex) benchmark from `cross_model_thinking_log.json`."""
+    path = EVAL_DATA_DIR / "cross_model_thinking_log.json"
+    return json.loads(path.read_text(encoding="utf-8"))
+

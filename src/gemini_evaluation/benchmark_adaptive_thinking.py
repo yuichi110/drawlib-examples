@@ -39,6 +39,7 @@ from gemini_evaluation.tracer import now_jst, save_yaml_report
 
 JSONL_PATH = Path(__file__).resolve().parent / "adaptive_thinking_runs.jsonl"
 YAML_PATH = Path(__file__).resolve().parent / "adaptive_thinking_log.yaml"
+JSON_PATH = Path(__file__).resolve().parent / "adaptive_thinking_log.json"
 
 BASELINE_SYS_INSTRUCTION = (
     "あなたはPCメーカーの丁寧なテクニカルサポート担当者です。"
@@ -140,11 +141,11 @@ PROMPTS: list[dict[str, Any]] = [
 ]
 
 METHODS: list[tuple[str, str]] = [
-    ("base_0", "Baseline 0: 固定 thinking=0 (Plain Stream)"),
     ("base_low", "Baseline Low: 固定 thinking=low (Plain Stream)"),
-    ("pat_a_pydantic_2f", "Pattern A: 2フィールド統合 {thinking, response}"),
-    ("pat_b_pydantic_1f", "Pattern B: 1フィールド分離 {thinking} + Stream"),
-    ("pat_c_tag", "Pattern C: 非JSON先頭タグ [DIRECT]/[THINK]"),
+    ("base_high", "Baseline High: 固定 thinking=high (Plain Stream)"),
+    ("pat_a_pydantic_2f", "Pattern A: 2フィールド統合 {thinking, response} (low -> high)"),
+    ("pat_b_pydantic_1f", "Pattern B: 1フィールド分離 {thinking} + Stream (low -> high)"),
+    ("pat_c_tag", "Pattern C: 非JSON先頭タグ [DIRECT]/[THINK] (low -> high)"),
 ]
 
 
@@ -161,22 +162,7 @@ async def execute_method(
     for attempt in range(1, 4):
         trace: dict[str, Any] = {}
         try:
-            if method_key == "base_0":
-                async for _ in stream_text(
-                    client,
-                    prompt,
-                    thinking=0,
-                    config=base_cfg,
-                    trace=trace,
-                ):
-                    pass
-                trace["adaptive"] = {
-                    "architecture": "baseline_0",
-                    "thinking_triggered": False,
-                    "flag_decided_ms": None,
-                    "gemini_call_count": 1,
-                }
-            elif method_key == "base_low":
+            if method_key == "base_low":
                 async for _ in stream_text(
                     client,
                     prompt,
@@ -187,6 +173,21 @@ async def execute_method(
                     pass
                 trace["adaptive"] = {
                     "architecture": "baseline_low",
+                    "thinking_triggered": False,
+                    "flag_decided_ms": None,
+                    "gemini_call_count": 1,
+                }
+            elif method_key == "base_high":
+                async for _ in stream_text(
+                    client,
+                    prompt,
+                    thinking="high",
+                    config=base_cfg,
+                    trace=trace,
+                ):
+                    pass
+                trace["adaptive"] = {
+                    "architecture": "baseline_high",
                     "thinking_triggered": True,
                     "flag_decided_ms": None,
                     "gemini_call_count": 1,
@@ -195,7 +196,8 @@ async def execute_method(
                 async for _ in stream_adaptive_pydantic_integrated(
                     client,
                     prompt,
-                    deep_thinking="low",
+                    fast_thinking="low",
+                    deep_thinking="high",
                     schema_cls=AdaptiveStreamResponse,
                     trace=trace,
                 ):
@@ -204,7 +206,8 @@ async def execute_method(
                 async for _ in stream_adaptive_pydantic_router(
                     client,
                     prompt,
-                    deep_thinking="low",
+                    fast_thinking="low",
+                    deep_thinking="high",
                     trace=trace,
                 ):
                     pass
@@ -212,7 +215,8 @@ async def execute_method(
                 async for _ in stream_adaptive_tag_prefix(
                     client,
                     prompt,
-                    deep_thinking="low",
+                    fast_thinking="low",
+                    deep_thinking="high",
                     trace=trace,
                 ):
                     pass
@@ -244,7 +248,8 @@ async def run_schema_complexity_experiment(
             async for _ in stream_adaptive_pydantic_integrated(
                 client,
                 test_prompt,
-                deep_thinking="low",
+                fast_thinking="low",
+                deep_thinking="high",
                 schema_cls=schema_cls,
                 trace=trace,
             ):
@@ -306,31 +311,51 @@ def compact_run_summary(
         "total_ms": ot.get("stream_completed_ms"),
         "prompt_tokens": gem_resp.get("prompt_token_count"),
         "thoughts_tokens": gem_resp.get("thoughts_token_count"),
+        "stage1_thoughts_tokens": ad.get("stage1_thoughts_tokens"),
+        "stage2_thoughts_tokens": ad.get("stage2_thoughts_tokens"),
         "output_tokens": gem_resp.get("output_token_count"),
         "output_chars": len(final_txt),
     }
 
 
 async def main() -> None:
-    """Run Schema Complexity Experiment + 9-Prompt × 5-Method Adaptive Thinking Benchmark."""
+    """Run 9-Prompt × 5-Method Adaptive Thinking Benchmark (gemini-3.8-flash low + high)."""
     suite_started_at = now_jst()
+
+    existing_schema_exp: list[dict[str, Any]] = []
+    if JSON_PATH.is_file():
+        try:
+            old_data = json.loads(JSON_PATH.read_text(encoding="utf-8"))
+            existing_schema_exp = list(old_data.get("schema_complexity_experiment", []))
+        except Exception:  # noqa: BLE001
+            existing_schema_exp = []
+
     if JSONL_PATH.is_file():
         JSONL_PATH.unlink()
 
     client = create_client()
 
-    print("=== Phase 1: Schema Cold vs Warm & Complexity Experiment ===", flush=True)
-    schema_exp_results = await run_schema_complexity_experiment(client)
+    if existing_schema_exp:
+        print("=== Reusing existing Schema Cold/Warm Experiment & warming up schemas ===", flush=True)
+        schema_exp_results = existing_schema_exp
+        warmup_a: dict[str, Any] = {}
+        async for _ in stream_adaptive_pydantic_integrated(
+            client, "こんにちは！", fast_thinking="low", deep_thinking="high", trace=warmup_a
+        ):
+            pass
+    else:
+        print("=== Phase 1: Schema Cold vs Warm & Complexity Experiment ===", flush=True)
+        schema_exp_results = await run_schema_complexity_experiment(client)
 
     # Warm up Pattern B's 1-field schema once as well so all 5 methods are warm-cached
     warmup_trace: dict[str, Any] = {}
     async for _ in stream_adaptive_pydantic_router(
-        client, "こんにちは！", deep_thinking="low", trace=warmup_trace
+        client, "こんにちは！", fast_thinking="low", deep_thinking="high", trace=warmup_trace
     ):
         pass
 
-    print("\n=== Phase 2: 9 Prompts × 5 Methods Matrix (45 Runs) ===", flush=True)
-    sem = asyncio.Semaphore(9)
+    print("\n=== Phase 2: 9 Prompts × 5 Methods Matrix (45 Runs: low -> high) ===", flush=True)
+    sem = asyncio.Semaphore(15)
 
     async def _run_adaptive_cell(
         p_spec: dict[str, Any], m_key: str, m_label: str
@@ -376,6 +401,8 @@ async def main() -> None:
             "suite_completed_at": now_jst(),
             "api_provider": "Google AI Studio (google-genai)",
             "model": MODEL,
+            "stage1_thinking_level": "low",
+            "stage2_thinking_level": "high",
         },
         "schema_complexity_experiment": schema_exp_results,
         "prompts": PROMPTS,
@@ -383,7 +410,8 @@ async def main() -> None:
         "runs": summaries,
     }
     save_yaml_report(report, YAML_PATH)
-    print(f"\nSaved {YAML_PATH} and {JSONL_PATH} successfully!", flush=True)
+    JSON_PATH.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    print(f"\nSaved {YAML_PATH}, {JSON_PATH}, and {JSONL_PATH} successfully!", flush=True)
 
 
 if __name__ == "__main__":

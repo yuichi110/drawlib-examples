@@ -153,7 +153,7 @@ def resolve_thinking_config(
         t_cfg = types.ThinkingConfig(thinking_budget=256)
     elif thinking == 2 or (isinstance(thinking, str) and thinking.strip().lower() in {"2", "low"}):
         label = "low"
-        t_cfg = types.ThinkingConfig(thinking_budget=4096)
+        t_cfg = types.ThinkingConfig(thinking_level=types.ThinkingLevel.LOW)
     elif thinking == 3 or (isinstance(thinking, str) and thinking.strip().lower() in {"3", "medium"}):
         label = "medium"
         t_cfg = types.ThinkingConfig(thinking_level=types.ThinkingLevel.MEDIUM)

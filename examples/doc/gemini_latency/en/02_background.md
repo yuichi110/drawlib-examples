@@ -1,6 +1,6 @@
 # 2. Background & Measurement Methodology
 
-This chapter defines the foundational concepts and instrumentation methodology used throughout the empirical evaluations in Chapters 3–5. Sections 2.1 and 2.2 decompose LLM inference latency on `gemini-3.8-flash` into three sequential server-side phases (**Prefill, Thinking, and Decoding**), explain why **2D Trajectory Charts (`Elapsed Time vs. Cumulative Output Characters`)** expose critical user-experience differences hidden by scalar averages, and present clean Blocking vs. Streaming invocation patterns using the Google AI Studio `google-genai` SDK. Sections 2.3 and 2.4 examine **Pydantic Structured Outputs (`response_schema`)**, **Cold vs. Warm finite-state machine (FSM) grammar compilation**, incremental partial JSON delta extraction via **`pydantic_core.from_json(..., allow_partial="trailing-strings")`**, and the microsecond-precision **`ExecutionTracer`** (`src/gemini_evaluation/tracer.py`).
+This chapter defines the foundational concepts and instrumentation methodology used throughout the empirical evaluations in Chapters 3–5. Sections 2.1 and 2.2 decompose LLM inference latency on `gemini-3.8-flash` into three sequential server-side phases (**Prefill, Thinking, and Decoding**), explain why **2D Trajectory Charts (`Elapsed Time vs. Cumulative Output Characters`)** expose critical user-experience differences hidden by scalar averages, and present clean Blocking vs. Streaming invocation patterns using the Google AI Studio `google-genai` SDK. Sections 2.3 through 2.5 examine **Pydantic Structured Outputs (`response_schema`)**, **Cold vs. Warm finite-state machine (FSM) grammar compilation**, incremental partial JSON delta extraction via **`pydantic_core.from_json(..., allow_partial="trailing-strings")`**, the microsecond-precision **`ExecutionTracer`** (`src/gemini_evaluation/tracer.py`), and a **comprehensive cross-generational comparison of Gemini 3.5 / 3.8 / 4 models, `ThinkingConfig` options, and Context Caching rules**.
 
 ```drawlib align=center code=fold width=100% file=ch02_latency_phases_trajectory.png caption="Figure 2-1: Anatomy of the 3 LLM Latency Phases (Prefill → Thinking → Decoding) and Blocking vs. Streaming 2D Trajectory Comparison (thinking=0 Empirical Data)"
 from drawlib.canvas import save, setup
@@ -147,7 +147,7 @@ Total = TTFT_blocking = T_Network_RTT + T_Prefill + T_Thinking + T_Decoding
 
 ## 2.2 Blocking vs. Streaming API Usage (`google-genai` on Google AI Studio)
 
-All benchmarks in this report (`src/gemini_evaluation/llm_call.py`) use the official **`google-genai`** SDK against **Google AI Studio** (`genai.Client(api_key=GEMINI_KEY)`) and `gemini-3.8-flash` via `asyncio` (`client.aio`). Below is the reference implementation (`resolve_thinking_config`) for resolving all six `ThinkingConfig` options and invoking Blocking (`generate_content`) versus Streaming (`generate_content_stream`).
+All benchmarks in this report (`src/gemini_evaluation/llm_call.py`) use the official **`google-genai`** SDK against **Google AI Studio** (`genai.Client(api_key=GEMINI_KEY)`) and `gemini-3.8-flash` via `asyncio` (`client.aio`). Below is the reference implementation (`resolve_thinking_config`) for resolving all six `ThinkingConfig` options and invoking Blocking (`generate_content`) versus Streaming (`generate_content_stream`) (see **Section 2.5** for a detailed analysis of `thinking_level` vs. `thinking_budget` across Gemini 3.5, 3.8, and 4).
 
 ```python
 from collections.abc import AsyncIterator
@@ -162,41 +162,48 @@ MODEL = "gemini-3.8-flash"
 client = genai.Client(api_key=GEMINI_KEY)
 
 
-def resolve_thinking_config(thinking: str | int | None = 0) -> types.GenerateContentConfig | None:
-    """Map the 6 thinking options (0, minimal, low, medium, high, default) to GenerateContentConfig."""
+def resolve_thinking_config(thinking: str | int | None = 0) -> types.ThinkingConfig | None:
+    """Map the 6 benchmark thinking options (0, minimal, low, medium, high, default) to ThinkingConfig.
+    Note: Because gemini-3.8-flash rejects ThinkingLevel.MINIMAL (HTTP 400) and produces 0 thoughts
+    at ThinkingLevel.LOW, benchmark labels 0 / minimal / low use legacy thinking_budget values to
+    sample intermediate reasoning token counts (see Section 2.5).
+    """
     if thinking is None or thinking == "default":
-        return None  # Server default dynamic thinking
-    if thinking in (0, "0"):
-        return types.GenerateContentConfig(
-            thinking_config=types.ThinkingConfig(thinking_budget=0)
-        )
+        return None  # Server default dynamic thinking (medium on gemini-3.8-flash)
+    if isinstance(thinking, int):
+        return types.ThinkingConfig(thinking_budget=thinking)
+    key = str(thinking).strip().lower()
+    if key == "0":
+        return types.ThinkingConfig(thinking_budget=0)
+    if key == "minimal":
+        return types.ThinkingConfig(thinking_budget=256)
+    if key == "low":
+        return types.ThinkingConfig(thinking_budget=4096)
     level_map = {
-        "minimal": types.ThinkingLevel.MINIMAL,
-        "low": types.ThinkingLevel.LOW,
         "medium": types.ThinkingLevel.MEDIUM,
         "high": types.ThinkingLevel.HIGH,
     }
-    return types.GenerateContentConfig(
-        thinking_config=types.ThinkingConfig(thinking_level=level_map[str(thinking).lower()])
-    )
+    return types.ThinkingConfig(thinking_level=level_map[key])
 
 
 # 2. Blocking Unary Call (waits for full completion: TTFT == Total)
 async def generate_text_blocking(prompt: str, thinking: str | int | None = 0) -> str:
+    cfg = resolve_thinking_config(thinking)
     resp = await client.aio.models.generate_content(
         model=MODEL,
         contents=prompt,
-        config=resolve_thinking_config(thinking),
+        config=types.GenerateContentConfig(thinking_config=cfg) if cfg else None,
     )
     return resp.text or ""
 
 
 # 3. Progressive Streaming Call (yields text chunks immediately after TTFT)
 async def stream_text_progressive(prompt: str, thinking: str | int | None = 0) -> AsyncIterator[str]:
+    cfg = resolve_thinking_config(thinking)
     stream = await client.aio.models.generate_content_stream(
         model=MODEL,
         contents=prompt,
-        config=resolve_thinking_config(thinking),
+        config=types.GenerateContentConfig(thinking_config=cfg) if cfg else None,
     )
     async with aclosing(stream):
         async for chunk in stream:
@@ -441,3 +448,58 @@ Every benchmark in this report (`src/gemini_evaluation/benchmark_thinking.py`, `
 | **Token Usage Breakdown** | `prompt_token_count` / `cached_content_token_count` / `thoughts_token_count` / `output_token_count` | Extracted from `resp.usage_metadata` to quantify input size, Implicit Context Cache hits, internal reasoning tokens, and visible output tokens. |
 
 All execution traces are serialized to human-readable YAML (`*_log.yaml`) and machine-readable JSON/JSONL (`*_log.json`, `*_runs.jsonl`, `*_turns.jsonl`), which are loaded directly by `examples/doc/gemini_latency/utils.py` to render every chart in this report.
+
+---
+
+## 2.5 Gemini 3.5 / 3.8 / 4 Model Lineup & Empirical API Option Verification
+
+While Chapters 3–5 use **`gemini-3.8-flash`** as the primary benchmark baseline, Google AI Studio (Gemini API) has evolved significantly from the **Gemini 3.5 / 3.8 series** to the **Gemini 4 series (`Hydrogen` / `Argon` / `Carbon`)** in how `ThinkingConfig` (`thinking_level` vs. `thinking_budget`), **Context Caching** (Explicit vs. Implicit caching and the 2,050-token multi-turn uncached tail window), and sampling parameters behave.
+
+This section synthesizes official documentation specifications and live API verification (`client.models.get()` and `generate_content()`) into three comprehensive reference tables (Tables 2-5A through 2-5C).
+
+### 1. Active Model Lineup, Positioning, and Selection Criteria (Table 2-5A)
+
+As of November 2026, legacy models `gemini-2.5-flash` (auto-routed to `gemini-3.5-flash-lite`), `gemini-2.5-pro` (auto-routed to `gemini-3.8-flash`), and `gemini-3.5-flash` (auto-routed to `gemini-3.6-flash`) are deprecated. Because **the Gemini 4 generation does not yet include a "Lite" tier model**, text and multimodal generation across all latency and reasoning tiers is covered by the **five active models (`3.5-flash-lite`, `3.8-flash`, `4-hydrogen`, `4-argon`, `4-carbon`)** summarized below.
+
+| Model ID (`model`) | Status & Generation | Pricing (Input / Output per 1M tok) | Context Window / Single-Hop Output Cap | Default `thinking_level` | Positioning & Practical Selection Guidelines |
+| :--- | :---: | :--- | :--- | :---: | :--- |
+| **`gemini-3.5-flash`** | Deprecated<br>*(Auto-routed to `3.6-flash`)* | $1.50 / $7.50<br>*(3.6-flash pricing)* | Input `1,048,576`<br>Output `65,536` (separate) | `medium` | **[Deprecated 3.5 Flash]**<br>• API requests automatically route to `gemini-3.6-flash`.<br>• Migrate new workloads to `gemini-4-hydrogen` or `gemini-3.8-flash`. |
+| **`gemini-3.5-flash-lite`** | **Active Stable**<br>*(Latest 3.x Lite)* | **$0.30 / $2.50** | Input `1,048,576`<br>Output `65,536` (separate) | **`minimal`**<br>*(0 thoughts)* | **[Fastest, Lowest-Cost Lite Workhorse]**<br>• Official recommended Lite model for new projects and the auto-migration target for `gemini-2.5-flash` (no Gemini 4 Lite exists yet).<br>• Defaults to `minimal` (`0` reasoning tokens) for ultra-fast routing, extraction, and classification; supports `medium` / `high` for autonomous subagent planning. |
+| **`gemini-3.8-flash`** | **Active Stable**<br>*(Report Baseline)* | **$1.50 / $7.50** | Input `1,048,576`<br>Output `65,536` (separate) | `medium` | **[Final 3.x Flagship Flash]**<br>• Official migration target for `gemini-2.5-pro`. While `gemini-4-hydrogen` is recommended at the same price point, **`gemini-3.8-flash` remains preferred when (1) zero-thought (`0 tok`) low-latency execution via `thinking_level="low"` is required, or (2) Explicit Context Caching (`caches.create`) is needed**. |
+| **`gemini-4-hydrogen`** | **Active Stable**<br>*(Recommended Flash Upgrade)* | **$1.50 / $7.50**<br>*(Free & Paid Tiers)* | **Unified 1M (`1,048,576`)**<br>Single-hop `65,536`<br>*(Long Decode up to 1M)* | **`high`** | **[Gemini 4 Mainstream Workhorse]**<br>• Same price as `3.8-flash` with stronger coding and agentic reasoning.<br>• Always-thinking architecture (thinking cannot be disabled), adding an exclusive **`xhigh`** level and **Long Decode (`automatic_continuation=True` up to 1M tokens)**. |
+| **`gemini-4-argon`** | **Active Stable**<br>*(Paid Tier Only)* | **$2.00 / $10.00**<br>*($4 / $20 after Nov 30, 2026)* | **Unified 1M (`1,048,576`)**<br>REST `32,768` / Stream `65,536`<br>*(Long Decode up to 1M)* | `medium` | **[Efficient Frontier Reasoning (Pro Tier)]**<br>• Built for complex software architecture, math, and multi-step agentic tasks beyond `hydrogen`.<br>• Approaches `carbon` quality while spending fewer reasoning tokens and lower latency per turn. |
+| **`gemini-4-carbon`** | **Active Stable**<br>*(Paid Tier Only)* | **$2.00 / $10.00**<br>*($4 / $20 after Nov 30, 2026)* | **Unified 1M (`1,048,576`)**<br>REST `32,768` / Stream `65,536`<br>*(Long Decode up to 1M)* | `medium` | **[Highest-Reasoning Frontier Model]**<br>• Spends the most reasoning tokens per turn; designed for the hardest software engineering, scientific reasoning, and cybersecurity tasks where accuracy outweighs latency. |
+
+---
+
+### 2. Model-by-Model `ThinkingConfig` (`thinking_level` vs. `thinking_budget`) Empirical Matrix (Table 2-5B)
+
+In the Gemini API, numeric **`thinking_budget`** was introduced for the Gemini 2.5 series, whereas string enum **`thinking_level`** is the standard parameter for **Gemini 3 and Gemini 4**. Crucially, **`thinking_budget` is deprecated starting in Gemini 3**: to disable or minimize internal reasoning on Gemini 3+ models, developers should specify the model's lowest supported **`thinking_level`** (`"minimal"` or `"low"`) rather than `thinking_budget=0` (passing both `thinking_level` and `thinking_budget` simultaneously returns HTTP `400` on all models).
+
+Table 2-5B compares all five `thinking_level` values (`minimal`, `low`, `medium`, `high`, `xhigh`) and legacy `thinking_budget` values (`0`, `256`, `4096`) across live API executions on a simple 1-word factual query versus a complex 5-person seating constraint puzzle (`usage_metadata.thoughts_token_count`).
+
+| `ThinkingConfig` Parameter | `gemini-3.5-flash`<br>*(Auto-routed to `3.6-flash`)* | `gemini-3.5-flash-lite`<br>*(Active Lite)* | `gemini-3.8-flash`<br>*(Report Baseline)* | `gemini-4-hydrogen`<br>*(4 Mainstream)* | `gemini-4-argon` /<br>`gemini-4-carbon` |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **Supported `thinking_level`s** | **`minimal`, `low`, `medium`, `high`** (4 levels) | **`minimal`, `low`, `medium`, `high`** (4 levels) | **`low`, `medium`, `high`** (3 levels) | **`low`, `medium`, `high`, `xhigh`** (4 levels) | **`low`, `medium`, `high`** (3 levels) |
+| **Unspecified (`None` / Default)** | Default = **`medium`**<br>Simple: `69 tok`<br>Complex: `2,711 tok` | Default = **`minimal`**<br>Simple: **`0 tok` (`None`)**<br>Complex: **`0 tok` (`None`)** | Default = **`medium`**<br>Simple: `0 tok` (`None`)<br>Complex: `1,303 tok` | Default = **`high`**<br>Simple: `68 tok`<br>Complex: `1,286 tok` | Default = **`medium`**<br>Dynamic reasoning |
+| **`thinking_level="minimal"`** | ✅ **Supported (No-Thinking)**<br>Simple: **`0 tok`**<br>Complex: **`0 tok`** | ✅ **Supported (Default)**<br>Simple: **`0 tok`**<br>Complex: **`0 tok`** | ❌ **`400 INVALID_ARGUMENT`**<br>*(MINIMAL is not supported)* | ❌ **`400 INVALID_ARGUMENT`**<br>*(MINIMAL is not supported)* | ❌ **`400 INVALID_ARGUMENT`**<br>*(MINIMAL is not supported)* |
+| **`thinking_level="low"`** | ✅ **Supported (Moderate)**<br>Simple: `70 tok`<br>Complex: `2,051 tok` | ✅ **Supported (Minimal)**<br>Simple: `41 tok`<br>Complex: **`0 tok`** | ✅ **Supported (Acts as 0 tok)**<br>Simple: **`0 tok`**<br>Complex: **`0 tok`** | ✅ **Supported (Always thinks)**<br>Simple: `35 tok`<br>Complex: `1,324 tok` | ✅ **Supported (Lowest)**<br>Simple: **`0 tok`**<br>Complex: Light reasoning |
+| **`thinking_level="medium"`** | ✅ **Supported (Default)**<br>Simple: `73 tok`<br>Complex: `2,613 tok` | ✅ **Supported (Deep Thinking)**<br>Simple: `53 tok`<br>Complex: `4,175 tok` | ✅ **Supported (Default)**<br>Simple: `0 tok`<br>Complex: `1,403 tok` | ✅ **Supported**<br>Simple: `36 tok`<br>Complex: `1,528 tok` | ✅ **Supported (Default)** |
+| **`thinking_level="high"`** | ✅ **Supported**<br>Simple: `70 tok`<br>Complex: `3,921 tok` | ✅ **Supported**<br>Simple: `58 tok`<br>Complex: `4,224 tok` | ✅ **Supported**<br>Simple: `61 tok`<br>Complex: `1,636 tok` | ✅ **Supported (Default)**<br>Simple: `67 tok`<br>Complex: `1,217 tok` | ✅ **Supported** |
+| **`thinking_level="xhigh"`** | ❌ **`400 INVALID_ARGUMENT`**<br>*(XHIGH is not supported)* | ❌ **`400 INVALID_ARGUMENT`**<br>*(XHIGH is not supported)* | ❌ **`400 INVALID_ARGUMENT`**<br>*(XHIGH is not supported)* | ✅ **Supported (Hydrogen Only)**<br>Simple: `84 tok`<br>Complex: **`3,376 tok`** | ❌ **`400 INVALID_ARGUMENT`**<br>*(XHIGH is not supported)* |
+| **`thinking_budget=0`**<br>*(Deprecated Legacy Param)* | ⚠️ Legacy compatible<br>Simple: **`0 tok`** / Complex: **`0 tok`** | ❌ **`400 INVALID_ARGUMENT`**<br>*(Rejected on 3.5-flash-lite)* | ⚠️ Legacy compatible<br>Simple: **`0 tok`** / Complex: **`0 tok`**<br>*(Used for benchmark `"0"`)* | ⚠️ **Maps to `low` (Warning)**<br>Simple: `32 tok` / Complex: `1,398 tok`<br>*(Does not disable thinking)* | ⚠️ Maps to nearest `thinking_level` (cannot disable thinking) |
+| **`thinking_budget=256`**<br>*(Deprecated Legacy Param)* | ⚠️ Exceeds 256 cap<br>Simple: `63 tok` / Complex: `1,486 tok` | ⚠️ Exceeds 256 cap<br>Simple: `50 tok` / Complex: `2,009 tok` | ⚠️ Legacy compatible<br>Simple: **`0 tok`** / Complex: **`0 tok`**<br>*(Used for benchmark `"minimal"`)* | ⚠️ Maps to `thinking_level`<br>Simple: `69 tok` / Complex: `1,346 tok` | ⚠️ Maps to nearest `thinking_level` |
+| **`thinking_budget=4096`**<br>*(Deprecated Legacy Param)* | ⚠️ Maps near `medium`/`high`<br>Simple: `68 tok` / Complex: `3,355 tok` | ⚠️ Maps near `medium`<br>Simple: `62 tok` / Complex: `3,449 tok` | ⚠️ **Intermediate thoughts**<br>Simple: `0 tok` / Complex: **`351–673 tok`**<br>*(Used for benchmark `"low"`)* | ⚠️ Maps to `thinking_level`<br>Complex: `1,471 tok` | ⚠️ Maps to nearest `thinking_level` |
+
+---
+
+### 3. Context Caching & API Parameter Evolution Across Generations (Table 2-5C)
+
+| Feature / Parameter | `gemini-3.5-flash` / `gemini-3.5-flash-lite` | `gemini-3.8-flash`<br>*(Report Baseline)* | `gemini-4-hydrogen` / `argon` / `carbon` |
+| :--- | :--- | :--- | :--- |
+| **Implicit Context Caching**<br>*(Zero-Config Auto-Caching)* | ✅ **Enabled by default**<br>• Documented minimum: `4,096 tok`<br>• Bypasses prefill computation and discounts cached prefix tokens | ✅ **Enabled by default**<br>• Documented minimum: `4,096 tok`<br>• **Empirically activates at Turn 8 (`2,686 prompt_tokens`, `703 cached_tokens`) right after crossing `2,048 tok`** (Chapter 5) | ✅ **Enabled by default (95% discount)**<br>• Documented minimum: `4,096 tok`<br>• **Explicitly documents the `2,050-token` uncached tail rule in multi-turn loops** |
+| **Multi-Turn Uncached Tail Window Rule**<br>*(Why caching starts above ~2,050 tok and leaves ~2,000 uncached tail tokens)* | Automatically caches matching prefixes while re-processing the trailing window at standard input rates. | In Chapter 5's 50-turn benchmark, **cache hits begin at Turn 8 (`2,686 tok`) and maintain a constant `Prompt - Cached ≈ 2,000 tokens` uncached tail across Turns 8–50**. | Gemini 4 documentation formally states:<br>*"Gemini caches the full previous request only if the new request adds at least **2,050 tokens**... For smaller additions, Gemini re-processes the last **2,050 tokens** of the previous request at the standard input rate."* |
+| **Explicit Context Caching**<br>(`client.caches.create` / `createCachedContent`) | ✅ **Supported** (`v1beta`) | ✅ **Supported** (`v1beta`)<br>• Included in `supported_actions` | ❌ **Removed (Unsupported / Returns Error)**<br>• Standardized exclusively on Implicit Caching |
+| **Sampling Parameters**<br>(`temperature`, `top_p`, `top_k`, `candidate_count`) | ⚠️ **Deprecated & Ignored**<br>• `candidate_count` unsupported | ⚠️ **Deprecated & Ignored**<br>• Fixed to optimal reasoning defaults | ⚠️ **Deprecated & Ignored**<br>• Ignored if in-range; out-of-range values return HTTP `400` |
+| **Prefilled Model Turn Validation**<br>(`contents` ending with `role="model"`) | ❌ **Disallowed (`400` Error)**<br>*(Enforced from 3.6-flash / 3.5-flash-lite)* | ❌ **Disallowed (`400` Error)**<br>• Use `system_instruction` or `response_schema` instead | ❌ **Disallowed (`400` Error)** |
+

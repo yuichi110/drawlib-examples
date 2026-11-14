@@ -1,8 +1,16 @@
 # 5. Multi-Turn Chat Behavior & Context Caching
 
-In production conversational AI systems (such as PC technical support desks and interactive troubleshooting assistants), users engage in extended multi-turn dialogues rather than isolated single-turn prompts. In this chapter, we analyze empirical measurements from a **50-turn continuous PC troubleshooting customer-support chat benchmark** (`src/gemini_evaluation/benchmark_multiturn_chat.py` / `multiturn_chat_log.json`, `200 total API executions` across `50 turns × 4 variants`) on Google AI Studio (`google-genai` SDK with `gemini-3.8-flash`). We examine how linear conversation history growth (`176 → 21,490 prompt_tokens`, `42,281 cumulative characters`) affects latency and how Gemini 3.8 Flash's zero-configuration **Implicit Context Caching (`cached_content_token_count`)** bounds prefill latency across long conversations.
+In production conversational AI systems (such as PC technical support desks and interactive troubleshooting assistants), users engage in extended multi-turn dialogues rather than isolated single-turn prompts. Moreover, realistic customer-support sessions mix a majority of routine diagnostic/procedural turns (`80%`) with occasional complex multi-condition calculation turns (`20%`, such as estimating battery backup duration during a power outage, virtual-memory sizing, or 3-year repair-vs-replacement total cost of ownership).
 
-```drawlib align=center code=fold width=100% file=ch5_multiturn_hero.png caption="Figure 5-1: 50-Turn PC Support Multi-Turn Evaluation Architecture & 4-Variant Average Latency Comparison (gemini-3.8-flash)"
+In this chapter, we **standardize exclusively on Streaming (`generate_content_stream`)** and analyze empirical measurements from a **50-turn continuous PC troubleshooting customer-support chat benchmark** (`src/gemini_evaluation/benchmark_multiturn_chat.py` / `multiturn_chat_log.json`, `150 total API executions` across `50 turns × 3 Streaming configurations`) on Google AI Studio (`google-genai` SDK with `gemini-3.8-flash`). We evaluate **initial response time (`TTFT`)** and **stream completion time (`Total`)**, alongside Gemini 3.8 Flash's zero-configuration **Implicit Context Caching (`cached_content_token_count`)**, across:
+
+1. **`(1)` Single-Model Fixed Streaming (`gemini-3.8-flash` `low` and `high`)**:
+   - **`streaming_low` (`3.8-flash [low]` fixed)**: Streams all 50 turns with `thinking_level="low"`.
+   - **`streaming_high` (`3.8-flash [high]` fixed)**: Streams all 50 turns with `thinking_level="high"`.
+2. **`(2)` Chapter 4's Adaptive Thinking Router (`adaptive_pat_a`: Pattern A `low → high`)**:
+   - Streams the 2-field integrated Pydantic schema `{thinking: bool, response: str}` in Stage 1 (`3.8-flash [low]`). On the 40 routine turns (`thinking=false`), Stage 1 answers directly in a single API call; on the 10 complex calculation turns (`thinking=true`: every 5th turn `T5, 10, ..., 50`), Stage 1 streams a 1-sentence bridge message in ~2.85s while launching Stage 2 (`3.8-flash [high]`) in parallel to stream the verified calculation.
+
+```drawlib align=center code=fold width=100% file=ch5_multiturn_hero.png caption="Figure 5-1: 50-Turn PC Support Multi-Turn Streaming Architecture & 3-Configuration TTFT / Total Comparison (gemini-3.8-flash)"
 from drawlib.canvas import save, setup
 from drawlib.icons import phosphor
 from drawlib.lines import line
@@ -10,142 +18,147 @@ from drawlib.shapes import rectangle
 from drawlib.styles import Styles
 from drawlib.text import text
 
-setup(width=156, height=80, dpi=150)
+setup(width=156, height=82, dpi=150)
 
 # Outer structural frame
-rectangle((78, 40), width=152, height=76, style=Styles.MutedDashed.patch(shape_r=2.0))
+rectangle((78, 41), width=152, height=78, style=Styles.MutedDashed.patch(shape_r=2.0))
 text(
-    (78, 74.2),
-    "50-Turn PC Support Multi-Turn Architecture & 4-Variant Latency Comparison (gemini-3.8-flash)",
-    style=Styles.DarkBold.patch(text_size=11.5),
+    (78, 76.0),
+    "50-Turn PC Support Streaming Benchmark: (1) 3.8-flash low/high vs (2) Adaptive Thinking Router",
+    style=Styles.DarkBold.patch(text_size=11.2),
 )
 
 # Top pipeline band: 50-Turn Evaluation Loop
-rectangle((78, 59.8), width=146, height=18.0, style=Styles.PrimaryNeutral.patch(shape_r=1.5))
+rectangle((78, 61.2), width=146, height=18.0, style=Styles.PrimaryNeutral.patch(shape_r=1.5))
 text(
-    (78, 66.2),
-    "Per-Turn Benchmark Pipeline (50-Step PC Troubleshooting Scenario with Rotated Call Order for Fair Cache Warm-Up)",
-    style=Styles.DarkBold.patch(text_size=10.2),
+    (78, 67.6),
+    "Per-Turn Streaming Pipeline (40 Routine Turns [80%] + 10 Multi-Step Math Turns [20%: T5,10..50] with Rotated Call Order)",
+    style=Styles.DarkBold.patch(text_size=10.0),
 )
 
 loop_steps = [
-    (22.0, 29.5, "1. User Simulator", "gemini-3.8-flash (t=0)\nPC issue query (avg 85.6 ch)", Styles.WhiteFlat),
-    (57.5, 31.5, "2. History + New Turn", "history: list[Content]\n176 → 21,490 tok (42,281 ch)", Styles.WhiteFlat),
-    (95.0, 34.0, "3. Implicit Cache Hit", "Auto-active at T8–9 (~2.7k tok)\n87.2% hit in T41–50 (max 90.6%)", Styles.SecondaryNeutral),
-    (132.5, 31.0, "4. Evaluate 4 Variants", "Detailed support guide\n(avg 753.0 ch, ~8.8× user query)", Styles.WhiteFlat),
+    (22.0, 29.5, "1. User Simulator", "gemini-3.8-flash (low)\n80% routine + 20% math (103 ch)", Styles.WhiteFlat),
+    (57.5, 31.5, "2. History + New Turn", "history: list[Content]\n180 → 20,899 tok (37,531 ch)", Styles.WhiteFlat),
+    (95.0, 34.0, "3. Implicit Cache Hit", "Auto-active at T8–9 (~2.7k tok)\n87.1% avg T41–50 (max 90.2%)", Styles.SecondaryNeutral),
+    (132.5, 31.0, "4. 3 Streaming Configs", "Record Initial Response (TTFT)\n& Completion (Total) on all 50T", Styles.WhiteFlat),
 ]
 for cx, w, st_top, st_bot, box_st in loop_steps:
-    rectangle((cx, 57.0), width=w, height=10.8, style=box_st.patch(shape_r=1.2, line_width=0.8))
-    text((cx, 59.8), st_top, style=Styles.DarkBold.patch(text_size=10.2))
-    text((cx, 54.6), st_bot, style=Styles.Dark.patch(text_size=10.0))
+    rectangle((cx, 58.4), width=w, height=10.8, style=box_st.patch(shape_r=1.2, line_width=0.8))
+    text((cx, 61.2), st_top, style=Styles.DarkBold.patch(text_size=10.0))
+    text((cx, 56.0), st_bot, style=Styles.Dark.patch(text_size=9.8))
 
-line((36.8, 57.0), (41.7, 57.0), arrow_head="->", style=Styles.DarkBold)
-line((73.3, 57.0), (78.0, 57.0), arrow_head="->", style=Styles.DarkBold)
-line((112.0, 57.0), (117.0, 57.0), arrow_head="->", style=Styles.DarkBold)
+line((36.8, 58.4), (41.7, 58.4), arrow_head="->", style=Styles.DarkBold)
+line((73.3, 58.4), (78.0, 58.4), arrow_head="->", style=Styles.DarkBold)
+line((112.0, 58.4), (117.0, 58.4), arrow_head="->", style=Styles.DarkBold)
 
-# Left Column: thinking=0 (Fast & Deterministic)
-phosphor.lightning((7.5, 46.8), width=3.4, style=Styles.DarkBold)
+# Left Column: (1) Single-Model Fixed Streaming (low vs high)
+phosphor.lightning((7.5, 48.0), width=3.2, style=Styles.DarkBold)
 text(
-    (10.5, 46.8),
-    "thinking=0 (Fast & Deterministic)",
-    style=Styles.DarkBold.patch(text_size=10.8, halign="left"),
-)
-
-# Focal Card: streaming_t0
-rectangle((42.0, 34.4), width=72.0, height=18.6, style=Styles.PrimaryFlat.patch(shape_r=1.6))
-phosphor.star((8.2, 40.8), width=3.2, style=Styles.WhiteBold)
-text(
-    (11.2, 40.8),
-    "Recommended: streaming_t0 (Streaming × thinking=0)",
-    style=Styles.WhiteBold.patch(text_size=10.5, halign="left"),
-)
-text(
-    (7.8, 36.6),
-    "• First Token (TTFT): Avg 2,460 ms (Median 2,029 ms)",
-    style=Styles.White.patch(text_size=10.0, halign="left"),
-)
-text(
-    (7.8, 32.8),
-    "• Stream Total: Avg 6,323 ms (-3,964 ms / 62% earlier vs Blocking)",
-    style=Styles.White.patch(text_size=10.0, halign="left"),
-)
-text(
-    (7.8, 29.0),
-    "• 50-Turn Scaling: 2,180ms (T11–20) → 2,574ms (T41–50) [+29ms/1k]",
-    style=Styles.WhiteBold.patch(text_size=10.0, halign="left"),
+    (10.5, 48.0),
+    "(1) Single-Model Fixed Streaming: 3.8-flash low vs high",
+    style=Styles.DarkBold.patch(text_size=10.4, halign="left"),
 )
 
-# Secondary Card: blocking_t0
-rectangle((42.0, 17.2), width=72.0, height=12.4, style=Styles.Neutral.patch(shape_r=1.4))
+# Card 1A: streaming_low
+rectangle((42.0, 36.8), width=72.0, height=16.0, style=Styles.Neutral.patch(shape_r=1.4))
 text(
-    (7.8, 20.6),
-    "Baseline: blocking_t0 (Blocking × thinking=0)",
-    style=Styles.DarkBold.patch(text_size=10.2, halign="left"),
+    (7.8, 42.2),
+    "1. streaming_low (gemini-3.8-flash [low] fixed)",
+    style=Styles.DarkBold.patch(text_size=10.0, halign="left"),
 )
 text(
-    (7.8, 16.8),
-    "• TTFT = Total: Avg 6,424 ms (Median 6,062 ms)",
-    style=Styles.Dark.patch(text_size=10.0, halign="left"),
+    (7.8, 38.4),
+    "• Initial TTFT: Avg 2,310 ms (Med 2,084 ms | Routine 2,304 / Math 2,336 ms)",
+    style=Styles.Dark.patch(text_size=9.5, halign="left"),
 )
 text(
-    (7.8, 13.2),
-    "• Waits until all ~753 chars finish decoding (+3.96s perceived delay)",
-    style=Styles.Dark.patch(text_size=10.0, halign="left"),
+    (7.8, 34.8),
+    "• Completion Total: Avg 6,589 ms (Med 6,583 ms | Avg 0 thinking tokens)",
+    style=Styles.Dark.patch(text_size=9.5, halign="left"),
+)
+text(
+    (7.8, 31.2),
+    "• Issue: Fast on all turns, but 0 thinking tokens on the 10 math turns",
+    style=Styles.Dark.patch(text_size=9.5, halign="left"),
+)
+
+# Card 1B: streaming_high
+rectangle((42.0, 19.6), width=72.0, height=15.6, style=Styles.Neutral.patch(shape_r=1.4))
+text(
+    (7.8, 24.8),
+    "2. streaming_high (gemini-3.8-flash [high] fixed)",
+    style=Styles.DarkBold.patch(text_size=10.0, halign="left"),
+)
+text(
+    (7.8, 21.0),
+    "• Initial TTFT: Avg 21,173 ms (Routine 16,958 ms / Math 38,033 ms)",
+    style=Styles.Dark.patch(text_size=9.5, halign="left"),
+)
+text(
+    (7.8, 17.4),
+    "• Completion Total: Avg 23,827 ms (Routine 19,683 ms / Math 40,404 ms)",
+    style=Styles.Dark.patch(text_size=9.5, halign="left"),
+)
+text(
+    (7.8, 13.8),
+    "• Issue: Wastes 1,534 thinking tokens (~17s freeze) on 40 routine turns",
+    style=Styles.Dark.patch(text_size=9.5, halign="left"),
 )
 
 # Vertical divider
-line((80.0, 11.0), (80.0, 48.5), style=Styles.MutedDashed.patch(line_width=1.0))
+line((80.0, 12.0), (80.0, 49.5), style=Styles.MutedDashed.patch(line_width=1.0))
 
-# Right Column: thinking=default (Dynamic Thinking Inflation)
-phosphor.warning((84.2, 46.8), width=3.4, style=Styles.DarkBold)
+# Right Column: (2) Chapter 4 Adaptive Thinking Router (Pattern A: low -> high)
+phosphor.star((84.2, 48.0), width=3.2, style=Styles.DarkBold)
 text(
-    (87.2, 46.8),
-    "thinking=default (Dynamic Reasoning Inflation: 10–13s Avg)",
-    style=Styles.DarkBold.patch(text_size=10.8, halign="left"),
-)
-
-# Card: streaming_default
-rectangle((116.5, 35.8), width=69.0, height=15.6, style=Styles.Neutral.patch(shape_r=1.4))
-text(
-    (84.0, 40.4),
-    "streaming_default (Streaming × thinking=default)",
+    (87.2, 48.0),
+    "(2) Recommended: Ch.4 Adaptive Thinking Router (Pattern A)",
     style=Styles.DarkBold.patch(text_size=10.2, halign="left"),
 )
-text(
-    (84.0, 36.2),
-    "• Avg TTFT: 9,838 ms | Avg Total: 12,335 ms",
-    style=Styles.Dark.patch(text_size=10.0, halign="left"),
-)
-text(
-    (84.0, 32.2),
-    "• Avg 858 thinking tokens block visible streaming for ~9.8s",
-    style=Styles.Dark.patch(text_size=10.0, halign="left"),
-)
 
-# Card: blocking_default
-rectangle((116.5, 17.6), width=69.0, height=13.2, style=Styles.Neutral.patch(shape_r=1.4))
+rectangle((116.5, 28.2), width=69.0, height=33.2, style=Styles.PrimaryFlat.patch(shape_r=1.6))
 text(
-    (84.0, 21.4),
-    "blocking_default (Blocking × thinking=default)",
-    style=Styles.DarkBold.patch(text_size=10.2, halign="left"),
+    (84.2, 41.8),
+    "3. adaptive_pat_a (Stage 1: low → Parallel Stage 2: high)",
+    style=Styles.WhiteBold.patch(text_size=9.8, halign="left"),
 )
 text(
-    (84.0, 17.4),
-    "• Avg TTFT = Total: 13,025 ms (Avg 954 thinking tokens)",
-    style=Styles.Dark.patch(text_size=10.0, halign="left"),
+    (84.2, 37.4),
+    "• Routing Accuracy: 50 / 50 (100%) Match (40 Routine, 10 Math)",
+    style=Styles.WhiteBold.patch(text_size=9.5, halign="left"),
 )
 text(
-    (84.0, 13.6),
-    "• Volatile (6.7s–22.0s) driven by 0–2,237 reasoning tokens",
-    style=Styles.Dark.patch(text_size=10.0, halign="left"),
+    (84.2, 33.2),
+    "• Initial TTFT: Avg 2,618 ms (Med 2,420 ms / P95 3,841 ms)",
+    style=Styles.White.patch(text_size=9.5, halign="left"),
+)
+text(
+    (86.0, 29.4),
+    "→ Routine 40T: 2,560 ms direct | Math 10T: 2,851 ms bridge",
+    style=Styles.White.patch(text_size=9.5, halign="left"),
+)
+text(
+    (84.2, 25.2),
+    "• Completion Total: Avg 12,034 ms (Med 4,990 ms)",
+    style=Styles.White.patch(text_size=9.5, halign="left"),
+)
+text(
+    (86.0, 21.4),
+    "→ Routine 40T: 5,008 ms | Math 10T: Stage 2 high (40,142 ms)",
+    style=Styles.White.patch(text_size=9.5, halign="left"),
+)
+text(
+    (84.2, 16.8),
+    "• Stage 1→2 Cache Share: Stage 2 hits 90.2% (18,890 tok) at T50",
+    style=Styles.WhiteBold.patch(text_size=9.5, halign="left"),
 )
 
 # Bottom architectural insight banner
 rectangle((78.0, 6.2), width=146.0, height=6.0, style=Styles.SecondaryNeutral.patch(shape_r=1.2))
 text(
     (78.0, 6.2),
-    "Key Takeaway: Across 50 turns of ~753-char replies, streaming_t0 delivers the first token 3.96s (62%) earlier with flat scaling.",
-    style=Styles.DarkBold.patch(text_size=10.0),
+    "Takeaway: Adaptive Thinking cuts TTFT by 87.6% (21.2s → 2.6s) and thinking tokens by 61.7% vs high while preserving math accuracy.",
+    style=Styles.DarkBold.patch(text_size=9.5),
 )
 
 save()
@@ -153,11 +166,11 @@ save()
 
 ---
 
-## 5.1 50-Turn PC Support Benchmark Architecture & Methodology
+## 5.1 50-Turn PC Support Streaming Benchmark Architecture & Methodology
 
-### 1. Multi-Turn History Accumulation in `google-genai`
+### 1. Multi-Turn History Accumulation & Adaptive Routing in `google-genai`
 
-Because the Gemini API is stateless across individual HTTP/gRPC requests, multi-turn chat in `google-genai` requires the application to maintain an ordered conversation list `history: list[types.Content]` (alternating `role="user"` and `role="model"` entries) and send the entire accumulated history plus the new user message on every turn (`src/gemini_evaluation/llm_call.py`):
+Because the Gemini API is stateless across individual HTTP/gRPC requests, multi-turn chat in `google-genai` requires the application to maintain an ordered conversation list `history: list[types.Content]` (alternating `role="user"` and `role="model"` entries) and send the accumulated history plus the new user message on every turn (`src/gemini_evaluation/llm_call.py` and `src/gemini_evaluation/adaptive_thinking.py`):
 
 ```python
 from google import genai
@@ -171,45 +184,40 @@ contents: list[types.Content] = [
     types.Content(role="user", parts=[types.Part.from_text(text=user_prompt)]),
 ]
 
+# (1) Single-model fixed Streaming (thinking_level="low" or "high")
 response_stream = await client.aio.models.generate_content_stream(
     model="gemini-3.8-flash",
     contents=contents,
     config=types.GenerateContentConfig(
         system_instruction=AGENT_SYSTEM_INSTRUCTION,
-        thinking_config=types.ThinkingConfig(thinking_budget=0),
+        thinking_config=types.ThinkingConfig(thinking_level="low"),  # or "high"
         temperature=0.2,
     ),
 )
 ```
 
-In this architecture, `prompt_token_count` grows monotonically with every turn. To evaluate how this growth impacts real-world latency, our 50-turn benchmark (`src/gemini_evaluation/benchmark_multiturn_chat.py`) implements an asymmetric two-agent simulation of **a customer and a PC technical support specialist troubleshooting an unresponsive PC**:
+In our 50-turn benchmark (`src/gemini_evaluation/benchmark_multiturn_chat.py`), we simulate **a customer and a PC technical support specialist troubleshooting an unresponsive PC** across a realistic mix of **40 routine procedural turns (`80%`)** and **10 multi-condition numerical calculation turns (`20%`: every 5th turn)**:
 
-1. **User Simulator (`gemini-3.8-flash`, `thinking=0`)**:
-   Generates a concise `70–100 char` customer question (`avg 85.6 chars`) across 50 sequential PC troubleshooting stages:
-   - **Turns 1–10 (Power, Discharge & Safe Mode)**: Black screen on power-on, blinking AC adapter LED, 30-second power-button discharge, logo freeze, BIOS `F2` SSD check, BIOS reset error `0xc0000001`, and booting into Windows Safe Mode.
-   - **Turns 11–20 (Data Backup & Software/Driver Isolation)**: Backing up work documents to USB in Safe Mode, uninstalling recent Windows Updates, rolling back a yellow-bang display driver in Device Manager, running `sfc /scannow` / `DISM` and `chkdsk`, isolating post-login freezes via Task Manager and `msconfig` clean boot, thermal check, and Windows Memory Diagnostic.
-   - **Turns 21–30 (Storage Health, System Restore & USB Recovery Media)**: Checking SSD S.M.A.R.T. health, Event Viewer `Kernel-Power 41` logs, disabling Fast Startup, PCIe link power management, BIOS/chipset updates, `MEMORY_MANAGEMENT` BSOD System Restore, Reset this PC (Keep my files), Cloud Download vs. Local Reinstall, creating a USB recovery drive on another PC, and BIOS boot order / Secure Boot configuration.
-   - **Turns 31–45 (BitLocker, Hardware Diagnostics & Repair Logistics)**: Locating the 48-digit BitLocker recovery key on a smartphone, running built-in hardware Diagnostics (detecting a memory module error code), verifying 1-year standard warranty vs. accidental damage coverage by serial number, pickup repair packaging, AC adapter inclusion rules, SSD data wipe consent, paid data recovery options, loaner/rental PC availability, on-site same-day repair eligibility, out-of-warranty cancellation fees, and trade-in replacement discounts.
-   - **Turns 46–50 (Post-Repair Verification & Preventive Backup)**: Post-repair inspection checklist and warranty period, malware scanning before restoring USB backups, automated system image backups to external SSD, OneDrive cloud folder sync, and 3 daily maintenance habits.
-2. **PC Support Agent (`gemini-3.8-flash`)**:
-   Reads the accumulated `history` and generates a comprehensive diagnostic and step-by-step response (`avg 753.0 chars`, **~8.8× longer** than the user query) covering troubleshooting steps, decision criteria, and safety precautions.
-3. **4-Variant Evaluation with Rotated Call Order (`rot = (turn - 1) % 4`)**:
-   Across all 50 turns (`176 → 21,490 prompt_tokens`, `42,281 cumulative chars`), we evaluate 4 variants on the exact same `history`, rotating execution order to eliminate cache-warmup bias:
+1. **User Simulator (`gemini-3.8-flash`, `thinking_level="low"`)**:
+   Generates a natural customer question (`avg 103.4 chars`) at each of the 50 troubleshooting stages:
+   - **40 Routine Troubleshooting Turns (`expected_thinking=False`)**: Power/AC adapter checks, 30-second discharge, BIOS check, Safe Mode boot, driver rollback, `sfc /scannow`, clean boot, BitLocker recovery key lookup, repair packaging, and post-repair checks.
+   - **10 Complex Multi-Condition Calculation Turns (`expected_thinking=True` at `Turns 5, 10, 15, 20, 25, 30, 35, 40, 45, 50`)**: Two turns per 10-turn cohort require exact multi-step arithmetic (e.g., Turn 5: `18 GB` USB backup feasibility on a `36 Wh` battery at `45 W` drain during a blackout; Turn 25: `pagefile.sys` + `hiberfil.sys` disk footprint on a `32 GB RAM` PC; Turn 40: standard warranty vs. accidental damage deductible comparison; Turn 50: 3-year cloud + external SSD backup TCO and `99.5%` SLA downtime budget).
+2. **3 Streaming Configurations Evaluated with Rotated Call Order (`rot = (turn - 1) % 3`)**:
+   Across all 50 turns (`180 → 20,899 prompt_tokens`, `37,531 cumulative chars`), we evaluate 3 Streaming configurations on the exact same `history`, rotating execution order every turn (using the `streaming_low` reply averaging `647.2 chars` as the canonical history entry):
 
-| Variant Key | SDK Method | `ThinkingConfig` | Avg `TTFT` (Median) | Avg `Total` | Avg Thinking Tokens | Architectural Role |
+| Streaming Configuration | Stage 1 / Single Config | Stage 2 (`thinking=true`) | Initial `TTFT` Avg (Med / P95) | Completion `Total` Avg (Med / P95) | Avg Thinking Tokens | Behavior Across 40 Routine vs. 10 Complex Turns |
 | :--- | :--- | :--- | ---: | ---: | ---: | :--- |
-| **`streaming_t0`** | `generate_content_stream` | `thinking_budget=0` | **`2,460 ms`** (`2,029 ms`) | **`6,323 ms`** | `19 tok` (T2–50: `0`) | **Recommended**: Delivers first token **`3,964 ms` (`3.96s` / `62%`) earlier** every turn |
-| **`blocking_t0`** | `generate_content` | `thinking_budget=0` | `6,424 ms` (`6,062 ms`) | `6,424 ms` | `0 tok` | Waits for full ~753-char completion (`TTFT = Total`) |
-| **`streaming_default`** | `generate_content_stream` | Default (dynamic) | `9,838 ms` (`10,500 ms`) | `12,335 ms` | `858 tok` | Internal reasoning stalls first visible token for ~9.8s |
-| **`blocking_default`** | `generate_content` | Default (dynamic) | `13,025 ms` (`12,548 ms`) | `13,025 ms` | `954 tok` | Waits ~13.0s for reasoning + full text generation |
+| **`(1)` `streaming_low`** | `3.8-flash [low]` | — (Single Call) | **`2,310 ms`** (`2,084` / `4,269 ms`) | **`6,589 ms`** (`6,583` / `8,397 ms`) | `0 tok` | Fast on all turns, but uses `0` thinking tokens on the 10 complex math turns |
+| **`(1)` `streaming_high`** | `3.8-flash [high]` | — (Single Call) | `21,173 ms` (`22,012` / `41,657 ms`) | `23,827 ms` (`23,887` / `43,621 ms`) | `1,981 tok` | Deep reasoning on math turns (`3,772 tok`), but stalls ~17.0s (`1,534 tok`) on routine turns |
+| **`(2)` ★`adaptive_pat_a`**<br>(Ch.4 Pattern A) | `3.8-flash [low]`<br>(`{thinking, response}`) | `3.8-flash [high]`<br>(Parallel + Cache Share) | **`2,618 ms`** (`2,420` / **`3,841 ms`**) | **`12,034 ms`** (**`4,990`** / `43,215 ms`) | **`758 tok`**<br>(`-61.7%`) | **`50/50 (100%)` accuracy**: Routine 40T finish in `2,560 / 5,008 ms`; Math 10T stream bridge at `2,851 ms` + Stage 2 `high` (`40,142 ms`) |
 
 ---
 
-## 5.2 Input Token Growth & Automatic Implicit Context Caching (`cached_content_token_count`)
+## 5.2 Input Token Growth & Automatic Implicit Context Caching (With Stage 1 → Stage 2 Cache Sharing)
 
-As each `(user, model)` message pair is appended to `history`, `prompt_token_count` grows linearly at **`~+435 tokens/turn`** (`176 tokens` at Turn 1 → `2,686 tokens` at Turn 8 → `10,060 tokens` at Turn 25 → **`21,490 tokens`** at Turn 50).
+As each `(user, model)` message pair is appended to `history`, `prompt_token_count` grows linearly at **`~+423 tokens/turn`** (`180 tokens` at Turn 1 → `2,710 tokens` at Turn 8 → `9,523 tokens` at Turn 25 → **`20,899 tokens`** at Turn 50).
 
-Our key empirical finding is that **once input context reaches `~2,686–3,045 tokens` at Turns 8–9, Gemini 3.8 Flash's automatic Implicit Context Caching (`usage_metadata.cached_content_token_count`) activates without any explicit cache API calls**, advancing every turn and reaching an **`87.2%` average hit rate in Turns 41–50 (`88.4%` on `streaming_t0` and `90.6%` peak on `blocking_t0` at Turn 50: `19,480 / 21,490 tokens` cached)**.
+Crucially, **once input context reaches `~2,710–3,050 tokens` at Turns 8–9, Gemini 3.8 Flash's automatic Implicit Context Caching (`usage_metadata.cached_content_token_count`) activates without any explicit cache API calls—and on complex calculation turns (`T10..T50`), Stage 2 (`high`) of `adaptive_pat_a` reuses the exact same cached history prefix warmed by Stage 1 (`low`)**.
 
 ```drawlib align=center code=fold width=100% file=ch5_token_cache_growth.png caption="Figure 5-2: 50-Turn Input Token Growth (prompt_tokens vs cached_tokens vs Uncached Delta ~2,400 tok)"
 from drawlib.canvas import save, setup
@@ -237,9 +245,9 @@ categories = [
     f"T{t}" if t in {1, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50} else ""
     for t in range(1, 51)
 ]
-prompt_vals = [float(t["variants"]["streaming_t0"]["prompt_tokens"]) for t in turns]
-cached_vals = [float(t["variants"]["streaming_t0"]["cached_tokens"]) for t in turns]
-uncached_vals = [p - c for p, c in zip(prompt_vals, cached_vals)]
+prompt_vals = [float(t["variants"]["streaming_low"]["prompt_tokens"]) for t in turns]
+cached_vals = [float(t["variants"]["adaptive_pat_a"]["cached_tokens"]) for t in turns]
+uncached_vals = [max(p - c, 0.0) for p, c in zip(prompt_vals, cached_vals)]
 
 # Left Card: LineChart container
 rectangle(
@@ -263,14 +271,14 @@ chart = LineChart(
     grid_style=Styles.MutedDashed,
 )
 chart.add_series(
-    "Total Input Tokens (prompt_tokens: 176 → 21,490 tok)",
+    "Total Input Tokens (prompt_tokens: 180 → 20,899)",
     prompt_vals,
     style=Styles.PrimaryFlat,
     line_width=2.6,
     point_shape="none",
 )
 chart.add_series(
-    "Implicit Cache Hits (cached_tokens: peak 18,995–19,480 tok)",
+    "Implicit Cache Hits (Stage1 18,507 / Stage2 18,890)",
     cached_vals,
     style=Styles.SuccessFlat,
     line_width=2.4,
@@ -292,8 +300,8 @@ chart.configure_y_axis(
 )
 chart.draw(xy=(8.5, 9.5))
 chart.draw_legend(
-    xy=(11.5, 70.0),
-    text_style=Styles.DarkBold.patch(text_size=10.0),
+    xy=(10.5, 70.0),
+    text_style=Styles.DarkBold.patch(text_size=9.5),
     orientation="vertical",
     item_gap=1.3,
 )
@@ -303,18 +311,18 @@ text((9.5, 54.0), "Tokens (tok)", style=Styles.DarkBold.patch(text_size=10.0, ha
 text((51.5, 6.2), "Conversation Turn (Turn 1 to Turn 50)", style=Styles.DarkBold.patch(text_size=10.0))
 
 # Callout annotation inside chart pointing to Turn 8-9 cache activation
-rectangle((44.5, 38.0), width=40.0, height=8.0, style=Styles.Neutral.patch(shape_r=1.0))
+rectangle((48.5, 36.5), width=38.0, height=8.0, style=Styles.Neutral.patch(shape_r=1.0))
 text(
-    (44.5, 39.8),
-    "Turns 8–9 (~2,686 tok threshold)",
-    style=Styles.DarkBold.patch(text_size=10.0),
+    (48.5, 38.3),
+    "Turns 8–9 (~2,710 tok threshold)",
+    style=Styles.DarkBold.patch(text_size=9.5),
 )
 text(
-    (44.5, 36.2),
-    "Auto Cache Active (up to 90.6% at T50)",
-    style=Styles.Dark.patch(text_size=10.0),
+    (48.5, 34.7),
+    "Auto Cache Active (88–90.2% at T50)",
+    style=Styles.Dark.patch(text_size=9.5),
 )
-line((36.0, 34.0), (24.0, 15.0), arrow_head="->", style=Styles.DarkBold.patch(line_width=1.6))
+line((38.0, 32.5), (24.0, 15.0), arrow_head="->", style=Styles.DarkBold.patch(line_width=1.6))
 
 # Right Panel: Neutral Summary Card Panel
 rectangle((125.5, 39.5), width=51.0, height=71.0, style=Styles.Neutral.patch(shape_r=1.6))
@@ -328,50 +336,48 @@ text(
 summary_cards = [
     (
         59.2,
-        "1. Linear Growth (~+435 tok/turn)",
-        "User (~86 ch) + Agent (~753 ch) pairs\ngrow input from 176 to 21,490 tokens",
+        "1. Linear Growth (~+423 tok/turn)",
+        "User (~103 ch) + Agent (~647 ch) pairs\ngrow input from 180 to 20,899 tokens",
     ),
     (
         43.8,
         "2. Zero-Config Activation at T8–9",
-        "Crossing ~2,686 tokens at Turns 8–9\ntriggers KV cache hits automatically",
+        "Crossing ~2,710 tokens at Turns 8–9\ntriggers KV cache hits automatically",
     ),
     (
         28.4,
-        "3. 87.2% Hit in T41–50 (90.6% Peak)",
-        "Cache boundary advances every turn,\nhitting up to 19,480 / 21,490 tok at T50",
+        "3. Stage 1→2 Prefix Cache Sharing",
+        "Parallel Stage 2 (high) reuses Stage 1\ncache, hitting 18,890 tok (90.2%) at T50",
     ),
     (
         13.0,
         "4. Uncached Delta Bounded (~2,400 tok)",
-        "New prefill work stays flat around ~2.4k\ntokens across all turns past Turn 9",
+        "New prefill work stays flat around ~2.4k\ntokens, keeping TTFT at ~2.3–2.6s",
     ),
 ]
 
 for cy, hdr, body in summary_cards:
     rectangle((125.5, cy), width=47.4, height=13.4, style=Styles.WhiteFlat.patch(shape_r=1.2, line_width=0.7))
-    text((103.2, cy + 3.6), hdr, style=Styles.DarkBold.patch(text_size=10.0, halign="left"))
-    text((103.2, cy - 2.0), body, style=Styles.Dark.patch(text_size=10.0, halign="left"))
+    text((103.2, cy + 3.6), hdr, style=Styles.DarkBold.patch(text_size=9.8, halign="left"))
+    text((103.2, cy - 2.0), body, style=Styles.Dark.patch(text_size=9.6, halign="left"))
 
 save()
 ```
 
-### How Automatic Implicit Context Caching Works Across 50 Turns
+### How Implicit Context Caching Accelerates Both Single-Call and Adaptive Multi-Turn Streaming
 
-1. **Zero-Configuration Activation at Turns 8–9 (`~2,686–3,045 Tokens`)**:
-   During Turns 1–7 (`176–2,298 prompt_tokens`), `cached_content_token_count` remains `0`. Once the accumulated prefix reaches **Turn 8 (`2,686 tokens`)** and **Turn 9 (`3,045 tokens`)**, Gemini 3.8 Flash automatically caches the shared history prefix (`703–1,060 cached tokens`).
-2. **Continuous Per-Turn Prefix Expansion**:
-   From Turn 9 onward, as conversation history grows, the cached prefix boundary advances continuously on every turn: Turn 10 (`1,061 tok`) → Turn 20 (`5,064 tok`) → Turn 30 (`9,935 tok`) → Turn 40 (`14,533 tok`) → Turn 50 (**`18,995 tok` [`88.4%`] on `streaming_t0`, and `19,480 tok` [`90.6%`] on `blocking_t0`**). Across **Turns 41–50**, the average cache hit rate reaches **`87.2%`** (`streaming_t0`).
-3. **Bounded Uncached Prefill Delta (`~2,400 Tokens`)**:
-   As shown by the dashed purple line in Figure 5-2, the uncached token delta (`prompt_tokens - cached_tokens`) requiring fresh KV-cache prefill computation on each turn remains flat around **`~2,340–2,540 tokens` (`~1,980–2,010 tokens` on `blocking_t0`)** from Turn 9 through Turn 50.
+1. **Zero-Configuration Activation at Turns 8–9 (`~2,710–3,050 Tokens`)**:
+   During Turns 1–7 (`180–2,369 prompt_tokens`), `cached_content_token_count` remains `0`. Once the accumulated prefix reaches **Turn 8 (`2,710 tokens`, `633 cached tokens` on `adaptive_pat_a`)** and **Turn 9 (`3,050 tokens`, `728–956 cached tokens`)**, Gemini 3.8 Flash automatically caches the shared history prefix. Across **Turns 41–50**, the average cache hit rate reaches **`87.1%–87.7%`**.
+2. **Stage 1 → Stage 2 Prefix Cache Sharing in `adaptive_pat_a`**:
+   Because `adaptive_pat_a` uses the exact same `AGENT_SYSTEM_INSTRUCTION` for both Stage 1 and Stage 2 (appending Stage 1's routing instruction to the final user turn rather than mutating the system prompt), Stage 2 (`thinking_level="high"`) immediately hits the warmed KV cache on complex turns (`18,507 cached tokens` in Stage 1 and **`18,890 cached tokens [90.2%]` in Stage 2** at Turn 50).
 
 ---
 
-## 5.3 50-Turn Latency Scaling (`+29 ms / 1k tokens` with `thinking=0`)
+## 5.3 50-Turn Evolution of Initial Response (`TTFT`) vs. Completion Time (`Total`)
 
-Because Implicit Context Caching reuses the KV cache for `85–90%+` of historical tokens in the second half of the dialogue, **`streaming_t0` TTFT increases by only `+394 ms` between Turns 11–20 (`2,180 ms` avg) and Turns 41–50 (`2,574 ms` avg)** despite a `+13,700 token` increase in prompt size. This represents a flat linear scaling slope of **`+29 ms per 1,000 input tokens`**, keeping median time-to-first-token at **`2,029 ms`** across the 50-turn troubleshooting session.
+To compare `(1) 3.8-flash low & high` and `(2) Adaptive Thinking Router (Pattern A)` without visual clutter, Figure 5-3 separates **Initial Response (`TTFT`) on the Left Panel** from **Stream Completion (`Total`) on the Right Panel** across all 50 turns.
 
-```drawlib align=center code=fold width=100% file=ch5_latency_evolution_2panel.png caption="Figure 5-3: 2-Panel 50-Turn Latency Evolution (Left: thinking=0 Flat Scaling, Right: thinking=default Latency & Thinking Token Bars)"
+```drawlib align=center code=fold width=100% file=ch5_latency_evolution_2panel.png caption="Figure 5-3: 2-Panel 50-Turn Streaming Latency Evolution (Left: Initial Response TTFT, Right: Stream Completion Total)"
 from drawlib.canvas import save, setup
 from drawlib.charts.line import LineChart
 from drawlib.lines import line
@@ -386,166 +392,160 @@ setup(width=156, height=90, dpi=150)
 rectangle((78.0, 45.0), width=152.0, height=86.0, style=Styles.MutedDashed.patch(shape_r=2.0))
 text(
     (78.0, 84.0),
-    "50-Turn Latency Evolution (176 → 21,490 tok): thinking=0 (Left) vs thinking=default (Right)",
-    style=Styles.DarkBold.patch(text_size=11.5),
+    "50-Turn Streaming Latency Evolution (180 → 20,899 tok): Initial TTFT (Left) vs Completion Total (Right)",
+    style=Styles.DarkBold.patch(text_size=11.2),
 )
 
 turns = load_multiturn_turns()
 labeled_turns = {1, 10, 20, 30, 40, 50}
 categories = [f"T{t['turn']}" if int(t["turn"]) in labeled_turns else "" for t in turns]
 
-s0_ttft = [float(t["variants"]["streaming_t0"]["ttft_ms"]) for t in turns]
-s0_total = [float(t["variants"]["streaming_t0"]["total_ms"]) for t in turns]
-b0_total = [float(t["variants"]["blocking_t0"]["total_ms"]) for t in turns]
+low_ttft = [float(t["variants"]["streaming_low"]["ttft_ms"]) for t in turns]
+high_ttft = [float(t["variants"]["streaming_high"]["ttft_ms"]) for t in turns]
+adap_ttft = [float(t["variants"]["adaptive_pat_a"]["ttft_ms"]) for t in turns]
 
-sd_ttft = [float(t["variants"]["streaming_default"]["ttft_ms"]) for t in turns]
-bd_total = [float(t["variants"]["blocking_default"]["total_ms"]) for t in turns]
-sd_th_tok = [float(t["variants"]["streaming_default"]["thoughts_tokens"]) for t in turns]
+low_total = [float(t["variants"]["streaming_low"]["total_ms"]) for t in turns]
+high_total = [float(t["variants"]["streaming_high"]["total_ms"]) for t in turns]
+adap_total = [float(t["variants"]["adaptive_pat_a"]["total_ms"]) for t in turns]
 
 # =========================================================================
-# Left Panel: thinking=0 (Flat +29 ms / 1k tok scaling)
+# Left Panel: Initial Response (TTFT) across 50 Turns
 # =========================================================================
 rectangle((42.5, 45.5), width=71.0, height=69.0, style=Styles.WhiteFlat.patch(shape_r=1.5, line_width=0.8))
 rectangle((42.5, 73.2), width=67.0, height=11.6, style=Styles.Neutral.patch(shape_r=1.1))
 text(
     (42.5, 76.6),
-    "Left Panel: thinking=0 (Median TTFT 2,029ms, +29ms/1k tok)",
-    style=Styles.DarkBold.patch(text_size=10.2),
+    "Left: Initial TTFT (Adaptive 2.62s & low 2.31s vs high 21.17s)",
+    style=Styles.DarkBold.patch(text_size=9.5),
 )
 
 # Legend for Left Panel
 line((10.0, 72.8), (13.6, 72.8), style=Styles.PrimaryBold.patch(line_width=2.6))
 circle((11.8, 72.8), radius=0.6, style=Styles.PrimaryFlat)
-text((14.5, 72.8), "streaming_t0 TTFT (Avg 2,460ms)", style=Styles.DarkBold.patch(text_size=10.0, halign="left"))
+text((14.4, 72.8), "★adaptive_pat_a (Avg 2,618ms / Med 2,420ms)", style=Styles.DarkBold.patch(text_size=9.6, halign="left"))
 
-line((10.0, 69.4), (13.6, 69.4), style=Styles.TealDashed.patch(line_width=1.9))
-text((14.5, 69.4), "streaming_t0 Total (6,323ms)", style=Styles.Dark.patch(text_size=10.0, halign="left"))
+line((10.0, 69.4), (13.6, 69.4), style=Styles.TealBold.patch(line_width=2.0))
+text((14.4, 69.4), "streaming_low (2,310ms)", style=Styles.Dark.patch(text_size=9.6, halign="left"))
 
-line((47.2, 69.4), (50.8, 69.4), style=Styles.SecondaryBold.patch(line_width=2.1))
-text((51.6, 69.4), "blocking_t0 (6,424ms)", style=Styles.Dark.patch(text_size=10.0, halign="left"))
+line((44.5, 69.4), (48.1, 69.4), style=Styles.DangerBold.patch(line_width=2.0))
+text((48.9, 69.4), "streaming_high (21,173ms)", style=Styles.Dark.patch(text_size=9.6, halign="left"))
 
 chart_left = LineChart(
     axis_line_style=Styles.Dark,
-    axis_text_style=Styles.Dark.patch(text_size=10.0),
+    axis_text_style=Styles.Dark.patch(text_size=9.8),
     grid_style=Styles.MutedDashed,
     categories=categories,
     width=59.0,
     height=42.0,
     show_points=True,
     point_shape="circle",
-    point_size=0.45,
+    point_size=0.42,
 )
 chart_left.configure_x_axis(show_grid=False)
 chart_left.configure_y_axis(
     min_value=0,
-    max_value=14000,
-    tick_step=3500,
+    max_value=60000,
+    tick_step=15000,
     format="{:,.0f}",
 )
 chart_left.add_series(
-    name="blocking_t0 Total",
-    values=b0_total,
-    style=Styles.SecondaryFlat,
-    line_width=2.0,
-    point_size=0.4,
-)
-chart_left.add_series(
-    name="streaming_t0 Total",
-    values=s0_total,
-    style=Styles.TealFlat,
+    name="streaming_high TTFT",
+    values=[min(v, 59500.0) for v in high_ttft],
+    style=Styles.DangerFlat,
     line_width=1.8,
-    line_style="dashed",
-    point_shape="none",
+    point_size=0.38,
 )
 chart_left.add_series(
-    name="streaming_t0 TTFT",
-    values=s0_ttft,
+    name="streaming_low TTFT",
+    values=low_ttft,
+    style=Styles.TealFlat,
+    line_width=2.0,
+    point_size=0.38,
+)
+chart_left.add_series(
+    name="adaptive_pat_a TTFT",
+    values=adap_ttft,
     style=Styles.PrimaryFlat,
-    line_width=2.6,
-    point_size=0.5,
+    line_width=2.5,
+    point_size=0.48,
 )
 chart_left.draw(xy=(14.5, 19.5))
-text((10.0, 63.8), "Latency (ms)", style=Styles.DarkBold.patch(text_size=10.0, halign="left"))
-text((44.0, 14.2), "Turn Number (T11–20 avg 2,180ms → T41–50 avg 2,574ms)", style=Styles.DarkBold.patch(text_size=10.0))
+text((10.0, 63.8), "Initial TTFT (ms)", style=Styles.DarkBold.patch(text_size=9.8, halign="left"))
+text((42.5, 14.2), "Turn Number (Adaptive & low stay at ~2–3s across all 50T)", style=Styles.DarkBold.patch(text_size=9.5))
 
 # =========================================================================
-# Right Panel: thinking=default (Latency + Thinking Token Bars)
+# Right Panel: Stream Completion (Total) across 50 Turns
 # =========================================================================
 rectangle((115.5, 45.5), width=71.0, height=69.0, style=Styles.WhiteFlat.patch(shape_r=1.5, line_width=0.8))
 rectangle((115.5, 73.2), width=67.0, height=11.6, style=Styles.Neutral.patch(shape_r=1.1))
 text(
     (115.5, 76.6),
-    "Right Panel: thinking=default (Latency & Thinking Bars)",
-    style=Styles.DarkBold.patch(text_size=10.2),
+    "Right: Completion Total (5.0s Routine 40T; Deep high Math 10T)",
+    style=Styles.DarkBold.patch(text_size=9.5),
 )
 
 # Legend for Right Panel
-line((83.5, 72.8), (87.5, 72.8), style=Styles.WarningBold.patch(line_width=2.2))
-circle((85.5, 72.8), radius=0.55, style=Styles.WarningFlat)
-text((88.5, 72.8), "streaming_def TTFT (9,838ms)", style=Styles.DarkBold.patch(text_size=10.0, halign="left"))
+line((83.0, 72.8), (86.6, 72.8), style=Styles.PrimaryBold.patch(line_width=2.6))
+circle((84.8, 72.8), radius=0.6, style=Styles.PrimaryFlat)
+text((87.4, 72.8), "★adaptive_pat_a (Med 4,990ms / Avg 12,034ms)", style=Styles.DarkBold.patch(text_size=9.6, halign="left"))
 
-line((83.5, 69.4), (87.5, 69.4), style=Styles.DangerBold.patch(line_width=2.0))
-text((88.5, 69.4), "blocking_def Total (13,025ms)", style=Styles.Dark.patch(text_size=10.0, halign="left"))
+line((83.0, 69.4), (86.6, 69.4), style=Styles.TealBold.patch(line_width=2.0))
+text((87.4, 69.4), "streaming_low (6,589ms)", style=Styles.Dark.patch(text_size=9.6, halign="left"))
 
-rectangle((124.0, 69.4), width=3.0, height=2.0, style=Styles.SecondaryNeutral.patch(line_width=0.6))
-text((126.5, 69.4), "ThTok (avg 858)", style=Styles.Dark.patch(text_size=10.0, halign="left"))
+line((117.5, 69.4), (121.1, 69.4), style=Styles.DangerBold.patch(line_width=2.0))
+text((121.9, 69.4), "streaming_high (23,827ms)", style=Styles.Dark.patch(text_size=9.6, halign="left"))
 
-# Draw Thinking Token vertical bars strictly inside the inner plot area (x: 97.7..144.2, y0: 25.8)
 rx0, ry0, rpw, rph = 87.5, 19.5, 59.0, 42.0
-inner_x0, inner_x1, inner_y0, inner_h = 97.7, 144.2, 25.8, 32.5
-for idx, th_val in enumerate(sd_th_tok):
-    bx = inner_x0 + (idx / max(len(sd_th_tok) - 1, 1)) * (inner_x1 - inner_x0)
-    bh = min(th_val / 2400.0, 1.0) * inner_h
-    if bh > 0.2:
-        rectangle(
-            (bx, inner_y0 + bh / 2.0),
-            width=0.62,
-            height=bh,
-            style=Styles.SecondaryNeutral.patch(line_width=0.3, shape_r=0),
-        )
 
 chart_right = LineChart(
     axis_line_style=Styles.Dark,
-    axis_text_style=Styles.Dark.patch(text_size=10.0),
+    axis_text_style=Styles.Dark.patch(text_size=9.8),
     grid_style=Styles.MutedDashed,
     categories=categories,
     width=rpw,
     height=rph,
     show_points=True,
     point_shape="circle",
-    point_size=0.45,
+    point_size=0.42,
 )
 chart_right.configure_x_axis(show_grid=False)
 chart_right.configure_y_axis(
     min_value=0,
-    max_value=24000,
-    tick_step=6000,
+    max_value=60000,
+    tick_step=15000,
     format="{:,.0f}",
 )
 chart_right.add_series(
-    name="blocking_default Total",
-    values=bd_total,
+    name="streaming_high Total",
+    values=[min(v, 59500.0) for v in high_total],
     style=Styles.DangerFlat,
     line_width=1.8,
-    point_size=0.4,
+    point_size=0.38,
 )
 chart_right.add_series(
-    name="streaming_default TTFT",
-    values=sd_ttft,
-    style=Styles.WarningFlat,
-    line_width=2.2,
-    point_size=0.45,
+    name="streaming_low Total",
+    values=low_total,
+    style=Styles.TealFlat,
+    line_width=2.0,
+    point_size=0.38,
+)
+chart_right.add_series(
+    name="adaptive_pat_a Total",
+    values=adap_total,
+    style=Styles.PrimaryFlat,
+    line_width=2.5,
+    point_size=0.48,
 )
 chart_right.draw(xy=(rx0, ry0))
-text((83.0, 63.8), "Latency (ms) / ThTok", style=Styles.DarkBold.patch(text_size=10.0, halign="left"))
-text((117.0, 14.2), "Turn Number (Driven by 0–2,237 Thinking Token Spikes)", style=Styles.DarkBold.patch(text_size=10.0))
+text((83.0, 63.8), "Completion Total (ms)", style=Styles.DarkBold.patch(text_size=9.8, halign="left"))
+text((115.5, 14.2), "Turn Number (10 spikes mark math turns T5,10..50)", style=Styles.DarkBold.patch(text_size=9.5))
 
 # Bottom callout bar
 rectangle((78.0, 6.2), width=146.0, height=6.0, style=Styles.PrimaryNeutral.patch(shape_r=1.2))
 text(
     (78.0, 6.2),
-    "Takeaway: streaming_t0 (left, solid blue) stays near ~2.0s median TTFT through Turn 50, while default (right) swings up to 22.0s.",
-    style=Styles.DarkBold.patch(text_size=10.0),
+    "Takeaway: adaptive_pat_a stays near ~2.6s TTFT (left) while selectively activating Stage 2 reasoning on the 10 math turns (right).",
+    style=Styles.DarkBold.patch(text_size=9.5),
 )
 
 save()
@@ -553,17 +553,18 @@ save()
 
 ### Key Architectural Observations from Figure 5-3
 
-1. **Left Panel (`thinking=0`): Stable `~2.0s` Median First-Token Latency Across 50 Turns**:
-   - The solid blue curve (`streaming_t0 TTFT`, avg **`2,460 ms`**, Turns 2–50 avg **`2,295 ms`**, median **`2,029 ms`**) remains tightly bounded across the conversation, running consistently **`3,964 ms` (`3.96s` / `62%`) below** the solid purple curve (`blocking_t0 Total=TTFT`, avg **`6,424 ms`**).
-   - Meanwhile, the dashed teal curve (`streaming_t0 Total`, avg **`6,323 ms`**) tracks `blocking_t0` (`6,424 ms`) almost identically, proving that streaming introduces zero completion-time penalty.
-2. **Right Panel (`thinking=default`): Volatility Dominated by Thinking Token Count**:
-   - Under `thinking=default`, the model dynamically generates an average of **`858–954` thinking tokens** per turn (shaded vertical bars, range `0–2,237 tokens`), causing both `streaming_default` TTFT (avg **`9,838 ms`**) and `blocking_default` Total (avg **`13,025 ms`**) to fluctuate wildly up to `22.0s` regardless of turn number.
+1. **Left Panel (Initial Response `TTFT`): `adaptive_pat_a` and `streaming_low` Stay Flat at `~2.3–2.6s` Across All 50 Turns**:
+   - The red curve (`streaming_high`) stalls for an average of **`16,958 ms`** on the 40 routine turns (`1,534` thinking tokens) and **`38,033 ms`** on the 10 calculation turns (**`21,173 ms` overall average**) before emitting a single visible character.
+   - By contrast, the solid blue curve (**`adaptive_pat_a`**, avg **`2,618 ms`**, median **`2,420 ms`**, P95 **`3,841 ms`**) tracks the teal curve (**`streaming_low`**, avg **`2,310 ms`**, median **`2,084 ms`**) along the bottom of the chart across all 50 turns—streaming direct answers in `2,560 ms` on routine turns and immediate 1-sentence bridges in `2,851 ms` on complex calculation turns.
+2. **Right Panel (Stream Completion `Total`): Fast `5.0s` Routine Completion + Selective `40.1s` Deep Calculation**:
+   - On the 40 routine turns (`expected_thinking=False`), `adaptive_pat_a` finishes in a single Stage 1 (`low`) call averaging **`5,008 ms` (`4,695 ms` median)**—even faster than `streaming_low` (`6,411 ms`) due to concise structured output.
+   - Exclusively on the 10 shaded calculation turns (`Turns 5, 10, 15, 20, 25, 30, 35, 40, 45, 50`), `adaptive_pat_a` rises to match `streaming_high` (`40,142 ms` vs. `40,404 ms`, generating an average of `3,671` thinking tokens in Stage 2). Across all 50 turns, `adaptive_pat_a` reduces median completion time by **`-79.1%`** (`4,990 ms` vs. `23,887 ms`) and mean completion time by **`-49.5%`** (`12,034 ms` vs. `23,827 ms`).
 
 ---
 
-## 5.4 Thinking Token Volatility & 2D Trajectory Snapshots (Turn 1 vs Turn 25 vs Turn 50)
+## 5.4 Bifurcated Thinking Token Distribution & 3-Turn Stream Trajectories (Turns 1, 25, and 50)
 
-To prove what drives latency under `thinking=default` and visualize how chunks arrive across early (**Turn 1**), mid (**Turn 25**), and late (**Turn 50**) conversation turns, Figure 5-4 pairs a **scatter plot of `thoughts_tokens` vs `total_ms` across all 100 `thinking=default` executions (`50 turns × 2 modes`)** on the left with a **3-Turn Trajectory Overlay (`Turn 1`, `Turn 25`, `Turn 50` from `load_multiturn_trajectory()`)** on the right.
+To examine how internal thinking tokens (`thoughts_token_count`) govern completion time and how chunks arrive during early (**Turn 1**: routine), mid (**Turn 25**: complex math), and late (**Turn 50**: complex math) turns, Figure 5-4 pairs a **scatter plot of `thoughts_tokens` vs `total_ms` across all 150 runs (`50 turns × 3 Streaming configs`)** on the left with a **3-Turn Trajectory Overlay (`Turn 1`, `Turn 25`, `Turn 50`)** on the right.
 
 ```drawlib align=center code=fold width=100% file=ch5_thinking_scatter_and_trajectories.png caption="Figure 5-4: Thinking Tokens vs Total Latency Scatter Plot (Left) & 3-Turn Stream Trajectory Overlay at Turns 1, 25, and 50 (Right)"
 from drawlib.canvas import save, setup
@@ -580,65 +581,65 @@ setup(width=156, height=94, dpi=150)
 rectangle((78.0, 47.0), width=152.0, height=90.0, style=Styles.MutedDashed.patch(shape_r=2.0))
 text(
     (78.0, 88.2),
-    "Thinking Tokens vs Total Latency (Left) & Turn 1 / 25 / 50 Trajectories (Right)",
+    "Thinking Tokens vs Total Latency (Left) & Turn 1 / 25 / 50 Stream Trajectories (Right)",
     style=Styles.DarkBold.patch(text_size=11.5),
 )
 
 # =========================================================================
-# Left Panel: Scatter plot of thoughts_tokens vs total_ms (100 default runs + t=0 ref)
+# Left Panel: Scatter plot of thoughts_tokens vs total_ms across 3 Streaming variants
 # =========================================================================
 rectangle((42.5, 47.5), width=71.0, height=73.0, style=Styles.WhiteFlat.patch(shape_r=1.5, line_width=0.8))
 rectangle((42.5, 77.2), width=67.0, height=11.2, style=Styles.Neutral.patch(shape_r=1.1))
 text(
     (42.5, 80.4),
-    "Left: thoughts_tokens vs total_ms (Total ≈ 6,300ms + 7.0ms×ThTok)",
-    style=Styles.DarkBold.patch(text_size=10.0),
+    "Left: thoughts_tokens vs total_ms (Adaptive Splits 40T vs 10T)",
+    style=Styles.DarkBold.patch(text_size=9.5),
 )
 
-pts_s_def: list[tuple[float, float]] = []
-pts_b_def: list[tuple[float, float]] = []
-pts_s_t0: list[tuple[float, float]] = []
+pts_low: list[tuple[float, float]] = []
+pts_high: list[tuple[float, float]] = []
+pts_adap: list[tuple[float, float]] = []
 
 for t_rec in load_multiturn_turns():
     v = t_rec["variants"]
-    pts_s_def.append((float(v["streaming_default"]["thoughts_tokens"]), float(v["streaming_default"]["total_ms"])))
-    pts_b_def.append((float(v["blocking_default"]["thoughts_tokens"]), float(v["blocking_default"]["total_ms"])))
-    pts_s_t0.append((0.0, float(v["streaming_t0"]["total_ms"])))
+    pts_low.append((float(v["streaming_low"]["thoughts_tokens"]), min(float(v["streaming_low"]["total_ms"]), 59000.0)))
+    pts_high.append((min(float(v["streaming_high"]["thoughts_tokens"]), 5900.0), min(float(v["streaming_high"]["total_ms"]), 59000.0)))
+    pts_adap.append((min(float(v["adaptive_pat_a"]["thoughts_tokens"]), 5900.0), min(float(v["adaptive_pat_a"]["total_ms"]), 59000.0)))
 
 # Compact legend inside Left Panel header
-circle((11.0, 76.2), radius=0.65, style=Styles.WarningFlat)
-text((12.5, 76.2), "streaming_default (50 runs)", style=Styles.DarkBold.patch(text_size=10.0, halign="left"))
-circle((46.0, 76.2), radius=0.65, style=Styles.DangerFlat)
-text((47.5, 76.2), "blocking_default (50 runs)", style=Styles.DarkBold.patch(text_size=10.0, halign="left"))
-circle((11.0, 73.0), radius=0.65, style=Styles.PrimaryFlat)
-text((12.5, 73.0), "streaming_t0 (X=0 ref, 50 runs)   Strong Linear Scaling", style=Styles.Dark.patch(text_size=10.0, halign="left"))
+circle((10.5, 76.2), radius=0.65, style=Styles.PrimaryFlat)
+text((12.0, 76.2), "★adaptive_pat_a (50 runs)", style=Styles.DarkBold.patch(text_size=9.5, halign="left"))
+circle((44.5, 76.2), radius=0.65, style=Styles.TealFlat)
+text((46.0, 76.2), "streaming_low (50 runs)", style=Styles.DarkBold.patch(text_size=9.5, halign="left"))
+circle((10.5, 73.0), radius=0.65, style=Styles.DangerFlat)
+text((12.0, 73.0), "streaming_high (50 runs: 1,000–5,500 tok on all turns)", style=Styles.Dark.patch(text_size=9.5, halign="left"))
 
 scatter = ScatterChart(
     axis_line_style=Styles.Dark,
-    axis_text_style=Styles.Dark.patch(text_size=10.0),
+    axis_text_style=Styles.Dark.patch(text_size=9.8),
     grid_style=Styles.MutedDashed,
-    width=63.0,
-    height=46.0,
+    width=61.0,
+    height=44.0,
     default_radius=0.85,
 )
 scatter.configure_x_axis(
     label="Internal Thinking Tokens (thoughts_token_count [tok])",
     min_value=0,
-    max_value=2400,
-    tick_step=800,
+    max_value=6000,
+    tick_step=1500,
     format="{:,.0f}",
 )
 scatter.configure_y_axis(
-    label="Total Latency (ms)",
     min_value=0,
-    max_value=24000,
-    tick_step=6000,
+    max_value=60000,
+    tick_step=15000,
     format="{:,.0f}",
 )
-scatter.add_series("blocking_default", pts_b_def, style=Styles.DangerFlat, shape="rhombus", radius=0.85)
-scatter.add_series("streaming_default", pts_s_def, style=Styles.WarningFlat, shape="triangle", radius=0.9)
-scatter.add_series("streaming_t0", pts_s_t0, style=Styles.PrimaryFlat, shape="circle", radius=0.85)
-scatter.draw(xy=(11.5, 18.0))
+scatter.add_series("streaming_high", pts_high, style=Styles.DangerFlat, shape="rhombus", radius=0.85)
+scatter.add_series("streaming_low", pts_low, style=Styles.TealFlat, shape="triangle", radius=0.85)
+scatter.add_series("adaptive_pat_a", pts_adap, style=Styles.PrimaryFlat, shape="circle", radius=0.9)
+scatter.draw(xy=(12.5, 18.0))
+text((10.0, 68.0), "Completion Total (ms)", style=Styles.DarkBold.patch(text_size=9.6, halign="left"))
 
 # =========================================================================
 # Right Panel: 3-Turn Trajectory Overlay (Turn 1, Turn 25, Turn 50)
@@ -647,34 +648,34 @@ rectangle((115.5, 47.5), width=71.0, height=73.0, style=Styles.WhiteFlat.patch(s
 rectangle((115.5, 77.2), width=67.0, height=11.2, style=Styles.Neutral.patch(shape_r=1.1))
 text(
     (115.5, 80.4),
-    "Right: Turn 1, Turn 25 & Turn 50 Trajectories (Time vs Chars)",
-    style=Styles.DarkBold.patch(text_size=10.0),
+    "Right: Turn 1 (Routine), Turn 25 & Turn 50 (Math) Trajectories",
+    style=Styles.DarkBold.patch(text_size=9.5),
 )
 
 # Legend for Right Panel trajectories
-line((83.5, 76.2), (87.5, 76.2), style=Styles.PrimaryBold.patch(line_width=2.4))
-text((88.5, 76.2), "streaming_t0", style=Styles.DarkBold.patch(text_size=10.0, halign="left"))
+line((83.5, 76.2), (87.5, 76.2), style=Styles.PrimaryBold.patch(line_width=2.5))
+text((88.5, 76.2), "★adaptive_pat_a", style=Styles.DarkBold.patch(text_size=9.5, halign="left"))
 
-line((111.5, 76.2), (115.5, 76.2), style=Styles.SecondaryBold.patch(line_width=2.2))
-text((116.5, 76.2), "blocking_t0", style=Styles.DarkBold.patch(text_size=10.0, halign="left"))
+line((114.5, 76.2), (118.5, 76.2), style=Styles.TealBold.patch(line_width=2.1))
+text((119.5, 76.2), "streaming_low", style=Styles.DarkBold.patch(text_size=9.5, halign="left"))
 
 line((83.5, 73.0), (87.5, 73.0), style=Styles.DangerDashed.patch(line_width=2.0))
-text((88.5, 73.0), "streaming_default (stalled during thinking)", style=Styles.Dark.patch(text_size=10.0, halign="left"))
+text((88.5, 73.0), "streaming_high (stalled 19.6–36.5s during thinking)", style=Styles.Dark.patch(text_size=9.5, halign="left"))
 
 sub_panels = [
-    (1, 54.0, "Turn 1 (176 tok / Initial Power Issue): blk_t0 5,418ms vs str_def 10,411ms"),
-    (25, 35.0, "Turn 25 (10,060 tok / Cache 75.0%): str_t0 3,833ms vs blk_t0 5,962ms"),
-    (50, 16.0, "Turn 50 (21,490 tok / Cache 88.4%): str_t0 4,083ms vs blk_t0 8,074ms"),
+    (1, 54.0, "Turn 1 (180 tok / Routine): adap 1.73/3.59s vs low 2.65/4.98s vs high 23.6s"),
+    (25, 35.0, "Turn 25 (9,523 tok / Math): adap 2.08s→Stage2 35.3s vs high TTFT 19.6s"),
+    (50, 16.0, "Turn 50 (20,899 tok / Math): adap 3.75s→Stage2 38.3s vs high TTFT 36.5s"),
 ]
 
-max_t = 20000.0
-max_c = 1050.0
+max_t = 42000.0
+max_c = 900.0
 pw = 55.0
 ph = 12.2
 px0 = 88.5
 
 for t_num, py0, sub_title in sub_panels:
-    text((px0 + pw / 2, py0 + ph + 2.0), sub_title, style=Styles.DarkBold.patch(text_size=10.0))
+    text((px0 + pw / 2, py0 + ph + 2.0), sub_title, style=Styles.DarkBold.patch(text_size=9.4))
     rectangle((px0 + pw / 2, py0 + ph / 2), width=pw, height=ph, style=Styles.Neutral.patch(line_width=0.5, shape_r=0))
 
     def to_x(ms: float) -> float:
@@ -683,24 +684,24 @@ for t_num, py0, sub_title in sub_panels:
     def to_y(ch: float, base_y: float = py0) -> float:
         return base_y + min(max(ch, 0.0), max_c) / max_c * ph
 
-    for xt in (0, 5000, 10000, 15000, 20000):
+    for xt in (0, 10000, 20000, 30000, 40000):
         tx = to_x(float(xt))
         line((tx, py0), (tx, py0 + ph), style=Styles.MutedDashed.patch(line_width=0.5))
         if t_num == 50:
-            text((tx, py0 - 2.2), f"{xt // 1000}s", style=Styles.Dark.patch(text_size=10.0))
+            text((tx, py0 - 2.2), f"{xt // 1000}s", style=Styles.Dark.patch(text_size=9.6))
 
-    for yt in (0, 500, 1000):
+    for yt in (0, 450, 900):
         ty = to_y(float(yt))
         line((px0, ty), (px0 + pw, ty), style=Styles.MutedDashed.patch(line_width=0.5))
-        text((px0 - 1.2, ty), f"{yt}", style=Styles.Dark.patch(text_size=10.0, halign="right"))
+        text((px0 - 1.2, ty), f"{yt}", style=Styles.Dark.patch(text_size=9.6, halign="right"))
 
     line((px0, py0), (px0 + pw, py0), style=Styles.Dark.patch(line_width=1.0))
     line((px0, py0), (px0, py0 + ph), style=Styles.Dark.patch(line_width=1.0))
 
     for v_key, st_line in (
-        ("streaming_default", Styles.DangerDashed.patch(line_width=1.9)),
-        ("blocking_t0", Styles.SecondaryBold.patch(line_width=2.0)),
-        ("streaming_t0", Styles.PrimaryBold.patch(line_width=2.4)),
+        ("streaming_high", Styles.DangerDashed.patch(line_width=1.9)),
+        ("streaming_low", Styles.TealBold.patch(line_width=2.0)),
+        ("adaptive_pat_a", Styles.PrimaryBold.patch(line_width=2.5)),
     ):
         tr = load_multiturn_trajectory(t_num, v_key)
         gem_pts = tr["timeline_series"].get("gemini", [])
@@ -708,14 +709,14 @@ for t_num, py0, sub_title in sub_panels:
             coords = [(to_x(float(p["t_ms"])), to_y(float(p["chars"]))) for p in gem_pts]
             lines(coords, style=st_line)
 
-text((px0 + pw / 2, 11.2), "Elapsed Time (s) — Y-Axis: Cumulative Output Characters (0–1,000 chars)", style=Styles.DarkBold.patch(text_size=10.0))
+text((px0 + pw / 2, 11.2), "Elapsed Time (0–42s) — Y-Axis: Cumulative Output Characters (0–900 chars)", style=Styles.DarkBold.patch(text_size=9.6))
 
 # Bottom callout bar
 rectangle((78.0, 5.8), width=146.0, height=5.8, style=Styles.SecondaryNeutral.patch(shape_r=1.2))
 text(
     (78.0, 5.8),
-    "Conclusion: At Turns 25 and 50, streaming_t0 (solid blue) begins streaming 2.1–4.0s earlier than blocking_t0 despite 21.5k input tokens.",
-    style=Styles.DarkBold.patch(text_size=10.0),
+    "Conclusion: At math Turns 25 & 50, adaptive_pat_a streams its bridge in 2.1–3.8s while Stage 2 (high) computes in parallel.",
+    style=Styles.DarkBold.patch(text_size=9.5),
 )
 
 save()
@@ -723,40 +724,39 @@ save()
 
 ### Key Findings from the Scatter & Trajectory Analysis
 
-1. **Left Panel: `Total ≈ 6,300 ms + 7.0 ms × ThTok` Governs Multi-Turn Latency**:
-   - Plotting all 100 `thinking=default` executions (`50 turns × 2 modes`) confirms that total completion time is governed by reasoning token count (`0–2,237 tokens`), **not** turn number (`Total ≈ 6,300 ms + 7.0 ms × ThTok`).
-   - The `~6,300 ms` y-intercept represents the base decoding time for a `~753-char` detailed technical support response, while each 1,000 thinking tokens add `~7.0 seconds` of pre-output delay.
-2. **Right Panel: 3-Turn Trajectory Snapshots (`Turn 1`, `Turn 25`, `Turn 50`)**:
-   - **Turn 1 (`176 tok`, Cache `0%`, Initial Unresponsive PC Query)**: Apart from the initial cold request, `blocking_t0` (solid purple) remains flat at `0 chars` until **`5,418 ms`**, and `streaming_default` (dashed red) stalls at `0 chars` for **`10,411 ms`** (`1,087` thinking tokens) before streaming.
-   - **Turn 25 (`10,060 tok`, Cache `7,547 tok [75.0%]`, BIOS/Chipset Update Guide)**: Even with 57× more input context, `streaming_t0` (solid blue) starts streaming at **`3,833 ms`**, delivering the first visible characters **`2,129 ms` (`36%`) earlier** than `blocking_t0` (`5,962 ms`).
-   - **Turn 50 (`21,490 tok`, Cache `18,995 tok [88.4%]`, Preventive Maintenance Summary)**: At the 50th turn (`122×` larger context), Implicit Context Caching serves `88.4–90.6%` of the prompt from KV cache. As a result, `streaming_t0` begins streaming at **`4,083 ms`**—**`3,991 ms` (`49%`) earlier** than `blocking_t0` (`8,074 ms`)—and completes the `902-char` reply at `9,554 ms` (whereas `streaming_default` stalls for `16,498 ms` due to `1,584` thinking tokens).
+1. **Left Panel: Clean Bifurcation of `adaptive_pat_a` into Routine (`~0 tok`) and Complex Math (`~3,671 tok`) Clusters**:
+   - While `streaming_high` (red diamonds) expends `1,000–5,500` thinking tokens indiscriminately across all 50 turns, `adaptive_pat_a` (blue circles) cleanly separates into two clusters: **40 routine turns at the bottom-left (`~0–30 tok`, `5,008 ms` avg Total)** and **10 complex math turns at the upper-right (`3,671 tok` avg, `40,142 ms` avg Total)**, saving **`61.7%` of total thinking tokens**.
+2. **Right Panel: 3-Turn Stream Trajectory Snapshots (`Turn 1`, `Turn 25`, `Turn 50`)**:
+   - **Turn 1 (`180 tok`, Routine Power Check, `expected_thinking=False`)**: `adaptive_pat_a` (solid blue) starts streaming at **`1,726 ms`** and finishes at **`3,592 ms`** in a single call, outperforming `streaming_low` (`2,652 / 4,984 ms`) while `streaming_high` stalls at `0 chars` until **`23,636 ms`**.
+   - **Turn 25 (`9,523 tok`, Cache `74.1%`, Complex RAM/Pagefile Sizing Math, `expected_thinking=True`)**: `adaptive_pat_a` streams its Stage 1 bridge message at **`2,075 ms`** and seamlessly appends the Stage 2 (`high`, `2,916` thinking tokens, **`7,521 cached tokens [77.1%]`**) calculation response (`35,289 ms` Total), eliminating the `19,631 ms` dead-air stall of `streaming_high`.
+   - **Turn 50 (`20,899 tok`, Cache `88.0%–90.2%`, Complex 3-Year Backup TCO & SLA Math, `expected_thinking=True`)**: With over `20.8k` input tokens, `adaptive_pat_a` delivers its bridge at **`3,753 ms`** (**`32.7s / 89.7%` earlier than `streaming_high` `36,492 ms`**) and completes Stage 2 (`3,435` thinking tokens, **`18,890 cached tokens [90.2%]`**) in **`38,274 ms`**, matching `streaming_high` (`38,857 ms`) in total completion time.
 
 ---
 
-## 5.5 Comprehensive 10-Turn Cohort Table & Production Guidelines for Multi-Turn Chat
+## 5.5 Cohort & Turn-Type Summary Table and Production Guidelines
 
-### 1. Cohort Summary Table (10-Turn Intervals: `Turns 1–10` through `Turns 41–50`)
+### 1. Comprehensive Performance Table by 10-Turn Cohort and Turn Type (`Routine 40T` vs. `Math 10T`)
 
-The table below summarizes input token growth, Implicit Context Cache hit rates, and latency across 10-turn cohorts and all 50 turns combined.
+The table below summarizes input token growth, Implicit Context Cache hit rates, and initial (`TTFT`) / completion (`Total`) latencies across 10-turn cohorts, routine vs. complex turns, and all 50 turns combined.
 
-| Turn Cohort & Troubleshooting Stage | Avg `prompt_tokens` /<br>Cache (`Hit Rate`) | `streaming_t0`<br>TTFT / Total (`ms`) | `blocking_t0`<br>Total (`ms`) | Streaming Lead<br>(`str_t0 - blk_t0`) | `streaming_default`<br>TTFT / Total [ThTok] | `blocking_default`<br>Total [ThTok] |
-| :--- | ---: | ---: | ---: | ---: | ---: | ---: |
-| **Turns 1–10**<br>(Power, Discharge, BIOS, Safe Mode) | `1,768 tok` (`176–3,407`)<br>Cache: `177 tok` (`10.0%`) | **`2,853`** / `5,910`<br>(T2–10: `2,000`) | `5,125` | **`-2,272 ms`**<br>(`-44.3%`) | `11,687` / `13,467`<br>[`1,211 tok`] | `12,988`<br>[`1,099 tok`] |
-| **Turns 11–20**<br>(Backup, Drivers, `sfc`, Memory Diag) | `5,635 tok` (`3,817–7,539`)<br>Cache: `3,229 tok` (`57.3%`) | **`2,180`** / `5,586` | `6,742` | **`-4,562 ms`**<br>(`-67.7%`) | `9,357` / `11,643`<br>[`828 tok`] | `14,398`<br>[`1,154 tok`] |
-| **Turns 21–30**<br>(SSD SMART, Restore, USB Boot Media) | `10,280 tok` (`8,005–12,478`)<br>Cache: `7,784 tok` (`75.7%`) | **`2,361`** / `6,804` | `6,666` | **`-4,305 ms`**<br>(`-64.6%`) | `9,969` / `12,658`<br>[`913 tok`] | `12,731`<br>[`954 tok`] |
-| **Turns 31–40**<br>(BitLocker, HW Diag, Pickup Repair) | `15,007 tok` (`12,995–16,915`)<br>Cache: `12,556 tok` (`83.7%`) | **`2,331`** / `6,260` | `6,653` | **`-4,322 ms`**<br>(`-65.0%`) | `8,265` / `11,405`<br>[`517 tok`] | `12,480`<br>[`802 tok`] |
-| **Turns 41–50**<br>(Loaner PC, On-Site, Backup & Maint) | `19,338 tok` (`17,309–21,490`)<br>Cache: `16,872 tok` (**`87.2%`**) | **`2,574`** / `7,054` | `6,935` | **`-4,361 ms`**<br>(`-62.9%`) | `9,910` / `12,504`<br>[`823 tok`] | `12,527`<br>[`763 tok`] |
-| **All 50 Turns** | **`10,406 tok`** (`176–21,490`)<br>Cache: **`8,124 tok`** (`78.1%` / Peak **`90.6%`**) | **`2,460`** / **`6,323`**<br>(Median **`2,029`**) | **`6,424`** | **`-3,964 ms`**<br>(**`-61.7%`**) | **`9,838`** / **`12,335`**<br>[**`858 tok`**] | **`13,025`**<br>[**`954 tok`**] |
+| Cohort / Turn Segment (8 Routine + 2 Math per Cohort) | Avg `prompt_tokens` /<br>Cache (`Hit Rate`) | `(1)` `streaming_low`<br>Initial `TTFT` / `Total` [ThTok] | `(1)` `streaming_high`<br>Initial `TTFT` / `Total` [ThTok] | `(2)` ★`adaptive_pat_a` (Pattern A)<br>Initial `TTFT` / `Total` [ThTok] | `adaptive` vs `high`<br>TTFT / Total Delta |
+| :--- | ---: | ---: | ---: | ---: | ---: |
+| **Turns 1–10**<br>(Power, BIOS, T5 Blackout Backup, T10 Recovery Math) | `1,796 tok` (`180–3,438`)<br>Cache: `179–287 tok` (`10–15%`) | **`1,854`** / `5,583 ms`<br>[`0 tok`] | `23,553` / `25,329 ms`<br>[`2,386 tok`] | **`2,121`** / **`9,729 ms`** (Med `4,332`)<br>[`715 tok` / Match `10/10`] | **`-21,432 ms` (`-91.0%`)**<br>Total: `-61.6%` |
+| **Turns 11–20**<br>(Drivers, `sfc`, T15 USB Speed, T20 Rebuild Math) | `5,533 tok` (`3,893–7,334`)<br>Cache: `3,151–3,383 tok` (`57–60%`) | **`2,372`** / `6,396 ms`<br>[`0 tok`] | `29,886` / `32,175 ms`<br>[`2,846 tok`] | **`2,431`** / **`14,142 ms`** (Med `4,953`)<br>[`949 tok` / Match `10/10`] | **`-27,455 ms` (`-91.9%`)**<br>Total: `-56.0%` |
+| **Turns 21–30**<br>(Restore, T25 Pagefile, T30 Bandwidth Math) | `9,759 tok` (`7,800–11,710`)<br>Cache: `7,321–7,530 tok` (`75–76%`) | **`3,143`** / `6,880 ms`<br>[`0 tok`] | `21,374` / `23,842 ms`<br>[`1,965 tok`] | **`2,926`** / **`11,670 ms`** (Med `6,104`)<br>[`652 tok` / Match `10/10`] | **`-18,448 ms` (`-86.3%`)**<br>Total: `-51.1%` |
+| **Turns 31–40**<br>(BitLocker, T35 Surface Scan, T40 Warranty Math) | `14,201 tok` (`12,293–16,156`)<br>Cache: `11,752–11,947 tok` (`83–84%`) | **`2,212`** / `6,737 ms`<br>[`0 tok`] | `14,686` / `17,870 ms`<br>[`1,237 tok`] | **`2,957`** / **`12,319 ms`** (Med `6,530`)<br>[`716 tok` / Match `10/10`] | **`-11,729 ms` (`-79.9%`)**<br>Total: `-31.1%` |
+| **Turns 41–50**<br>(Repair, T45 3-Yr TCO, T50 Cloud SLA Math) | `18,757 tok` (`16,661–20,899`)<br>Cache: `16,337–16,528 tok` (**`87–88%`**) | **`1,970`** / `7,348 ms`<br>[`0 tok`] | `16,365` / `19,921 ms`<br>[`1,473 tok`] | **`2,655`** / **`12,312 ms`** (Med `6,242`)<br>[`757 tok` / Match `10/10`] | **`-13,710 ms` (`-83.8%`)**<br>Total: `-38.2%` |
+| **Routine 40 Turns Avg**<br>(`expected_thinking=False`) | `9,676 tok`<br>(1 API call) | **`2,304`** / `6,411 ms`<br>(Med `2,060` / `6,497`) [`0`] | `16,958` / `19,683 ms`<br>(Med `20,701` / `22,721`) [`1,534`] | **`2,560`** / **`5,008 ms`**<br>(Med `2,352` / **`4,695`**) [`30`] | **`-14,398 ms` (`-84.9%`)**<br>Total: **`-74.6%`** |
+| **Complex Math 10 Turns Avg**<br>(`expected_thinking=True`: `T5..50`) | `11,341 tok`<br>(Stage 1 + Stage 2 Parallel) | **`2,336`** / `7,302 ms`<br>(Med `2,310` / `7,370`) [`0`] | `38,033` / `40,404 ms`<br>(Med `32,083` / `34,257`) [`3,772`] | **`2,851`** / **`40,142 ms`**<br>(Med `2,618` / `38,900`) [`3,671`] | **`-35,182 ms` (`-92.5%`)**<br>Total: `-0.6%` (Full Depth) |
+| **All 50 Turns Overall Avg**<br>(Median / P95) | **`10,009 tok`** (`180–20,899`)<br>Cache: **`77.4%–78.5%`** (Max **`90.2%`**) | **`2,310`** / **`6,589 ms`**<br>(Med `2,084` / `6,583`) [`0`] | **`21,173`** / **`23,827 ms`**<br>(Med `22,012` / `23,887`) [`1,981`] | **`2,618`** / **`12,034 ms`**<br>(Med `2,420` / **`4,990`**) [**`758`**] | **`-18,555 ms` (`-87.6%`)**<br>Total: **`-49.5%`** (Med **`-79.1%`**) |
 
-### 2. Production Architecture Guidelines for Multi-Turn Chat
+### 2. Production Architecture Guidelines for Multi-Turn Streaming Chat
 
-1. **Preserve Strict Prefix Immutability to Maximize Implicit Context Caching**:
+1. **Preserve Strict Prefix Immutability Across Stage 1 and Stage 2**:
    - Gemini 3.8 Flash's Implicit Context Caching matches the exact token prefix across `system_instruction` and historical `contents: list[types.Content]`.
-   - **Anti-Pattern**: Injecting per-request dynamic timestamps, random request UUIDs, or mutating device telemetry JSON inside `system_instruction` invalidates the token prefix on every turn, dropping the cache hit rate to `0%`.
-   - **Best Practice**: Keep `system_instruction` static and treat `history: list[types.Content]` as strictly **append-only**. Place dynamic per-turn metadata (such as current diagnostic status or retrieved knowledge-base snippets) at the end of the latest user turn message.
-2. **Standardize on `Streaming × thinking=0` (`streaming_t0`) for Conversational UX**:
-   - When technical support responses average `~753 chars`, full token generation takes `~6.42 seconds` even with `thinking=0`.
-   - Using `generate_content_stream` with `thinking_budget=0` delivers the first token in **`2,460 ms` on average (`2,029 ms` median, `3,964 ms` / `62%` earlier than Blocking)** and scales at just **`+29 ms per 1,000 input tokens`**, maintaining responsive UX through Turn 50.
-3. **Combine Multi-Turn Prefix Caching with the Two-Field Integrated Adaptive Router (Pattern A)**:
-   - Leaving `thinking=default` enabled across all turns inflates average TTFT to **`9,838 ms`**.
-   - Instead, pair `thinking=0` streaming for routine troubleshooting turns with the **2-Field Integrated Pydantic Router (Pattern A)** from Chapter 4 when a turn requires complex multi-step cost or transfer-time math. Because Stage 1 (`thinking=0` prefix check) and Stage 2 (`thinking=low` parallel handoff) share the exact same `system_instruction` + `history` prefix, Stage 2 automatically benefits from the warmed Implicit Context Cache.
+   - **Best Practice**: Keep `system_instruction` identical between Stage 1 (`low`) and Stage 2 (`high`) and treat `history: list[types.Content]` as strictly **append-only** (injecting Stage 1's routing instructions into the final user turn). This enables Stage 2 to hit up to **`90.2%` (`18,890 cached tokens` at Turn 50)** of the conversation prefix warmed by Stage 1.
+2. **Resolve the `low` vs. `high` Dilemma with Chapter 4's Adaptive Thinking Router (Pattern A)**:
+   - Using fixed `streaming_low` across all 50 turns yields fast responses (`2,310 ms` TTFT / `6,589 ms` Total) but performs zero internal reasoning (`0 tok`) even when users ask multi-variable cost or capacity math questions. Conversely, fixed `streaming_high` freezes the UI for an average of **`21.2 seconds`** (`17.0s` on routine turns and `38.0s` on math turns).
+   - Deploying **Pattern A (`low → high` 2-Field Integrated Pydantic Router)** delivers **`2,618 ms` average TTFT (`2,420 ms` median)** across all 50 turns, completes the 40 routine turns in **`5,008 ms`**, and selectively engages `high` reasoning (`3,671` thinking tokens) on the 10 calculation turns.
+3. **Extending Stage 1 (`3.5-flash-lite`) or Stage 2 (`Gemini 4` Series)**:
+   - As detailed in Section 4.1, teams seeking even faster initial response (`~1.0–1.5s` TTFT) can substitute **`gemini-3.5-flash-lite` (`minimal` / `low`)** in Stage 1, while complex enterprise workflows requiring deeper reasoning can route Stage 2 to **`gemini-4-hydrogen [high]`** or **`gemini-4-carbon [medium/high]`**.

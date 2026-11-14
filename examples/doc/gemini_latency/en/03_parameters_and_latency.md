@@ -137,14 +137,14 @@ config_low = types.GenerateContentConfig(
 )
 ```
 
-| Option Value (`thinking=`) | Normalized Label | SDK Configuration (`types.ThinkingConfig`) | Measured Reasoning Tokens (`ThTok`) | Behavior & Primary Use Cases |
+| Option Value (`thinking=`) | Normalized Label | SDK Configuration (`types.ThinkingConfig` via `llm_call.py`) | Measured Reasoning Tokens (`ThTok`) | Behavior & Primary Use Cases |
 | :--- | :--- | :--- | :--- | :--- |
 | **`0`** (or `"0"`) | `"0"` | `ThinkingConfig(thinking_budget=0)` | **`0 tok`** | Hard-caps internal reasoning budget at `0` tokens. Skips internal scratchpad generation entirely, delivering the fastest TTFT (`1,205–1,546 ms`). Ideal for greetings, standard procedures, and stage-1 routers. |
-| **`1`** (or `"minimal"`) | `"minimal"` | `ThinkingConfig(thinking_level=MINIMAL)` | **`0 tok`** | Minimal reasoning preset. Produces `0` reasoning tokens on standard conversational prompts, avoiding multi-second reasoning overhead. |
-| **`2`** (or `"low"`) | `"low"` | `ThinkingConfig(thinking_level=LOW)` | **`351–557 tok`** | Light internal reasoning (`~4.3–5.5 s` TTFT). Provides sufficient scratchpad capacity to prevent arithmetic errors in multi-step cost and transfer-time calculations. |
-| **`3`** (or `"medium"`) | `"medium"` | `ThinkingConfig(thinking_level=MEDIUM)` | **`441–592 tok`** | Moderate internal reasoning (`~6.2–6.7 s` TTFT). |
+| **`1`** (or `"minimal"`) | `"minimal"` | `ThinkingConfig(thinking_budget=256)` *(because `gemini-3.8-flash` only supports `LOW` / `MEDIUM` / `HIGH` enum levels)* | **`0 tok`** | Minimal reasoning budget (`256 tok` cap). Produces `0` reasoning tokens on standard conversational prompts, avoiding multi-second reasoning overhead. |
+| **`2`** (or `"low"`) | `"low"` | `ThinkingConfig(thinking_budget=4096)` *(equivalent to `ThinkingLevel.LOW`)* | **`351–557 tok`** | Light internal reasoning (`~4.3–5.5 s` TTFT). Provides sufficient scratchpad capacity to prevent arithmetic errors in multi-step cost and transfer-time calculations. |
+| **`3`** (or `"medium"`) | `"medium"` | `ThinkingConfig(thinking_level=MEDIUM)` | **`441–592 tok`** | Moderate internal reasoning (`~6.2–6.7 s` TTFT). Explicit specification of the server's default level. |
 | **`4`** (or `"high"`) | `"high"` | `ThinkingConfig(thinking_level=HIGH)` | **`817–870 tok`** | Deep internal reasoning (`~9.0–9.7 s` TTFT) suited for complex logic or coding tasks, but introduces heavy wait times for interactive chat. |
-| **`None`** (or `"default"`) | `"default"` | Omitted (Dynamic server default) | **`467–1,006 tok`** | Default behavior when `thinking_config` is omitted. Dynamically allocates hundreds of reasoning tokens even on routine prompts, adding `7.5–10.4 s` of latency. |
+| **`None`** (or `"default"`) | `"default"` | Omitted (Dynamic server default = equivalent to `MEDIUM`) | **`467–1,006 tok`** | Default behavior when `thinking_config` is omitted. Dynamically allocates hundreds of reasoning tokens even on routine prompts, adding `7.5–10.4 s` of latency. |
 
 ### Complete 18-Run Benchmark Table (`Blocking` vs. `Streaming`)
 
@@ -569,3 +569,297 @@ Inspecting the benchmark prompts in `src/gemini_evaluation/benchmark_adaptive_th
    - **Cloud Backup**: Year 1 (`550 yen × 12 = 6,600 yen`) + Year 2 (`600 yen × 12 = 7,200 yen`) = `13,800 yen`, yielding a 2-year total of **`93,600 yen`**.
 
 In Chapter 4, we design and benchmark the **Adaptive Thinking Router Pattern** to combine fast `thinking=0` responsiveness on Tiers 1–2 with parallel `thinking=low` scratchpad verification on Tier 3.
+
+---
+
+## 3.5 Cross-Model × `thinking_level` (Plus Deprecated `thinking_budget=0`) Latency Comparison across All 5 Active Models (5 Simple + 5 Complex Queries = 220 Runs)
+
+Sections 3.1 through 3.4 analyzed `ThinkingConfig` behavior on `gemini-3.8-flash`. In production architecture design, however, engineers must choose among the **five active Gemini 3.5 / 3.8 / 4 models** introduced in Section 2.5 (`gemini-3.5-flash-lite`, `gemini-3.8-flash`, `gemini-4-hydrogen`, `gemini-4-argon`, and `gemini-4-carbon`) and understand how each model's supported `thinking_level` options—as well as the deprecated legacy `thinking_budget=0` setting—scale across both **Simple conversational queries** and **Complex multi-step calculations**.
+
+To provide a direct apples-to-apples comparison, we created `src/gemini_evaluation/benchmark_cross_model_thinking.py` and executed **220 live streaming API calls (`generate_content_stream`)** sending the exact same **5 Simple queries (`S1`–`S5`)** and **5 Complex queries (`C1`–`C5`)** across all **22 `(model, thinking_level / budget=0)` configurations** (`src/gemini_evaluation/cross_model_thinking_log.yaml` / `.json`).
+
+```drawlib align=center code=fold width=100% file=ch03_cross_model_thinking_comparison.png caption="Figure 3-5: Cross-Model × thinking_level + Deprecated thinking_budget=0 (22 Configurations) Streaming TTFT, Total Completion Time, and Reasoning Token Comparison across 5 Simple Queries (S1–S5) vs. 5 Complex Queries (C1–C5) (220 Total Runs)"
+from drawlib.canvas import save, setup
+from drawlib.icons import phosphor
+from drawlib.lines import line
+from drawlib.shapes import rectangle
+from drawlib.styles import Styles
+from drawlib.text import text
+from drawlib.utils import load_cross_model_thinking_benchmark
+
+setup(width=172, height=158, dpi=150)
+
+# Outer structural frame
+rectangle((86.0, 79.0), width=168.0, height=154.0, style=Styles.MutedDashed.patch(shape_r=2.0))
+text(
+    (86.0, 151.6),
+    "5 Active Models × All thinking_level Options + Deprecated budget=0 (22 Configs): Simple vs. Complex",
+    style=Styles.DarkBold.patch(text_size=11.2),
+)
+
+# Top Legend Bar
+rectangle((86.0, 145.2), width=160.0, height=5.2, style=Styles.Neutral.patch(shape_r=1.0))
+rectangle((9.5, 145.2), width=4.0, height=2.2, style=Styles.PrimaryFlat.patch(shape_r=0.3))
+text((12.5, 145.2), "Streaming TTFT (First Token)", style=Styles.PrimaryBold.patch(text_size=9.8, halign="left"))
+
+rectangle((53.5, 145.2), width=4.0, height=2.2, style=Styles.PrimaryNeutral.patch(shape_r=0.3))
+text((56.5, 145.2), "Streaming Total (Completion)", style=Styles.DarkBold.patch(text_size=9.8, halign="left"))
+
+rectangle((98.5, 145.2), width=4.0, height=2.2, style=Styles.SecondaryFlat.patch(shape_r=0.3))
+text((101.5, 145.2), "[budget=0*] Deprecated thinking_budget=0", style=Styles.DarkBold.patch(text_size=9.8, halign="left"))
+
+# Column Headers
+rectangle((24.0, 138.8), width=36.0, height=4.4, style=Styles.PrimaryNeutral.patch(shape_r=0.8))
+text((24.0, 138.8), "Model / Config (22 Configs)", style=Styles.DarkBold.patch(text_size=10.0))
+
+rectangle((68.5, 138.8), width=49.0, height=4.4, style=Styles.PrimaryNeutral.patch(shape_r=0.8))
+text((68.5, 138.8), "1. Simple 5-Query Avg (S1-S5) [0–30s]", style=Styles.DarkBold.patch(text_size=10.0))
+
+rectangle((121.5, 138.8), width=53.0, height=4.4, style=Styles.PrimaryNeutral.patch(shape_r=0.8))
+text((121.5, 138.8), "2. Complex 5-Query Avg (C1-C5) [0–42s]", style=Styles.DarkBold.patch(text_size=10.0))
+
+rectangle((157.5, 138.8), width=16.0, height=4.4, style=Styles.SecondaryNeutral.patch(shape_r=0.8))
+text((157.5, 138.8), "Avg ThTok", style=Styles.DarkBold.patch(text_size=10.0))
+
+data = load_cross_model_thinking_benchmark()
+agg = data["aggregated"]
+
+SX0 = 45.0
+SW = 32.0
+S_MAX = 30000.0
+
+CX0 = 96.0
+CW = 36.0
+C_MAX = 42000.0
+
+for ms in (0, 10000, 20000, 30000):
+    gx = SX0 + (ms / S_MAX) * SW
+    line((gx, 13.5), (gx, 136.2), style=Styles.LightDashed.patch(line_width=0.6))
+    text((gx, 11.2), f"{ms // 1000}s", style=Styles.Dark.patch(text_size=9.5))
+
+for ms in (0, 10000, 20000, 30000, 40000):
+    gx = CX0 + (ms / C_MAX) * CW
+    line((gx, 13.5), (gx, 136.2), style=Styles.LightDashed.patch(line_width=0.6))
+    text((gx, 11.2), f"{ms // 1000}s", style=Styles.Dark.patch(text_size=9.5))
+
+short_names = {
+    "gemini-3.5-flash-lite": "3.5-flash-lite",
+    "gemini-3.8-flash": "3.8-flash",
+    "gemini-4-hydrogen": "4-hydrogen",
+    "gemini-4-argon": "4-argon",
+    "gemini-4-carbon": "4-carbon",
+}
+
+for idx, row in enumerate(agg):
+    ry = 133.5 - idx * 5.6
+    m_short = short_names.get(row["model"], row["model"])
+    lvl = row["thinking_level"]
+    status = row.get("status", "OK")
+    is_budget0 = lvl == "budget=0"
+    is_lite_or_fast = row["model"] in {"gemini-3.5-flash-lite", "gemini-4-hydrogen"} and lvl in {"minimal", "low"}
+
+    if status == "UNSUPPORTED_400":
+        bg_st = Styles.DangerFlat.patch(shape_r=0.6, alpha=0.14)
+    elif is_budget0:
+        bg_st = Styles.SecondaryNeutral.patch(shape_r=0.6, alpha=0.38)
+    elif is_lite_or_fast:
+        bg_st = Styles.PrimaryNeutral.patch(shape_r=0.6, alpha=0.32)
+    else:
+        bg_st = Styles.LightFlat.patch(shape_r=0.6, alpha=0.45) if idx % 2 == 0 else Styles.WhiteFlat.patch(shape_r=0.6)
+
+    rectangle((86.0, ry), width=160.0, height=5.0, style=bg_st)
+
+    lbl_text = f"{m_short} [budget=0*]" if is_budget0 else f"{m_short} [{lvl}]"
+    lbl_style = Styles.DangerBold.patch(text_size=9.5, halign="left") if status == "UNSUPPORTED_400" else Styles.DarkBold.patch(text_size=9.5, halign="left")
+    text((7.2, ry), lbl_text, style=lbl_style)
+
+    if status == "UNSUPPORTED_400":
+        rectangle((96.0, ry), width=102.0, height=3.6, style=Styles.WhiteFlat.patch(shape_r=0.5, line_width=0.6))
+        phosphor.x_circle((55.0, ry), width=2.8, style=Styles.DangerBold)
+        text(
+            (57.4, ry),
+            "400 INVALID_ARGUMENT (thinking_budget=0 unsupported → use minimal)",
+            style=Styles.DangerBold.patch(text_size=9.5, halign="left"),
+        )
+        rectangle((157.5, ry), width=15.0, height=3.8, style=Styles.WhiteFlat.patch(shape_r=0.5))
+        text((157.5, ry), "N/A", style=Styles.DangerBold.patch(text_size=9.5))
+        continue
+
+    bar_tot_st = Styles.SecondaryNeutral.patch(shape_r=0.3) if is_budget0 else Styles.PrimaryNeutral.patch(shape_r=0.3)
+    bar_ttft_st = Styles.SecondaryFlat.patch(shape_r=0.3) if is_budget0 else Styles.PrimaryFlat.patch(shape_r=0.3)
+
+    # Simple bar
+    s_ttft = float(row["simple_ttft_avg_ms"])
+    s_tot = float(row["simple_total_avg_ms"])
+    sw_tot = min(s_tot / S_MAX, 1.0) * SW
+    sw_ttft = min(s_ttft / S_MAX, 1.0) * SW
+    rectangle((SX0 + sw_tot / 2, ry), width=max(sw_tot, 0.4), height=2.4, style=bar_tot_st)
+    rectangle((SX0 + sw_ttft / 2, ry), width=max(sw_ttft, 0.4), height=2.4, style=bar_ttft_st)
+    text(
+        (SX0 + sw_tot + 0.8, ry),
+        f"{s_ttft / 1000:.1f}s / {s_tot / 1000:.1f}s",
+        style=Styles.Dark.patch(text_size=9.5, halign="left"),
+    )
+
+    # Complex bar
+    c_ttft = float(row["complex_ttft_avg_ms"])
+    c_tot = float(row["complex_total_avg_ms"])
+    c_th = float(row["complex_thoughts_avg"])
+    cw_tot = min(c_tot / C_MAX, 1.0) * CW
+    cw_ttft = min(c_ttft / C_MAX, 1.0) * CW
+    rectangle((CX0 + cw_tot / 2, ry), width=max(cw_tot, 0.4), height=2.4, style=bar_tot_st)
+    rectangle((CX0 + cw_ttft / 2, ry), width=max(cw_ttft, 0.4), height=2.4, style=bar_ttft_st)
+    text(
+        (CX0 + cw_tot + 0.8, ry),
+        f"{c_ttft / 1000:.1f}s / {c_tot / 1000:.1f}s",
+        style=Styles.DarkBold.patch(text_size=9.5, halign="left"),
+    )
+
+    # Complex thoughts token pill
+    rectangle((157.5, ry), width=15.0, height=3.8, style=Styles.WhiteFlat.patch(shape_r=0.5))
+    text((157.5, ry), f"{c_th:,.0f} tok", style=Styles.PrimaryBold.patch(text_size=9.5))
+
+# Bottom callout banner
+rectangle((86.0, 5.2), width=160.0, height=5.4, style=Styles.PrimaryNeutral.patch(shape_r=1.0))
+phosphor.gauge((9.8, 5.2), width=3.0, style=Styles.PrimaryBold)
+text(
+    (13.2, 5.2),
+    "Takeaway: budget=0* fails with HTTP 400 on 3.5-flash-lite and coerces to low on the other 4 models; always specify thinking_level.",
+    style=Styles.DarkBold.patch(text_size=9.8, halign="left"),
+)
+
+save()
+```
+
+---
+
+### 1. Benchmark Suite: 5 Simple Queries (`S1`–`S5`) + 5 Complex Queries (`C1`–`C5`) (Table 3-5A)
+
+Every model and `thinking_level` (as well as deprecated `thinking_budget=0`) configuration was evaluated on the exact same 10 PC technical support queries shown in Table 3-5A.
+
+| Query ID | Category | Query Title | Prompt Summary & Processing Requirements |
+| :---: | :---: | :--- | :--- |
+| **`S1`** | **Simple** | Initial PC Boot Greeting | Initial intake response to a customer reporting that their laptop suddenly stopped turning on. |
+| **`S2`** | **Simple** | Power Reset Thanks / Closing | Polite closing response after the customer confirms that power discharge restored the power LED. |
+| **`S3`** | **Simple** | Support Center Hours | Standard guidance on phone vs. chat support operating hours and business days. |
+| **`S4`** | **Simple** | Forced Shutdown Hold Time | Short factual answer on how many seconds (`~4–10s`) to hold the power button when Windows freezes. |
+| **`S5`** | **Simple** | Model & Serial Number Location | Guidance on where to find the model number and serial sticker on a laptop (bottom cover, battery bay, BIOS). |
+| **`C1`** | **Complex** | 3-Year Repair vs. Replacement Cost | Repair plan (board `38,000` + SSD `22,000` + power `2,400×36` + Year-2 battery `16,000` = `162,400 yen`) vs. Replacement plan (new PC `168,000` − trade-in `25,000` − 10% points `14,300` + power `1,550×36` = `184,500 yen`; repair saves **`22,100 yen`**). |
+| **`C2`** | **Complex** | 1.8TB Local + Cloud Transfer Time | 1,200GB video at `300 MB/s` (`4,000s`) + 600GB small CAD files at `50 MB/s` (`12,000s`) local backup (`266m 40s`) + 360GB cloud upload at `40 MB/s` (`9,000s` = `150m`), totaling **`6 hours 56 minutes 40 seconds`**. |
+| **`C3`** | **Complex** | Loaner Rental vs. Same-Day On-Site | 8-day depot repair (`32,000` + 2-day downtime `36,000` + 6-day rental `21,000` + setup `4,000` = `93,000 yen`) vs. Same-day on-site repair (`32,000` + dispatch `22,000` + rush `12,000` + half-day downtime `9,000` = `75,000 yen`; on-site saves **`18,000 yen`**). |
+| **`C4`** | **Complex** | 3-PC 2-Year Maintenance & Upgrade | 3 PCs × 24m base plan (`43,200 yen`) + 2 discounted on-site repairs (`7,200 yen`) + 3 discounted 16GB RAM upgrades (`29,400 yen`) + Year-1 & Year-2 cloud backup (`13,800 yen`) = **`93,600 yen`**. |
+| **`C5`** | **Complex** | 4-Drive RAID5 12TB Rebuild Time | 4×4TB RAID5 (`12TB` usable × 75% used = **`9.0TB` stored**); rebuilding `12,000,000 MB` takes 5 daytime hours at `100 MB/s` (`1,800,000 MB`) + `10,200,000 MB` at night (`250 MB/s` = `40,800s` = `11h 20m`) = **`16 hours 20 minutes`**. |
+
+---
+
+### 2. Aggregated Latency & Token Summary across All 22 Configurations (Table 3-5B)
+
+Table 3-5B summarizes the **Simple 5-query averages (`S1`–`S5`)**, **Complex 5-query averages (`C1`–`C5`)**, and **Overall 10-query averages** across all 22 `(model, thinking_level / budget=0)` configurations.
+
+| Model (`model`) | Config (`thinking_level` / `budget=0`) | Simple (`S1`–`S5`) Avg TTFT | Simple (`S1`–`S5`) Avg Total | Simple Avg `ThTok` / `OutTok` | Complex (`C1`–`C5`) Avg TTFT | Complex (`C1`–`C5`) Avg Total | Complex Avg `ThTok` / `OutTok` | Overall 10-Query Avg TTFT / Total |
+| :--- | :---: | ---: | ---: | :---: | ---: | ---: | :---: | ---: |
+| **`gemini-3.5-flash-lite`** | **`budget=0`** *(deprecated/error)* | ❌ `400 Error` | ❌ `400 Error` | Unsupported (use `minimal`) | ❌ `400 Error` | ❌ `400 Error` | Unsupported (use `minimal`) | **❌ `400 INVALID_ARGUMENT`** |
+| **`gemini-3.5-flash-lite`** | **`minimal`** *(default)* | **`733.9 ms`** | **`1,378.9 ms`** | `0.0` / `188.6` | **`677.6 ms`** | **`2,063.2 ms`** | `0.0` / `588.8` | **`705.8 ms` / `1,721.0 ms`** |
+| **`gemini-3.5-flash-lite`** | **`low`** | **`671.6 ms`** | **`1,373.5 ms`** | `0.0` / `203.4` | **`1,467.2 ms`** | **`2,815.4 ms`** | `336.4` / `558.2` | **`1,069.4 ms` / `2,094.5 ms`** |
+| **`gemini-3.5-flash-lite`** | **`medium`** | `1,399.9 ms` | `1,933.5 ms` | `232.2` / `174.0` | `2,719.0 ms` | `4,078.8 ms` | `884.4` / `581.0` | `2,059.5 ms` / `3,006.2 ms` |
+| **`gemini-3.5-flash-lite`** | **`high`** | `2,158.7 ms` | `2,568.6 ms` | `459.4` / `169.6` | `3,493.9 ms` | `4,837.8 ms` | `1,313.0` / `591.8` | `2,826.3 ms` / `3,703.2 ms` |
+| **`gemini-3.8-flash`** | **`budget=0`** *(deprecated/legacy)* | `3,041.6 ms` | `5,457.5 ms` | `100.0` / `213.0` | `2,564.7 ms` | `7,653.2 ms` | `91.8` / `627.8` | `2,803.2 ms` / `6,555.4 ms` |
+| **`gemini-3.8-flash`** | **`low`** | `2,458.7 ms` | `5,041.8 ms` | `62.0` / `238.0` | `2,586.6 ms` | `7,965.4 ms` | `104.6` / `653.4` | `2,522.7 ms` / `6,503.6 ms` |
+| **`gemini-3.8-flash`** | **`medium`** *(default)* | `3,950.6 ms` | `6,655.5 ms` | `206.8` / `252.0` | `6,155.5 ms` | `10,707.2 ms` | `605.0` / `567.2` | `5,053.1 ms` / `8,681.4 ms` |
+| **`gemini-3.8-flash`** | **`high`** | `10,186.7 ms` | `12,502.7 ms` | `799.6` / `243.4` | `13,429.9 ms` | `18,948.5 ms` | `1,549.0` / `693.4` | `11,808.3 ms` / `15,725.6 ms` |
+| **`gemini-4-hydrogen`** | **`budget=0`** *(deprecated/coerced)* | `3,018.6 ms` | `3,870.3 ms` | `147.4` / `146.0` | `5,341.2 ms` | `7,474.6 ms` | `670.4` / `508.6` | `4,179.9 ms` / `5,672.5 ms` |
+| **`gemini-4-hydrogen`** | **`low`** | `2,598.0 ms` | **`3,367.6 ms`** | `183.8` / `146.0` | `3,908.6 ms` | **`5,899.8 ms`** | `657.6` / `521.6` | **`3,253.3 ms` / `4,633.7 ms`** |
+| **`gemini-4-hydrogen`** | **`medium`** | `3,762.3 ms` | `5,150.8 ms` | `231.6` / `218.4` | `6,506.2 ms` | `9,004.7 ms` | `954.2` / `593.2` | `5,134.2 ms` / `7,077.7 ms` |
+| **`gemini-4-hydrogen`** | **`high`** *(default)* | `4,060.9 ms` | `5,244.0 ms` | `273.0` / `205.6` | `9,339.2 ms` | `11,804.2 ms` | `1,156.0` / `593.8` | `6,700.1 ms` / `8,524.1 ms` |
+| **`gemini-4-hydrogen`** | **`xhigh`** *(exclusive)* | `7,650.8 ms` | `8,738.9 ms` | `761.6` / `221.2` | `13,015.8 ms` | `15,431.1 ms` | **`2,248.0`** / `632.8` | `10,333.3 ms` / `12,085.0 ms` |
+| **`gemini-4-argon`** | **`budget=0`** *(deprecated/legacy)* | `9,817.2 ms` | `13,952.0 ms` | `0.0` / `222.2` | `13,300.9 ms` | `21,158.1 ms` | `0.0` / `715.8` | `11,559.1 ms` / `17,555.0 ms` |
+| **`gemini-4-argon`** | **`low`** | `4,382.4 ms` | `8,649.0 ms` | `0.0` / `250.4` | `10,940.2 ms` | `19,397.1 ms` | `0.0` / `698.4` | `7,661.3 ms` / `14,023.0 ms` |
+| **`gemini-4-argon`** | **`medium`** *(default)* | `6,137.7 ms` | `10,080.2 ms` | `0.0` / `231.8` | **`4,931.3 ms`** | **`13,279.8 ms`** | `0.0` / `699.6` | **`5,534.5 ms` / `11,680.0 ms`** |
+| **`gemini-4-argon`** | **`high`** | `22,181.4 ms` | `25,528.0 ms` | `774.6` / `235.6` | `27,175.9 ms` | `34,240.4 ms` | `1,100.0` / `601.0` | `24,678.6 ms` / `29,884.2 ms` |
+| **`gemini-4-carbon`** | **`budget=0`** *(deprecated/legacy)* | `4,854.2 ms` | `7,891.5 ms` | `0.0` / `222.2` | `4,434.0 ms` | `12,103.0 ms` | `0.0` / `684.8` | `4,644.1 ms` / `9,997.2 ms` |
+| **`gemini-4-carbon`** | **`low`** | `7,677.8 ms` | `11,455.9 ms` | `0.0` / `223.4` | `5,400.9 ms` | `12,485.9 ms` | `0.0` / `641.6` | `6,539.4 ms` / `11,970.9 ms` |
+| **`gemini-4-carbon`** | **`medium`** *(default)* | `6,309.1 ms` | `9,129.1 ms` | `97.6` / `217.2` | `13,448.1 ms` | `19,218.0 ms` | `713.2` / `565.6` | `9,878.6 ms` / `14,173.5 ms` |
+| **`gemini-4-carbon`** | **`high`** | `14,648.2 ms` | `17,207.2 ms` | `722.4` / `227.0` | `34,355.5 ms` | `40,209.9 ms` | **`2,794.6`** / `608.4` | `24,501.9 ms` / `28,708.5 ms` |
+
+---
+
+### 3. Per-Query Breakdown across All 22 Configurations (Tables 3-5C & 3-5D)
+
+Each cell reports **`TTFT (ms)` / `Total (ms)` (`ThTok`)**.
+
+#### Table 3-5C: Simple Queries (`S1`–`S5`) Breakdown by Model × Configuration (22 Configs)
+
+| Model | Config (`level`) | `S1` Boot Greeting | `S2` Reset Thanks | `S3` Support Hours | `S4` Hold Seconds | `S5` Serial Sticker | Simple 5-Query Avg |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **`gemini-3.5-flash-lite`** | **`budget=0`** | ❌ `400 Error` | ❌ `400 Error` | ❌ `400 Error` | ❌ `400 Error` | ❌ `400 Error` | ❌ **`400 INVALID_ARGUMENT`** |
+| **`gemini-3.5-flash-lite`** | **`minimal`** | `754` / `1,415` (`0`) | `795` / `1,025` (`0`) | `736` / `1,509` (`0`) | `562` / `795` (`0`) | `822` / `2,150` (`0`) | **`733.9`** / `1,378.9` (`0.0`) |
+| **`gemini-3.5-flash-lite`** | **`low`** | `781` / `1,460` (`0`) | `586` / `858` (`0`) | `625` / `1,667` (`0`) | `662` / `905` (`0`) | `704` / `1,978` (`0`) | **`671.6`** / `1,373.5` (`0.0`) |
+| **`gemini-3.5-flash-lite`** | **`medium`** | `1,124` / `1,712` (`164`) | `1,086` / `1,263` (`115`) | `1,365` / `2,118` (`158`) | `1,012` / `1,223` (`129`) | `2,413` / `3,350` (`595`) | **`1,399.9`** / `1,933.5` (`232.2`) |
+| **`gemini-3.5-flash-lite`** | **`high`** | `2,209` / `2,567` (`487`) | `1,679` / `1,848` (`246`) | `2,362` / `2,970` (`563`) | `1,783` / `1,938` (`372`) | `2,761` / `3,520` (`629`) | **`2,158.7`** / `2,568.6` (`459.4`) |
+| **`gemini-3.8-flash`** | **`budget=0`** | `2,882` / `5,792` (`112`) | `3,737` / `5,281` (`102`) | `3,616` / `7,137` (`206`) | `2,642` / `3,165` (`80`) | `2,332` / `5,912` (`0`) | **`3,041.6`** / `5,457.5` (`100.0`) |
+| **`gemini-3.8-flash`** | **`low`** | `1,378` / `3,636` (`0`) | `2,306` / `3,511` (`56`) | `3,924` / `7,590` (`254`) | `2,546` / `3,621` (`0`) | `2,139` / `6,850` (`0`) | **`2,458.7`** / `5,041.8` (`62.0`) |
+| **`gemini-3.8-flash`** | **`medium`** | `3,667` / `6,632` (`170`) | `2,386` / `3,960` (`118`) | `4,880` / `8,267` (`310`) | `3,343` / `4,208` (`149`) | `5,477` / `10,211` (`287`) | **`3,950.6`** / `6,655.5` (`206.8`) |
+| **`gemini-3.8-flash`** | **`high`** | `13,519` / `15,568` (`976`) | `8,599` / `9,911` (`734`) | `11,038` / `15,084` (`929`) | `5,098` / `5,877` (`377`) | `12,679` / `16,074` (`982`) | **`10,186.7`** / `12,502.7` (`799.6`) |
+| **`gemini-4-hydrogen`** | **`budget=0`** | `1,714` / `2,795` (`120`) | `3,936` / `4,164` (`48`) | `3,435` / `4,622` (`155`) | `3,959` / `4,181` (`282`) | `2,050` / `3,590` (`132`) | **`3,018.6`** / `3,870.3` (`147.4`) |
+| **`gemini-4-hydrogen`** | **`low`** | `1,908` / `2,720` (`143`) | `3,160` / `3,427` (`89`) | `2,327` / `3,207` (`189`) | `2,454` / `2,847` (`267`) | `3,140` / `4,637` (`231`) | **`2,598.0`** / `3,367.6` (`183.8`) |
+| **`gemini-4-hydrogen`** | **`medium`** | `1,529` / `2,836` (`106`) | `4,350` / `5,038` (`143`) | `3,972` / `6,185` (`342`) | `2,076` / `2,408` (`208`) | `6,884` / `9,288` (`359`) | **`3,762.3`** / `5,150.8` (`231.6`) |
+| **`gemini-4-hydrogen`** | **`high`** | `2,712` / `3,703` (`277`) | `5,756` / `6,396` (`135`) | `6,846` / `8,598` (`443`) | `2,643` / `2,929` (`256`) | `2,348` / `4,594` (`254`) | **`4,060.9`** / `5,244.0` (`273.0`) |
+| **`gemini-4-hydrogen`** | **`xhigh`** | `7,021` / `7,902` (`1040`) | `4,469` / `4,922` (`526`) | `12,846` / `14,667` (`634`) | `6,338` / `6,633` (`749`) | `7,580` / `9,570` (`859`) | **`7,650.8`** / `8,738.9` (`761.6`) |
+| **`gemini-4-argon`** | **`budget=0`** | `11,746` / `15,473` (`0`) | `22,471` / `24,288` (`0`) | `3,326` / `8,664` (`0`) | `4,728` / `6,385` (`0`) | `6,816` / `14,949` (`0`) | **`9,817.2`** / `13,952.0` (`0.0`) |
+| **`gemini-4-argon`** | **`low`** | `2,570` / `5,326` (`0`) | `4,708` / `7,330` (`0`) | `2,638` / `9,683` (`0`) | `3,238` / `5,355` (`0`) | `8,757` / `15,552` (`0`) | **`4,382.4`** / `8,649.0` (`0.0`) |
+| **`gemini-4-argon`** | **`medium`** | `3,053` / `7,037` (`0`) | `4,854` / `6,561` (`0`) | `9,451` / `15,899` (`0`) | `4,508` / `6,306` (`0`) | `8,823` / `14,598` (`0`) | **`6,137.7`** / `10,080.2` (`0.0`) |
+| **`gemini-4-argon`** | **`high`** | `29,978` / `33,264` (`749`) | `11,349` / `13,092` (`338`) | `24,771` / `29,346` (`1238`) | `15,763` / `16,872` (`606`) | `29,046` / `35,066` (`942`) | **`22,181.4`** / `25,528.0` (`774.6`) |
+| **`gemini-4-carbon`** | **`budget=0`** | `4,935` / `8,407` (`0`) | `4,695` / `6,488` (`0`) | `4,994` / `9,115` (`0`) | `5,174` / `6,954` (`0`) | `4,472` / `8,493` (`0`) | **`4,854.2`** / `7,891.5` (`0.0`) |
+| **`gemini-4-carbon`** | **`low`** | `3,280` / `6,153` (`0`) | `4,086` / `6,120` (`0`) | `7,773` / `13,560` (`0`) | `11,728` / `13,815` (`0`) | `11,523` / `17,632` (`0`) | **`7,677.8`** / `11,455.9` (`0.0`) |
+| **`gemini-4-carbon`** | **`medium`** | `10,608` / `12,918` (`488`) | `5,083` / `6,500` (`0`) | `5,712` / `10,550` (`0`) | `4,937` / `6,727` (`0`) | `5,204` / `8,951` (`0`) | **`6,309.1`** / `9,129.1` (`97.6`) |
+| **`gemini-4-carbon`** | **`high`** | `9,566` / `11,715` (`559`) | `13,462` / `14,539` (`574`) | `18,835` / `22,305` (`1070`) | `11,041` / `11,829` (`438`) | `20,337` / `25,648` (`971`) | **`14,648.2`** / `17,207.2` (`722.4`) |
+
+#### Table 3-5D: Complex Queries (`C1`–`C5`) Breakdown by Model × Configuration (22 Configs)
+
+| Model | Config (`level`) | `C1` 3-Yr Repair vs Buy | `C2` 1.8TB Transfer | `C3` Loaner vs On-Site | `C4` 3-PC 2-Yr Plan | `C5` RAID5 Rebuild | Complex 5-Query Avg |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **`gemini-3.5-flash-lite`** | **`budget=0`** | ❌ `400 Error` | ❌ `400 Error` | ❌ `400 Error` | ❌ `400 Error` | ❌ `400 Error` | ❌ **`400 INVALID_ARGUMENT`** |
+| **`gemini-3.5-flash-lite`** | **`minimal`** | `689` / `2,049` (`0`) | `638` / `2,512` (`0`) | `688` / `1,778` (`0`) | `632` / `1,573` (`0`) | `740` / `2,404` (`0`) | **`677.6`** / `2,063.2` (`0.0`) |
+| **`gemini-3.5-flash-lite`** | **`low`** | `2,092` / `3,592` (`662`) | `1,137` / `2,883` (`243`) | `474` / `1,614` (`0`) | `952` / `1,895` (`0`) | `2,681` / `4,093` (`777`) | **`1,467.2`** / `2,815.4` (`336.4`) |
+| **`gemini-3.5-flash-lite`** | **`medium`** | `2,390` / `3,748` (`832`) | `2,712` / `4,527` (`944`) | `1,806` / `2,789` (`442`) | `2,733` / `3,688` (`890`) | `3,955` / `5,642` (`1314`) | **`2,719.0`** / `4,078.8` (`884.4`) |
+| **`gemini-3.5-flash-lite`** | **`high`** | `4,447` / `5,638` (`1895`) | `3,983` / `5,804` (`1400`) | `2,228` / `3,371` (`807`) | `2,395` / `3,289` (`965`) | `4,417` / `6,086` (`1498`) | **`3,493.9`** / `4,837.8` (`1313.0`) |
+| **`gemini-3.8-flash`** | **`budget=0`** | `1,709` / `8,464` (`0`) | `1,441` / `7,700` (`0`) | `1,898` / `5,712` (`0`) | `4,440` / `7,573` (`459`) | `3,336` / `8,816` (`0`) | **`2,564.7`** / `7,653.2` (`91.8`) |
+| **`gemini-3.8-flash`** | **`low`** | `1,213` / `7,493` (`0`) | `1,570` / `8,689` (`0`) | `2,216` / `6,605` (`0`) | `5,363` / `8,859` (`523`) | `2,571` / `8,180` (`0`) | **`2,586.6`** / `7,965.4` (`104.6`) |
+| **`gemini-3.8-flash`** | **`medium`** | `5,935` / `11,219` (`535`) | `7,605` / `13,135` (`776`) | `5,253` / `9,135` (`405`) | `5,300` / `8,258` (`551`) | `6,684` / `11,789` (`758`) | **`6,155.5`** / `10,707.2` (`605.0`) |
+| **`gemini-3.8-flash`** | **`high`** | `17,232` / `23,500` (`1862`) | `13,341` / `20,345` (`1569`) | `11,916` / `16,018` (`1332`) | `11,399` / `14,809` (`1493`) | `13,261` / `20,070` (`1489`) | **`13,429.9`** / `18,948.5` (`1549.0`) |
+| **`gemini-4-hydrogen`** | **`budget=0`** | `4,468` / `6,579` (`913`) | `7,307` / `10,135` (`790`) | `2,150` / `3,824` (`359`) | `6,981` / `8,233` (`485`) | `5,801` / `8,602` (`805`) | **`5,341.2`** / `7,474.6` (`670.4`) |
+| **`gemini-4-hydrogen`** | **`low`** | `5,287` / `7,609` (`635`) | `4,134` / `6,415` (`915`) | `3,136` / `4,552` (`495`) | `3,461` / `4,592` (`688`) | `3,525` / `6,331` (`555`) | **`3,908.6`** / `5,899.8` (`657.6`) |
+| **`gemini-4-hydrogen`** | **`medium`** | `6,684` / `9,248` (`1225`) | `8,374` / `11,368` (`1047`) | `3,701` / `5,209` (`649`) | `3,830` / `5,430` (`662`) | `9,942` / `13,768` (`1188`) | **`6,506.2`** / `9,004.7` (`954.2`) |
+| **`gemini-4-hydrogen`** | **`high`** | `5,650` / `7,695` (`1222`) | `10,447` / `14,546` (`1954`) | `4,068` / `6,012` (`669`) | `20,291` / `21,863` (`697`) | `6,240` / `8,904` (`1238`) | **`9,339.2`** / `11,804.2` (`1156.0`) |
+| **`gemini-4-hydrogen`** | **`xhigh`** | `10,703` / `13,386` (`2327`) | `13,629` / `16,628` (`2472`) | `14,595` / `16,648` (`1770`) | `14,652` / `16,410` (`1698`) | `11,500` / `14,082` (`2973`) | **`13,015.8`** / `15,431.1` (`2248.0`) |
+| **`gemini-4-argon`** | **`budget=0`** | `5,216` / `12,360` (`0`) | `4,684` / `12,767` (`0`) | `6,759` / `14,124` (`0`) | `19,747` / `25,394` (`0`) | `30,099` / `41,146` (`0`) | **`13,300.9`** / `21,158.1` (`0.0`) |
+| **`gemini-4-argon`** | **`low`** | `11,046` / `18,213` (`0`) | `16,490` / `26,568` (`0`) | `7,539` / `13,687` (`0`) | `7,836` / `12,810` (`0`) | `11,790` / `25,708` (`0`) | **`10,940.2`** / `19,397.1` (`0.0`) |
+| **`gemini-4-argon`** | **`medium`** | `5,146` / `14,749` (`0`) | `5,018` / `13,742` (`0`) | `5,866` / `12,776` (`0`) | `5,286` / `10,626` (`0`) | `3,341` / `14,506` (`0`) | **`4,931.3`** / `13,279.8` (`0.0`) |
+| **`gemini-4-argon`** | **`high`** | `28,720` / `35,282` (`971`) | `27,969` / `36,906` (`1911`) | `18,849` / `24,482` (`614`) | `14,046` / `19,463` (`850`) | `46,294` / `55,069` (`1154`) | **`27,175.9`** / `34,240.4` (`1100.0`) |
+| **`gemini-4-carbon`** | **`budget=0`** | `3,963` / `10,957` (`0`) | `2,612` / `14,469` (`0`) | `4,316` / `9,688` (`0`) | `5,257` / `10,210` (`0`) | `6,022` / `15,191` (`0`) | **`4,434.0`** / `12,103.0` (`0.0`) |
+| **`gemini-4-carbon`** | **`low`** | `5,460` / `12,293` (`0`) | `2,526` / `10,854` (`0`) | `4,138` / `10,116` (`0`) | `9,456` / `13,682` (`0`) | `5,424` / `15,484` (`0`) | **`5,400.9`** / `12,485.9` (`0.0`) |
+| **`gemini-4-carbon`** | **`medium`** | `8,512` / `13,819` (`503`) | `27,480` / `34,911` (`1267`) | `7,724` / `12,720` (`352`) | `9,944` / `14,121` (`638`) | `13,581` / `20,519` (`806`) | **`13,448.1`** / `19,218.0` (`713.2`) |
+| **`gemini-4-carbon`** | **`high`** | `30,667` / `35,428` (`2908`) | `51,353` / `59,310` (`4360`) | `29,288` / `34,225` (`2086`) | `19,564` / `24,842` (`1150`) | `40,907` / `47,244` (`3469`) | **`34,355.5`** / `40,209.9` (`2794.6`) |
+
+---
+
+### 4. Six Key Architectural Insights from the 220-Run Cross-Model Benchmark
+
+1. **Empirical Behavior of Deprecated `thinking_budget=0` (`400 Error` on `3.5-flash-lite`; Coerced to `low` on the Other 4 Models)**:
+   - **`gemini-3.5-flash-lite`**: Passing `thinking_budget=0` fails with **`400 INVALID_ARGUMENT`** across all 10 queries. To achieve zero-thinking inference on `3.5-flash-lite`, applications must pass **`thinking_level="minimal"`**.
+   - **`gemini-3.8-flash` / `gemini-4-hydrogen` / `gemini-4-argon` / `gemini-4-carbon`**: While accepted for backward compatibility, `thinking_budget=0` is coerced server-side to each model's minimum thinking level (`low`). For example, `gemini-3.8-flash [budget=0]` averages `2,564.7 ms` (`91.8 tok`) on Complex queries—virtually identical to `low` (`2,586.6 ms`, `104.6 tok`)—and `gemini-4-hydrogen [budget=0]` still expends **`670.4` thinking tokens** on Complex queries (`657.6 tok` on `low`), confirming that `thinking_budget=0` cannot force zero thinking on always-thinking models.
+2. **`gemini-3.5-flash-lite` Delivers Sub-Second TTFT (`~0.7s`) and Ultra-Fast Reasoning Decoding (`~450–500 tok/s`)**:
+   - At `minimal` (its default), `3.5-flash-lite` keeps `thoughts_tokens = 0` across both Simple and Complex queries, achieving **Simple avg `TTFT = 733.9 ms` and Complex avg `TTFT = 677.6 ms` (`705.8 ms` overall)**.
+   - Even at `high` on Complex queries—where it generates an average of **`1,313.0` reasoning tokens**—it reaches first token in **`3,493.9 ms` (`Total = 4,837.8 ms`)**, corresponding to `~450–500 reasoning tokens/sec` (`~4×` faster than `gemini-3.8-flash`).
+3. **`gemini-4-hydrogen` Reasons More Thoroughly than `gemini-3.8-flash` Yet Completes Faster (`Total`)**:
+   - Because `gemini-4-hydrogen` is an always-on reasoning model, `4-hydrogen [low]` generates `183.8 tok` on Simple queries and `657.6 tok` on Complex queries (vs. `62.0 tok` and `104.6 tok` on `3.8-flash [low]`).
+   - While `3.8-flash [low]` starts slightly earlier on Complex queries (`TTFT = 2,586.6 ms` vs. `3,908.6 ms`), **`4-hydrogen [low]` has a much faster output decoding rate and finishes the entire response `~2.1 seconds` earlier (`Complex Total = 5,899.8 ms` vs. `7,965.4 ms`, and `Overall Total = 4,633.7 ms` vs. `6,503.6 ms`)**.
+   - At `high`, **`4-hydrogen [high]` (`Overall TTFT = 6,700.1 ms / Total = 8,524.1 ms`) is 43–46% faster than `3.8-flash [high]` (`11,808.3 ms / 15,725.6 ms`)**.
+4. **The Exclusive `xhigh` Tier on `gemini-4-hydrogen`**:
+   - On Complex queries, `4-hydrogen [xhigh]` invests an average of **`2,248.0` reasoning tokens (up to `2,973 tok`)** while completing in **`TTFT = 13,015.8 ms` / `Total = 15,431.1 ms`**—delivering **1.45× more reasoning tokens in 3.5 seconds less total time than `3.8-flash [high]` (`1,549.0 tok`, `18,948.5 ms`)**.
+5. **Bimodal Latency Behavior (`low` / `medium` vs. `high`) on `gemini-4-argon` and `gemini-4-carbon`**:
+   - Frontier models `4-argon` and `4-carbon` operate with `thoughts_token_count = 0` at `low` (and `4-argon [medium]`), allowing `4-argon [medium]` to answer Complex queries in **`TTFT = 4,931.3 ms` (`Total = 13,279.8 ms`)**.
+   - At `high` (and `4-carbon [medium]`), deep multi-step reasoning engages (`4-carbon [high]` averages **`2,794.6 tok`** and **`34.4s TTFT / 40.2s Total`** on Complex queries), making them best suited for asynchronous background workers or escalated deep-analysis tasks rather than synchronous chat UI turns.
+6. **Implications for the Adaptive Thinking Router (Chapter 4)**:
+   - Pairing **`gemini-3.5-flash-lite` (all levels)**, **`gemini-3.8-flash [low]`**, or **`gemini-4-hydrogen [low]`** as the Stage-1 immediate response router with **`gemini-3.8-flash [medium / high]`** or **`Gemini 4` series (`4-hydrogen [medium+]` / `4-argon` / `4-carbon`)** as the parallel Stage-2 reasoning worker achieves ~1–2s perceived responsiveness alongside rigorous multi-step calculation verification.
+

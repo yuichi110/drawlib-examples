@@ -120,38 +120,51 @@ async def stream_adaptive_pydantic_integrated(
     prompt: str,
     *,
     history: Sequence[types.Content] | None = None,
-    deep_thinking: ThinkingOption = "low",
+    fast_thinking: ThinkingOption = "low",
+    deep_thinking: ThinkingOption = "high",
     schema_cls: type[BaseModel] = AdaptiveStreamResponse,
+    stage2_system_instruction: str | None = None,
     trace: dict[str, Any] | None = None,
 ) -> AsyncIterator[str]:
     """Pattern A: Minimal 2-field Pydantic (`{thinking: bool, response: str}`) + incremental partial JSON stream.
 
-    - If `thinking == False`: Completes in 1 Gemini API call, streaming `response` deltas immediately.
+    - If `thinking == False`: Completes in 1 Gemini API call (`fast_thinking`), streaming `response` deltas immediately.
     - If `thinking == True`: Immediately spawns Stage-2 (`deep_thinking`) plain-text stream in background,
       emits Stage-1's 1-sentence acknowledgment for fast TTFT, and seamlessly chains Stage-2.
     """
+    fast_label, stage1_cfg = resolve_thinking_config(
+        fast_thinking,
+        types.GenerateContentConfig(
+            system_instruction=ADAPTIVE_STAGE1_JSON_INSTRUCTION,
+            response_mime_type="application/json",
+            response_schema=schema_cls,
+            temperature=0.2,
+        ),
+    )
+    s2_sys = stage2_system_instruction or ADAPTIVE_STAGE2_CONTINUATION_INSTRUCTION
     deep_label, deep_cfg = resolve_thinking_config(
         deep_thinking,
         types.GenerateContentConfig(
-            system_instruction=ADAPTIVE_STAGE2_CONTINUATION_INSTRUCTION,
+            system_instruction=s2_sys,
             temperature=0.2,
         ),
     )
     tracer = ExecutionTracer(
-        pattern=f"Pattern A: Pydantic Integrated ({{thinking, response}} -> 0 or {deep_label})",
+        pattern=f"Pattern A: Pydantic Integrated ({{thinking, response}} -> {fast_label} or {deep_label})",
         mode="streaming",
         target=trace,
-        thinking=f"adaptive(0->{deep_label})",
+        thinking=f"adaptive({fast_label}->{deep_label})",
     )
 
     contents_payload, hist_msg_cnt, hist_total_chars = _build_gemini_contents(prompt, history)
-    stage1_cfg = types.GenerateContentConfig(
-        system_instruction=ADAPTIVE_STAGE1_JSON_INSTRUCTION,
-        response_mime_type="application/json",
-        response_schema=schema_cls,
-        thinking_config=types.ThinkingConfig(thinking_budget=0),
-        temperature=0.2,
-    )
+    if stage2_system_instruction is not None:
+        s2_prompt = (
+            f"{prompt}\n"
+            "（注：冒頭の挨拶と受付の1文は表示済みのため、挨拶を繰り返さず直ちに本題の計算ステップと結論から回答してください。）"
+        )
+        stage2_contents, _, _ = _build_gemini_contents(s2_prompt, history)
+    else:
+        stage2_contents = contents_payload
 
     decided_thinking: bool | None = None
     flag_decided_ms: float | None = None
@@ -161,8 +174,11 @@ async def stream_adaptive_pydantic_integrated(
     total_gem_chunks = 0
     last_finish_reason = "STOP"
     s1_prompt_tok = 0
+    s1_cached_tok = 0
+    s1_thoughts_tok = 0
     s1_out_tok = 0
     s2_prompt_tok = 0
+    s2_cached_tok = 0
     s2_thoughts_tok = 0
     s2_out_tok = 0
     emitted_chunks: list[str] = []
@@ -171,19 +187,21 @@ async def stream_adaptive_pydantic_integrated(
     stage2_task: asyncio.Task[None] | None = None
 
     async def _produce_stage2() -> None:
-        nonlocal s2_prompt_tok, s2_thoughts_tok, s2_out_tok, stage2_first_chunk_ms, last_finish_reason
+        nonlocal s2_prompt_tok, s2_cached_tok, s2_thoughts_tok, s2_out_tok, stage2_first_chunk_ms, last_finish_reason
         try:
             st2 = await client.aio.models.generate_content_stream(
                 model=MODEL,
-                contents=contents_payload,
+                contents=stage2_contents,
                 config=deep_cfg,
             )
             async with aclosing(st2):
                 async for ch2 in st2:
                     last_finish_reason = _extract_finish_reason(ch2)
-                    p_t, _, th_t, o_t = _extract_usage_counts(ch2)
+                    p_t, c_t, th_t, o_t = _extract_usage_counts(ch2)
                     if p_t is not None:
                         s2_prompt_tok = p_t
+                    if c_t is not None:
+                        s2_cached_tok = c_t
                     if th_t is not None:
                         s2_thoughts_tok = th_t
                     if o_t is not None:
@@ -209,9 +227,13 @@ async def stream_adaptive_pydantic_integrated(
         async with aclosing(st1):
             async for ch1 in st1:
                 last_finish_reason = _extract_finish_reason(ch1)
-                p_t, _, _, o_t = _extract_usage_counts(ch1)
+                p_t, c_t, th_t, o_t = _extract_usage_counts(ch1)
                 if p_t is not None:
                     s1_prompt_tok = p_t
+                if c_t is not None:
+                    s1_cached_tok = c_t
+                if th_t is not None:
+                    s1_thoughts_tok = th_t
                 if o_t is not None:
                     s1_out_tok = o_t
                 if not ch1.text:
@@ -278,9 +300,10 @@ async def stream_adaptive_pydantic_integrated(
         final_text=full_text,
         chunk_count=total_gem_chunks,
         finish_reason=last_finish_reason,
-        thoughts_token_count=s2_thoughts_tok,
+        thoughts_token_count=s1_thoughts_tok + s2_thoughts_tok,
         output_token_count=s1_out_tok + s2_out_tok,
-        prompt_token_count=s1_prompt_tok + s2_prompt_tok,
+        prompt_token_count=s1_prompt_tok,
+        cached_content_token_count=max(s1_cached_tok, s2_cached_tok),
         history_message_count=hist_msg_cnt,
         history_total_chars=hist_total_chars,
     )
@@ -293,10 +316,14 @@ async def stream_adaptive_pydantic_integrated(
         "stage2_first_chunk_ms": stage2_first_chunk_ms,
         "gemini_call_count": gemini_calls,
         "stage1_prompt_tokens": s1_prompt_tok,
+        "stage1_cached_tokens": s1_cached_tok,
+        "stage1_thoughts_tokens": s1_thoughts_tok,
         "stage1_output_tokens": s1_out_tok,
         "stage2_prompt_tokens": s2_prompt_tok,
+        "stage2_cached_tokens": s2_cached_tok,
         "stage2_thoughts_tokens": s2_thoughts_tok,
         "stage2_output_tokens": s2_out_tok,
+        "total_billed_prompt_tokens": s1_prompt_tok + s2_prompt_tok,
     }
     res_dict["adaptive"] = adaptive_info
     if trace is not None:
@@ -308,16 +335,26 @@ async def stream_adaptive_pydantic_router(
     prompt: str,
     *,
     history: Sequence[types.Content] | None = None,
-    deep_thinking: ThinkingOption = "low",
+    fast_thinking: ThinkingOption = "low",
+    deep_thinking: ThinkingOption = "high",
     trace: dict[str, Any] | None = None,
 ) -> AsyncIterator[str]:
     """Pattern B: 1-field Pydantic router `{thinking: bool}` followed by sequential plain-text stream."""
+    fast_label, router_cfg = resolve_thinking_config(
+        fast_thinking,
+        types.GenerateContentConfig(
+            system_instruction=ROUTER_ONLY_INSTRUCTION,
+            response_mime_type="application/json",
+            response_schema=ThinkingDecision,
+            temperature=0.0,
+        ),
+    )
     deep_label, _ = resolve_thinking_config(deep_thinking)
     tracer = ExecutionTracer(
-        pattern=f"Pattern B: Pydantic 1-Field Router ({{thinking}}) + Stream (0 or {deep_label})",
+        pattern=f"Pattern B: Pydantic 1-Field Router ({{thinking}}) + Stream ({fast_label} or {deep_label})",
         mode="streaming",
         target=trace,
-        thinking=f"router(0->{deep_label})",
+        thinking=f"router({fast_label}->{deep_label})",
     )
 
     contents_payload, hist_msg_cnt, hist_total_chars = _build_gemini_contents(prompt, history)
@@ -327,21 +364,15 @@ async def stream_adaptive_pydantic_router(
     router_resp = await client.aio.models.generate_content(
         model=MODEL,
         contents=contents_payload,
-        config=types.GenerateContentConfig(
-            system_instruction=ROUTER_ONLY_INSTRUCTION,
-            response_mime_type="application/json",
-            response_schema=ThinkingDecision,
-            thinking_config=types.ThinkingConfig(thinking_budget=0),
-            temperature=0.0,
-        ),
+        config=router_cfg,
     )
     router_dur_ms = elapsed_ms(router_t0, time.perf_counter())
     flag_decided_ms = tracer.rel_ms()
     decision_obj = ThinkingDecision.model_validate_json(router_resp.text or '{"thinking": false}')
     need_thinking = decision_obj.thinking
-    r_p_tok, _, _, r_o_tok = _extract_usage_counts(router_resp)
+    r_p_tok, _, r_th_tok, r_o_tok = _extract_usage_counts(router_resp)
 
-    chosen_thinking: ThinkingOption = deep_thinking if need_thinking else 0
+    chosen_thinking: ThinkingOption = deep_thinking if need_thinking else fast_thinking
     _, stream_cfg = resolve_thinking_config(
         chosen_thinking,
         types.GenerateContentConfig(
@@ -388,7 +419,7 @@ async def stream_adaptive_pydantic_router(
         final_text=full_text,
         chunk_count=gem_chunk_cnt,
         finish_reason=last_finish_reason,
-        thoughts_token_count=s2_th_tok,
+        thoughts_token_count=int(r_th_tok or 0) + s2_th_tok,
         output_token_count=int(r_o_tok or 0) + s2_o_tok,
         prompt_token_count=int(r_p_tok or 0) + s2_p_tok,
         history_message_count=hist_msg_cnt,
@@ -402,6 +433,7 @@ async def stream_adaptive_pydantic_router(
         "flag_decided_ms": flag_decided_ms,
         "gemini_call_count": 2,
         "stage1_prompt_tokens": int(r_p_tok or 0),
+        "stage1_thoughts_tokens": int(r_th_tok or 0),
         "stage1_output_tokens": int(r_o_tok or 0),
         "stage2_prompt_tokens": s2_p_tok,
         "stage2_thoughts_tokens": s2_th_tok,
@@ -417,10 +449,18 @@ async def stream_adaptive_tag_prefix(
     prompt: str,
     *,
     history: Sequence[types.Content] | None = None,
-    deep_thinking: ThinkingOption = "low",
+    fast_thinking: ThinkingOption = "low",
+    deep_thinking: ThinkingOption = "high",
     trace: dict[str, Any] | None = None,
 ) -> AsyncIterator[str]:
     """Pattern C: Non-JSON `[DIRECT]` / `[THINK]` plain-text prefix self-routing stream."""
+    fast_label, stage1_cfg = resolve_thinking_config(
+        fast_thinking,
+        types.GenerateContentConfig(
+            system_instruction=ADAPTIVE_STAGE1_TAG_INSTRUCTION,
+            temperature=0.2,
+        ),
+    )
     deep_label, deep_cfg = resolve_thinking_config(
         deep_thinking,
         types.GenerateContentConfig(
@@ -429,18 +469,13 @@ async def stream_adaptive_tag_prefix(
         ),
     )
     tracer = ExecutionTracer(
-        pattern=f"Pattern C: Plain-Text Tag Prefix ([DIRECT]/[THINK] -> 0 or {deep_label})",
+        pattern=f"Pattern C: Plain-Text Tag Prefix ([DIRECT]/[THINK] -> {fast_label} or {deep_label})",
         mode="streaming",
         target=trace,
-        thinking=f"tag(0->{deep_label})",
+        thinking=f"tag({fast_label}->{deep_label})",
     )
 
     contents_payload, hist_msg_cnt, hist_total_chars = _build_gemini_contents(prompt, history)
-    stage1_cfg = types.GenerateContentConfig(
-        system_instruction=ADAPTIVE_STAGE1_TAG_INSTRUCTION,
-        thinking_config=types.ThinkingConfig(thinking_budget=0),
-        temperature=0.2,
-    )
 
     decided_thinking: bool | None = None
     flag_decided_ms: float | None = None
@@ -449,6 +484,7 @@ async def stream_adaptive_tag_prefix(
     total_gem_chunks = 0
     last_finish_reason = "STOP"
     s1_p_tok = 0
+    s1_th_tok = 0
     s1_o_tok = 0
     s2_p_tok = 0
     s2_th_tok = 0
@@ -498,9 +534,11 @@ async def stream_adaptive_tag_prefix(
         async with aclosing(st1):
             async for ch1 in st1:
                 last_finish_reason = _extract_finish_reason(ch1)
-                p_t, _, _, o_t = _extract_usage_counts(ch1)
+                p_t, _, th_t, o_t = _extract_usage_counts(ch1)
                 if p_t is not None:
                     s1_p_tok = p_t
+                if th_t is not None:
+                    s1_th_tok = th_t
                 if o_t is not None:
                     s1_o_tok = o_t
                 if not ch1.text:
@@ -574,7 +612,7 @@ async def stream_adaptive_tag_prefix(
         final_text=full_text,
         chunk_count=total_gem_chunks,
         finish_reason=last_finish_reason,
-        thoughts_token_count=s2_th_tok,
+        thoughts_token_count=s1_th_tok + s2_th_tok,
         output_token_count=s1_o_tok + s2_o_tok,
         prompt_token_count=s1_p_tok + s2_p_tok,
         history_message_count=hist_msg_cnt,
@@ -587,6 +625,7 @@ async def stream_adaptive_tag_prefix(
         "stage2_first_chunk_ms": stage2_first_chunk_ms,
         "gemini_call_count": gemini_calls,
         "stage1_prompt_tokens": s1_p_tok,
+        "stage1_thoughts_tokens": s1_th_tok,
         "stage1_output_tokens": s1_o_tok,
         "stage2_prompt_tokens": s2_p_tok,
         "stage2_thoughts_tokens": s2_th_tok,
