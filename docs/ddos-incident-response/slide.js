@@ -1064,7 +1064,9 @@
     }
 
     const windowWidth = window.innerWidth;
-    const windowHeight = window.innerHeight;
+    const bannerEl = document.querySelector('.demo-banner');
+    const bannerH = (bannerEl && !document.fullscreenElement && !isPresenterMode) ? (bannerEl.offsetHeight || 38) : 0;
+    const windowHeight = Math.max(100, window.innerHeight - bannerH);
 
     const scaleX = windowWidth / STAGE_WIDTH;
     const scaleY = windowHeight / STAGE_HEIGHT;
@@ -1348,6 +1350,8 @@
 
   // Lifecycle initialization
   window.addEventListener('resize', updateScale);
+  window.addEventListener('load', updateScale);
+  document.addEventListener('fullscreenchange', updateScale);
   window.addEventListener('hashchange', initFromHash);
   window.addEventListener('DOMContentLoaded', () => {
     initOverviewThumbs();
