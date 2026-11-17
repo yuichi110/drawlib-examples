@@ -1,6 +1,6 @@
 # 01. Google AI Studio で始める Hello World
 
-本クックブックでは `drawlib.toml` の `[jupyter].setup_packages` 設定により、生成されるすべてのノートブック先頭に `!pip install -q drawlib google-genai pydantic` が自動挿入されるため、Google Colab 上での手動パッケージ追加は不要です。Git リポジトリへ認証情報をハードコードせずに安全に Gemini を呼び出すため、**Google Cloud プロジェクト**に紐付いた API キー（`GEMINI_API_KEY`）を **Google AI Studio** で発行し、Colab 左サイドバーの **シークレット（`🔑` アイコン）** に保存して **「ノートブックからのアクセス（Notebook access）」** を ON に設定します。
+本クックブックでは `drawlib.toml` の `[jupyter].setup_packages` 設定により、生成されるすべてのノートブック先頭に `!pip install -q google-genai` のみが自動挿入されるため、Google Colab 上で高速に起動でき手動パッケージ追加も不要です。Git リポジトリへ認証情報をハードコードせずに安全に Gemini を呼び出すため、**Google Cloud プロジェクト**に紐付いた API キー（`GEMINI_API_KEY`）を **Google AI Studio** で発行し、Colab 左サイドバーの **シークレット（`🔑` アイコン）** に保存して **「ノートブックからのアクセス（Notebook access）」** を ON に設定します。
 
 ```drawlib align=center code=fold file=ch01_aistudio_workflow_ja.png caption="図1-1: Google AI Studio APIキー発行と Colab シークレットによる最短実行フロー"
 from drawlib.canvas import save, setup
@@ -69,14 +69,14 @@ ai.gemini((cxs[2], 41.5), width=6.4, style=Styles.Primary)
 text((cxs[2], 32.3), "genai.Client", style=Styles.WhiteBold.patch(text_size=11.2))
 text((cxs[2], 25.5), "userdata.get(...)\napi_key=api_key", style=Styles.White.patch(text_size=10.0))
 
-# Stage 4: gemini-2.5-flash 推論レスポンス
+# Stage 4: gemini-3.8-flash 推論レスポンス
 rectangle((cxs[3], cy), width=card_w, height=card_h, style=soft_card)
 rectangle((cxs[3], 50.2), width=14.0, height=4.4, style=Styles.White.patch(shape_r=1.2, shape_line_color=Colors.Gray3))
 text((cxs[3], 50.2), "STEP 4", style=Styles.PrimaryBold.patch(text_size=10.0))
 rectangle((cxs[3], 41.5), width=9.2, height=9.2, style=Styles.White.patch(shape_r=2.0, shape_line_color=Colors.Gray3))
 phosphor.sparkle((cxs[3], 41.5), width=6.0, style=Styles.PrimaryBold)
 text((cxs[3], 32.3), "推論レスポンス", style=Styles.DarkBold.patch(text_size=11.0))
-text((cxs[3], 25.5), "gemini-2.5-flash\ntext + usage_metadata", style=Styles.Dark.patch(text_size=10.0))
+text((cxs[3], 25.5), "gemini-3.8-flash\ntext + usage_metadata", style=Styles.Dark.patch(text_size=10.0))
 
 # ステージ間の矢印（カード間隔 7.5 ユニット）
 for idx in range(3):
@@ -91,10 +91,10 @@ rectangle(
     height=8.4,
     style=Styles.White.patch(shape_r=1.8, shape_line_color=Colors.Gray4),
 )
-phosphor.terminal_window((15.0, 12.2), width=4.6, style=Styles.PrimaryBold)
+phosphor.terminal_window((34.5, 12.2), width=4.6, style=Styles.PrimaryBold)
 text(
-    (79.0, 12.2),
-    "自動挿入セットアップセル:  !pip install -q drawlib google-genai pydantic   •   Git への鍵混入ゼロ",
+    (80.0, 12.2),
+    "自動挿入セットアップセル:  !pip install -q google-genai   •   Git への鍵混入ゼロ",
     style=Styles.DarkBold.patch(text_size=10.2),
 )
 
@@ -107,9 +107,11 @@ Google Colab で最初のコードセルを実行する前に、以下の手順�
 
 1. **Google AI Studio**（`aistudio.google.com/apikey`）を開き、**「API キーを作成（Create API key）」** から既存または新規の **Google Cloud プロジェクト**を選択してキーを発行します。
 2. Google Colab 左サイドバーの **シークレット（`🔑`）** アイコンを開き、名前を `GEMINI_API_KEY` としてキーを貼り付け、**「ノートブックからのアクセス」** トグルを ON にします。
-3. 実行時に `userdata.get("GEMINI_API_KEY")` でキーを読み込み、`genai.Client` を初期化します。
+3. セル先頭で `MODEL = "gemini-3.8-flash"` を定義して利用モデルを分かりやすく指定し、`userdata.get("GEMINI_API_KEY")` で読み込んだキーを `genai.Client` に渡します。
 
 ```python
+MODEL = "gemini-3.8-flash"
+
 from google.colab import userdata
 from google import genai
 
@@ -117,8 +119,8 @@ api_key = userdata.get("GEMINI_API_KEY")
 client = genai.Client(api_key=api_key)
 
 response = client.models.generate_content(
-    model="gemini-2.5-flash",
-    contents="統一された SDK が開発者の生産性を高める理由を2文で説明してください。",
+    model=MODEL,
+    contents="こんにちは！",
 )
 print(response.text)
 ```
@@ -235,71 +237,34 @@ paid_cards.draw(r_xy, width=r_w, height=r_h)
 save()
 ```
 
-## 3. `GenerateContentConfig` と Drawlib によるトークン消費量の可視化
+## 3. `GenerateContentConfig` とトークン消費量（`usage_metadata`）の確認
 
-モデルの役割設定（システムプロンプト）や出力の再現性（`temperature`）を制御するには、`types.GenerateContentConfig` を `generate_content` に渡します。また、レスポンスの `response.usage_metadata` からは、入力プロンプト（`prompt_token_count`）、内部思考（`thoughts_token_count`）、最終回答（`candidates_token_count`）の正確なトークン数を取得できます。
+モデルの振る舞い（`system_instruction`）や出力の再現性（`temperature`）を制御するには、`types.GenerateContentConfig` を `generate_content` に渡します。また、レスポンスの `response.usage_metadata` からは、入力プロンプト（`prompt_token_count`）、内部思考（`thoughts_token_count`）、最終回答（`candidates_token_count`）の正確なトークン数を取得できます。
 
 ```python
 from google.genai import types
 
 config = types.GenerateContentConfig(
-    system_instruction="あなたは簡潔に回答するクラウドアーキテクトです。短い箇条書き3点で答えてください。",
+    system_instruction="1つの短い文で答えてください。",
     temperature=0.2,
 )
 
 response = client.models.generate_content(
-    model="gemini-2.5-flash",
-    contents="ノートブックで API キーを安全に管理するベストプラクティスを3つ挙げてください。",
+    model=MODEL,
+    contents="Pythonとは何ですか？",
     config=config,
 )
 print(response.text)
 
 usage = response.usage_metadata
-prompt_tokens = usage.prompt_token_count or 0
-thoughts_tokens = usage.thoughts_token_count or 0
-candidates_tokens = usage.candidates_token_count or 0
-
-print(f"Prompt tokens:     {prompt_tokens}")
-print(f"Thoughts tokens:   {thoughts_tokens}")
-print(f"Candidates tokens: {candidates_tokens}")
+print(f"Prompt tokens:     {usage.prompt_token_count or 0}")
+print(f"Thoughts tokens:   {usage.thoughts_token_count or 0}")
+print(f"Candidates tokens: {usage.candidates_token_count or 0}")
 ```
 
-ノートブックには `google-genai` と一緒に `drawlib` もセットアップされているため、`setup(..., cwd=True)` と `BarChart`、`show()` を使って、直前のセルで取得した `usage_metadata` のトークン内訳をそのまま次のセルで可視化できます。
-
-```python
-from drawlib.canvas import setup, show
-from drawlib.charts.bar import BarChart
-from drawlib.styles import Styles
-
-setup(width=110, height=52, cwd=True)
-
-chart = BarChart(
-    axis_line_style=Styles.MutedDashed,
-    categories=["入力 (Prompt)", "思考 (Thoughts)", "出力 (Candidates)"],
-    width=96.0,
-    height=40.0,
-    title="Gemini 2.5 Flash — トークン消費量の内訳",
-    title_style=Styles.DarkBold.patch(text_size=12.0),
-    background_style=Styles.Neutral.patch(shape_r=2.0),
-    bar_width_ratio=0.48,
-    bar_r=0.8,
-    axis_text_style=Styles.Dark.patch(text_size=10.5),
-    grid_style=Styles.MutedThin,
-    value_text_style=Styles.DarkBold.patch(text_size=10.5),
-    value_format="{:.0f}",
-)
-chart.add_series(
-    "トークン数",
-    [float(prompt_tokens), float(thoughts_tokens), float(candidates_tokens)],
-    style=Styles.PrimaryFlat,
-)
-chart.configure_y_axis(min_value=0.0)
-chart.draw(xy=(7.0, 6.0))
-
-show()
-```
+`gemini-3.8-flash` では内部推論に費やされたトークン数が `thoughts_token_count` として独立して記録されるため、入出力サイズと思考コストの内訳を `usage_metadata` から一目で把握できます。
 
 ### まとめと次のステップ
 
-- **セキュアで手軽な実行環境**: `GEMINI_API_KEY` を Colab シークレットに保管することで、Git への鍵漏洩を防ぎつつ、Google Cloud プロジェクトの無料枠・従量課金枠をシームレスに使い分けられます。
-- **次章（Chapter 02）のプレビュー**: 続く第2章では、後続の Gemini 呼び出しコードを1行も変えずに、`genai.Client` の初期化だけを **Google Cloud Vertex AI**（`vertexai=True`・IAM 認証）へ切り替える方法を解説します。
+- **高速かつセキュアな実行環境**: `google-genai` のみの軽量セットアップと Colab シークレットによる `GEMINI_API_KEY` 管理を組み合わせることで、Git への鍵漏洩を防ぎつつ、Google Cloud プロジェクトの無料枠・従量課金枠を素早く使い分けられます。
+- **次章（Chapter 02）のプレビュー**: 続く第2章では、後続の `gemini-3.8-flash` 呼び出しコードを1行も変えずに、`genai.Client` の初期化だけを **Google Cloud Vertex AI**（`vertexai=True`・IAM 認証）へ切り替える方法を解説します。

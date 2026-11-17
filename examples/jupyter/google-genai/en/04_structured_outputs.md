@@ -32,7 +32,7 @@ phosphor.file_code((stage_xs[0], 46.8), width=6.0, style=Styles.PrimaryBold)
 text((stage_xs[0], 39.0), "1. Input + Schema", style=Styles.DarkBold.patch(text_size=10.8))
 text(
     (stage_xs[0], 25.0),
-    "Raw Incident Log\n+\nIncidentReport\n(BaseModel)",
+    "Incident Text\n+\nIncidentSummary\n(BaseModel)",
     style=Styles.Dark.patch(text_size=10.0),
 )
 
@@ -42,7 +42,7 @@ phosphor.sparkle((stage_xs[1], 46.8), width=6.0, style=Styles.WhiteBold)
 text((stage_xs[1], 39.0), "2. Grammar Decode", style=Styles.WhiteBold.patch(text_size=10.8))
 text(
     (stage_xs[1], 25.0),
-    "application/json\n+\nresponse_schema\n(Gemini 2.5)",
+    "application/json\n+\nresponse_schema\n(Gemini 3.8)",
     style=Styles.White.patch(text_size=10.0),
 )
 
@@ -56,13 +56,13 @@ text(
     style=Styles.Dark.patch(text_size=10.0),
 )
 
-# Stage 4: Downstream Persistence & Drawlib Table (SecondaryNeutral)
+# Stage 4: Downstream Typed Application & DB (SecondaryNeutral)
 rectangle((stage_xs[3], card_cy), width=card_w, height=card_h, style=Styles.SecondaryNeutral.patch(shape_r=2.0))
-phosphor.table((stage_xs[3], 46.8), width=6.0, style=Styles.SecondaryBold)
-text((stage_xs[3], 39.0), "4. DB & Table UI", style=Styles.DarkBold.patch(text_size=10.8))
+phosphor.database((stage_xs[3], 46.8), width=6.0, style=Styles.SecondaryBold)
+text((stage_xs[3], 39.0), "4. Typed App / DB", style=Styles.DarkBold.patch(text_size=10.8))
 text(
     (stage_xs[3], 25.0),
-    "Typed Persistence\nAlert Routing &\nDrawlib Table",
+    "Queue Routing\nAlerting &\nDB Persistence",
     style=Styles.Dark.patch(text_size=10.0),
 )
 
@@ -83,18 +83,20 @@ save()
 
 ---
 
-## 1. 3-Line Client Setup & Defining a Nested Pydantic Schema
+## 1. Client Setup & Defining a Nested Pydantic Schema
 
-First, initialize the `google-genai` client using your `GEMINI_API_KEY` stored in Google Colab Secrets (`🔑` panel on the left sidebar):
+First, set `MODEL = "gemini-3.8-flash"` at the top of the cell so you can switch models in one place, and initialize the `google-genai` client using your `GEMINI_API_KEY` stored in Google Colab Secrets (`🔑` panel on the left sidebar):
 
 ```python
+MODEL = "gemini-3.8-flash"
+
 from google.colab import userdata
 from google import genai
 
 client = genai.Client(api_key=userdata.get("GEMINI_API_KEY"))
 ```
 
-Next, compose a nested Pydantic schema (`ActionItem` inside `IncidentSummary`) to extract structured postmortem metadata from an unstructured operational incident log. Passing `IncidentSummary` to `response_schema` instructs the SDK to compile the Pydantic model into a strict schema and populate `response.parsed` automatically:
+Next, compose a nested Pydantic schema (`ActionItem` inside `IncidentSummary`) to extract structured postmortem metadata from a concise incident report. Passing `IncidentSummary` to `response_schema` instructs the SDK to compile the Pydantic model into a strict schema and populate `response.parsed` automatically (`pydantic` comes pre-installed in Google Colab and bundled with `google-genai`):
 
 ```python
 from typing import Literal
@@ -104,36 +106,24 @@ from pydantic import BaseModel, Field
 
 
 class ActionItem(BaseModel):
-    owner: str = Field(description="Team or engineer responsible for the follow-up task.")
-    task: str = Field(description="Concrete, actionable engineering remediation step.")
-    priority: Literal["P0", "P1", "P2"] = Field(description="Urgency tier from P0 (immediate) to P2.")
+    owner: str = Field(description="Team responsible for the follow-up task.")
+    task: str = Field(description="Concrete remediation step.")
+    priority: Literal["P0", "P1", "P2"] = Field(description="Urgency tier (P0 highest).")
 
 
 class IncidentSummary(BaseModel):
     title: str = Field(description="Concise incident headline under 60 characters.")
     severity: Literal["LOW", "MEDIUM", "HIGH", "CRITICAL"] = Field(
-        description="Overall customer-impact severity level."
+        description="Customer-impact severity level."
     )
-    root_cause: str = Field(description="Single-sentence technical root cause explanation.")
-    affected_services: list[str] = Field(description="Microservice names impacted during the outage.")
-    action_items: list[ActionItem] = Field(description="Prioritized follow-up engineering action items.")
+    root_cause: str = Field(description="One-sentence technical root cause.")
+    affected_services: list[str] = Field(description="Impacted service names.")
+    action_items: list[ActionItem] = Field(description="Prioritized follow-up tasks.")
 
-
-raw_incident_log = """
-[2026-04-12 14:03 UTC] PagerDuty Alert: 5xx error rate on checkout-api spiked to 38%.
-[14:09 UTC] On-call SRE noticed PostgreSQL connection pool at 100% saturation.
-[14:16 UTC] Root cause identified: a slow upstream payment-webhook timeout triggered an
-unbounded client retry storm from payment-worker into checkout-api.
-[14:24 UTC] Mitigated by enabling circuit-breaker shedding and restarting stalled workers.
-Follow-ups agreed in retro:
-1. SRE Team to cap exponential backoff and enforce circuit-breaker budgets immediately (P0).
-2. Payments Team to add PgBouncer pool saturation alerts at 80% utilization (P1).
-3. Platform Team to replay webhook timeout scenarios in staging load tests next sprint (P2).
-"""
 
 response = client.models.generate_content(
-    model="gemini-2.5-flash",
-    contents=raw_incident_log,
+    model=MODEL,
+    contents="Checkout API returned 502 errors for EU users for 12 minutes due to a Redis timeout.",
     config=types.GenerateContentConfig(
         response_mime_type="application/json",
         response_schema=IncidentSummary,
@@ -149,7 +139,7 @@ print(summary.model_dump_json(indent=2))
 
 ---
 
-## 2. Schema Design Best Practices & Rendering Extracted Data with Drawlib
+## 2. Schema Design Best Practices & Fast Deterministic Classification
 
 While grammar-constrained decoding guarantees syntactic validity, thoughtful Pydantic schema design dramatically improves **semantic accuracy** and **latency** on production workloads:
 
@@ -184,7 +174,7 @@ left_cards = CardList(
 )
 left_cards.add(
     "1. Closed Categories via Literal / Enum",
-    "Constrain severity & priority labels\ninstead of free-form str fields.",
+    "Constrain severity & queue labels\ninstead of free-form str fields.",
     badge_text="R1",
     icon=phosphor.tag,
     style=Styles.PrimaryNeutral.patch(shape_r=2.0),
@@ -219,8 +209,8 @@ right_cards.add(
     icon=phosphor.tree_structure,
 )
 right_cards.add(
-    "4. Low Temperature + thinking_budget=0",
-    "Pair temperature=0.0-0.2 with zero\nthinking budget for fast extraction.",
+    '4. Low Temp + thinking_level="low"',
+    'Pair temperature=0.0-0.2 with\nthinking_level="low" on Gemini 3.8.',
     badge_text="R4",
     icon=phosphor.lightning,
     style=Styles.SecondaryNeutral.patch(shape_r=2.0),
@@ -232,58 +222,46 @@ save()
 
 Keep these four engineering rules in mind when authoring schemas for `response_schema`:
 
-1. **Use `Literal` or `Enum` for closed categories**: Constrain finite taxonomies (`Literal["P0", "P1", "P2"]`) so downstream routers and database `ENUM` columns never encounter unexpected casing or synonyms.
-2. **Compose nested `list[SubModel]` instead of `dict[str, Any]`**: Arbitrary open dictionaries lack fixed property names and cannot be grammar-constrained reliably; model key-value pairs explicitly as `list[SubModel]`.
-3. **Attach concise `Field(description=...)` metadata**: Descriptions are forwarded in the compiled JSON Schema, guiding Gemini on domain semantics (such as character budgets, ISO units, or severity thresholds) without bloating your main prompt.
-4. **Tune `temperature` and `thinking_budget` for deterministic speed**: For straightforward entity extraction on `gemini-2.5-flash`, pairing `temperature=0.1` with `thinking_config=types.ThinkingConfig(thinking_budget=0)` minimizes tail latency and output variance.
+1. **Use `Literal` or `Enum` for closed categories**: Constrain finite taxonomies (`Literal["P0", "P1", "P2"]` or `str, Enum`) so downstream routers and database `ENUM` columns never encounter unexpected casing or synonyms.
+2. **Compose nested `list[SubModel]` instead of `dict[str, Any]`**: Arbitrary open dictionaries lack fixed property names and cannot be grammar-constrained reliably; model structured records explicitly as `list[SubModel]`.
+3. **Attach concise `Field(description=...)` metadata**: Descriptions are forwarded in the compiled JSON Schema, guiding Gemini on domain semantics (such as character budgets, ISO units, or urgency criteria) without bloating your main prompt.
+4. **Tune `temperature` and `thinking_level` for deterministic speed**: For straightforward entity extraction and classification on `gemini-3.8-flash`, pairing `temperature=0.1` with `thinking_config=types.ThinkingConfig(thinking_level="low")` minimizes tail latency and output variance.
 
-Because `summary.action_items` is already a strongly typed `list[ActionItem]`, you can feed it straight into a **Drawlib `Table`** (`setup(..., cwd=True)` + `Table` + `show()`) to render an executive incident summary right inside your notebook cell:
+Putting all four rules together, you can combine a Python `Enum` with `list[RoutedIssue]` and `thinking_level="low"` to split a multi-issue customer ticket into typed routing records and iterate directly over `response.parsed`:
 
 ```python
-from drawlib.canvas import setup, show
-from drawlib.smartarts import Table
-from drawlib.styles import Colors, Styles
-from drawlib.text import text
+from enum import Enum
 
-setup(width=120, height=52, cwd=True)
 
-text(
-    (60, 46.5),
-    f"[{summary.severity}] {summary.title}",
-    style=Styles.DarkBold.patch(text_size=11.5),
+class TicketQueue(str, Enum):
+    BILLING = "billing"
+    AUTH = "auth"
+    ANALYTICS = "analytics"
+
+
+class RoutedIssue(BaseModel):
+    queue: TicketQueue = Field(description="Target support queue.")
+    urgent: bool = Field(description="True if payment or login is blocked.")
+    summary: str = Field(description="Actionable summary under 50 characters.")
+
+
+class TriageBatch(BaseModel):
+    issues: list[RoutedIssue] = Field(description="Distinct issues found in the message.")
+
+
+triage_response = client.models.generate_content(
+    model=MODEL,
+    contents="Customer was billed twice on invoice #8821 and cannot export CSV reports.",
+    config=types.GenerateContentConfig(
+        response_mime_type="application/json",
+        response_schema=TriageBatch,
+        temperature=0.1,
+        thinking_config=types.ThinkingConfig(thinking_level="low"),
+    ),
 )
 
-items = summary.action_items[:4]
-rows = [["Priority", "Owner", "Remediation Task"]] + [
-    [item.priority, item.owner, item.task] for item in items
-]
-
-table = Table(
-    cell_style=Styles.White,
-    text_style=Styles.Dark.patch(text_size=10.0),
-    header_cell_style=Styles.PrimaryFlat,
-    header_text_style=Styles.WhiteBold.patch(text_size=10.5),
-    border_style=Styles.MutedThin,
-)
-table.set_style_cell_evenodd(
-    even_color=Colors.Light,
-    even_text_style=Styles.Dark.patch(text_size=10.0),
-    odd_color=Colors.White,
-    odd_text_style=Styles.Dark.patch(text_size=10.0),
-)
-table.set_style_cell_header(
-    background_color=Colors.Primary,
-    text_style=Styles.WhiteBold.patch(text_size=10.5),
-)
-
-row_heights = [9.0] + [27.0 / max(len(items), 1)] * len(items)
-table.draw_flexible(
-    xy=(6, 41),
-    column_widths=[18, 26, 64],
-    row_heights=row_heights,
-    data=rows,
-    align="top_left",
-)
-
-show()
+batch: TriageBatch = triage_response.parsed
+for item in batch.issues:
+    flag = "URGENT" if item.urgent else "NORMAL"
+    print(f"[{flag}] -> {item.queue.value}: {item.summary}")
 ```

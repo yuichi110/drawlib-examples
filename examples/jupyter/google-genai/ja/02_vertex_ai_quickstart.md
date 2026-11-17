@@ -153,24 +153,27 @@ save()
 
 ## 1. Vertex AI での最小構成 Hello World（Colab キーレス IAM 認証）
 
-Google Cloud Vertex AI を利用する場合、静的な API キーを発行・配布する必要はありません。Google Colab 上で `auth.authenticate_user()` を実行すると、ブラウザの認証ポップアップを通じて Google Cloud IAM に紐づく一時的な認証情報（ADC: Application Default Credentials）が自動的に設定されます。事前に対象プロジェクトで Vertex AI API（`aiplatform.googleapis.com`）を有効化し、使用する Google アカウントに **Vertex AI ユーザー**（`roles/aiplatform.user`）ロールを付与しておいてください。
+Google Cloud Vertex AI を利用する場合、静的な API キーを発行・配布する必要はありません。ノートブック冒頭の `!pip install -q google-genai` セットアップセルを実行したあと、Google Colab 上で `auth.authenticate_user()` を呼び出すと、ブラウザの認証ポップアップを通じて Google Cloud IAM に紐づく一時的な認証情報（ADC: Application Default Credentials）が自動的に設定されます。事前に対象プロジェクトで Vertex AI API（`aiplatform.googleapis.com`）を有効化し、使用する Google アカウントに **Vertex AI ユーザー**（`roles/aiplatform.user`）ロールを付与したうえで、セル先頭の `GC_PROJECT` をご自身のプロジェクト ID に書き換えて実行してください（`LOCATION = "global"` と `MODEL = "gemini-3.8-flash"` はそのまま動作します）。
 
 ```python
+GC_PROJECT = "your-gcp-project-id"
+LOCATION = "global"
+MODEL = "gemini-3.8-flash"
+
 from google.colab import auth
 from google import genai
 
-# ブラウザのポップアップで Google アカウント認証を実行
 auth.authenticate_user()
 
 client = genai.Client(
     vertexai=True,
-    project="your-gcp-project-id",  # ご自身の Google Cloud プロジェクト ID に置き換えてください
-    location="us-central1",         # または "asia-northeast1"、"global" など
+    project=GC_PROJECT,
+    location=LOCATION,
 )
 
 response = client.models.generate_content(
-    model="gemini-2.5-flash",
-    contents="Vertex AI からこんにちは！キーレス IAM 認証の利点を3つ、2文以内で簡潔に教えてください。",
+    model=MODEL,
+    contents="こんにちは！",
 )
 print(response.text)
 ```
@@ -180,6 +183,9 @@ print(response.text)
 ノートブックを Git リポジトリにコミットしたりチームメンバーと共有したりする際は、プロジェクト ID をコードセルに直接記述せず、**Colab シークレット**（左サイドバーの鍵アイコンから `GOOGLE_CLOUD_PROJECT` を登録し「ノートブックからのアクセス」を有効化）から `userdata.get("GOOGLE_CLOUD_PROJECT")` で安全に読み込むパターンが推奨されます。
 
 ```python
+LOCATION = "global"
+MODEL = "gemini-3.8-flash"
+
 from google.colab import auth, userdata
 from google import genai
 
@@ -189,18 +195,18 @@ auth.authenticate_user()
 client = genai.Client(
     vertexai=True,
     project=userdata.get("GOOGLE_CLOUD_PROJECT"),
-    location="asia-northeast1",
+    location=LOCATION,
 )
 
 response = client.models.generate_content(
-    model="gemini-2.5-flash",
-    contents="Colab シークレット経由で Vertex AI クライアントが正常に初期化されたことを確認してください。",
+    model=MODEL,
+    contents="宇宙の豆知識を1つ教えてください。",
 )
 print(response.text)
 ```
 
-> **リージョンエンドポイントと `location="global"` の使い分け:**
-> データ所在地（データレジデンシー）の厳格な国内・特定地域固定や低レイテンシが求められるワークロードでは、`"asia-northeast1"`（東京）や `"us-central1"`（アイオワ）などの**リージョンエンドポイント**を指定します。一方、マルチリージョンでの動的な負荷分散と高いクォータ可用性を優先する場合や、**最新の Preview モデル**（各リージョンへ展開される前に Vertex AI の `global` エンドポイント限定で先行公開されるモデル）を試す場合は **`location="global"`** を指定してください。
+> **推奨デフォルト `LOCATION = "global"` とリージョンエンドポイントの使い分け:**
+> Vertex AI では **`location="global"`** をデフォルトとして推奨します。最新の **Gemini 3.8+** モデル（`gemini-3.8-flash` や `global` 先行で公開される最新 Preview モデルなど）に対応しており、マルチリージョンへの動的なクォータルーティングによって高い可用性を確保できます。一方、データ所在地（データレジデンシー）を日本国内や特定地域に厳格に固定する必要があるワークロードでは、`LOCATION` を `"asia-northeast1"`（東京）や `"us-central1"`（アイオワ）などの**リージョンエンドポイント**に変更してください。
 
 ---
 
@@ -276,7 +282,7 @@ matrix_data = [
     ["比較項目", "Google AI Studio", "Google Cloud Vertex AI"],
     ["認証方式", "API キー (GEMINI_API_KEY)", "キーレス IAM / ADC・サービスアカウント"],
     ["課金・クォータ", "無料枠 または GCP 連携の従量課金", "GCP 請求先アカウント・予約スループット"],
-    ["データ所在地", "グローバル自動ルーティング", "リージョン指定 (東京・米国等) + global"],
+    ["接続先・データ所在地", "グローバル自動ルーティング", "global (推奨既定) + リージョン指定 (東京等)"],
     ["VPC-SC / CMEK", "非対応 (パブリック HTTPS API)", "対応 (VPC-SC / Private PSC / CMEK)"],
     ["最適な用途", "高速プロトタイピング・学習・個人開発", "本番システム運用・企業 IAM ガバナンス"],
     ["SDK 互換性", "100% 同一 (models.* / chats.*)", "100% 同一 (models.* / chats.*)"],
@@ -295,5 +301,5 @@ save()
 
 ### 第3章〜第5章における初期化コードの扱い
 
-- **第3章〜第5章では簡潔な AI Studio 初期化を採用**: 第1章で確認したとおり、Google AI Studio の API キーは Google Cloud プロジェクトに直接リンクして課金やレート制限の引き上げを行えるため、**第3章〜第5章では各サンプルを最小限の見通し良いコードに保つ目的で、簡潔な3行の AI Studio 初期化**（`genai.Client(api_key=userdata.get("GEMINI_API_KEY"))`）に統一しています。
-- **Vertex AI ユーザーはそのまま差し替え可能**: 第3章〜第5章のすべてのコードセル（ストリーミング、`ThinkingConfig`、マルチモーダル入力、Pydantic 構造化出力、マルチターンチャット、Function Calling）は、冒頭の3行の `client` 初期化部分を本章の `vertexai=True` 構成に置き換えるだけで、**残りのコードを1文字も変更せずに Vertex AI 上でそのまま動作します**。
+- **第3章〜第5章では簡潔な AI Studio 初期化を採用**: 第1章で確認したとおり、Google AI Studio の API キーは Google Cloud プロジェクトに直接リンクして課金やレート制限の引き上げを行えるため、**第3章〜第5章では各サンプルを最小限の見通し良いコードに保つ目的で、簡潔な AI Studio 初期化**（`genai.Client(api_key=userdata.get("GEMINI_API_KEY"))`）に統一しています。
+- **Vertex AI ユーザーはそのまま差し替え可能**: 第3章〜第5章のすべてのコードセル（ストリーミング、`ThinkingConfig`、マルチモーダル入力、Pydantic 構造化出力、マルチターンチャット、Function Calling）は、冒頭の `client` 初期化部分を本章の `vertexai=True`（`location="global"`）構成に置き換えるだけで、**残りのコードを1文字も変更せずに Vertex AI 上でそのまま動作します**。

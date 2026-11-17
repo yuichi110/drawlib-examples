@@ -26,7 +26,7 @@ phosphor.chat_circle_text((10.0, 56.8), width=3.8, style=Styles.DarkBold)
 text((25.0, 56.8), "1. User Prompt", style=Styles.DarkBold.patch(text_size=10.5))
 text(
     (23.5, 47.2),
-    '"Compare latency &\npick Tokyo region"',
+    '"Compare latency:\n2 cloud regions"',
     style=Styles.Dark.patch(text_size=10.0),
 )
 
@@ -43,7 +43,7 @@ text(
 # 3. Gemini FunctionCall (PrimaryNeutral)
 rectangle((127.0, 51.0), width=38.0, height=21.0, style=Styles.PrimaryNeutral.patch(shape_r=2.0))
 ai.gemini((112.5, 56.8), width=3.8, style=Styles.Primary)
-text((128.5, 56.8), "3. Gemini 2.5", style=Styles.DarkBold.patch(text_size=10.5))
+text((128.5, 56.8), "3. Gemini 3.8", style=Styles.DarkBold.patch(text_size=10.5))
 text(
     (127.0, 47.2),
     'FunctionCall:\nregion="asia-northeast1"',
@@ -67,7 +67,7 @@ ai.gemini((60.5, 22.3), width=3.8, style=Styles.Primary)
 text((77.2, 22.3), "5. FunctionResponse", style=Styles.DarkBold.patch(text_size=10.5))
 text(
     (75.0, 12.7),
-    "SDK feeds JSON result\nback to Gemini 2.5",
+    "SDK feeds JSON result\nback to Gemini 3.8",
     style=Styles.Dark.patch(text_size=10.0),
 )
 
@@ -106,18 +106,20 @@ save()
 
 ---
 
-## 1. 3-Line Client Setup & Stateful Multi-Turn Chat (`client.chats.create`)
+## 1. Client Setup & Stateful Multi-Turn Chat (`client.chats.create`)
 
-Start by reading your `GEMINI_API_KEY` from Google Colab Secrets (`userdata.get`) and creating a unified `genai.Client` instance:
+Define `MODEL = "gemini-3.8-flash"` at the top of the cell, then read your `GEMINI_API_KEY` from Google Colab Secrets (`userdata.get`) to initialize a unified `genai.Client`:
 
 ```python
+MODEL = "gemini-3.8-flash"
+
 from google.colab import userdata
 from google import genai
 
 client = genai.Client(api_key=userdata.get("GEMINI_API_KEY"))
 ```
 
-While `client.models.generate_content()` is stateless, **`client.chats.create()`** maintains an in-memory `list[types.Content]` transcript across turns. Each call to `chat.send_message()` appends a `Content(role="user")` message, sends the accumulated history to Gemini, and records the returned `Content(role="model")` turn (along with any intermediate tool calls). Because long multi-turn sessions resend a growing shared prefix on every turn, they automatically benefit from Gemini 2.5's **Implicit Context Caching**, lowering time-to-first-token (TTFT) and input token cost on repeated prefixes with zero extra configuration.
+While `client.models.generate_content()` is stateless, **`client.chats.create()`** maintains an in-memory `list[types.Content]` transcript across turns. Each call to `chat.send_message()` appends a `Content(role="user")` message, sends the accumulated history to Gemini, and records the returned `Content(role="model")` turn (along with any intermediate tool calls). Because multi-turn sessions resend a growing shared prefix on every turn, they automatically benefit from Gemini 3.8's **Implicit Context Caching**, lowering time-to-first-token (TTFT) and input token cost on repeated prefixes with zero extra configuration.
 
 ```drawlib align=center code=fold file=ch05_chat_state_context.png caption="Figure 5-2: Multi-Turn Chat History Accumulation and Tool-Augmented Session Flow"
 from drawlib.canvas import save, setup
@@ -140,12 +142,12 @@ text(
 rectangle((25.0, 51.0), width=38.0, height=14.0, style=Styles.Neutral.patch(shape_r=2.0))
 phosphor.chat_circle((10.0, 53.8), width=3.5, style=Styles.DarkBold)
 text((26.5, 53.8), "Turn 1: send_message()", style=Styles.DarkBold.patch(text_size=10.2))
-text((25.0, 47.6), "Initial gateway prompt", style=Styles.Dark.patch(text_size=10.0))
+text((25.0, 47.6), "Initial user message", style=Styles.Dark.patch(text_size=10.0))
 
 rectangle((25.0, 32.0), width=38.0, height=14.0, style=Styles.Neutral.patch(shape_r=2.0))
 phosphor.chats_circle((10.0, 34.8), width=3.5, style=Styles.DarkBold)
 text((26.5, 34.8), "Turn 2: send_message()", style=Styles.DarkBold.patch(text_size=10.2))
-text((25.0, 28.6), "Follow-up retry policy", style=Styles.Dark.patch(text_size=10.0))
+text((25.0, 28.6), "Context-aware follow-up", style=Styles.Dark.patch(text_size=10.0))
 
 rectangle((25.0, 13.0), width=38.0, height=14.0, style=Styles.PrimaryFlat.patch(shape_r=2.0))
 phosphor.wrench((10.0, 15.8), width=3.5, style=Styles.WhiteBold)
@@ -171,10 +173,10 @@ text((80.0, 22.5), '4. Content(role="model")', style=Styles.Dark.patch(text_size
 rectangle((80.0, 13.0), width=42.0, height=7.6, style=Styles.SecondaryNeutral.patch(shape_r=1.5))
 text((80.0, 13.0), "5. FunctionCall + Response", style=Styles.DarkBold.patch(text_size=10.0))
 
-# --- Right Column: Gemini 2.5 & Implicit Caching (x in [115, 146], cx = 130.5) ---
+# --- Right Column: Gemini 3.8 & Implicit Caching (x in [115, 146], cx = 130.5) ---
 rectangle((130.5, 48.5), width=31.0, height=25.0, style=Styles.PrimaryNeutral.patch(shape_r=2.0))
 ai.gemini((130.5, 56.2), width=4.2, style=Styles.Primary)
-text((130.5, 50.2), "Gemini 2.5 API", style=Styles.DarkBold.patch(text_size=10.5))
+text((130.5, 50.2), "Gemini 3.8 API", style=Styles.DarkBold.patch(text_size=10.5))
 text(
     (130.5, 42.0),
     "Full Content[] list\nsent each turn",
@@ -201,36 +203,32 @@ line((104.0, 18.5), (115.0, 18.5), arrow_head="->", style=Styles.SuccessBold)
 save()
 ```
 
-Create a stateful chat session with `gemini-2.5-flash`, send two sequential follow-up prompts, and inspect `chat.get_history()` to see how `user` and `model` turns accumulate:
+Create a stateful chat session with `MODEL` (`gemini-3.8-flash`), send two short messages, and inspect `chat.get_history()` to verify how `user` and `model` turns accumulate:
 
 ```python
-chat = client.chats.create(model="gemini-2.5-flash")
+chat = client.chats.create(model=MODEL)
 
-reply_1 = chat.send_message(
-    "We are deploying a multi-region Cloud Run API gateway. Give 2 short architecture tips."
-)
-print("Model (Turn 1):\n", reply_1.text)
+reply_1 = chat.send_message("My favorite programming language is Python.")
+print("Turn 1:", reply_1.text)
 
-reply_2 = chat.send_message(
-    "Based on those two tips, what HTTP timeout and retry budget should our client use?"
-)
-print("\nModel (Turn 2):\n", reply_2.text)
+reply_2 = chat.send_message("What is my favorite language, in one sentence?")
+print("Turn 2:", reply_2.text)
 
 print("\n--- Accumulated Session History ---")
 for idx, turn in enumerate(chat.get_history(), start=1):
     preview = " ".join(
         p.text.strip() for p in (turn.parts or []) if p.text and not p.thought
     )
-    print(f"[{idx}] role={turn.role:<5} | {preview[:85]}...")
+    print(f"[{idx}] role={turn.role:<5} | {preview[:80]}")
 ```
 
 ---
 
-## 2. Automatic Python Function Calling & Inline Drawlib Visualization
+## 2. Automatic Python Function Calling & Tool-Enabled Chat
 
-To give Gemini live access to external metrics, databases, or internal APIs, pass plain typed Python functions directly into **`types.GenerateContentConfig(tools=[...])`**. Be sure to include **type annotations** (`region: str -> dict[str, float]`) and a clear **Google-style docstring** (`Args:` and `Returns:`): the SDK compiles them into a JSON Schema tool declaration automatically.
+To give Gemini live access to external metrics, databases, or internal APIs, pass plain typed Python functions directly into **`types.GenerateContentConfig(tools=[...])`**. Include **type annotations** (`region: str -> dict[str, float]`) and a clear **Google-style docstring** (`Args:` and `Returns:`): the SDK compiles them into a JSON Schema tool declaration automatically.
 
-When Gemini decides it needs telemetry for multiple regions, `genai.Client` executes `get_region_latency()` locally for each requested region, packages the returned Python dictionaries into `FunctionResponse` payloads, and returns the final synthesized recommendation:
+First, call `client.models.generate_content(model=MODEL, ...)` with a one-line prompt comparing two regions. `genai.Client` executes `get_region_latency()` locally for each requested region, feeds the returned dictionaries back as `FunctionResponse` payloads, and prints the grounded comparison:
 
 ```python
 from google.genai import types
@@ -254,75 +252,42 @@ def get_region_latency(region: str) -> dict[str, float]:
     return REGION_LATENCY_MS.get(region, {"p50_ms": -1.0, "p95_ms": -1.0})
 
 
+response = client.models.generate_content(
+    model=MODEL,
+    contents="Compare latency in asia-northeast1 and us-central1.",
+    config=types.GenerateContentConfig(
+        tools=[get_region_latency],
+        temperature=0.1,
+    ),
+)
+print(response.text)
+```
+
+Next, combine both primitives by passing `tools=[get_region_latency]` into **`client.chats.create(model=MODEL, config=...)`**. Across follow-up turns, the session remembers earlier regions while invoking new tool calls on demand and recording every `FunctionCall` and `FunctionResponse` inside `tool_chat.get_history()`:
+
+```python
 tool_chat = client.chats.create(
-    model="gemini-2.5-flash",
+    model=MODEL,
     config=types.GenerateContentConfig(
         tools=[get_region_latency],
         temperature=0.1,
     ),
 )
 
-recommendation = tool_chat.send_message(
-    "Check the p50 and p95 latency across asia-northeast1, us-central1, and europe-west1, "
-    "then recommend the best primary and failover regions for users in Tokyo."
-)
-print(recommendation.text)
+turn_1 = tool_chat.send_message("Check latency in asia-northeast1 and us-central1.")
+print("Turn 1:\n", turn_1.text)
+
+turn_2 = tool_chat.send_message("Check europe-west1 too. Which is fastest, in one sentence?")
+print("\nTurn 2:\n", turn_2.text)
 
 print("\n--- Recorded Tool Call Trace ---")
 for turn in tool_chat.get_history():
     for part in turn.parts or []:
         if part.function_call:
-            print(f"-> FunctionCall: {part.function_call.name}({dict(part.function_call.args or {})})")
+            fc = part.function_call
+            print(f"-> FunctionCall: {fc.name}({dict(fc.args or {})})")
         elif part.function_response:
             print(f"<- FunctionResponse: {part.function_response.response}")
 ```
 
-Finally, render the exact multi-region `p50` and `p95` latency metrics queried by the agent directly inside your Jupyter or Colab output cell using Drawlib's **`BarChart`** with `setup(..., cwd=True)` and `show()`:
-
-```python
-from drawlib.canvas import clear, setup, show
-from drawlib.charts.bar import BarChart
-from drawlib.styles import Styles
-from drawlib.text import text
-
-clear()
-setup(width=116, height=56, cwd=True)
-
-regions = list(REGION_LATENCY_MS.keys())
-p50_ms = [get_region_latency(r)["p50_ms"] for r in regions]
-p95_ms = [get_region_latency(r)["p95_ms"] for r in regions]
-
-text(
-    (58.0, 50.8),
-    "Multi-Region API Latency Queried via Gemini Function Calling",
-    style=Styles.DarkBold.patch(text_size=11.5),
-)
-
-chart = BarChart(
-    axis_line_style=Styles.MutedDashed,
-    categories=regions,
-    width=96.0,
-    height=34.0,
-    orientation="vertical",
-    bar_mode="group",
-    bar_width_ratio=0.62,
-    bar_r=0.8,
-    axis_text_style=Styles.Dark.patch(text_size=10.0),
-    grid_style=Styles.MutedThin,
-    value_text_style=Styles.DarkBold.patch(text_size=10.0),
-    value_format="{:.1f} ms",
-)
-chart.add_series("p50 Median (ms)", p50_ms, style=Styles.PrimaryFlat)
-chart.add_series("p95 Tail (ms)", p95_ms, style=Styles.SecondaryNeutral)
-chart.configure_y_axis(min_value=0.0, max_value=100.0, tick_step=25.0, unit=" ms")
-chart.draw(xy=(12.0, 6.0))
-chart.draw_legend(
-    xy=(36.0, 44.5),
-    text_style=Styles.Dark.patch(text_size=10.0),
-    orientation="horizontal",
-)
-
-show()
-```
-
-> **Key Takeaways**: Combine `client.chats.create()` for stateful multi-turn context, typed Python functions in `tools=[fn]` for zero-boilerplate tool execution, and `setup(..., cwd=True)` + `show()` to turn live Gemini tool telemetry into publication-grade Drawlib charts right inside your notebook.
+> **Key Takeaways**: Define `MODEL = "gemini-3.8-flash"` once at the top of your notebook, use `client.chats.create(model=MODEL)` for stateful multi-turn context, pass typed Python functions into `tools=[fn]` for automatic function calling with `generate_content()`, and combine both in a tool-enabled chat session to handle multi-step follow-up questions with zero manual tool-loop boilerplate.

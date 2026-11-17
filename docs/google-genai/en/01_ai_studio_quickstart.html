@@ -44,18 +44,18 @@
     
     
     
-    <meta name="description" content="This cookbook uses [jupyter].setup_packages in drawlib.toml to automatically prepend !pip install -q drawlib google-genai pydantic at the top of every…">
+    <meta name="description" content="This cookbook uses [jupyter].setup_packages in drawlib.toml to automatically prepend !pip install -q google-genai at the top of every generated notebook…">
     <link rel="canonical" href="https://examples.drawlib.com/google-genai/en/01_ai_studio_quickstart.html">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="Google GenAI SDK Cookbook">
     <meta property="og:title" content="01. Hello World with Google AI Studio — Google GenAI SDK Cookbook">
-    <meta property="og:description" content="This cookbook uses [jupyter].setup_packages in drawlib.toml to automatically prepend !pip install -q drawlib google-genai pydantic at the top of every…">
+    <meta property="og:description" content="This cookbook uses [jupyter].setup_packages in drawlib.toml to automatically prepend !pip install -q google-genai at the top of every generated notebook…">
     <meta property="og:url" content="https://examples.drawlib.com/google-genai/en/01_ai_studio_quickstart.html">
     <meta property="og:locale" content="en_US">
     <meta property="og:locale:alternate" content="ja_JP">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="01. Hello World with Google AI Studio — Google GenAI SDK Cookbook">
-    <meta name="twitter:description" content="This cookbook uses [jupyter].setup_packages in drawlib.toml to automatically prepend !pip install -q drawlib google-genai pydantic at the top of every…">
+    <meta name="twitter:description" content="This cookbook uses [jupyter].setup_packages in drawlib.toml to automatically prepend !pip install -q google-genai at the top of every generated notebook…">
     
     
     <link rel="icon" type="image/png" href="../_assets/favicon.png">
@@ -172,7 +172,7 @@
   </div>
   <div class="nb-cell nb-markdown-cell">
 <h1>01. Hello World with Google AI Studio</h1>
-<p>This cookbook uses <code>[jupyter].setup_packages</code> in <code>drawlib.toml</code> to automatically prepend <code>!pip install -q drawlib google-genai pydantic</code> at the top of every generated notebook, so zero manual package installation is required in Google Colab. To run your first Gemini call safely without hardcoding credentials in Git, generate an API key (<code>GEMINI_API_KEY</code>) in <strong>Google AI Studio</strong>—backed by a <strong>Google Cloud Project</strong>—and store it in Google Colab's <strong>Secrets</strong> sidebar (<code>🔑</code> icon on the left pane with <strong>Notebook access</strong> toggled ON).</p>
+<p>This cookbook uses <code>[jupyter].setup_packages</code> in <code>drawlib.toml</code> to automatically prepend <code>!pip install -q google-genai</code> at the top of every generated notebook, ensuring fast startup in Google Colab with zero manual package installation. To run your first Gemini call safely without hardcoding credentials in Git, generate an API key (<code>GEMINI_API_KEY</code>) in <strong>Google AI Studio</strong>—backed by a <strong>Google Cloud Project</strong>—and store it in Google Colab's <strong>Secrets</strong> sidebar (<code>🔑</code> icon on the left pane with <strong>Notebook access</strong> toggled ON).</p>
 
 <figure class="drawlib-figure align-center">
   <img src="../images/01_ai_studio_quickstart/ch01_aistudio_workflow.png" alt="Figure 1-1: End-to-End Google AI Studio &amp; Colab Secrets Setup Workflow" loading="lazy">
@@ -246,14 +246,14 @@
 <span class="n">text</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="mf">32.3</span><span class="p">),</span> <span class="s2">"genai.Client"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">WhiteBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">11.2</span><span class="p">))</span>
 <span class="n">text</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="mf">25.5</span><span class="p">),</span> <span class="s2">"userdata.get(...)</span><span class="se">\n</span><span class="s2">api_key=api_key"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">White</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">))</span>
 
-<span class="c1"># Stage 4: Gemini 2.5 Flash Response &amp; Usage Metadata</span>
+<span class="c1"># Stage 4: Gemini 3.8 Flash Response &amp; Usage Metadata</span>
 <span class="n">rectangle</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">cy</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="n">card_w</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="n">card_h</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">soft_card</span><span class="p">)</span>
 <span class="n">rectangle</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="mf">50.2</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">14.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">4.4</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">White</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">1.2</span><span class="p">,</span> <span class="n">shape_line_color</span><span class="o">=</span><span class="n">Colors</span><span class="o">.</span><span class="n">Gray3</span><span class="p">))</span>
 <span class="n">text</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="mf">50.2</span><span class="p">),</span> <span class="s2">"STEP 4"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">))</span>
 <span class="n">rectangle</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="mf">41.5</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">9.2</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">9.2</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">White</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">shape_line_color</span><span class="o">=</span><span class="n">Colors</span><span class="o">.</span><span class="n">Gray3</span><span class="p">))</span>
 <span class="n">phosphor</span><span class="o">.</span><span class="n">sparkle</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="mf">41.5</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">6.0</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryBold</span><span class="p">)</span>
 <span class="n">text</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="mf">32.3</span><span class="p">),</span> <span class="s2">"Flash Response"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">11.0</span><span class="p">))</span>
-<span class="n">text</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="mf">25.5</span><span class="p">),</span> <span class="s2">"gemini-2.5-flash</span><span class="se">\n</span><span class="s2">text + usage_metadata"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Dark</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">))</span>
+<span class="n">text</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="mf">25.5</span><span class="p">),</span> <span class="s2">"gemini-3.8-flash</span><span class="se">\n</span><span class="s2">text + usage_metadata"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Dark</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">))</span>
 
 <span class="c1"># Inter-stage orthogonal connectors (7.5-unit gap between card edges)</span>
 <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
@@ -268,10 +268,10 @@
     <span class="n">height</span><span class="o">=</span><span class="mf">8.4</span><span class="p">,</span>
     <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">White</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">1.8</span><span class="p">,</span> <span class="n">shape_line_color</span><span class="o">=</span><span class="n">Colors</span><span class="o">.</span><span class="n">Gray4</span><span class="p">),</span>
 <span class="p">)</span>
-<span class="n">phosphor</span><span class="o">.</span><span class="n">terminal_window</span><span class="p">((</span><span class="mf">15.0</span><span class="p">,</span> <span class="mf">12.2</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">4.6</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryBold</span><span class="p">)</span>
+<span class="n">phosphor</span><span class="o">.</span><span class="n">terminal_window</span><span class="p">((</span><span class="mf">34.0</span><span class="p">,</span> <span class="mf">12.2</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">4.6</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryBold</span><span class="p">)</span>
 <span class="n">text</span><span class="p">(</span>
-    <span class="p">(</span><span class="mf">79.0</span><span class="p">,</span> <span class="mf">12.2</span><span class="p">),</span>
-    <span class="s2">"Auto-Prepended Setup Cell:  !pip install -q drawlib google-genai pydantic   •   Zero Keys in Git"</span><span class="p">,</span>
+    <span class="p">(</span><span class="mf">80.0</span><span class="p">,</span> <span class="mf">12.2</span><span class="p">),</span>
+    <span class="s2">"Auto-Prepended Setup Cell:  !pip install -q google-genai   •   Zero Keys in Git"</span><span class="p">,</span>
     <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.2</span><span class="p">),</span>
 <span class="p">)</span>
 
@@ -283,7 +283,7 @@
 <ol>
 <li>Open <strong>Google AI Studio</strong> (<code>aistudio.google.com/apikey</code>), click <strong>Create API key</strong>, and select an existing or new <strong>Google Cloud Project</strong>.</li>
 <li>In Google Colab, click the <strong>Secrets (<code>🔑</code>)</strong> icon in the left sidebar, add a secret named <code>GEMINI_API_KEY</code>, paste your key value, and toggle <strong>Notebook access</strong> ON.</li>
-<li>Read the key at runtime via <code>userdata.get(&quot;GEMINI_API_KEY&quot;)</code> and pass it directly to <code>genai.Client</code>:</li>
+<li>Define <code>MODEL = &quot;gemini-3.8-flash&quot;</code> at the top of the cell so you can easily customize the target model, then read <code>GEMINI_API_KEY</code> via <code>userdata.get(...)</code> and pass it to <code>genai.Client</code>:</li>
 </ol>
 
   </div>
@@ -291,7 +291,7 @@
     <div class="nb-input">
       <div class="nb-prompt nb-in-prompt">In [setup]:</div>
       <div class="nb-code-area">
-        <pre><code class="language-bash">!pip<span class="w"> </span>install<span class="w"> </span>-q<span class="w"> </span>drawlib<span class="w"> </span>google-genai<span class="w"> </span>pydantic
+        <pre><code class="language-bash">!pip<span class="w"> </span>install<span class="w"> </span>-q<span class="w"> </span>google-genai
 </code></pre>
       </div>
     </div>
@@ -300,15 +300,17 @@
     <div class="nb-input">
       <div class="nb-prompt nb-in-prompt">In [1]:</div>
       <div class="nb-code-area">
-        <pre><code class="language-python"><span class="kn">from</span><span class="w"> </span><span class="nn">google.colab</span><span class="w"> </span><span class="kn">import</span> <span class="n">userdata</span>
+        <pre><code class="language-python"><span class="n">MODEL</span> <span class="o">=</span> <span class="s2">"gemini-3.8-flash"</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">google.colab</span><span class="w"> </span><span class="kn">import</span> <span class="n">userdata</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">google</span><span class="w"> </span><span class="kn">import</span> <span class="n">genai</span>
 
 <span class="n">api_key</span> <span class="o">=</span> <span class="n">userdata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"GEMINI_API_KEY"</span><span class="p">)</span>
 <span class="n">client</span> <span class="o">=</span> <span class="n">genai</span><span class="o">.</span><span class="n">Client</span><span class="p">(</span><span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span><span class="p">)</span>
 
 <span class="n">response</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">generate_content</span><span class="p">(</span>
-    <span class="n">model</span><span class="o">=</span><span class="s2">"gemini-2.5-flash"</span><span class="p">,</span>
-    <span class="n">contents</span><span class="o">=</span><span class="s2">"Explain in two sentences why unified SDKs improve developer productivity."</span><span class="p">,</span>
+    <span class="n">model</span><span class="o">=</span><span class="n">MODEL</span><span class="p">,</span>
+    <span class="n">contents</span><span class="o">=</span><span class="s2">"Hello!"</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
 </code></pre>
@@ -432,8 +434,8 @@
 <span class="n">save</span><span class="p">()</span>
 </code></pre>
 </details>
-<h2>3. <code>GenerateContentConfig</code> &amp; Inline Token Visualization with Drawlib</h2>
-<p>To control model persona, determinism, and output formatting, pass a <code>types.GenerateContentConfig</code> object to <code>generate_content</code>. Every response also attaches <code>response.usage_metadata</code>, exposing exact token counts across your input prompt (<code>prompt_token_count</code>), internal reasoning (<code>thoughts_token_count</code>), and final answer (<code>candidates_token_count</code>):</p>
+<h2>3. <code>GenerateContentConfig</code> &amp; Token Usage Metadata</h2>
+<p>To control model behavior and determinism, pass a <code>types.GenerateContentConfig</code> object (such as <code>system_instruction</code> and <code>temperature</code>) to <code>generate_content</code>. Every response also attaches <code>response.usage_metadata</code>, exposing exact token counts across your input prompt (<code>prompt_token_count</code>), internal reasoning (<code>thoughts_token_count</code>), and final answer (<code>candidates_token_count</code>):</p>
 
   </div>
   <div class="nb-cell nb-code-cell">
@@ -443,76 +445,31 @@
         <pre><code class="language-python"><span class="kn">from</span><span class="w"> </span><span class="nn">google.genai</span><span class="w"> </span><span class="kn">import</span> <span class="n">types</span>
 
 <span class="n">config</span> <span class="o">=</span> <span class="n">types</span><span class="o">.</span><span class="n">GenerateContentConfig</span><span class="p">(</span>
-    <span class="n">system_instruction</span><span class="o">=</span><span class="s2">"You are a concise cloud architect. Answer in three short bullet points."</span><span class="p">,</span>
+    <span class="n">system_instruction</span><span class="o">=</span><span class="s2">"Answer in one short sentence."</span><span class="p">,</span>
     <span class="n">temperature</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="n">response</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">generate_content</span><span class="p">(</span>
-    <span class="n">model</span><span class="o">=</span><span class="s2">"gemini-2.5-flash"</span><span class="p">,</span>
-    <span class="n">contents</span><span class="o">=</span><span class="s2">"List three security best practices for managing API keys in notebooks."</span><span class="p">,</span>
+    <span class="n">model</span><span class="o">=</span><span class="n">MODEL</span><span class="p">,</span>
+    <span class="n">contents</span><span class="o">=</span><span class="s2">"What is Python?"</span><span class="p">,</span>
     <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
 
 <span class="n">usage</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">usage_metadata</span>
-<span class="n">prompt_tokens</span> <span class="o">=</span> <span class="n">usage</span><span class="o">.</span><span class="n">prompt_token_count</span> <span class="ow">or</span> <span class="mi">0</span>
-<span class="n">thoughts_tokens</span> <span class="o">=</span> <span class="n">usage</span><span class="o">.</span><span class="n">thoughts_token_count</span> <span class="ow">or</span> <span class="mi">0</span>
-<span class="n">candidates_tokens</span> <span class="o">=</span> <span class="n">usage</span><span class="o">.</span><span class="n">candidates_token_count</span> <span class="ow">or</span> <span class="mi">0</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Prompt tokens:     </span><span class="si">{</span><span class="n">prompt_tokens</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Thoughts tokens:   </span><span class="si">{</span><span class="n">thoughts_tokens</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Candidates tokens: </span><span class="si">{</span><span class="n">candidates_tokens</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Prompt tokens:     </span><span class="si">{</span><span class="n">usage</span><span class="o">.</span><span class="n">prompt_token_count</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="mi">0</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Thoughts tokens:   </span><span class="si">{</span><span class="n">usage</span><span class="o">.</span><span class="n">thoughts_token_count</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="mi">0</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Candidates tokens: </span><span class="si">{</span><span class="n">usage</span><span class="o">.</span><span class="n">candidates_token_count</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="mi">0</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </code></pre>
       </div>
     </div>
   </div>
   <div class="nb-cell nb-markdown-cell">
-<p>Because <code>drawlib</code> is pre-installed in the notebook alongside <code>google-genai</code>, you can render those live <code>usage_metadata</code> metrics directly inside the next Colab output cell using <code>setup(..., cwd=True)</code>, <code>BarChart</code>, and <code>show()</code>:</p>
-
-  </div>
-  <div class="nb-cell nb-code-cell">
-    <div class="nb-input">
-      <div class="nb-prompt nb-in-prompt">In [3]:</div>
-      <div class="nb-code-area">
-        <pre><code class="language-python"><span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.canvas</span><span class="w"> </span><span class="kn">import</span> <span class="n">setup</span><span class="p">,</span> <span class="n">show</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.charts.bar</span><span class="w"> </span><span class="kn">import</span> <span class="n">BarChart</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.styles</span><span class="w"> </span><span class="kn">import</span> <span class="n">Styles</span>
-
-<span class="n">setup</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mi">110</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">52</span><span class="p">,</span> <span class="n">cwd</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
-<span class="n">chart</span> <span class="o">=</span> <span class="n">BarChart</span><span class="p">(</span>
-    <span class="n">axis_line_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">MutedDashed</span><span class="p">,</span>
-    <span class="n">categories</span><span class="o">=</span><span class="p">[</span><span class="s2">"Prompt"</span><span class="p">,</span> <span class="s2">"Thoughts"</span><span class="p">,</span> <span class="s2">"Candidates"</span><span class="p">],</span>
-    <span class="n">width</span><span class="o">=</span><span class="mf">96.0</span><span class="p">,</span>
-    <span class="n">height</span><span class="o">=</span><span class="mf">40.0</span><span class="p">,</span>
-    <span class="n">title</span><span class="o">=</span><span class="s2">"Gemini 2.5 Flash — Live Token Usage Breakdown"</span><span class="p">,</span>
-    <span class="n">title_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">12.0</span><span class="p">),</span>
-    <span class="n">background_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Neutral</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">2.0</span><span class="p">),</span>
-    <span class="n">bar_width_ratio</span><span class="o">=</span><span class="mf">0.48</span><span class="p">,</span>
-    <span class="n">bar_r</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span>
-    <span class="n">axis_text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Dark</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.5</span><span class="p">),</span>
-    <span class="n">grid_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">MutedThin</span><span class="p">,</span>
-    <span class="n">value_text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.5</span><span class="p">),</span>
-    <span class="n">value_format</span><span class="o">=</span><span class="s2">"</span><span class="si">{:.0f}</span><span class="s2">"</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="n">chart</span><span class="o">.</span><span class="n">add_series</span><span class="p">(</span>
-    <span class="s2">"Tokens"</span><span class="p">,</span>
-    <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">prompt_tokens</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">thoughts_tokens</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">candidates_tokens</span><span class="p">)],</span>
-    <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryFlat</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="n">chart</span><span class="o">.</span><span class="n">configure_y_axis</span><span class="p">(</span><span class="n">min_value</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
-<span class="n">chart</span><span class="o">.</span><span class="n">draw</span><span class="p">(</span><span class="n">xy</span><span class="o">=</span><span class="p">(</span><span class="mf">7.0</span><span class="p">,</span> <span class="mf">6.0</span><span class="p">))</span>
-
-<span class="n">show</span><span class="p">()</span>
-</code></pre>
-      </div>
-    </div>
-  </div>
-  <div class="nb-cell nb-markdown-cell">
+<p>On <code>gemini-3.8-flash</code>, internal reasoning tokens are reported separately under <code>thoughts_token_count</code>, making it easy to monitor both prompt/output size and thinking overhead from a single <code>usage_metadata</code> object.</p>
 <h3>Key Takeaways &amp; Next Step</h3>
 <ul>
-<li><strong>Zero-Friction Setup</strong>: Storing <code>GEMINI_API_KEY</code> in Colab Secrets keeps notebooks clean, shareable, and safe to commit to Git while linking directly to your Google Cloud Project's Free or Paid Tier.</li>
-<li><strong>Up Next in Chapter 02</strong>: Learn how to switch <code>genai.Client</code> to <strong>Google Cloud Vertex AI</strong> (<code>vertexai=True</code>) using keyless IAM authentication while keeping 100% of your downstream Gemini code unchanged.</li>
+<li><strong>Zero-Friction Setup</strong>: Auto-installing only <code>google-genai</code> and storing <code>GEMINI_API_KEY</code> in Colab Secrets keeps notebooks fast to launch, shareable, and safe to commit to Git across both Free and Paid Tiers.</li>
+<li><strong>Up Next in Chapter 02</strong>: Learn how to switch <code>genai.Client</code> to <strong>Google Cloud Vertex AI</strong> (<code>vertexai=True</code>) using keyless IAM authentication while keeping 100% of your downstream <code>gemini-3.8-flash</code> code unchanged.</li>
 </ul>
 
   </div>

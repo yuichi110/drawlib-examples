@@ -15,7 +15,7 @@ ja = "日本語"
 
 [jupyter]
 colab_base_url = "https://colab.research.google.com/github/yuichi110/drawlib-examples/blob/main/docs/google-genai"
-setup_packages = ["drawlib", "google-genai", "pydantic"]
+setup_packages = ["google-genai"]
 drawlib_cell_mode = "markdown"
 image_mode = "url"
 execute = false

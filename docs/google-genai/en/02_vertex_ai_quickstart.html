@@ -328,14 +328,14 @@
 </details>
 <hr />
 <h2>1. Minimal Hello World on Vertex AI (Keyless IAM Auth in Colab)</h2>
-<p>When targeting Google Cloud Vertex AI, you do not need to generate or distribute static API keys. Inside Google Colab, <code>auth.authenticate_user()</code> opens a browser sign-in prompt to establish short-lived Application Default Credentials (ADC) backed by Google Cloud IAM. Ensure the Vertex AI API (<code>aiplatform.googleapis.com</code>) is enabled on your project and your Google account has the <strong>Vertex AI User</strong> (<code>roles/aiplatform.user</code>) role.</p>
+<p>When targeting Google Cloud Vertex AI, you do not need to generate or distribute static API keys. After running the <code>!pip install -q google-genai</code> setup cell at the top of the notebook, <code>auth.authenticate_user()</code> opens a browser sign-in prompt in Google Colab to establish short-lived Application Default Credentials (ADC) backed by Google Cloud IAM. Ensure the Vertex AI API (<code>aiplatform.googleapis.com</code>) is enabled on your project and your Google account has the <strong>Vertex AI User</strong> (<code>roles/aiplatform.user</code>) role, then set <code>GC_PROJECT</code> right at the top of the cell (<code>LOCATION = &quot;global&quot;</code> and <code>MODEL = &quot;gemini-3.8-flash&quot;</code> work out of the box):</p>
 
   </div>
   <div class="nb-cell nb-code-cell nb-setup-cell">
     <div class="nb-input">
       <div class="nb-prompt nb-in-prompt">In [setup]:</div>
       <div class="nb-code-area">
-        <pre><code class="language-bash">!pip<span class="w"> </span>install<span class="w"> </span>-q<span class="w"> </span>drawlib<span class="w"> </span>google-genai<span class="w"> </span>pydantic
+        <pre><code class="language-bash">!pip<span class="w"> </span>install<span class="w"> </span>-q<span class="w"> </span>google-genai
 </code></pre>
       </div>
     </div>
@@ -344,21 +344,24 @@
     <div class="nb-input">
       <div class="nb-prompt nb-in-prompt">In [1]:</div>
       <div class="nb-code-area">
-        <pre><code class="language-python"><span class="kn">from</span><span class="w"> </span><span class="nn">google.colab</span><span class="w"> </span><span class="kn">import</span> <span class="n">auth</span>
+        <pre><code class="language-python"><span class="n">GC_PROJECT</span> <span class="o">=</span> <span class="s2">"your-gcp-project-id"</span>
+<span class="n">LOCATION</span> <span class="o">=</span> <span class="s2">"global"</span>
+<span class="n">MODEL</span> <span class="o">=</span> <span class="s2">"gemini-3.8-flash"</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">google.colab</span><span class="w"> </span><span class="kn">import</span> <span class="n">auth</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">google</span><span class="w"> </span><span class="kn">import</span> <span class="n">genai</span>
 
-<span class="c1"># Authenticate with your Google account in the browser popup</span>
 <span class="n">auth</span><span class="o">.</span><span class="n">authenticate_user</span><span class="p">()</span>
 
 <span class="n">client</span> <span class="o">=</span> <span class="n">genai</span><span class="o">.</span><span class="n">Client</span><span class="p">(</span>
     <span class="n">vertexai</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-    <span class="n">project</span><span class="o">=</span><span class="s2">"your-gcp-project-id"</span><span class="p">,</span>  <span class="c1"># Replace with your Google Cloud Project ID</span>
-    <span class="n">location</span><span class="o">=</span><span class="s2">"us-central1"</span><span class="p">,</span>         <span class="c1"># Or "asia-northeast1", "global", etc.</span>
+    <span class="n">project</span><span class="o">=</span><span class="n">GC_PROJECT</span><span class="p">,</span>
+    <span class="n">location</span><span class="o">=</span><span class="n">LOCATION</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="n">response</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">generate_content</span><span class="p">(</span>
-    <span class="n">model</span><span class="o">=</span><span class="s2">"gemini-2.5-flash"</span><span class="p">,</span>
-    <span class="n">contents</span><span class="o">=</span><span class="s2">"Hello from Vertex AI! List three advantages of keyless IAM authentication in two sentences."</span><span class="p">,</span>
+    <span class="n">model</span><span class="o">=</span><span class="n">MODEL</span><span class="p">,</span>
+    <span class="n">contents</span><span class="o">=</span><span class="s2">"Hello!"</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
 </code></pre>
@@ -374,7 +377,10 @@
     <div class="nb-input">
       <div class="nb-prompt nb-in-prompt">In [2]:</div>
       <div class="nb-code-area">
-        <pre><code class="language-python"><span class="kn">from</span><span class="w"> </span><span class="nn">google.colab</span><span class="w"> </span><span class="kn">import</span> <span class="n">auth</span><span class="p">,</span> <span class="n">userdata</span>
+        <pre><code class="language-python"><span class="n">LOCATION</span> <span class="o">=</span> <span class="s2">"global"</span>
+<span class="n">MODEL</span> <span class="o">=</span> <span class="s2">"gemini-3.8-flash"</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">google.colab</span><span class="w"> </span><span class="kn">import</span> <span class="n">auth</span><span class="p">,</span> <span class="n">userdata</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">google</span><span class="w"> </span><span class="kn">import</span> <span class="n">genai</span>
 
 <span class="n">auth</span><span class="o">.</span><span class="n">authenticate_user</span><span class="p">()</span>
@@ -383,12 +389,12 @@
 <span class="n">client</span> <span class="o">=</span> <span class="n">genai</span><span class="o">.</span><span class="n">Client</span><span class="p">(</span>
     <span class="n">vertexai</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="n">project</span><span class="o">=</span><span class="n">userdata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"GOOGLE_CLOUD_PROJECT"</span><span class="p">),</span>
-    <span class="n">location</span><span class="o">=</span><span class="s2">"asia-northeast1"</span><span class="p">,</span>
+    <span class="n">location</span><span class="o">=</span><span class="n">LOCATION</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="n">response</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">generate_content</span><span class="p">(</span>
-    <span class="n">model</span><span class="o">=</span><span class="s2">"gemini-2.5-flash"</span><span class="p">,</span>
-    <span class="n">contents</span><span class="o">=</span><span class="s2">"Confirm that Vertex AI initialized cleanly using Colab Secrets."</span><span class="p">,</span>
+    <span class="n">model</span><span class="o">=</span><span class="n">MODEL</span><span class="p">,</span>
+    <span class="n">contents</span><span class="o">=</span><span class="s2">"Tell me one fun fact about space."</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
 </code></pre>
@@ -397,8 +403,8 @@
   </div>
   <div class="nb-cell nb-markdown-cell">
 <blockquote>
-<p><strong>Regional Endpoints vs. <code>location=&quot;global&quot;</code>:</strong>
-Use a <strong>regional endpoint</strong> such as <code>&quot;us-central1&quot;</code> (Iowa) or <code>&quot;asia-northeast1&quot;</code> (Tokyo) when your workload requires strict geographic data residency and predictable regional routing. Use <strong><code>location=&quot;global&quot;</code></strong> when you want dynamic multi-region routing for maximum quota availability—or when testing <strong>bleeding-edge Preview models</strong> on Vertex AI that launch exclusively on the <code>global</code> endpoint before rolling out to individual regions.</p>
+<p><strong>Why <code>LOCATION = &quot;global&quot;</code> Is the Recommended Default (vs. Regional Endpoints):</strong>
+On Vertex AI, <strong><code>location=&quot;global&quot;</code></strong> is the recommended default: it supports the latest <strong>Gemini 3.8+</strong> models (such as <code>gemini-3.8-flash</code> and new Preview releases that launch on <code>global</code> first) and provides dynamic multi-region quota routing for higher availability. Change <code>LOCATION</code> to a <strong>regional endpoint</strong> such as <code>&quot;asia-northeast1&quot;</code> (Tokyo) or <code>&quot;us-central1&quot;</code> (Iowa) when your workload requires strict geographic data residency.</p>
 </blockquote>
 <hr />
 <h2>2. Choosing Between Google AI Studio and Vertex AI</h2>
@@ -477,7 +483,7 @@ Use a <strong>regional endpoint</strong> such as <code>&quot;us-central1&quot;</
     <span class="p">[</span><span class="s2">"Evaluation Axis"</span><span class="p">,</span> <span class="s2">"Google AI Studio"</span><span class="p">,</span> <span class="s2">"Google Cloud Vertex AI"</span><span class="p">],</span>
     <span class="p">[</span><span class="s2">"Authentication"</span><span class="p">,</span> <span class="s2">"API Key (GEMINI_API_KEY)"</span><span class="p">,</span> <span class="s2">"Keyless IAM / ADC &amp; Service Accounts"</span><span class="p">],</span>
     <span class="p">[</span><span class="s2">"Billing Model"</span><span class="p">,</span> <span class="s2">"Free Tier or GCP Project Pay-As-You-Go"</span><span class="p">,</span> <span class="s2">"GCP Cloud Billing &amp; Provisioned Quotas"</span><span class="p">],</span>
-    <span class="p">[</span><span class="s2">"Regional Residency"</span><span class="p">,</span> <span class="s2">"Global routing managed by Google"</span><span class="p">,</span> <span class="s2">"Regional (us-central1, Tokyo) + global"</span><span class="p">],</span>
+    <span class="p">[</span><span class="s2">"Endpoint &amp; Residency"</span><span class="p">,</span> <span class="s2">"Global routing managed by Google"</span><span class="p">,</span> <span class="s2">"global (default) + Regional (Tokyo, US)"</span><span class="p">],</span>
     <span class="p">[</span><span class="s2">"VPC-SC / CMEK"</span><span class="p">,</span> <span class="s2">"Not supported (Public HTTPS API)"</span><span class="p">,</span> <span class="s2">"Supported (VPC-SC, Private PSC, CMEK)"</span><span class="p">],</span>
     <span class="p">[</span><span class="s2">"Best Use Case"</span><span class="p">,</span> <span class="s2">"Fast prototyping, notebooks &amp; indie apps"</span><span class="p">,</span> <span class="s2">"Enterprise production &amp; IAM governance"</span><span class="p">],</span>
     <span class="p">[</span><span class="s2">"SDK Compatibility"</span><span class="p">,</span> <span class="s2">"100% Identical (models.* / chats.*)"</span><span class="p">,</span> <span class="s2">"100% Identical (models.* / chats.*)"</span><span class="p">],</span>
@@ -496,8 +502,8 @@ Use a <strong>regional endpoint</strong> such as <code>&quot;us-central1&quot;</
 </details>
 <h3>How Chapters 3 Through 5 Work</h3>
 <ul>
-<li><strong>Concise Default Initialization in Chapters 3–5</strong>: Because Google AI Studio API keys can be linked directly to a Google Cloud Project for billing and higher rate limits (as covered in Chapter 1), <strong>Chapters 3 through 5 standardize on the concise 3-line AI Studio initialization</strong> (<code>genai.Client(api_key=userdata.get(&quot;GEMINI_API_KEY&quot;))</code>) so every notebook stays minimal and focused on core SDK capabilities.</li>
-<li><strong>Drop-In Compatibility for Vertex AI Users</strong>: Every single code cell in Chapters 3–5—covering Streaming, <code>ThinkingConfig</code>, Multimodal Inputs, Pydantic Structured Outputs, Multi-turn Chat, and Function Calling—<strong>runs unchanged on Vertex AI</strong> simply by replacing that 3-line <code>client</code> initialization with this chapter's <code>vertexai=True</code> setup.</li>
+<li><strong>Concise Default Initialization in Chapters 3–5</strong>: Because Google AI Studio API keys can be linked directly to a Google Cloud Project for billing and higher rate limits (as covered in Chapter 1), <strong>Chapters 3 through 5 standardize on the concise AI Studio initialization</strong> (<code>genai.Client(api_key=userdata.get(&quot;GEMINI_API_KEY&quot;))</code>) so every notebook stays minimal and focused on core SDK capabilities.</li>
+<li><strong>Drop-In Compatibility for Vertex AI Users</strong>: Every single code cell in Chapters 3–5—covering Streaming, <code>ThinkingConfig</code>, Multimodal Inputs, Pydantic Structured Outputs, Multi-turn Chat, and Function Calling—<strong>runs unchanged on Vertex AI</strong> simply by replacing that <code>client</code> initialization with this chapter's <code>vertexai=True</code> (<code>location=&quot;global&quot;</code>) setup.</li>
 </ul>
 
   </div>

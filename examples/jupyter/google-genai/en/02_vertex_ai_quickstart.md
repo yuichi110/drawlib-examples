@@ -153,24 +153,27 @@ save()
 
 ## 1. Minimal Hello World on Vertex AI (Keyless IAM Auth in Colab)
 
-When targeting Google Cloud Vertex AI, you do not need to generate or distribute static API keys. Inside Google Colab, `auth.authenticate_user()` opens a browser sign-in prompt to establish short-lived Application Default Credentials (ADC) backed by Google Cloud IAM. Ensure the Vertex AI API (`aiplatform.googleapis.com`) is enabled on your project and your Google account has the **Vertex AI User** (`roles/aiplatform.user`) role.
+When targeting Google Cloud Vertex AI, you do not need to generate or distribute static API keys. After running the `!pip install -q google-genai` setup cell at the top of the notebook, `auth.authenticate_user()` opens a browser sign-in prompt in Google Colab to establish short-lived Application Default Credentials (ADC) backed by Google Cloud IAM. Ensure the Vertex AI API (`aiplatform.googleapis.com`) is enabled on your project and your Google account has the **Vertex AI User** (`roles/aiplatform.user`) role, then set `GC_PROJECT` right at the top of the cell (`LOCATION = "global"` and `MODEL = "gemini-3.8-flash"` work out of the box):
 
 ```python
+GC_PROJECT = "your-gcp-project-id"
+LOCATION = "global"
+MODEL = "gemini-3.8-flash"
+
 from google.colab import auth
 from google import genai
 
-# Authenticate with your Google account in the browser popup
 auth.authenticate_user()
 
 client = genai.Client(
     vertexai=True,
-    project="your-gcp-project-id",  # Replace with your Google Cloud Project ID
-    location="us-central1",         # Or "asia-northeast1", "global", etc.
+    project=GC_PROJECT,
+    location=LOCATION,
 )
 
 response = client.models.generate_content(
-    model="gemini-2.5-flash",
-    contents="Hello from Vertex AI! List three advantages of keyless IAM authentication in two sentences.",
+    model=MODEL,
+    contents="Hello!",
 )
 print(response.text)
 ```
@@ -180,6 +183,9 @@ print(response.text)
 When committing notebooks to Git or sharing them with teammates, avoid hardcoding your Google Cloud Project ID in source cells. Store `GOOGLE_CLOUD_PROJECT` in **Colab Secrets** (the key icon in the left sidebar, with **Notebook access** toggled on) and read it dynamically with `userdata.get("GOOGLE_CLOUD_PROJECT")`:
 
 ```python
+LOCATION = "global"
+MODEL = "gemini-3.8-flash"
+
 from google.colab import auth, userdata
 from google import genai
 
@@ -189,18 +195,18 @@ auth.authenticate_user()
 client = genai.Client(
     vertexai=True,
     project=userdata.get("GOOGLE_CLOUD_PROJECT"),
-    location="asia-northeast1",
+    location=LOCATION,
 )
 
 response = client.models.generate_content(
-    model="gemini-2.5-flash",
-    contents="Confirm that Vertex AI initialized cleanly using Colab Secrets.",
+    model=MODEL,
+    contents="Tell me one fun fact about space.",
 )
 print(response.text)
 ```
 
-> **Regional Endpoints vs. `location="global"`:**
-> Use a **regional endpoint** such as `"us-central1"` (Iowa) or `"asia-northeast1"` (Tokyo) when your workload requires strict geographic data residency and predictable regional routing. Use **`location="global"`** when you want dynamic multi-region routing for maximum quota availability—or when testing **bleeding-edge Preview models** on Vertex AI that launch exclusively on the `global` endpoint before rolling out to individual regions.
+> **Why `LOCATION = "global"` Is the Recommended Default (vs. Regional Endpoints):**
+> On Vertex AI, **`location="global"`** is the recommended default: it supports the latest **Gemini 3.8+** models (such as `gemini-3.8-flash` and new Preview releases that launch on `global` first) and provides dynamic multi-region quota routing for higher availability. Change `LOCATION` to a **regional endpoint** such as `"asia-northeast1"` (Tokyo) or `"us-central1"` (Iowa) when your workload requires strict geographic data residency.
 
 ---
 
@@ -276,7 +282,7 @@ matrix_data = [
     ["Evaluation Axis", "Google AI Studio", "Google Cloud Vertex AI"],
     ["Authentication", "API Key (GEMINI_API_KEY)", "Keyless IAM / ADC & Service Accounts"],
     ["Billing Model", "Free Tier or GCP Project Pay-As-You-Go", "GCP Cloud Billing & Provisioned Quotas"],
-    ["Regional Residency", "Global routing managed by Google", "Regional (us-central1, Tokyo) + global"],
+    ["Endpoint & Residency", "Global routing managed by Google", "global (default) + Regional (Tokyo, US)"],
     ["VPC-SC / CMEK", "Not supported (Public HTTPS API)", "Supported (VPC-SC, Private PSC, CMEK)"],
     ["Best Use Case", "Fast prototyping, notebooks & indie apps", "Enterprise production & IAM governance"],
     ["SDK Compatibility", "100% Identical (models.* / chats.*)", "100% Identical (models.* / chats.*)"],
@@ -295,5 +301,5 @@ save()
 
 ### How Chapters 3 Through 5 Work
 
-- **Concise Default Initialization in Chapters 3–5**: Because Google AI Studio API keys can be linked directly to a Google Cloud Project for billing and higher rate limits (as covered in Chapter 1), **Chapters 3 through 5 standardize on the concise 3-line AI Studio initialization** (`genai.Client(api_key=userdata.get("GEMINI_API_KEY"))`) so every notebook stays minimal and focused on core SDK capabilities.
-- **Drop-In Compatibility for Vertex AI Users**: Every single code cell in Chapters 3–5—covering Streaming, `ThinkingConfig`, Multimodal Inputs, Pydantic Structured Outputs, Multi-turn Chat, and Function Calling—**runs unchanged on Vertex AI** simply by replacing that 3-line `client` initialization with this chapter's `vertexai=True` setup.
+- **Concise Default Initialization in Chapters 3–5**: Because Google AI Studio API keys can be linked directly to a Google Cloud Project for billing and higher rate limits (as covered in Chapter 1), **Chapters 3 through 5 standardize on the concise AI Studio initialization** (`genai.Client(api_key=userdata.get("GEMINI_API_KEY"))`) so every notebook stays minimal and focused on core SDK capabilities.
+- **Drop-In Compatibility for Vertex AI Users**: Every single code cell in Chapters 3–5—covering Streaming, `ThinkingConfig`, Multimodal Inputs, Pydantic Structured Outputs, Multi-turn Chat, and Function Calling—**runs unchanged on Vertex AI** simply by replacing that `client` initialization with this chapter's `vertexai=True` (`location="global"`) setup.

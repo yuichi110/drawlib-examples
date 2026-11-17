@@ -1,6 +1,6 @@
 # 01. Hello World with Google AI Studio
 
-This cookbook uses `[jupyter].setup_packages` in `drawlib.toml` to automatically prepend `!pip install -q drawlib google-genai pydantic` at the top of every generated notebook, so zero manual package installation is required in Google Colab. To run your first Gemini call safely without hardcoding credentials in Git, generate an API key (`GEMINI_API_KEY`) in **Google AI Studio**—backed by a **Google Cloud Project**—and store it in Google Colab's **Secrets** sidebar (`🔑` icon on the left pane with **Notebook access** toggled ON).
+This cookbook uses `[jupyter].setup_packages` in `drawlib.toml` to automatically prepend `!pip install -q google-genai` at the top of every generated notebook, ensuring fast startup in Google Colab with zero manual package installation. To run your first Gemini call safely without hardcoding credentials in Git, generate an API key (`GEMINI_API_KEY`) in **Google AI Studio**—backed by a **Google Cloud Project**—and store it in Google Colab's **Secrets** sidebar (`🔑` icon on the left pane with **Notebook access** toggled ON).
 
 ```drawlib align=center code=fold file=ch01_aistudio_workflow.png caption="Figure 1-1: End-to-End Google AI Studio & Colab Secrets Setup Workflow"
 from drawlib.canvas import save, setup
@@ -69,14 +69,14 @@ ai.gemini((cxs[2], 41.5), width=6.4, style=Styles.Primary)
 text((cxs[2], 32.3), "genai.Client", style=Styles.WhiteBold.patch(text_size=11.2))
 text((cxs[2], 25.5), "userdata.get(...)\napi_key=api_key", style=Styles.White.patch(text_size=10.0))
 
-# Stage 4: Gemini 2.5 Flash Response & Usage Metadata
+# Stage 4: Gemini 3.8 Flash Response & Usage Metadata
 rectangle((cxs[3], cy), width=card_w, height=card_h, style=soft_card)
 rectangle((cxs[3], 50.2), width=14.0, height=4.4, style=Styles.White.patch(shape_r=1.2, shape_line_color=Colors.Gray3))
 text((cxs[3], 50.2), "STEP 4", style=Styles.PrimaryBold.patch(text_size=10.0))
 rectangle((cxs[3], 41.5), width=9.2, height=9.2, style=Styles.White.patch(shape_r=2.0, shape_line_color=Colors.Gray3))
 phosphor.sparkle((cxs[3], 41.5), width=6.0, style=Styles.PrimaryBold)
 text((cxs[3], 32.3), "Flash Response", style=Styles.DarkBold.patch(text_size=11.0))
-text((cxs[3], 25.5), "gemini-2.5-flash\ntext + usage_metadata", style=Styles.Dark.patch(text_size=10.0))
+text((cxs[3], 25.5), "gemini-3.8-flash\ntext + usage_metadata", style=Styles.Dark.patch(text_size=10.0))
 
 # Inter-stage orthogonal connectors (7.5-unit gap between card edges)
 for idx in range(3):
@@ -91,10 +91,10 @@ rectangle(
     height=8.4,
     style=Styles.White.patch(shape_r=1.8, shape_line_color=Colors.Gray4),
 )
-phosphor.terminal_window((15.0, 12.2), width=4.6, style=Styles.PrimaryBold)
+phosphor.terminal_window((34.0, 12.2), width=4.6, style=Styles.PrimaryBold)
 text(
-    (79.0, 12.2),
-    "Auto-Prepended Setup Cell:  !pip install -q drawlib google-genai pydantic   •   Zero Keys in Git",
+    (80.0, 12.2),
+    "Auto-Prepended Setup Cell:  !pip install -q google-genai   •   Zero Keys in Git",
     style=Styles.DarkBold.patch(text_size=10.2),
 )
 
@@ -107,9 +107,11 @@ Before running the code cell below in Google Colab, complete this one-time secre
 
 1. Open **Google AI Studio** (`aistudio.google.com/apikey`), click **Create API key**, and select an existing or new **Google Cloud Project**.
 2. In Google Colab, click the **Secrets (`🔑`)** icon in the left sidebar, add a secret named `GEMINI_API_KEY`, paste your key value, and toggle **Notebook access** ON.
-3. Read the key at runtime via `userdata.get("GEMINI_API_KEY")` and pass it directly to `genai.Client`:
+3. Define `MODEL = "gemini-3.8-flash"` at the top of the cell so you can easily customize the target model, then read `GEMINI_API_KEY` via `userdata.get(...)` and pass it to `genai.Client`:
 
 ```python
+MODEL = "gemini-3.8-flash"
+
 from google.colab import userdata
 from google import genai
 
@@ -117,8 +119,8 @@ api_key = userdata.get("GEMINI_API_KEY")
 client = genai.Client(api_key=api_key)
 
 response = client.models.generate_content(
-    model="gemini-2.5-flash",
-    contents="Explain in two sentences why unified SDKs improve developer productivity.",
+    model=MODEL,
+    contents="Hello!",
 )
 print(response.text)
 ```
@@ -235,71 +237,34 @@ paid_cards.draw(r_xy, width=r_w, height=r_h)
 save()
 ```
 
-## 3. `GenerateContentConfig` & Inline Token Visualization with Drawlib
+## 3. `GenerateContentConfig` & Token Usage Metadata
 
-To control model persona, determinism, and output formatting, pass a `types.GenerateContentConfig` object to `generate_content`. Every response also attaches `response.usage_metadata`, exposing exact token counts across your input prompt (`prompt_token_count`), internal reasoning (`thoughts_token_count`), and final answer (`candidates_token_count`):
+To control model behavior and determinism, pass a `types.GenerateContentConfig` object (such as `system_instruction` and `temperature`) to `generate_content`. Every response also attaches `response.usage_metadata`, exposing exact token counts across your input prompt (`prompt_token_count`), internal reasoning (`thoughts_token_count`), and final answer (`candidates_token_count`):
 
 ```python
 from google.genai import types
 
 config = types.GenerateContentConfig(
-    system_instruction="You are a concise cloud architect. Answer in three short bullet points.",
+    system_instruction="Answer in one short sentence.",
     temperature=0.2,
 )
 
 response = client.models.generate_content(
-    model="gemini-2.5-flash",
-    contents="List three security best practices for managing API keys in notebooks.",
+    model=MODEL,
+    contents="What is Python?",
     config=config,
 )
 print(response.text)
 
 usage = response.usage_metadata
-prompt_tokens = usage.prompt_token_count or 0
-thoughts_tokens = usage.thoughts_token_count or 0
-candidates_tokens = usage.candidates_token_count or 0
-
-print(f"Prompt tokens:     {prompt_tokens}")
-print(f"Thoughts tokens:   {thoughts_tokens}")
-print(f"Candidates tokens: {candidates_tokens}")
+print(f"Prompt tokens:     {usage.prompt_token_count or 0}")
+print(f"Thoughts tokens:   {usage.thoughts_token_count or 0}")
+print(f"Candidates tokens: {usage.candidates_token_count or 0}")
 ```
 
-Because `drawlib` is pre-installed in the notebook alongside `google-genai`, you can render those live `usage_metadata` metrics directly inside the next Colab output cell using `setup(..., cwd=True)`, `BarChart`, and `show()`:
-
-```python
-from drawlib.canvas import setup, show
-from drawlib.charts.bar import BarChart
-from drawlib.styles import Styles
-
-setup(width=110, height=52, cwd=True)
-
-chart = BarChart(
-    axis_line_style=Styles.MutedDashed,
-    categories=["Prompt", "Thoughts", "Candidates"],
-    width=96.0,
-    height=40.0,
-    title="Gemini 2.5 Flash — Live Token Usage Breakdown",
-    title_style=Styles.DarkBold.patch(text_size=12.0),
-    background_style=Styles.Neutral.patch(shape_r=2.0),
-    bar_width_ratio=0.48,
-    bar_r=0.8,
-    axis_text_style=Styles.Dark.patch(text_size=10.5),
-    grid_style=Styles.MutedThin,
-    value_text_style=Styles.DarkBold.patch(text_size=10.5),
-    value_format="{:.0f}",
-)
-chart.add_series(
-    "Tokens",
-    [float(prompt_tokens), float(thoughts_tokens), float(candidates_tokens)],
-    style=Styles.PrimaryFlat,
-)
-chart.configure_y_axis(min_value=0.0)
-chart.draw(xy=(7.0, 6.0))
-
-show()
-```
+On `gemini-3.8-flash`, internal reasoning tokens are reported separately under `thoughts_token_count`, making it easy to monitor both prompt/output size and thinking overhead from a single `usage_metadata` object.
 
 ### Key Takeaways & Next Step
 
-- **Zero-Friction Setup**: Storing `GEMINI_API_KEY` in Colab Secrets keeps notebooks clean, shareable, and safe to commit to Git while linking directly to your Google Cloud Project's Free or Paid Tier.
-- **Up Next in Chapter 02**: Learn how to switch `genai.Client` to **Google Cloud Vertex AI** (`vertexai=True`) using keyless IAM authentication while keeping 100% of your downstream Gemini code unchanged.
+- **Zero-Friction Setup**: Auto-installing only `google-genai` and storing `GEMINI_API_KEY` in Colab Secrets keeps notebooks fast to launch, shareable, and safe to commit to Git across both Free and Paid Tiers.
+- **Up Next in Chapter 02**: Learn how to switch `genai.Client` to **Google Cloud Vertex AI** (`vertexai=True`) using keyless IAM authentication while keeping 100% of your downstream `gemini-3.8-flash` code unchanged.

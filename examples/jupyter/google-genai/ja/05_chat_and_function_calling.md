@@ -26,7 +26,7 @@ phosphor.chat_circle_text((10.0, 56.8), width=3.8, style=Styles.DarkBold)
 text((25.0, 56.8), "1. ユーザー質問", style=Styles.DarkBold.patch(text_size=10.5))
 text(
     (23.5, 47.2),
-    "リージョン遅延を比較し\n東京向け構成を推奨して",
+    "2リージョンの遅延を\n比較して教えて",
     style=Styles.Dark.patch(text_size=10.0),
 )
 
@@ -43,7 +43,7 @@ text(
 # 3. Gemini FunctionCall (PrimaryNeutral)
 rectangle((127.0, 51.0), width=38.0, height=21.0, style=Styles.PrimaryNeutral.patch(shape_r=2.0))
 ai.gemini((112.5, 56.8), width=3.8, style=Styles.Primary)
-text((128.5, 56.8), "3. Gemini 2.5", style=Styles.DarkBold.patch(text_size=10.5))
+text((128.5, 56.8), "3. Gemini 3.8", style=Styles.DarkBold.patch(text_size=10.5))
 text(
     (127.0, 47.2),
     'FunctionCall 発行:\nregion="asia-northeast1"',
@@ -67,7 +67,7 @@ ai.gemini((60.5, 22.3), width=3.8, style=Styles.Primary)
 text((77.2, 22.3), "5. FunctionResponse", style=Styles.DarkBold.patch(text_size=10.5))
 text(
     (75.0, 12.7),
-    "SDK が JSON 実行結果を\nGemini 2.5 へ自動返送",
+    "SDK が JSON 実行結果を\nGemini 3.8 へ自動返送",
     style=Styles.Dark.patch(text_size=10.0),
 )
 
@@ -77,7 +77,7 @@ phosphor.check_circle((10.0, 22.3), width=3.8, style=Styles.SuccessBold)
 text((25.0, 22.3), "6. 最終回答の生成", style=Styles.DarkBold.patch(text_size=10.5))
 text(
     (23.5, 12.7),
-    "asia-northeast1 を推奨\n(p50: 14.2 ms 実測根拠)",
+    "asia-northeast1 が最速\n(p50: 14.2 ms 実測根拠)",
     style=Styles.Dark.patch(text_size=10.0),
 )
 
@@ -106,18 +106,20 @@ save()
 
 ---
 
-## 1. 3行のクライアント初期化とマルチターン会話（`client.chats.create`）
+## 1. クライアント初期化とマルチターン会話（`client.chats.create`）
 
-Google Colab のシークレット（`userdata.get`）から `GEMINI_API_KEY` を読み込み、共通の `genai.Client` を3行で初期化します。
+セルの先頭で `MODEL = "gemini-3.8-flash"` を定義し、Google Colab のシークレット（`userdata.get`）から `GEMINI_API_KEY` を読み込んで共通の `genai.Client` を初期化します。
 
 ```python
+MODEL = "gemini-3.8-flash"
+
 from google.colab import userdata
 from google import genai
 
 client = genai.Client(api_key=userdata.get("GEMINI_API_KEY"))
 ```
 
-単発の `client.models.generate_content()` とは異なり、**`client.chats.create()`** はセッション内部で `list[types.Content]` 形式の会話履歴を保持します。`chat.send_message()` を呼ぶたびに `Content(role="user")` とモデルの応答 `Content(role="model")`（および途中のツール呼び出し履歴）が自動的に追記されます。さらにマルチターン会話が長くなると、毎ターン送信される共通プレフィックスに対して Gemini 2.5 の **暗黙的コンテキストキャッシュ（Implicit Context Caching）** が追加設定なしで自動的に働き、レイテンシ（TTFT）と入力トークンコストが抑えられます。
+単発の `client.models.generate_content()` とは異なり、**`client.chats.create()`** はセッション内部で `list[types.Content]` 形式の会話履歴を保持します。`chat.send_message()` を呼ぶたびに `Content(role="user")` とモデルの応答 `Content(role="model")`（および途中のツール呼び出し履歴）が自動的に追記されます。さらにマルチターン会話が長くなると、毎ターン送信される共通プレフィックスに対して Gemini 3.8 の **暗黙的コンテキストキャッシュ（Implicit Context Caching）** が追加設定なしで自動的に働き、レイテンシ（TTFT）と入力トークンコストが抑えられます。
 
 ```drawlib align=center code=fold file=ch05_chat_state_context_ja.png caption="図5-2: chats.create() による会話履歴の蓄積とツール連携セッションの構造"
 from drawlib.canvas import save, setup
@@ -140,12 +142,12 @@ text(
 rectangle((25.0, 51.0), width=38.0, height=14.0, style=Styles.Neutral.patch(shape_r=2.0))
 phosphor.chat_circle((10.0, 53.8), width=3.5, style=Styles.DarkBold)
 text((26.5, 53.8), "Turn 1: send_message()", style=Styles.DarkBold.patch(text_size=10.2))
-text((25.0, 47.6), "ゲートウェイ設計の初回相談", style=Styles.Dark.patch(text_size=10.0))
+text((25.0, 47.6), "初回のユーザー発言を送信", style=Styles.Dark.patch(text_size=10.0))
 
 rectangle((25.0, 32.0), width=38.0, height=14.0, style=Styles.Neutral.patch(shape_r=2.0))
 phosphor.chats_circle((10.0, 34.8), width=3.5, style=Styles.DarkBold)
 text((26.5, 34.8), "Turn 2: send_message()", style=Styles.DarkBold.patch(text_size=10.2))
-text((25.0, 28.6), "タイムアウト設計の深掘り", style=Styles.Dark.patch(text_size=10.0))
+text((25.0, 28.6), "文脈を踏まえた追加質問", style=Styles.Dark.patch(text_size=10.0))
 
 rectangle((25.0, 13.0), width=38.0, height=14.0, style=Styles.PrimaryFlat.patch(shape_r=2.0))
 phosphor.wrench((10.0, 15.8), width=3.5, style=Styles.WhiteBold)
@@ -171,10 +173,10 @@ text((80.0, 22.5), '4. Content(role="model")', style=Styles.Dark.patch(text_size
 rectangle((80.0, 13.0), width=42.0, height=7.6, style=Styles.SecondaryNeutral.patch(shape_r=1.5))
 text((80.0, 13.0), "5. FunctionCall + JSON 応答", style=Styles.DarkBold.patch(text_size=10.0))
 
-# --- Right Column: Gemini 2.5 & Implicit Caching (x in [115, 146], cx = 130.5) ---
+# --- Right Column: Gemini 3.8 & Implicit Caching (x in [115, 146], cx = 130.5) ---
 rectangle((130.5, 48.5), width=31.0, height=25.0, style=Styles.PrimaryNeutral.patch(shape_r=2.0))
 ai.gemini((130.5, 56.2), width=4.2, style=Styles.Primary)
-text((130.5, 50.2), "Gemini 2.5 API", style=Styles.DarkBold.patch(text_size=10.5))
+text((130.5, 50.2), "Gemini 3.8 API", style=Styles.DarkBold.patch(text_size=10.5))
 text(
     (130.5, 42.0),
     "毎ターン全履歴の\nContent[] を送信",
@@ -201,36 +203,32 @@ line((104.0, 18.5), (115.0, 18.5), arrow_head="->", style=Styles.SuccessBold)
 save()
 ```
 
-`gemini-2.5-flash` でチャットセッションを開始し、2回連続でフォローアップ質問を送信したあと、`chat.get_history()` に蓄積された `user` と `model` のターンを確認してみましょう。
+`MODEL`（`gemini-3.8-flash`）でチャットセッションを作成し、短い2ターンのメッセージを送信したあと、`chat.get_history()` に蓄積された `user` と `model` のターンを確認してみましょう。
 
 ```python
-chat = client.chats.create(model="gemini-2.5-flash")
+chat = client.chats.create(model=MODEL)
 
-reply_1 = chat.send_message(
-    "マルチリージョン構成の Cloud Run API ゲートウェイを設計中です。重要なポイントを2点に絞って教えてください。"
-)
-print("Model (Turn 1):\n", reply_1.text)
+reply_1 = chat.send_message("私の好きなプログラミング言語はPythonです。")
+print("Turn 1:", reply_1.text)
 
-reply_2 = chat.send_message(
-    "その2点を踏まえると、クライアント側の HTTP タイムアウトとリトライ戦略はどう設定すべきですか？"
-)
-print("\nModel (Turn 2):\n", reply_2.text)
+reply_2 = chat.send_message("私の好きな言語は何ですか？1文で答えてください。")
+print("Turn 2:", reply_2.text)
 
 print("\n--- 蓄積されたセッション履歴 ---")
 for idx, turn in enumerate(chat.get_history(), start=1):
     preview = " ".join(
         p.text.strip() for p in (turn.parts or []) if p.text and not p.thought
     )
-    print(f"[{idx}] role={turn.role:<5} | {preview[:85]}...")
+    print(f"[{idx}] role={turn.role:<5} | {preview[:80]}")
 ```
 
 ---
 
-## 2. Python 関数の自動 Function Calling と Drawlib インライン可視化
+## 2. Python 関数の自動 Function Calling とツール付きチャット
 
 外部の監視メトリクスや社内 API を Gemini に連携させるには、型ヒント（`region: str -> dict[str, float]`）と **Google スタイルの docstring**（`Args:` / `Returns:`）を記述した通常の Python 関数を **`types.GenerateContentConfig(tools=[...])`** にそのまま渡します。SDK が関数シグネチャから JSON スキーマを自動生成します。
 
-複数リージョンの比較を求められた Gemini が `FunctionCall` を発行すると、`genai.Client` が各リージョンに対してローカルの `get_region_latency()` を自動実行し、`FunctionResponse` をモデルへ返送して実測値に基づく推奨構成をまとめ上げます。
+まずは単発の `client.models.generate_content(model=MODEL, ...)` で2つのリージョンのレイテンシを比較してみましょう。`genai.Client` が各リージョンに対してローカルの `get_region_latency()` を自動実行し、`FunctionResponse` をモデルへ返送して実測値に基づく比較結果を出力します。
 
 ```python
 from google.genai import types
@@ -254,75 +252,42 @@ def get_region_latency(region: str) -> dict[str, float]:
     return REGION_LATENCY_MS.get(region, {"p50_ms": -1.0, "p95_ms": -1.0})
 
 
+response = client.models.generate_content(
+    model=MODEL,
+    contents="asia-northeast1 と us-central1 のレイテンシを比較してください。",
+    config=types.GenerateContentConfig(
+        tools=[get_region_latency],
+        temperature=0.1,
+    ),
+)
+print(response.text)
+```
+
+続いて、これまでの2つの機能を組み合わせて **`client.chats.create(model=MODEL, config=...)`** に `tools=[get_region_latency]` を渡します。フォローアップ質問を重ねても過去の文脈を維持したまま必要に応じて追加のツール呼び出しを実行し、すべての `FunctionCall` と `FunctionResponse` が `tool_chat.get_history()` に記録されます。
+
+```python
 tool_chat = client.chats.create(
-    model="gemini-2.5-flash",
+    model=MODEL,
     config=types.GenerateContentConfig(
         tools=[get_region_latency],
         temperature=0.1,
     ),
 )
 
-recommendation = tool_chat.send_message(
-    "asia-northeast1、us-central1、europe-west1 の p50 / p95 レイテンシを取得して比較し、"
-    "東京のユーザー向けに最適なプライマリおよびフェイルオーバー先リージョンを推奨してください。"
-)
-print(recommendation.text)
+turn_1 = tool_chat.send_message("asia-northeast1 と us-central1 のレイテンシを確認してください。")
+print("Turn 1:\n", turn_1.text)
+
+turn_2 = tool_chat.send_message("europe-west1 も確認して、最速のリージョンを1文で答えてください。")
+print("\nTurn 2:\n", turn_2.text)
 
 print("\n--- 記録されたツール呼び出しトレース ---")
 for turn in tool_chat.get_history():
     for part in turn.parts or []:
         if part.function_call:
-            print(f"-> FunctionCall: {part.function_call.name}({dict(part.function_call.args or {})})")
+            fc = part.function_call
+            print(f"-> FunctionCall: {fc.name}({dict(fc.args or {})})")
         elif part.function_response:
             print(f"<- FunctionResponse: {part.function_response.response}")
 ```
 
-最後に、全5章のクックブックの締めくくりとして、エージェントがツール経由で取得したマルチリージョンの `p50` / `p95` レイテンシデータを、`setup(..., cwd=True)` と **`BarChart`** + `show()` を使ってノートブックの出力セル内に直接チャートとして可視化します。
-
-```python
-from drawlib.canvas import clear, setup, show
-from drawlib.charts.bar import BarChart
-from drawlib.styles import Styles
-from drawlib.text import text
-
-clear()
-setup(width=116, height=56, cwd=True)
-
-regions = list(REGION_LATENCY_MS.keys())
-p50_ms = [get_region_latency(r)["p50_ms"] for r in regions]
-p95_ms = [get_region_latency(r)["p95_ms"] for r in regions]
-
-text(
-    (58.0, 50.8),
-    "Gemini Function Calling で取得したリージョン別 API レイテンシ比較",
-    style=Styles.DarkBold.patch(text_size=11.5),
-)
-
-chart = BarChart(
-    axis_line_style=Styles.MutedDashed,
-    categories=regions,
-    width=96.0,
-    height=34.0,
-    orientation="vertical",
-    bar_mode="group",
-    bar_width_ratio=0.62,
-    bar_r=0.8,
-    axis_text_style=Styles.Dark.patch(text_size=10.0),
-    grid_style=Styles.MutedThin,
-    value_text_style=Styles.DarkBold.patch(text_size=10.0),
-    value_format="{:.1f} ms",
-)
-chart.add_series("p50 中央値 (ms)", p50_ms, style=Styles.PrimaryFlat)
-chart.add_series("p95 テール遅延 (ms)", p95_ms, style=Styles.SecondaryNeutral)
-chart.configure_y_axis(min_value=0.0, max_value=100.0, tick_step=25.0, unit=" ms")
-chart.draw(xy=(12.0, 6.0))
-chart.draw_legend(
-    xy=(34.5, 44.5),
-    text_style=Styles.Dark.patch(text_size=10.0),
-    orientation="horizontal",
-)
-
-show()
-```
-
-> **まとめ**: `client.chats.create()` によるマルチターン文脈管理、型付き Python 関数を `tools=[fn]` に渡すだけの自動 Function Calling、そして `setup(..., cwd=True)` + `show()` による Drawlib チャート描画を組み合わせることで、データ取得から意思決定・可視化までを1つのノートブック内でシームレスに完結できます。
+> **まとめ**: ノートブック先頭で `MODEL = "gemini-3.8-flash"` を定義し、マルチターン履歴を自動管理する `client.chats.create(model=MODEL)` と、型付き Python 関数を `tools=[fn]` に渡すだけの自動 Function Calling を組み合わせることで、単発の `generate_content()` から複数ターンのツール付きチャットまでボイラープレートなしで実装できます。

@@ -46,18 +46,18 @@
     
     
     
-    <meta name="description" content="本クックブックでは drawlib.toml の [jupyter].setup_packages 設定により、生成されるすべてのノートブック先頭に !pip install -q drawlib google-genai pydantic が自動挿入されるため、Google Colab…">
+    <meta name="description" content="本クックブックでは drawlib.toml の [jupyter].setup_packages 設定により、生成されるすべてのノートブック先頭に !pip install -q google-genai のみが自動挿入されるため、Google Colab 上で高速に起動でき手動パッケージ追加も不要です。Git…">
     <link rel="canonical" href="https://examples.drawlib.com/google-genai/ja/01_ai_studio_quickstart.html">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="Google GenAI SDK Cookbook">
     <meta property="og:title" content="01. Google AI Studio で始める Hello World — Google GenAI SDK Cookbook">
-    <meta property="og:description" content="本クックブックでは drawlib.toml の [jupyter].setup_packages 設定により、生成されるすべてのノートブック先頭に !pip install -q drawlib google-genai pydantic が自動挿入されるため、Google Colab…">
+    <meta property="og:description" content="本クックブックでは drawlib.toml の [jupyter].setup_packages 設定により、生成されるすべてのノートブック先頭に !pip install -q google-genai のみが自動挿入されるため、Google Colab 上で高速に起動でき手動パッケージ追加も不要です。Git…">
     <meta property="og:url" content="https://examples.drawlib.com/google-genai/ja/01_ai_studio_quickstart.html">
     <meta property="og:locale" content="ja_JP">
     <meta property="og:locale:alternate" content="en_US">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="01. Google AI Studio で始める Hello World — Google GenAI SDK Cookbook">
-    <meta name="twitter:description" content="本クックブックでは drawlib.toml の [jupyter].setup_packages 設定により、生成されるすべてのノートブック先頭に !pip install -q drawlib google-genai pydantic が自動挿入されるため、Google Colab…">
+    <meta name="twitter:description" content="本クックブックでは drawlib.toml の [jupyter].setup_packages 設定により、生成されるすべてのノートブック先頭に !pip install -q google-genai のみが自動挿入されるため、Google Colab 上で高速に起動でき手動パッケージ追加も不要です。Git…">
     
     
     <link rel="icon" type="image/png" href="../_assets/favicon.png">
@@ -174,7 +174,7 @@
   </div>
   <div class="nb-cell nb-markdown-cell">
 <h1>01. Google AI Studio で始める Hello World</h1>
-<p>本クックブックでは <code>drawlib.toml</code> の <code>[jupyter].setup_packages</code> 設定により、生成されるすべてのノートブック先頭に <code>!pip install -q drawlib google-genai pydantic</code> が自動挿入されるため、Google Colab 上での手動パッケージ追加は不要です。Git リポジトリへ認証情報をハードコードせずに安全に Gemini を呼び出すため、<strong>Google Cloud プロジェクト</strong>に紐付いた API キー（<code>GEMINI_API_KEY</code>）を <strong>Google AI Studio</strong> で発行し、Colab 左サイドバーの <strong>シークレット（<code>🔑</code> アイコン）</strong> に保存して <strong>「ノートブックからのアクセス（Notebook access）」</strong> を ON に設定します。</p>
+<p>本クックブックでは <code>drawlib.toml</code> の <code>[jupyter].setup_packages</code> 設定により、生成されるすべてのノートブック先頭に <code>!pip install -q google-genai</code> のみが自動挿入されるため、Google Colab 上で高速に起動でき手動パッケージ追加も不要です。Git リポジトリへ認証情報をハードコードせずに安全に Gemini を呼び出すため、<strong>Google Cloud プロジェクト</strong>に紐付いた API キー（<code>GEMINI_API_KEY</code>）を <strong>Google AI Studio</strong> で発行し、Colab 左サイドバーの <strong>シークレット（<code>🔑</code> アイコン）</strong> に保存して <strong>「ノートブックからのアクセス（Notebook access）」</strong> を ON に設定します。</p>
 
 <figure class="drawlib-figure align-center">
   <img src="../images/01_ai_studio_quickstart/ch01_aistudio_workflow_ja.png" alt="図1-1: Google AI Studio APIキー発行と Colab シークレットによる最短実行フロー" loading="lazy">
@@ -248,14 +248,14 @@
 <span class="n">text</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="mf">32.3</span><span class="p">),</span> <span class="s2">"genai.Client"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">WhiteBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">11.2</span><span class="p">))</span>
 <span class="n">text</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="mf">25.5</span><span class="p">),</span> <span class="s2">"userdata.get(...)</span><span class="se">\n</span><span class="s2">api_key=api_key"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">White</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">))</span>
 
-<span class="c1"># Stage 4: gemini-2.5-flash 推論レスポンス</span>
+<span class="c1"># Stage 4: gemini-3.8-flash 推論レスポンス</span>
 <span class="n">rectangle</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">cy</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="n">card_w</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="n">card_h</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">soft_card</span><span class="p">)</span>
 <span class="n">rectangle</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="mf">50.2</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">14.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">4.4</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">White</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">1.2</span><span class="p">,</span> <span class="n">shape_line_color</span><span class="o">=</span><span class="n">Colors</span><span class="o">.</span><span class="n">Gray3</span><span class="p">))</span>
 <span class="n">text</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="mf">50.2</span><span class="p">),</span> <span class="s2">"STEP 4"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">))</span>
 <span class="n">rectangle</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="mf">41.5</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">9.2</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">9.2</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">White</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">shape_line_color</span><span class="o">=</span><span class="n">Colors</span><span class="o">.</span><span class="n">Gray3</span><span class="p">))</span>
 <span class="n">phosphor</span><span class="o">.</span><span class="n">sparkle</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="mf">41.5</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">6.0</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryBold</span><span class="p">)</span>
 <span class="n">text</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="mf">32.3</span><span class="p">),</span> <span class="s2">"推論レスポンス"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">11.0</span><span class="p">))</span>
-<span class="n">text</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="mf">25.5</span><span class="p">),</span> <span class="s2">"gemini-2.5-flash</span><span class="se">\n</span><span class="s2">text + usage_metadata"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Dark</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">))</span>
+<span class="n">text</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="mf">25.5</span><span class="p">),</span> <span class="s2">"gemini-3.8-flash</span><span class="se">\n</span><span class="s2">text + usage_metadata"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Dark</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">))</span>
 
 <span class="c1"># ステージ間の矢印（カード間隔 7.5 ユニット）</span>
 <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
@@ -270,10 +270,10 @@
     <span class="n">height</span><span class="o">=</span><span class="mf">8.4</span><span class="p">,</span>
     <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">White</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">1.8</span><span class="p">,</span> <span class="n">shape_line_color</span><span class="o">=</span><span class="n">Colors</span><span class="o">.</span><span class="n">Gray4</span><span class="p">),</span>
 <span class="p">)</span>
-<span class="n">phosphor</span><span class="o">.</span><span class="n">terminal_window</span><span class="p">((</span><span class="mf">15.0</span><span class="p">,</span> <span class="mf">12.2</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">4.6</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryBold</span><span class="p">)</span>
+<span class="n">phosphor</span><span class="o">.</span><span class="n">terminal_window</span><span class="p">((</span><span class="mf">34.5</span><span class="p">,</span> <span class="mf">12.2</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">4.6</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryBold</span><span class="p">)</span>
 <span class="n">text</span><span class="p">(</span>
-    <span class="p">(</span><span class="mf">79.0</span><span class="p">,</span> <span class="mf">12.2</span><span class="p">),</span>
-    <span class="s2">"自動挿入セットアップセル:  !pip install -q drawlib google-genai pydantic   •   Git への鍵混入ゼロ"</span><span class="p">,</span>
+    <span class="p">(</span><span class="mf">80.0</span><span class="p">,</span> <span class="mf">12.2</span><span class="p">),</span>
+    <span class="s2">"自動挿入セットアップセル:  !pip install -q google-genai   •   Git への鍵混入ゼロ"</span><span class="p">,</span>
     <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.2</span><span class="p">),</span>
 <span class="p">)</span>
 
@@ -285,7 +285,7 @@
 <ol>
 <li><strong>Google AI Studio</strong>（<code>aistudio.google.com/apikey</code>）を開き、<strong>「API キーを作成（Create API key）」</strong> から既存または新規の <strong>Google Cloud プロジェクト</strong>を選択してキーを発行します。</li>
 <li>Google Colab 左サイドバーの <strong>シークレット（<code>🔑</code>）</strong> アイコンを開き、名前を <code>GEMINI_API_KEY</code> としてキーを貼り付け、<strong>「ノートブックからのアクセス」</strong> トグルを ON にします。</li>
-<li>実行時に <code>userdata.get(&quot;GEMINI_API_KEY&quot;)</code> でキーを読み込み、<code>genai.Client</code> を初期化します。</li>
+<li>セル先頭で <code>MODEL = &quot;gemini-3.8-flash&quot;</code> を定義して利用モデルを分かりやすく指定し、<code>userdata.get(&quot;GEMINI_API_KEY&quot;)</code> で読み込んだキーを <code>genai.Client</code> に渡します。</li>
 </ol>
 
   </div>
@@ -293,7 +293,7 @@
     <div class="nb-input">
       <div class="nb-prompt nb-in-prompt">In [setup]:</div>
       <div class="nb-code-area">
-        <pre><code class="language-bash">!pip<span class="w"> </span>install<span class="w"> </span>-q<span class="w"> </span>drawlib<span class="w"> </span>google-genai<span class="w"> </span>pydantic
+        <pre><code class="language-bash">!pip<span class="w"> </span>install<span class="w"> </span>-q<span class="w"> </span>google-genai
 </code></pre>
       </div>
     </div>
@@ -302,15 +302,17 @@
     <div class="nb-input">
       <div class="nb-prompt nb-in-prompt">In [1]:</div>
       <div class="nb-code-area">
-        <pre><code class="language-python"><span class="kn">from</span><span class="w"> </span><span class="nn">google.colab</span><span class="w"> </span><span class="kn">import</span> <span class="n">userdata</span>
+        <pre><code class="language-python"><span class="n">MODEL</span> <span class="o">=</span> <span class="s2">"gemini-3.8-flash"</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">google.colab</span><span class="w"> </span><span class="kn">import</span> <span class="n">userdata</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">google</span><span class="w"> </span><span class="kn">import</span> <span class="n">genai</span>
 
 <span class="n">api_key</span> <span class="o">=</span> <span class="n">userdata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"GEMINI_API_KEY"</span><span class="p">)</span>
 <span class="n">client</span> <span class="o">=</span> <span class="n">genai</span><span class="o">.</span><span class="n">Client</span><span class="p">(</span><span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span><span class="p">)</span>
 
 <span class="n">response</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">generate_content</span><span class="p">(</span>
-    <span class="n">model</span><span class="o">=</span><span class="s2">"gemini-2.5-flash"</span><span class="p">,</span>
-    <span class="n">contents</span><span class="o">=</span><span class="s2">"統一された SDK が開発者の生産性を高める理由を2文で説明してください。"</span><span class="p">,</span>
+    <span class="n">model</span><span class="o">=</span><span class="n">MODEL</span><span class="p">,</span>
+    <span class="n">contents</span><span class="o">=</span><span class="s2">"こんにちは！"</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
 </code></pre>
@@ -434,8 +436,8 @@
 <span class="n">save</span><span class="p">()</span>
 </code></pre>
 </details>
-<h2>3. <code>GenerateContentConfig</code> と Drawlib によるトークン消費量の可視化</h2>
-<p>モデルの役割設定（システムプロンプト）や出力の再現性（<code>temperature</code>）を制御するには、<code>types.GenerateContentConfig</code> を <code>generate_content</code> に渡します。また、レスポンスの <code>response.usage_metadata</code> からは、入力プロンプト（<code>prompt_token_count</code>）、内部思考（<code>thoughts_token_count</code>）、最終回答（<code>candidates_token_count</code>）の正確なトークン数を取得できます。</p>
+<h2>3. <code>GenerateContentConfig</code> とトークン消費量（<code>usage_metadata</code>）の確認</h2>
+<p>モデルの振る舞い（<code>system_instruction</code>）や出力の再現性（<code>temperature</code>）を制御するには、<code>types.GenerateContentConfig</code> を <code>generate_content</code> に渡します。また、レスポンスの <code>response.usage_metadata</code> からは、入力プロンプト（<code>prompt_token_count</code>）、内部思考（<code>thoughts_token_count</code>）、最終回答（<code>candidates_token_count</code>）の正確なトークン数を取得できます。</p>
 
   </div>
   <div class="nb-cell nb-code-cell">
@@ -445,76 +447,31 @@
         <pre><code class="language-python"><span class="kn">from</span><span class="w"> </span><span class="nn">google.genai</span><span class="w"> </span><span class="kn">import</span> <span class="n">types</span>
 
 <span class="n">config</span> <span class="o">=</span> <span class="n">types</span><span class="o">.</span><span class="n">GenerateContentConfig</span><span class="p">(</span>
-    <span class="n">system_instruction</span><span class="o">=</span><span class="s2">"あなたは簡潔に回答するクラウドアーキテクトです。短い箇条書き3点で答えてください。"</span><span class="p">,</span>
+    <span class="n">system_instruction</span><span class="o">=</span><span class="s2">"1つの短い文で答えてください。"</span><span class="p">,</span>
     <span class="n">temperature</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="n">response</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">generate_content</span><span class="p">(</span>
-    <span class="n">model</span><span class="o">=</span><span class="s2">"gemini-2.5-flash"</span><span class="p">,</span>
-    <span class="n">contents</span><span class="o">=</span><span class="s2">"ノートブックで API キーを安全に管理するベストプラクティスを3つ挙げてください。"</span><span class="p">,</span>
+    <span class="n">model</span><span class="o">=</span><span class="n">MODEL</span><span class="p">,</span>
+    <span class="n">contents</span><span class="o">=</span><span class="s2">"Pythonとは何ですか？"</span><span class="p">,</span>
     <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
 
 <span class="n">usage</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">usage_metadata</span>
-<span class="n">prompt_tokens</span> <span class="o">=</span> <span class="n">usage</span><span class="o">.</span><span class="n">prompt_token_count</span> <span class="ow">or</span> <span class="mi">0</span>
-<span class="n">thoughts_tokens</span> <span class="o">=</span> <span class="n">usage</span><span class="o">.</span><span class="n">thoughts_token_count</span> <span class="ow">or</span> <span class="mi">0</span>
-<span class="n">candidates_tokens</span> <span class="o">=</span> <span class="n">usage</span><span class="o">.</span><span class="n">candidates_token_count</span> <span class="ow">or</span> <span class="mi">0</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Prompt tokens:     </span><span class="si">{</span><span class="n">prompt_tokens</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Thoughts tokens:   </span><span class="si">{</span><span class="n">thoughts_tokens</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Candidates tokens: </span><span class="si">{</span><span class="n">candidates_tokens</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Prompt tokens:     </span><span class="si">{</span><span class="n">usage</span><span class="o">.</span><span class="n">prompt_token_count</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="mi">0</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Thoughts tokens:   </span><span class="si">{</span><span class="n">usage</span><span class="o">.</span><span class="n">thoughts_token_count</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="mi">0</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Candidates tokens: </span><span class="si">{</span><span class="n">usage</span><span class="o">.</span><span class="n">candidates_token_count</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="mi">0</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </code></pre>
       </div>
     </div>
   </div>
   <div class="nb-cell nb-markdown-cell">
-<p>ノートブックには <code>google-genai</code> と一緒に <code>drawlib</code> もセットアップされているため、<code>setup(..., cwd=True)</code> と <code>BarChart</code>、<code>show()</code> を使って、直前のセルで取得した <code>usage_metadata</code> のトークン内訳をそのまま次のセルで可視化できます。</p>
-
-  </div>
-  <div class="nb-cell nb-code-cell">
-    <div class="nb-input">
-      <div class="nb-prompt nb-in-prompt">In [3]:</div>
-      <div class="nb-code-area">
-        <pre><code class="language-python"><span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.canvas</span><span class="w"> </span><span class="kn">import</span> <span class="n">setup</span><span class="p">,</span> <span class="n">show</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.charts.bar</span><span class="w"> </span><span class="kn">import</span> <span class="n">BarChart</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.styles</span><span class="w"> </span><span class="kn">import</span> <span class="n">Styles</span>
-
-<span class="n">setup</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mi">110</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">52</span><span class="p">,</span> <span class="n">cwd</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
-<span class="n">chart</span> <span class="o">=</span> <span class="n">BarChart</span><span class="p">(</span>
-    <span class="n">axis_line_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">MutedDashed</span><span class="p">,</span>
-    <span class="n">categories</span><span class="o">=</span><span class="p">[</span><span class="s2">"入力 (Prompt)"</span><span class="p">,</span> <span class="s2">"思考 (Thoughts)"</span><span class="p">,</span> <span class="s2">"出力 (Candidates)"</span><span class="p">],</span>
-    <span class="n">width</span><span class="o">=</span><span class="mf">96.0</span><span class="p">,</span>
-    <span class="n">height</span><span class="o">=</span><span class="mf">40.0</span><span class="p">,</span>
-    <span class="n">title</span><span class="o">=</span><span class="s2">"Gemini 2.5 Flash — トークン消費量の内訳"</span><span class="p">,</span>
-    <span class="n">title_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">12.0</span><span class="p">),</span>
-    <span class="n">background_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Neutral</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">2.0</span><span class="p">),</span>
-    <span class="n">bar_width_ratio</span><span class="o">=</span><span class="mf">0.48</span><span class="p">,</span>
-    <span class="n">bar_r</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span>
-    <span class="n">axis_text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Dark</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.5</span><span class="p">),</span>
-    <span class="n">grid_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">MutedThin</span><span class="p">,</span>
-    <span class="n">value_text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.5</span><span class="p">),</span>
-    <span class="n">value_format</span><span class="o">=</span><span class="s2">"</span><span class="si">{:.0f}</span><span class="s2">"</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="n">chart</span><span class="o">.</span><span class="n">add_series</span><span class="p">(</span>
-    <span class="s2">"トークン数"</span><span class="p">,</span>
-    <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">prompt_tokens</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">thoughts_tokens</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">candidates_tokens</span><span class="p">)],</span>
-    <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryFlat</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="n">chart</span><span class="o">.</span><span class="n">configure_y_axis</span><span class="p">(</span><span class="n">min_value</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
-<span class="n">chart</span><span class="o">.</span><span class="n">draw</span><span class="p">(</span><span class="n">xy</span><span class="o">=</span><span class="p">(</span><span class="mf">7.0</span><span class="p">,</span> <span class="mf">6.0</span><span class="p">))</span>
-
-<span class="n">show</span><span class="p">()</span>
-</code></pre>
-      </div>
-    </div>
-  </div>
-  <div class="nb-cell nb-markdown-cell">
+<p><code>gemini-3.8-flash</code> では内部推論に費やされたトークン数が <code>thoughts_token_count</code> として独立して記録されるため、入出力サイズと思考コストの内訳を <code>usage_metadata</code> から一目で把握できます。</p>
 <h3>まとめと次のステップ</h3>
 <ul>
-<li><strong>セキュアで手軽な実行環境</strong>: <code>GEMINI_API_KEY</code> を Colab シークレットに保管することで、Git への鍵漏洩を防ぎつつ、Google Cloud プロジェクトの無料枠・従量課金枠をシームレスに使い分けられます。</li>
-<li><strong>次章（Chapter 02）のプレビュー</strong>: 続く第2章では、後続の Gemini 呼び出しコードを1行も変えずに、<code>genai.Client</code> の初期化だけを <strong>Google Cloud Vertex AI</strong>（<code>vertexai=True</code>・IAM 認証）へ切り替える方法を解説します。</li>
+<li><strong>高速かつセキュアな実行環境</strong>: <code>google-genai</code> のみの軽量セットアップと Colab シークレットによる <code>GEMINI_API_KEY</code> 管理を組み合わせることで、Git への鍵漏洩を防ぎつつ、Google Cloud プロジェクトの無料枠・従量課金枠を素早く使い分けられます。</li>
+<li><strong>次章（Chapter 02）のプレビュー</strong>: 続く第2章では、後続の <code>gemini-3.8-flash</code> 呼び出しコードを1行も変えずに、<code>genai.Client</code> の初期化だけを <strong>Google Cloud Vertex AI</strong>（<code>vertexai=True</code>・IAM 認証）へ切り替える方法を解説します。</li>
 </ul>
 
   </div>

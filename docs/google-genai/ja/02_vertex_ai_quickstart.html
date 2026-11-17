@@ -330,14 +330,14 @@
 </details>
 <hr />
 <h2>1. Vertex AI での最小構成 Hello World（Colab キーレス IAM 認証）</h2>
-<p>Google Cloud Vertex AI を利用する場合、静的な API キーを発行・配布する必要はありません。Google Colab 上で <code>auth.authenticate_user()</code> を実行すると、ブラウザの認証ポップアップを通じて Google Cloud IAM に紐づく一時的な認証情報（ADC: Application Default Credentials）が自動的に設定されます。事前に対象プロジェクトで Vertex AI API（<code>aiplatform.googleapis.com</code>）を有効化し、使用する Google アカウントに <strong>Vertex AI ユーザー</strong>（<code>roles/aiplatform.user</code>）ロールを付与しておいてください。</p>
+<p>Google Cloud Vertex AI を利用する場合、静的な API キーを発行・配布する必要はありません。ノートブック冒頭の <code>!pip install -q google-genai</code> セットアップセルを実行したあと、Google Colab 上で <code>auth.authenticate_user()</code> を呼び出すと、ブラウザの認証ポップアップを通じて Google Cloud IAM に紐づく一時的な認証情報（ADC: Application Default Credentials）が自動的に設定されます。事前に対象プロジェクトで Vertex AI API（<code>aiplatform.googleapis.com</code>）を有効化し、使用する Google アカウントに <strong>Vertex AI ユーザー</strong>（<code>roles/aiplatform.user</code>）ロールを付与したうえで、セル先頭の <code>GC_PROJECT</code> をご自身のプロジェクト ID に書き換えて実行してください（<code>LOCATION = &quot;global&quot;</code> と <code>MODEL = &quot;gemini-3.8-flash&quot;</code> はそのまま動作します）。</p>
 
   </div>
   <div class="nb-cell nb-code-cell nb-setup-cell">
     <div class="nb-input">
       <div class="nb-prompt nb-in-prompt">In [setup]:</div>
       <div class="nb-code-area">
-        <pre><code class="language-bash">!pip<span class="w"> </span>install<span class="w"> </span>-q<span class="w"> </span>drawlib<span class="w"> </span>google-genai<span class="w"> </span>pydantic
+        <pre><code class="language-bash">!pip<span class="w"> </span>install<span class="w"> </span>-q<span class="w"> </span>google-genai
 </code></pre>
       </div>
     </div>
@@ -346,21 +346,24 @@
     <div class="nb-input">
       <div class="nb-prompt nb-in-prompt">In [1]:</div>
       <div class="nb-code-area">
-        <pre><code class="language-python"><span class="kn">from</span><span class="w"> </span><span class="nn">google.colab</span><span class="w"> </span><span class="kn">import</span> <span class="n">auth</span>
+        <pre><code class="language-python"><span class="n">GC_PROJECT</span> <span class="o">=</span> <span class="s2">"your-gcp-project-id"</span>
+<span class="n">LOCATION</span> <span class="o">=</span> <span class="s2">"global"</span>
+<span class="n">MODEL</span> <span class="o">=</span> <span class="s2">"gemini-3.8-flash"</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">google.colab</span><span class="w"> </span><span class="kn">import</span> <span class="n">auth</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">google</span><span class="w"> </span><span class="kn">import</span> <span class="n">genai</span>
 
-<span class="c1"># ブラウザのポップアップで Google アカウント認証を実行</span>
 <span class="n">auth</span><span class="o">.</span><span class="n">authenticate_user</span><span class="p">()</span>
 
 <span class="n">client</span> <span class="o">=</span> <span class="n">genai</span><span class="o">.</span><span class="n">Client</span><span class="p">(</span>
     <span class="n">vertexai</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-    <span class="n">project</span><span class="o">=</span><span class="s2">"your-gcp-project-id"</span><span class="p">,</span>  <span class="c1"># ご自身の Google Cloud プロジェクト ID に置き換えてください</span>
-    <span class="n">location</span><span class="o">=</span><span class="s2">"us-central1"</span><span class="p">,</span>         <span class="c1"># または "asia-northeast1"、"global" など</span>
+    <span class="n">project</span><span class="o">=</span><span class="n">GC_PROJECT</span><span class="p">,</span>
+    <span class="n">location</span><span class="o">=</span><span class="n">LOCATION</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="n">response</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">generate_content</span><span class="p">(</span>
-    <span class="n">model</span><span class="o">=</span><span class="s2">"gemini-2.5-flash"</span><span class="p">,</span>
-    <span class="n">contents</span><span class="o">=</span><span class="s2">"Vertex AI からこんにちは！キーレス IAM 認証の利点を3つ、2文以内で簡潔に教えてください。"</span><span class="p">,</span>
+    <span class="n">model</span><span class="o">=</span><span class="n">MODEL</span><span class="p">,</span>
+    <span class="n">contents</span><span class="o">=</span><span class="s2">"こんにちは！"</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
 </code></pre>
@@ -376,7 +379,10 @@
     <div class="nb-input">
       <div class="nb-prompt nb-in-prompt">In [2]:</div>
       <div class="nb-code-area">
-        <pre><code class="language-python"><span class="kn">from</span><span class="w"> </span><span class="nn">google.colab</span><span class="w"> </span><span class="kn">import</span> <span class="n">auth</span><span class="p">,</span> <span class="n">userdata</span>
+        <pre><code class="language-python"><span class="n">LOCATION</span> <span class="o">=</span> <span class="s2">"global"</span>
+<span class="n">MODEL</span> <span class="o">=</span> <span class="s2">"gemini-3.8-flash"</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">google.colab</span><span class="w"> </span><span class="kn">import</span> <span class="n">auth</span><span class="p">,</span> <span class="n">userdata</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">google</span><span class="w"> </span><span class="kn">import</span> <span class="n">genai</span>
 
 <span class="n">auth</span><span class="o">.</span><span class="n">authenticate_user</span><span class="p">()</span>
@@ -385,12 +391,12 @@
 <span class="n">client</span> <span class="o">=</span> <span class="n">genai</span><span class="o">.</span><span class="n">Client</span><span class="p">(</span>
     <span class="n">vertexai</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="n">project</span><span class="o">=</span><span class="n">userdata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"GOOGLE_CLOUD_PROJECT"</span><span class="p">),</span>
-    <span class="n">location</span><span class="o">=</span><span class="s2">"asia-northeast1"</span><span class="p">,</span>
+    <span class="n">location</span><span class="o">=</span><span class="n">LOCATION</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="n">response</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">generate_content</span><span class="p">(</span>
-    <span class="n">model</span><span class="o">=</span><span class="s2">"gemini-2.5-flash"</span><span class="p">,</span>
-    <span class="n">contents</span><span class="o">=</span><span class="s2">"Colab シークレット経由で Vertex AI クライアントが正常に初期化されたことを確認してください。"</span><span class="p">,</span>
+    <span class="n">model</span><span class="o">=</span><span class="n">MODEL</span><span class="p">,</span>
+    <span class="n">contents</span><span class="o">=</span><span class="s2">"宇宙の豆知識を1つ教えてください。"</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
 </code></pre>
@@ -399,8 +405,8 @@
   </div>
   <div class="nb-cell nb-markdown-cell">
 <blockquote>
-<p><strong>リージョンエンドポイントと <code>location=&quot;global&quot;</code> の使い分け:</strong>
-データ所在地（データレジデンシー）の厳格な国内・特定地域固定や低レイテンシが求められるワークロードでは、<code>&quot;asia-northeast1&quot;</code>（東京）や <code>&quot;us-central1&quot;</code>（アイオワ）などの<strong>リージョンエンドポイント</strong>を指定します。一方、マルチリージョンでの動的な負荷分散と高いクォータ可用性を優先する場合や、<strong>最新の Preview モデル</strong>（各リージョンへ展開される前に Vertex AI の <code>global</code> エンドポイント限定で先行公開されるモデル）を試す場合は <strong><code>location=&quot;global&quot;</code></strong> を指定してください。</p>
+<p><strong>推奨デフォルト <code>LOCATION = &quot;global&quot;</code> とリージョンエンドポイントの使い分け:</strong>
+Vertex AI では <strong><code>location=&quot;global&quot;</code></strong> をデフォルトとして推奨します。最新の <strong>Gemini 3.8+</strong> モデル（<code>gemini-3.8-flash</code> や <code>global</code> 先行で公開される最新 Preview モデルなど）に対応しており、マルチリージョンへの動的なクォータルーティングによって高い可用性を確保できます。一方、データ所在地（データレジデンシー）を日本国内や特定地域に厳格に固定する必要があるワークロードでは、<code>LOCATION</code> を <code>&quot;asia-northeast1&quot;</code>（東京）や <code>&quot;us-central1&quot;</code>（アイオワ）などの<strong>リージョンエンドポイント</strong>に変更してください。</p>
 </blockquote>
 <hr />
 <h2>2. Google AI Studio と Vertex AI の使い分け</h2>
@@ -479,7 +485,7 @@
     <span class="p">[</span><span class="s2">"比較項目"</span><span class="p">,</span> <span class="s2">"Google AI Studio"</span><span class="p">,</span> <span class="s2">"Google Cloud Vertex AI"</span><span class="p">],</span>
     <span class="p">[</span><span class="s2">"認証方式"</span><span class="p">,</span> <span class="s2">"API キー (GEMINI_API_KEY)"</span><span class="p">,</span> <span class="s2">"キーレス IAM / ADC・サービスアカウント"</span><span class="p">],</span>
     <span class="p">[</span><span class="s2">"課金・クォータ"</span><span class="p">,</span> <span class="s2">"無料枠 または GCP 連携の従量課金"</span><span class="p">,</span> <span class="s2">"GCP 請求先アカウント・予約スループット"</span><span class="p">],</span>
-    <span class="p">[</span><span class="s2">"データ所在地"</span><span class="p">,</span> <span class="s2">"グローバル自動ルーティング"</span><span class="p">,</span> <span class="s2">"リージョン指定 (東京・米国等) + global"</span><span class="p">],</span>
+    <span class="p">[</span><span class="s2">"接続先・データ所在地"</span><span class="p">,</span> <span class="s2">"グローバル自動ルーティング"</span><span class="p">,</span> <span class="s2">"global (推奨既定) + リージョン指定 (東京等)"</span><span class="p">],</span>
     <span class="p">[</span><span class="s2">"VPC-SC / CMEK"</span><span class="p">,</span> <span class="s2">"非対応 (パブリック HTTPS API)"</span><span class="p">,</span> <span class="s2">"対応 (VPC-SC / Private PSC / CMEK)"</span><span class="p">],</span>
     <span class="p">[</span><span class="s2">"最適な用途"</span><span class="p">,</span> <span class="s2">"高速プロトタイピング・学習・個人開発"</span><span class="p">,</span> <span class="s2">"本番システム運用・企業 IAM ガバナンス"</span><span class="p">],</span>
     <span class="p">[</span><span class="s2">"SDK 互換性"</span><span class="p">,</span> <span class="s2">"100% 同一 (models.* / chats.*)"</span><span class="p">,</span> <span class="s2">"100% 同一 (models.* / chats.*)"</span><span class="p">],</span>
@@ -498,8 +504,8 @@
 </details>
 <h3>第3章〜第5章における初期化コードの扱い</h3>
 <ul>
-<li><strong>第3章〜第5章では簡潔な AI Studio 初期化を採用</strong>: 第1章で確認したとおり、Google AI Studio の API キーは Google Cloud プロジェクトに直接リンクして課金やレート制限の引き上げを行えるため、<strong>第3章〜第5章では各サンプルを最小限の見通し良いコードに保つ目的で、簡潔な3行の AI Studio 初期化</strong>（<code>genai.Client(api_key=userdata.get(&quot;GEMINI_API_KEY&quot;))</code>）に統一しています。</li>
-<li><strong>Vertex AI ユーザーはそのまま差し替え可能</strong>: 第3章〜第5章のすべてのコードセル（ストリーミング、<code>ThinkingConfig</code>、マルチモーダル入力、Pydantic 構造化出力、マルチターンチャット、Function Calling）は、冒頭の3行の <code>client</code> 初期化部分を本章の <code>vertexai=True</code> 構成に置き換えるだけで、<strong>残りのコードを1文字も変更せずに Vertex AI 上でそのまま動作します</strong>。</li>
+<li><strong>第3章〜第5章では簡潔な AI Studio 初期化を採用</strong>: 第1章で確認したとおり、Google AI Studio の API キーは Google Cloud プロジェクトに直接リンクして課金やレート制限の引き上げを行えるため、<strong>第3章〜第5章では各サンプルを最小限の見通し良いコードに保つ目的で、簡潔な AI Studio 初期化</strong>（<code>genai.Client(api_key=userdata.get(&quot;GEMINI_API_KEY&quot;))</code>）に統一しています。</li>
+<li><strong>Vertex AI ユーザーはそのまま差し替え可能</strong>: 第3章〜第5章のすべてのコードセル（ストリーミング、<code>ThinkingConfig</code>、マルチモーダル入力、Pydantic 構造化出力、マルチターンチャット、Function Calling）は、冒頭の <code>client</code> 初期化部分を本章の <code>vertexai=True</code>（<code>location=&quot;global&quot;</code>）構成に置き換えるだけで、<strong>残りのコードを1文字も変更せずに Vertex AI 上でそのまま動作します</strong>。</li>
 </ul>
 
   </div>

@@ -44,18 +44,18 @@
     
     
     
-    <meta name="description" content="Interactive AI applications optimize perceived responsiveness along two independent axes: streaming delivery (generate_content_stream) cuts Time To First…">
+    <meta name="description" content="Interactive AI applications on gemini-3.8-flash optimize perceived responsiveness along two independent axes: streaming delivery (generate_content_stream)…">
     <link rel="canonical" href="https://examples.drawlib.com/google-genai/en/03_streaming_and_thinking.html">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="Google GenAI SDK Cookbook">
     <meta property="og:title" content="03. Streaming Delivery &amp; ThinkingConfig Control — Google GenAI SDK Cookbook">
-    <meta property="og:description" content="Interactive AI applications optimize perceived responsiveness along two independent axes: streaming delivery (generate_content_stream) cuts Time To First…">
+    <meta property="og:description" content="Interactive AI applications on gemini-3.8-flash optimize perceived responsiveness along two independent axes: streaming delivery (generate_content_stream)…">
     <meta property="og:url" content="https://examples.drawlib.com/google-genai/en/03_streaming_and_thinking.html">
     <meta property="og:locale" content="en_US">
     <meta property="og:locale:alternate" content="ja_JP">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="03. Streaming Delivery &amp; ThinkingConfig Control — Google GenAI SDK Cookbook">
-    <meta name="twitter:description" content="Interactive AI applications optimize perceived responsiveness along two independent axes: streaming delivery (generate_content_stream) cuts Time To First…">
+    <meta name="twitter:description" content="Interactive AI applications on gemini-3.8-flash optimize perceived responsiveness along two independent axes: streaming delivery (generate_content_stream)…">
     
     
     <link rel="icon" type="image/png" href="../_assets/favicon.png">
@@ -172,12 +172,12 @@
   </div>
   <div class="nb-cell nb-markdown-cell">
 <h1>03. Streaming Delivery &amp; ThinkingConfig Control</h1>
-<p>Interactive AI applications optimize perceived responsiveness along two independent axes: <strong>streaming delivery (<code>generate_content_stream</code>)</strong> cuts Time To First Token (TTFT) by yielding output chunks as soon as generation starts, while <strong><code>types.ThinkingConfig(thinking_budget=...)</code></strong> right-sizes internal reasoning tokens to match each task's complexity.
-Combining progressive streaming with an explicit thinking budget turns multi-second blocking calls into sub-second interactive experiences—reserving deep chain-of-thought compute strictly for tasks that need it.</p>
+<p>Interactive AI applications on <strong><code>gemini-3.8-flash</code></strong> optimize perceived responsiveness along two independent axes: <strong>streaming delivery (<code>generate_content_stream</code>)</strong> cuts Time To First Token (TTFT) by yielding output chunks as soon as generation starts, while <strong><code>types.ThinkingConfig(thinking_level=...)</code></strong> right-sizes internal reasoning depth (<code>&quot;low&quot;</code>, <code>&quot;medium&quot;</code>, or <code>&quot;high&quot;</code>) to match each task's complexity.
+Combining progressive streaming with an explicit thinking level turns multi-second blocking calls into sub-second interactive experiences—reserving deep chain-of-thought compute strictly for tasks that need it.</p>
 
 <figure class="drawlib-figure align-center">
-  <img src="../images/03_streaming_and_thinking/ch03_streaming_ttft.png" alt="Figure 3-1: Blocking Generation vs. Streaming Delivery &amp; Reasoning Latency Timeline" loading="lazy">
-  <figcaption>Figure 3-1: Blocking Generation vs. Streaming Delivery &amp; Reasoning Latency Timeline</figcaption>
+  <img src="../images/03_streaming_and_thinking/ch03_streaming_ttft.png" alt="Figure 3-1: Blocking Generation vs. Streaming Delivery &amp; Thinking Level Timeline (gemini-3.8-flash)" loading="lazy">
+  <figcaption>Figure 3-1: Blocking Generation vs. Streaming Delivery &amp; Thinking Level Timeline (gemini-3.8-flash)</figcaption>
 </figure>
 <details class="drawlib-code-fold">
   <summary>View Drawlib Python Code</summary>
@@ -188,33 +188,33 @@ Combining progressive streaming with an explicit thinking budget turns multi-sec
 <span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.styles</span><span class="w"> </span><span class="kn">import</span> <span class="n">Styles</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.text</span><span class="w"> </span><span class="kn">import</span> <span class="n">text</span>
 
-<span class="n">setup</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mi">152</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">74</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">150</span><span class="p">)</span>
+<span class="n">setup</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mi">156</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">74</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">150</span><span class="p">)</span>
 
 <span class="c1"># Header labels</span>
 <span class="n">text</span><span class="p">((</span><span class="mf">6.0</span><span class="p">,</span> <span class="mf">67.0</span><span class="p">),</span> <span class="s2">"Delivery Mode &amp; Config"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">11.0</span><span class="p">,</span> <span class="n">halign</span><span class="o">=</span><span class="s2">"left"</span><span class="p">))</span>
 <span class="n">text</span><span class="p">(</span>
-    <span class="p">(</span><span class="mf">98.0</span><span class="p">,</span> <span class="mf">67.0</span><span class="p">),</span>
-    <span class="s2">"Request-to-Response Latency Timeline (Seconds)"</span><span class="p">,</span>
+    <span class="p">(</span><span class="mf">101.0</span><span class="p">,</span> <span class="mf">67.0</span><span class="p">),</span>
+    <span class="s2">"Latency Timeline on gemini-3.8-flash (Seconds)"</span><span class="p">,</span>
     <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">11.0</span><span class="p">),</span>
 <span class="p">)</span>
 
-<span class="c1"># Vertical timeline gridlines (0.0s to 3.0s -&gt; x = 53.0 to 143.0, 30 units/sec)</span>
+<span class="c1"># Vertical timeline gridlines (0.0s to 3.0s -&gt; x = 56.0 to 146.0, 30 units/sec)</span>
 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">7</span><span class="p">):</span>
-    <span class="n">tx</span> <span class="o">=</span> <span class="mf">53.0</span> <span class="o">+</span> <span class="n">i</span> <span class="o">*</span> <span class="mf">15.0</span>
+    <span class="n">tx</span> <span class="o">=</span> <span class="mf">56.0</span> <span class="o">+</span> <span class="n">i</span> <span class="o">*</span> <span class="mf">15.0</span>
     <span class="n">sec</span> <span class="o">=</span> <span class="n">i</span> <span class="o">*</span> <span class="mf">0.5</span>
     <span class="n">line</span><span class="p">((</span><span class="n">tx</span><span class="p">,</span> <span class="mf">13.0</span><span class="p">),</span> <span class="p">(</span><span class="n">tx</span><span class="p">,</span> <span class="mf">62.5</span><span class="p">),</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">MutedDashedThin</span><span class="p">)</span>
     <span class="n">text</span><span class="p">((</span><span class="n">tx</span><span class="p">,</span> <span class="mf">8.2</span><span class="p">),</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">sec</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">s"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Muted</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">))</span>
 
-<span class="n">line</span><span class="p">((</span><span class="mf">53.0</span><span class="p">,</span> <span class="mf">13.0</span><span class="p">),</span> <span class="p">(</span><span class="mf">143.0</span><span class="p">,</span> <span class="mf">13.0</span><span class="p">),</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Dark</span><span class="p">)</span>
+<span class="n">line</span><span class="p">((</span><span class="mf">56.0</span><span class="p">,</span> <span class="mf">13.0</span><span class="p">),</span> <span class="p">(</span><span class="mf">146.0</span><span class="p">,</span> <span class="mf">13.0</span><span class="p">),</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Dark</span><span class="p">)</span>
 
 <span class="c1"># Row 1: Blocking generate_content()</span>
-<span class="n">rectangle</span><span class="p">((</span><span class="mf">28.0</span><span class="p">,</span> <span class="mf">55.0</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">44.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">12.5</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Neutral</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">1.8</span><span class="p">))</span>
+<span class="n">rectangle</span><span class="p">((</span><span class="mf">29.0</span><span class="p">,</span> <span class="mf">55.0</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">46.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">12.5</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Neutral</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">1.8</span><span class="p">))</span>
 <span class="n">phosphor</span><span class="o">.</span><span class="n">hourglass</span><span class="p">((</span><span class="mf">11.0</span><span class="p">,</span> <span class="mf">55.0</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">4.4</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Dark</span><span class="p">)</span>
 <span class="n">text</span><span class="p">((</span><span class="mf">15.2</span><span class="p">,</span> <span class="mf">57.3</span><span class="p">),</span> <span class="s2">"1. Blocking Call"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.5</span><span class="p">,</span> <span class="n">halign</span><span class="o">=</span><span class="s2">"left"</span><span class="p">))</span>
 <span class="n">text</span><span class="p">((</span><span class="mf">15.2</span><span class="p">,</span> <span class="mf">52.3</span><span class="p">),</span> <span class="s2">"generate_content()"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Muted</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">halign</span><span class="o">=</span><span class="s2">"left"</span><span class="p">))</span>
 
 <span class="n">rectangle</span><span class="p">(</span>
-    <span class="p">(</span><span class="mf">69.5</span><span class="p">,</span> <span class="mf">55.0</span><span class="p">),</span>
+    <span class="p">(</span><span class="mf">72.5</span><span class="p">,</span> <span class="mf">55.0</span><span class="p">),</span>
     <span class="n">width</span><span class="o">=</span><span class="mf">33.0</span><span class="p">,</span>
     <span class="n">height</span><span class="o">=</span><span class="mf">9.4</span><span class="p">,</span>
     <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">SecondaryNeutral</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">1.2</span><span class="p">),</span>
@@ -222,7 +222,7 @@ Combining progressive streaming with an explicit thinking budget turns multi-sec
     <span class="n">text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Dark</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">),</span>
 <span class="p">)</span>
 <span class="n">rectangle</span><span class="p">(</span>
-    <span class="p">(</span><span class="mf">111.8</span><span class="p">,</span> <span class="mf">55.0</span><span class="p">),</span>
+    <span class="p">(</span><span class="mf">114.8</span><span class="p">,</span> <span class="mf">55.0</span><span class="p">),</span>
     <span class="n">width</span><span class="o">=</span><span class="mf">50.4</span><span class="p">,</span>
     <span class="n">height</span><span class="o">=</span><span class="mf">9.4</span><span class="p">,</span>
     <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Neutral</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">1.2</span><span class="p">),</span>
@@ -230,14 +230,14 @@ Combining progressive streaming with an explicit thinking budget turns multi-sec
     <span class="n">text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">),</span>
 <span class="p">)</span>
 
-<span class="c1"># Row 2: Streaming + Default Thinking</span>
-<span class="n">rectangle</span><span class="p">((</span><span class="mf">28.0</span><span class="p">,</span> <span class="mf">38.5</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">44.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">12.5</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Neutral</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">1.8</span><span class="p">))</span>
+<span class="c1"># Row 2: Streaming + thinking_level="medium" (Default)</span>
+<span class="n">rectangle</span><span class="p">((</span><span class="mf">29.0</span><span class="p">,</span> <span class="mf">38.5</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">46.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">12.5</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Neutral</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">1.8</span><span class="p">))</span>
 <span class="n">phosphor</span><span class="o">.</span><span class="n">brain</span><span class="p">((</span><span class="mf">11.0</span><span class="p">,</span> <span class="mf">38.5</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">4.4</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryBold</span><span class="p">)</span>
 <span class="n">text</span><span class="p">((</span><span class="mf">15.2</span><span class="p">,</span> <span class="mf">40.8</span><span class="p">),</span> <span class="s2">"2. Stream + Thinking"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.5</span><span class="p">,</span> <span class="n">halign</span><span class="o">=</span><span class="s2">"left"</span><span class="p">))</span>
-<span class="n">text</span><span class="p">((</span><span class="mf">15.2</span><span class="p">,</span> <span class="mf">35.8</span><span class="p">),</span> <span class="s2">"Default budget (-1)"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Muted</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">halign</span><span class="o">=</span><span class="s2">"left"</span><span class="p">))</span>
+<span class="n">text</span><span class="p">((</span><span class="mf">15.2</span><span class="p">,</span> <span class="mf">35.8</span><span class="p">),</span> <span class="s1">'thinking_level="medium"'</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Muted</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">halign</span><span class="o">=</span><span class="s2">"left"</span><span class="p">))</span>
 
 <span class="n">rectangle</span><span class="p">(</span>
-    <span class="p">(</span><span class="mf">69.5</span><span class="p">,</span> <span class="mf">38.5</span><span class="p">),</span>
+    <span class="p">(</span><span class="mf">72.5</span><span class="p">,</span> <span class="mf">38.5</span><span class="p">),</span>
     <span class="n">width</span><span class="o">=</span><span class="mf">33.0</span><span class="p">,</span>
     <span class="n">height</span><span class="o">=</span><span class="mf">9.4</span><span class="p">,</span>
     <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">SecondaryNeutral</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">1.2</span><span class="p">),</span>
@@ -245,7 +245,7 @@ Combining progressive streaming with an explicit thinking budget turns multi-sec
     <span class="n">text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Dark</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">),</span>
 <span class="p">)</span>
 <span class="n">rectangle</span><span class="p">(</span>
-    <span class="p">(</span><span class="mf">111.8</span><span class="p">,</span> <span class="mf">38.5</span><span class="p">),</span>
+    <span class="p">(</span><span class="mf">114.8</span><span class="p">,</span> <span class="mf">38.5</span><span class="p">),</span>
     <span class="n">width</span><span class="o">=</span><span class="mf">50.4</span><span class="p">,</span>
     <span class="n">height</span><span class="o">=</span><span class="mf">9.4</span><span class="p">,</span>
     <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryNeutral</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">1.2</span><span class="p">),</span>
@@ -253,36 +253,36 @@ Combining progressive streaming with an explicit thinking budget turns multi-sec
     <span class="n">text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">),</span>
 <span class="p">)</span>
 
-<span class="c1"># Row 3: Streaming + thinking_budget=0 (Focal Hero)</span>
-<span class="n">rectangle</span><span class="p">((</span><span class="mf">28.0</span><span class="p">,</span> <span class="mf">22.0</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">44.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">12.5</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryNeutral</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">1.8</span><span class="p">))</span>
+<span class="c1"># Row 3: Streaming + thinking_level="low" (Focal Hero)</span>
+<span class="n">rectangle</span><span class="p">((</span><span class="mf">29.0</span><span class="p">,</span> <span class="mf">22.0</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">46.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">12.5</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryNeutral</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">1.8</span><span class="p">))</span>
 <span class="n">phosphor</span><span class="o">.</span><span class="n">lightning</span><span class="p">((</span><span class="mf">11.0</span><span class="p">,</span> <span class="mf">22.0</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">4.4</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryBold</span><span class="p">)</span>
 <span class="n">text</span><span class="p">((</span><span class="mf">15.2</span><span class="p">,</span> <span class="mf">24.3</span><span class="p">),</span> <span class="s2">"3. Fast Stream"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.5</span><span class="p">,</span> <span class="n">halign</span><span class="o">=</span><span class="s2">"left"</span><span class="p">))</span>
-<span class="n">text</span><span class="p">((</span><span class="mf">15.2</span><span class="p">,</span> <span class="mf">19.3</span><span class="p">),</span> <span class="s2">"thinking_budget=0"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Dark</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">halign</span><span class="o">=</span><span class="s2">"left"</span><span class="p">))</span>
+<span class="n">text</span><span class="p">((</span><span class="mf">15.2</span><span class="p">,</span> <span class="mf">19.3</span><span class="p">),</span> <span class="s1">'thinking_level="low"'</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Dark</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">halign</span><span class="o">=</span><span class="s2">"left"</span><span class="p">))</span>
 
-<span class="n">rectangle</span><span class="p">((</span><span class="mf">57.0</span><span class="p">,</span> <span class="mf">22.0</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">8.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">9.4</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Neutral</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">1.0</span><span class="p">))</span>
+<span class="n">rectangle</span><span class="p">((</span><span class="mf">60.0</span><span class="p">,</span> <span class="mf">22.0</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">8.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">9.4</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Neutral</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">1.0</span><span class="p">))</span>
 <span class="n">rectangle</span><span class="p">(</span>
-    <span class="p">(</span><span class="mf">83.8</span><span class="p">,</span> <span class="mf">22.0</span><span class="p">),</span>
+    <span class="p">(</span><span class="mf">86.8</span><span class="p">,</span> <span class="mf">22.0</span><span class="p">),</span>
     <span class="n">width</span><span class="o">=</span><span class="mf">44.4</span><span class="p">,</span>
     <span class="n">height</span><span class="o">=</span><span class="mf">9.4</span><span class="p">,</span>
     <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryFlat</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">1.2</span><span class="p">),</span>
     <span class="n">text</span><span class="o">=</span><span class="s2">"TTFT 0.28s • Instant Stream"</span><span class="p">,</span>
     <span class="n">text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">WhiteBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">),</span>
 <span class="p">)</span>
-<span class="n">text</span><span class="p">((</span><span class="mf">108.5</span><span class="p">,</span> <span class="mf">22.0</span><span class="p">),</span> <span class="s2">"Done in 1.75s"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">halign</span><span class="o">=</span><span class="s2">"left"</span><span class="p">))</span>
+<span class="n">text</span><span class="p">((</span><span class="mf">111.5</span><span class="p">,</span> <span class="mf">22.0</span><span class="p">),</span> <span class="s2">"Done in 1.75s"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">halign</span><span class="o">=</span><span class="s2">"left"</span><span class="p">))</span>
 
 <span class="n">save</span><span class="p">()</span>
 </code></pre>
 </details>
 <hr />
-<h2>1. 3-Line Client Setup &amp; Progressive Streaming (<code>generate_content_stream</code>)</h2>
-<p>Start by initializing the unified <code>genai.Client</code> with your <code>GEMINI_API_KEY</code> stored in Google Colab Secrets (<strong>🔑 Secrets</strong> in the left sidebar):</p>
+<h2>1. Client Setup &amp; Progressive Streaming (<code>generate_content_stream</code>)</h2>
+<p>Start by setting <code>MODEL = &quot;gemini-3.8-flash&quot;</code> and initializing the unified <code>genai.Client</code> with your <code>GEMINI_API_KEY</code> stored in Google Colab Secrets (<strong>🔑 Secrets</strong> in the left sidebar):</p>
 
   </div>
   <div class="nb-cell nb-code-cell nb-setup-cell">
     <div class="nb-input">
       <div class="nb-prompt nb-in-prompt">In [setup]:</div>
       <div class="nb-code-area">
-        <pre><code class="language-bash">!pip<span class="w"> </span>install<span class="w"> </span>-q<span class="w"> </span>drawlib<span class="w"> </span>google-genai<span class="w"> </span>pydantic
+        <pre><code class="language-bash">!pip<span class="w"> </span>install<span class="w"> </span>-q<span class="w"> </span>google-genai
 </code></pre>
       </div>
     </div>
@@ -291,7 +291,9 @@ Combining progressive streaming with an explicit thinking budget turns multi-sec
     <div class="nb-input">
       <div class="nb-prompt nb-in-prompt">In [1]:</div>
       <div class="nb-code-area">
-        <pre><code class="language-python"><span class="kn">from</span><span class="w"> </span><span class="nn">google.colab</span><span class="w"> </span><span class="kn">import</span> <span class="n">userdata</span>
+        <pre><code class="language-python"><span class="n">MODEL</span> <span class="o">=</span> <span class="s2">"gemini-3.8-flash"</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">google.colab</span><span class="w"> </span><span class="kn">import</span> <span class="n">userdata</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">google</span><span class="w"> </span><span class="kn">import</span> <span class="n">genai</span>
 
 <span class="n">client</span> <span class="o">=</span> <span class="n">genai</span><span class="o">.</span><span class="n">Client</span><span class="p">(</span><span class="n">api_key</span><span class="o">=</span><span class="n">userdata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"GEMINI_API_KEY"</span><span class="p">))</span>
@@ -313,8 +315,8 @@ Combining progressive streaming with an explicit thinking budget turns multi-sec
 <span class="n">ttft_ms</span> <span class="o">=</span> <span class="kc">None</span>
 
 <span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="n">client</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">generate_content_stream</span><span class="p">(</span>
-    <span class="n">model</span><span class="o">=</span><span class="s2">"gemini-2.5-flash"</span><span class="p">,</span>
-    <span class="n">contents</span><span class="o">=</span><span class="s2">"List 4 practical latency optimization techniques for LLM APIs, one bullet per line."</span><span class="p">,</span>
+    <span class="n">model</span><span class="o">=</span><span class="n">MODEL</span><span class="p">,</span>
+    <span class="n">contents</span><span class="o">=</span><span class="s2">"Tell me a short story in 3 sentences."</span><span class="p">,</span>
 <span class="p">):</span>
     <span class="k">if</span> <span class="n">chunk</span><span class="o">.</span><span class="n">text</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">ttft_ms</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -332,17 +334,20 @@ Combining progressive streaming with an explicit thinking budget turns multi-sec
 <p><strong>Note:</strong> Always guard <code>if chunk.text:</code> before printing or recording <code>ttft_ms</code>. Early or trailing stream frames (such as metadata-only chunks) can carry empty text payloads while updating <code>usage_metadata</code>.</p>
 </blockquote>
 <hr />
-<h2>2. Right-Sizing Reasoning with <code>ThinkingConfig</code> (<code>thinking_budget</code>)</h2>
-<p><code>gemini-2.5-flash</code> is a hybrid reasoning model: before emitting visible output tokens, it can spend internal <strong>thinking tokens</strong> planning and verifying its answer. Because thinking runs <em>before</em> the first visible output token is emitted, controlling <code>types.ThinkingConfig(thinking_budget=...)</code> directly governs TTFT and token cost:</p>
+<h2>2. Right-Sizing Reasoning with <code>ThinkingConfig</code> (<code>thinking_level</code>)</h2>
+<p><code>gemini-3.8-flash</code> is a reasoning-capable model: before emitting visible output tokens, it can spend internal <strong>thinking tokens</strong> (<code>thoughts_token_count</code>) planning and verifying its answer. Because thinking runs <em>before</em> the first visible output token is emitted, setting <code>types.ThinkingConfig(thinking_level=...)</code> directly governs TTFT and token cost across three supported levels on <code>gemini-3.8-flash</code>:</p>
 <ul>
-<li><strong><code>thinking_budget=0</code> (Reasoning Off)</strong>: Disables internal thinking on <code>gemini-2.5-flash</code> for sub-second TTFT on intent classification, entity extraction, routing, and conversational support chat.</li>
-<li><strong><code>thinking_budget=1024</code> (Predictable Cap, <code>512</code>–<code>4096</code>)</strong>: Allocates a bounded token ceiling so moderately complex summarization, RAG synthesis, and SQL drafting gain structured reasoning with predictable p95 latency and cost.</li>
-<li><strong>Dynamic Default (<code>thinking_budget=-1</code> or omitted)</strong>: Lets the model automatically scale reasoning depth based on prompt difficulty—ideal for multi-step math, algorithm generation, and architectural trade-off analysis.</li>
+<li><strong><code>thinking_level=&quot;low&quot;</code> (Zero Thoughts / Fastest TTFT)</strong>: Produces <code>0</code> internal reasoning tokens on <code>gemini-3.8-flash</code>, delivering sub-second TTFT for conversational chat, intent routing, classification, and entity extraction.</li>
+<li><strong><code>thinking_level=&quot;medium&quot;</code> (Default — Balanced Dynamic Reasoning)</strong>: Automatically adapts reasoning depth to prompt complexity—skipping extra thoughts on simple queries while allocating structured reasoning for RAG synthesis, summarization, and SQL drafting.</li>
+<li><strong><code>thinking_level=&quot;high&quot;</code> (Deep Reasoning)</strong>: Dedicates thorough chain-of-thought tokens for multi-step math, algorithm generation, and architectural trade-off analysis.</li>
 </ul>
+<blockquote>
+<p><strong>Important (<code>gemini-3.8-flash</code> API Rules):</strong> Numeric <code>thinking_budget</code> from Gemini 2.5 is deprecated in Gemini 3.8—use <code>thinking_level</code> instead (never pass both together). On <code>gemini-3.8-flash</code>, only <code>&quot;low&quot;</code>, <code>&quot;medium&quot;</code>, and <code>&quot;high&quot;</code> are valid; passing <code>&quot;minimal&quot;</code> or <code>&quot;xhigh&quot;</code> returns HTTP <code>400 INVALID_ARGUMENT</code>.</p>
+</blockquote>
 
 <figure class="drawlib-figure align-center">
-  <img src="../images/03_streaming_and_thinking/ch03_thinking_tiers.png" alt="Figure 3-2: ThinkingConfig Budget Tiers by Task Complexity" loading="lazy">
-  <figcaption>Figure 3-2: ThinkingConfig Budget Tiers by Task Complexity</figcaption>
+  <img src="../images/03_streaming_and_thinking/ch03_thinking_tiers.png" alt="Figure 3-2: ThinkingConfig Levels by Task Complexity (gemini-3.8-flash)" loading="lazy">
+  <figcaption>Figure 3-2: ThinkingConfig Levels by Task Complexity (gemini-3.8-flash)</figcaption>
 </figure>
 <details class="drawlib-code-fold">
   <summary>View Drawlib Python Code</summary>
@@ -356,7 +361,7 @@ Combining progressive streaming with an explicit thinking budget turns multi-sec
 
 <span class="n">text</span><span class="p">(</span>
     <span class="p">(</span><span class="mf">76.0</span><span class="p">,</span> <span class="mf">61.5</span><span class="p">),</span>
-    <span class="s2">"Selecting thinking_budget Across Workload Tiers (gemini-2.5-flash)"</span><span class="p">,</span>
+    <span class="s2">"Selecting thinking_level Across Workload Tiers (gemini-3.8-flash)"</span><span class="p">,</span>
     <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">12.0</span><span class="p">),</span>
 <span class="p">)</span>
 
@@ -373,21 +378,21 @@ Combining progressive streaming with an explicit thinking budget turns multi-sec
     <span class="n">spacing</span><span class="o">=</span><span class="mf">5.0</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="n">tiers</span><span class="o">.</span><span class="n">add</span><span class="p">(</span>
-    <span class="s2">"Budget = 0 (Off)"</span><span class="p">,</span>
-    <span class="s2">"Sub-second TTFT</span><span class="se">\n</span><span class="s2">Classification, routing</span><span class="se">\n</span><span class="s2">&amp; fast support chat"</span><span class="p">,</span>
+    <span class="s1">'level = "low"'</span><span class="p">,</span>
+    <span class="s2">"0 thoughts • Fast TTFT</span><span class="se">\n</span><span class="s2">Chat, routing, extraction</span><span class="se">\n</span><span class="s2">&amp; classification"</span><span class="p">,</span>
     <span class="n">icon</span><span class="o">=</span><span class="n">phosphor</span><span class="o">.</span><span class="n">lightning</span><span class="p">,</span>
     <span class="n">badge_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryFlat</span><span class="p">,</span>
     <span class="n">icon_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">WhiteBold</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="n">tiers</span><span class="o">.</span><span class="n">add</span><span class="p">(</span>
-    <span class="s2">"Budget = 1024"</span><span class="p">,</span>
-    <span class="s2">"Bounded latency (512–4k)</span><span class="se">\n</span><span class="s2">RAG synthesis, SQL</span><span class="se">\n</span><span class="s2">&amp; structured summaries"</span><span class="p">,</span>
+    <span class="s1">'level = "medium"'</span><span class="p">,</span>
+    <span class="s2">"Default • Dynamic depth</span><span class="se">\n</span><span class="s2">RAG synthesis, SQL</span><span class="se">\n</span><span class="s2">&amp; balanced summaries"</span><span class="p">,</span>
     <span class="n">icon</span><span class="o">=</span><span class="n">phosphor</span><span class="o">.</span><span class="n">sliders</span><span class="p">,</span>
     <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryNeutral</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="n">tiers</span><span class="o">.</span><span class="n">add</span><span class="p">(</span>
-    <span class="s2">"Dynamic (-1)"</span><span class="p">,</span>
-    <span class="s2">"Auto-scaled depth</span><span class="se">\n</span><span class="s2">Multi-step math, code</span><span class="se">\n</span><span class="s2">&amp; architecture design"</span><span class="p">,</span>
+    <span class="s1">'level = "high"'</span><span class="p">,</span>
+    <span class="s2">"Deep reasoning tokens</span><span class="se">\n</span><span class="s2">Multi-step math, code</span><span class="se">\n</span><span class="s2">&amp; architecture design"</span><span class="p">,</span>
     <span class="n">icon</span><span class="o">=</span><span class="n">phosphor</span><span class="o">.</span><span class="n">brain</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="n">tiers</span><span class="o">.</span><span class="n">draw</span><span class="p">(</span><span class="n">xy</span><span class="o">=</span><span class="p">(</span><span class="mf">6.0</span><span class="p">,</span> <span class="mf">6.5</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">140.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">49.5</span><span class="p">,</span> <span class="n">align</span><span class="o">=</span><span class="s2">"bottom_left"</span><span class="p">)</span>
@@ -395,102 +400,50 @@ Combining progressive streaming with an explicit thinking budget turns multi-sec
 <span class="n">save</span><span class="p">()</span>
 </code></pre>
 </details>
-<h3>Benchmarking <code>thinking_budget=0</code> vs. <code>thinking_budget=1024</code></h3>
-<p>Let's run the exact same quantitative prompt under <code>thinking_budget=0</code> and <code>thinking_budget=1024</code>, capturing <code>ttft_ms</code>, <code>total_ms</code>, internal <code>thoughts_token_count</code>, and visible <code>candidates_token_count</code> from the stream's <code>usage_metadata</code>:</p>
+<h3>Benchmarking <code>thinking_level=&quot;low&quot;</code> vs. <code>thinking_level=&quot;high&quot;</code></h3>
+<p>Let's run the same arithmetic prompt under <code>thinking_level=&quot;low&quot;</code> and <code>thinking_level=&quot;high&quot;</code>, capturing <code>ttft_ms</code>, <code>total_ms</code>, internal <code>thoughts_token_count</code>, and visible <code>candidates_token_count</code> from <code>usage_metadata</code> and printing a formatted comparison table:</p>
 
   </div>
   <div class="nb-cell nb-code-cell">
     <div class="nb-input">
       <div class="nb-prompt nb-in-prompt">In [3]:</div>
       <div class="nb-code-area">
-        <pre><code class="language-python"><span class="kn">from</span><span class="w"> </span><span class="nn">google.genai</span><span class="w"> </span><span class="kn">import</span> <span class="n">types</span>
+        <pre><code class="language-python"><span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">google.genai</span><span class="w"> </span><span class="kn">import</span> <span class="n">types</span>
 
-<span class="n">prompt</span> <span class="o">=</span> <span class="p">(</span>
-    <span class="s2">"A service handles 120 req/s. Cache hits (70%) take 8 ms; "</span>
-    <span class="s2">"cache misses (30%) call Gemini taking 420 ms. Compute weighted average latency in ms."</span>
-<span class="p">)</span>
-<span class="n">results</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="n">prompt</span> <span class="o">=</span> <span class="s2">"What is 27 * 43 + 19?"</span>
+<span class="n">rows</span> <span class="o">=</span> <span class="p">[]</span>
 
-<span class="k">for</span> <span class="n">label</span><span class="p">,</span> <span class="n">budget</span> <span class="ow">in</span> <span class="p">[(</span><span class="s2">"Budget 0 (Off)"</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="s2">"Budget 1024 (Capped)"</span><span class="p">,</span> <span class="mi">1024</span><span class="p">)]:</span>
+<span class="k">for</span> <span class="n">level</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"low"</span><span class="p">,</span> <span class="s2">"high"</span><span class="p">):</span>
     <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span>
     <span class="n">ttft_ms</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">usage</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">chunks</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="n">client</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">generate_content_stream</span><span class="p">(</span>
-        <span class="n">model</span><span class="o">=</span><span class="s2">"gemini-2.5-flash"</span><span class="p">,</span>
+        <span class="n">model</span><span class="o">=</span><span class="n">MODEL</span><span class="p">,</span>
         <span class="n">contents</span><span class="o">=</span><span class="n">prompt</span><span class="p">,</span>
         <span class="n">config</span><span class="o">=</span><span class="n">types</span><span class="o">.</span><span class="n">GenerateContentConfig</span><span class="p">(</span>
-            <span class="n">thinking_config</span><span class="o">=</span><span class="n">types</span><span class="o">.</span><span class="n">ThinkingConfig</span><span class="p">(</span><span class="n">thinking_budget</span><span class="o">=</span><span class="n">budget</span><span class="p">),</span>
+            <span class="n">thinking_config</span><span class="o">=</span><span class="n">types</span><span class="o">.</span><span class="n">ThinkingConfig</span><span class="p">(</span><span class="n">thinking_level</span><span class="o">=</span><span class="n">level</span><span class="p">),</span>
         <span class="p">),</span>
     <span class="p">):</span>
-        <span class="k">if</span> <span class="n">chunk</span><span class="o">.</span><span class="n">text</span> <span class="ow">and</span> <span class="n">ttft_ms</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">ttft_ms</span> <span class="o">=</span> <span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span> <span class="o">-</span> <span class="n">t0</span><span class="p">)</span> <span class="o">*</span> <span class="mi">1000</span>
+        <span class="k">if</span> <span class="n">chunk</span><span class="o">.</span><span class="n">text</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">ttft_ms</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">ttft_ms</span> <span class="o">=</span> <span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span> <span class="o">-</span> <span class="n">t0</span><span class="p">)</span> <span class="o">*</span> <span class="mi">1000</span>
+            <span class="n">chunks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">chunk</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">chunk</span><span class="o">.</span><span class="n">usage_metadata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">usage</span> <span class="o">=</span> <span class="n">chunk</span><span class="o">.</span><span class="n">usage_metadata</span>
 
     <span class="n">total_ms</span> <span class="o">=</span> <span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span> <span class="o">-</span> <span class="n">t0</span><span class="p">)</span> <span class="o">*</span> <span class="mi">1000</span>
     <span class="n">thoughts_tokens</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">usage</span><span class="p">,</span> <span class="s2">"thoughts_token_count"</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">or</span> <span class="mi">0</span>
-    <span class="n">candidates_tokens</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">usage</span><span class="p">,</span> <span class="s2">"candidates_token_count"</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">or</span> <span class="mi">0</span>
+    <span class="n">output_tokens</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">usage</span><span class="p">,</span> <span class="s2">"candidates_token_count"</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">or</span> <span class="mi">0</span>
+    <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">level</span><span class="p">,</span> <span class="n">ttft_ms</span> <span class="ow">or</span> <span class="n">total_ms</span><span class="p">,</span> <span class="n">total_ms</span><span class="p">,</span> <span class="n">thoughts_tokens</span><span class="p">,</span> <span class="n">output_tokens</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"[</span><span class="si">{</span><span class="n">level</span><span class="si">}</span><span class="s2">] </span><span class="si">{</span><span class="s1">''</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">chunks</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
-    <span class="n">results</span><span class="p">[</span><span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">"ttft_ms"</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="n">ttft_ms</span> <span class="ow">or</span> <span class="n">total_ms</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
-        <span class="s2">"total_ms"</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="n">total_ms</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
-        <span class="s2">"thoughts_token_count"</span><span class="p">:</span> <span class="n">thoughts_tokens</span><span class="p">,</span>
-        <span class="s2">"candidates_token_count"</span><span class="p">:</span> <span class="n">candidates_tokens</span><span class="p">,</span>
-    <span class="p">}</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">results</span><span class="p">[</span><span class="n">label</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-</code></pre>
-      </div>
-    </div>
-  </div>
-  <div class="nb-cell nb-markdown-cell">
-<h3>Visualizing Measured Latency &amp; Token Footprint in Colab</h3>
-<p>Because Drawlib renders directly inline inside Jupyter and Google Colab cells (<code>setup(..., cwd=True)</code> + <code>show()</code>), we can plot <code>results</code> right inside the notebook using <code>BarChart</code>:</p>
-
-  </div>
-  <div class="nb-cell nb-code-cell">
-    <div class="nb-input">
-      <div class="nb-prompt nb-in-prompt">In [4]:</div>
-      <div class="nb-code-area">
-        <pre><code class="language-python"><span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.canvas</span><span class="w"> </span><span class="kn">import</span> <span class="n">setup</span><span class="p">,</span> <span class="n">show</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.charts.bar</span><span class="w"> </span><span class="kn">import</span> <span class="n">BarChart</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.styles</span><span class="w"> </span><span class="kn">import</span> <span class="n">Styles</span>
-
-<span class="n">setup</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mi">116</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">56</span><span class="p">,</span> <span class="n">cwd</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
-<span class="n">metrics</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"ttft_ms"</span><span class="p">,</span> <span class="s2">"total_ms"</span><span class="p">,</span> <span class="s2">"thoughts_token_count"</span><span class="p">,</span> <span class="s2">"candidates_token_count"</span><span class="p">]</span>
-<span class="n">chart</span> <span class="o">=</span> <span class="n">BarChart</span><span class="p">(</span>
-    <span class="n">axis_line_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">MutedDashed</span><span class="p">,</span>
-    <span class="n">categories</span><span class="o">=</span><span class="p">[</span><span class="s2">"TTFT (ms)"</span><span class="p">,</span> <span class="s2">"Total (ms)"</span><span class="p">,</span> <span class="s2">"Thoughts Tok"</span><span class="p">,</span> <span class="s2">"Output Tok"</span><span class="p">],</span>
-    <span class="n">width</span><span class="o">=</span><span class="mf">98.0</span><span class="p">,</span>
-    <span class="n">height</span><span class="o">=</span><span class="mf">38.0</span><span class="p">,</span>
-    <span class="n">title</span><span class="o">=</span><span class="s2">"Latency &amp; Token Footprint: Budget 0 vs. Budget 1024"</span><span class="p">,</span>
-    <span class="n">title_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">BlackBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">11.5</span><span class="p">),</span>
-    <span class="n">bar_mode</span><span class="o">=</span><span class="s2">"group"</span><span class="p">,</span>
-    <span class="n">bar_width_ratio</span><span class="o">=</span><span class="mf">0.68</span><span class="p">,</span>
-    <span class="n">bar_r</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span>
-    <span class="n">axis_text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Muted</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">),</span>
-    <span class="n">grid_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">MutedThin</span><span class="p">,</span>
-    <span class="n">value_text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">),</span>
-    <span class="n">value_format</span><span class="o">=</span><span class="s2">"</span><span class="si">{:.0f}</span><span class="s2">"</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="n">chart</span><span class="o">.</span><span class="n">add_series</span><span class="p">(</span>
-    <span class="s2">"Budget 0 (Off)"</span><span class="p">,</span>
-    <span class="p">[</span><span class="n">results</span><span class="p">[</span><span class="s2">"Budget 0 (Off)"</span><span class="p">][</span><span class="n">m</span><span class="p">]</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">metrics</span><span class="p">],</span>
-    <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryFlat</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="n">chart</span><span class="o">.</span><span class="n">add_series</span><span class="p">(</span>
-    <span class="s2">"Budget 1024 (Capped)"</span><span class="p">,</span>
-    <span class="p">[</span><span class="n">results</span><span class="p">[</span><span class="s2">"Budget 1024 (Capped)"</span><span class="p">][</span><span class="n">m</span><span class="p">]</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">metrics</span><span class="p">],</span>
-    <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">SecondaryNeutral</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="n">chart</span><span class="o">.</span><span class="n">draw</span><span class="p">(</span><span class="n">xy</span><span class="o">=</span><span class="p">(</span><span class="mf">9.0</span><span class="p">,</span> <span class="mf">12.0</span><span class="p">))</span>
-<span class="n">chart</span><span class="o">.</span><span class="n">draw_legend</span><span class="p">(</span>
-    <span class="n">xy</span><span class="o">=</span><span class="p">(</span><span class="mf">28.0</span><span class="p">,</span> <span class="mf">5.5</span><span class="p">),</span>
-    <span class="n">text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">),</span>
-    <span class="n">orientation</span><span class="o">=</span><span class="s2">"horizontal"</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="n">show</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="si">{</span><span class="s1">'Level'</span><span class="si">:</span><span class="s2">&lt;8</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="s1">'TTFT (ms)'</span><span class="si">:</span><span class="s2">&gt;10</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="s1">'Total (ms)'</span><span class="si">:</span><span class="s2">&gt;11</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="s1">'Thoughts Tok'</span><span class="si">:</span><span class="s2">&gt;14</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="s1">'Output Tok'</span><span class="si">:</span><span class="s2">&gt;12</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"-"</span> <span class="o">*</span> <span class="mi">59</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">level</span><span class="p">,</span> <span class="n">ttft_ms</span><span class="p">,</span> <span class="n">total_ms</span><span class="p">,</span> <span class="n">thoughts_tokens</span><span class="p">,</span> <span class="n">output_tokens</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">level</span><span class="si">:</span><span class="s2">&lt;8</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">ttft_ms</span><span class="si">:</span><span class="s2">&gt;10.1f</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">total_ms</span><span class="si">:</span><span class="s2">&gt;11.1f</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">thoughts_tokens</span><span class="si">:</span><span class="s2">&gt;14d</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">output_tokens</span><span class="si">:</span><span class="s2">&gt;12d</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </code></pre>
       </div>
     </div>
@@ -498,9 +451,9 @@ Combining progressive streaming with an explicit thinking budget turns multi-sec
   <div class="nb-cell nb-markdown-cell">
 <h3>Key Takeaways</h3>
 <ul>
-<li><strong>Stream User-Facing Text (<code>generate_content_stream</code>)</strong>: Eliminates full-response buffering so users read the opening sentence immediately after reasoning finishes.</li>
-<li><strong>Match <code>thinking_budget</code> to Route SLAs</strong>: Set <code>thinking_budget=0</code> on latency-critical routers and classifiers, cap mid-tier workflows (<code>512</code>–<code>4096</code>), and keep <code>-1</code> (dynamic) for complex analytical reasoning.</li>
-<li><strong>Inspect <code>thoughts_token_count</code></strong>: Monitor <code>response.usage_metadata.thoughts_token_count</code> alongside <code>candidates_token_count</code> to track reasoning token utilization in production.</li>
+<li><strong>Stream User-Facing Text (<code>generate_content_stream</code>)</strong>: Eliminates full-response buffering so users read the opening sentence immediately after prefill and reasoning finish.</li>
+<li><strong>Match <code>thinking_level</code> to Route SLAs</strong>: On <code>gemini-3.8-flash</code>, set <code>thinking_level=&quot;low&quot;</code> (<code>0</code> thoughts) on latency-critical routers and chat, keep <code>&quot;medium&quot;</code> (default) for general workloads, and reserve <code>&quot;high&quot;</code> for complex analytical reasoning.</li>
+<li><strong>Inspect <code>thoughts_token_count</code></strong>: Monitor <code>usage_metadata.thoughts_token_count</code> alongside <code>candidates_token_count</code> to track internal reasoning token utilization and latency impact in production.</li>
 </ul>
 
   </div>

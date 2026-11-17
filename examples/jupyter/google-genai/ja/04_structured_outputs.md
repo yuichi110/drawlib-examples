@@ -32,7 +32,7 @@ phosphor.file_code((stage_xs[0], 46.8), width=6.0, style=Styles.PrimaryBold)
 text((stage_xs[0], 39.0), "1. 入力とスキーマ", style=Styles.DarkBold.patch(text_size=10.8))
 text(
     (stage_xs[0], 25.0),
-    "生インシデントログ\n+\nIncidentReport\n(BaseModel)",
+    "障害報告テキスト\n+\nIncidentSummary\n(BaseModel)",
     style=Styles.Dark.patch(text_size=10.0),
 )
 
@@ -42,7 +42,7 @@ phosphor.sparkle((stage_xs[1], 46.8), width=6.0, style=Styles.WhiteBold)
 text((stage_xs[1], 39.0), "2. 文法制約デコード", style=Styles.WhiteBold.patch(text_size=10.8))
 text(
     (stage_xs[1], 25.0),
-    "application/json\n+\nresponse_schema\n(Gemini 2.5)",
+    "application/json\n+\nresponse_schema\n(Gemini 3.8)",
     style=Styles.White.patch(text_size=10.0),
 )
 
@@ -56,13 +56,13 @@ text(
     style=Styles.Dark.patch(text_size=10.0),
 )
 
-# Stage 4: Downstream Persistence & Drawlib Table (SecondaryNeutral)
+# Stage 4: Downstream Typed Application & DB (SecondaryNeutral)
 rectangle((stage_xs[3], card_cy), width=card_w, height=card_h, style=Styles.SecondaryNeutral.patch(shape_r=2.0))
-phosphor.table((stage_xs[3], 46.8), width=6.0, style=Styles.SecondaryBold)
-text((stage_xs[3], 39.0), "4. DB・Table 出力", style=Styles.DarkBold.patch(text_size=10.8))
+phosphor.database((stage_xs[3], 46.8), width=6.0, style=Styles.SecondaryBold)
+text((stage_xs[3], 39.0), "4. アプリ / DB 連携", style=Styles.DarkBold.patch(text_size=10.8))
 text(
     (stage_xs[3], 25.0),
-    "型安全なDB保存\nアラート通知・\nDrawlib Table",
+    "キュー振り分け\nアラート通知・\n型安全なDB保存",
     style=Styles.Dark.patch(text_size=10.0),
 )
 
@@ -83,18 +83,20 @@ save()
 
 ---
 
-## 1. 3行のクライアント初期化とネストされた Pydantic スキーマ定義
+## 1. クライアント初期化とネストされた Pydantic スキーマ定義
 
-まず、Google Colab のシークレット（左サイドバーの `🔑` アイコン）に保存した `GEMINI_API_KEY` を読み込み、`google-genai` クライアントを初期化します。
+まず、セルの先頭で `MODEL = "gemini-3.8-flash"` を定数として定義し（モデルの切り替えを1箇所で管理できるようにします）、Google Colab のシークレット（左サイドバーの `🔑` アイコン）に保存した `GEMINI_API_KEY` を読み込んで `google-genai` クライアントを初期化します。
 
 ```python
+MODEL = "gemini-3.8-flash"
+
 from google.colab import userdata
 from google import genai
 
 client = genai.Client(api_key=userdata.get("GEMINI_API_KEY"))
 ```
 
-次に、非構造化の障害対応ログからポストモーテム情報を構造化抽出するため、ネストされた Pydantic スキーマ（`IncidentSummary` 内の `list[ActionItem]`）を定義します。`response_schema` に `IncidentSummary` クラスを渡すだけで、SDK が JSON Schema への変換と `response.parsed` へのデシリアライズを自動実行します。
+次に、簡潔な障害報告文からポストモーテム情報を構造化抽出するため、ネストされた Pydantic スキーマ（`IncidentSummary` 内の `list[ActionItem]`）を定義します。`response_schema` に `IncidentSummary` クラスを渡すだけで、SDK が JSON Schema への変換と `response.parsed` へのデシリアライズを自動実行します（`pydantic` は Google Colab に標準搭載されており、`google-genai` の依存関係としても同梱されています）。
 
 ```python
 from typing import Literal
@@ -104,9 +106,9 @@ from pydantic import BaseModel, Field
 
 
 class ActionItem(BaseModel):
-    owner: str = Field(description="対応タスクを担当するチーム名または担当者名。")
-    task: str = Field(description="具体的かつ実行可能な再発防止エンジニアリング施策。")
-    priority: Literal["P0", "P1", "P2"] = Field(description="P0（最優先）から P2 までの優先度区分。")
+    owner: str = Field(description="対応タスクを担当するチーム名。")
+    task: str = Field(description="具体的な再発防止施策。")
+    priority: Literal["P0", "P1", "P2"] = Field(description="優先度（P0が最優先）。")
 
 
 class IncidentSummary(BaseModel):
@@ -114,26 +116,14 @@ class IncidentSummary(BaseModel):
     severity: Literal["LOW", "MEDIUM", "HIGH", "CRITICAL"] = Field(
         description="顧客影響度に基づく重大度レベル。"
     )
-    root_cause: str = Field(description="技術的な根本原因を1文で要約した説明。")
-    affected_services: list[str] = Field(description="障害の影響を受けたマイクロサービス名の一覧。")
-    action_items: list[ActionItem] = Field(description="優先度付きの再発防止アクションアイテム一覧。")
+    root_cause: str = Field(description="技術的な根本原因の1文要約。")
+    affected_services: list[str] = Field(description="影響を受けたサービス名一覧。")
+    action_items: list[ActionItem] = Field(description="優先度付きの再発防止タスク一覧。")
 
-
-raw_incident_log = """
-[2026-04-12 14:03 UTC] PagerDuty アラート: checkout-api の 5xx エラー率が 38% に急増。
-[14:09 UTC] オンコール SRE が PostgreSQL コネクションプールの使用率 100% 飽和を確認。
-[14:16 UTC] 根本原因を特定: 上流の決済 Webhook タイムアウトを契機に、payment-worker から
-checkout-api への無制限なリトライストームが発生していた。
-[14:24 UTC] サーキットブレーカーによる負荷遮断と滞留ワーカーの再起動により復旧。
-振り返りミーティングで合意した恒久対策:
-1. SRE チーム: 指数バックオフの上限設定とサーキットブレーカー閾値の即時適用 (P0)
-2. 決済チーム: PgBouncer プール使用率 80% 時点での飽和事前アラート追加 (P1)
-3. 基盤チーム: 次スプリントの負荷試験で Webhook タイムアウト時の再現テストを実施 (P2)
-"""
 
 response = client.models.generate_content(
-    model="gemini-2.5-flash",
-    contents=raw_incident_log,
+    model=MODEL,
+    contents="Redisのタイムアウトにより、決済APIで12分間にわたり502エラーが発生しました。",
     config=types.GenerateContentConfig(
         response_mime_type="application/json",
         response_schema=IncidentSummary,
@@ -149,7 +139,7 @@ print(summary.model_dump_json(indent=2))
 
 ---
 
-## 2. スキーマ設計のベストプラクティスと Drawlib による抽出データの可視化
+## 2. スキーマ設計のベストプラクティスと高速・決定論的な構造化抽出
 
 文法制約付きデコーディングは JSON の構文破損を100%防ぎますが、実務での **抽出精度** と **応答速度** をさらに高めるには、以下の4つの Pydantic スキーマ設計原則が有効です。
 
@@ -184,7 +174,7 @@ left_cards = CardList(
 )
 left_cards.add(
     "1. Literal / Enum で分類値を固定",
-    "自由記述の str を避け、重大度や\n優先度の候補値集合を厳密に制限。",
+    "自由記述の str を避け、重大度や\nキュー名の候補値集合を厳密に制限。",
     badge_text="R1",
     icon=phosphor.tag,
     style=Styles.PrimaryNeutral.patch(shape_r=2.0),
@@ -219,8 +209,8 @@ right_cards.add(
     icon=phosphor.tree_structure,
 )
 right_cards.add(
-    "4. 低 temperature + thinking_budget=0",
-    "temperature=0.0〜0.2 とゼロ思考予算の\n併用で定型抽出を高速・決定論的に実行。",
+    '4. 低温度 + thinking_level="low"',
+    "temperature=0.0〜0.2 と低思考レベルの\n併用で Gemini 3.8 の抽出を高速化。",
     badge_text="R4",
     icon=phosphor.lightning,
     style=Styles.SecondaryNeutral.patch(shape_r=2.0),
@@ -232,58 +222,46 @@ save()
 
 `response_schema` 用のモデルを設計する際は、次の4点を意識してください。
 
-1. **閉じたカテゴリには `Literal` または `Enum` を使う**: `Literal["P0", "P1", "P2"]` のように選択肢を列挙することで、表記揺れや想定外ラベルによる後続処理の分岐ミスを防止できます。
+1. **閉じたカテゴリには `Literal` または `Enum` を使う**: `Literal["P0", "P1", "P2"]` や `str, Enum` で選択肢を列挙することで、表記揺れや想定外ラベルによる後続処理の分岐ミスを防止できます。
 2. **任意の `dict[str, Any]` ではなく `list[SubModel]` を合成する**: キー名が不定の辞書型は文法制約を効かせにくいため、明示的な属性を持つサブモデルの配列としてモデリングします。
-3. **曖昧な指標には簡潔な `Field(description=...)` を添える**: `description` は JSON Schema にそのまま埋め込まれるため、プロンプト本文を肥大化させずに文字数制限や判定基準をモデルへ伝達できます。
-4. **高速・決定論的な抽出では `temperature=0.0`〜`0.2` と `thinking_budget=0` を組み合わせる**: `gemini-2.5-flash` で定型データ抽出を行う場合、`thinking_config=types.ThinkingConfig(thinking_budget=0)` を併用するとレイテンシと出力のばらつきを最小化できます。
+3. **曖昧な指標には簡潔な `Field(description=...)` を添える**: `description` は JSON Schema にそのまま埋め込まれるため、プロンプト本文を肥大化させずに文字数制限や緊急度の判定基準をモデルへ伝達できます。
+4. **高速・決定論的な抽出では `temperature=0.0`〜`0.2` と `thinking_level="low"` を組み合わせる**: `gemini-3.8-flash` で定型データ抽出や分類を行う場合、`thinking_config=types.ThinkingConfig(thinking_level="low")` を併用するとレイテンシと出力のばらつきを最小化できます。
 
-抽出結果の `summary.action_items` はすでに型安全な `list[ActionItem]` になっているため、そのまま **Drawlib の `Table`**（`setup(..., cwd=True)` + `Table` + `show()`）へ渡すだけで、ノートブックセル内にエグゼクティブ向けの対策一覧表を描画できます。
+これら4つの原則を組み合わせ、`Enum` と `list[RoutedIssue]` および `thinking_level="low"` を用いて、複数の課題を含む問い合わせ文を型安全な振り分けレコードへ分割し、`response.parsed` の各要素を直接ループ処理してみましょう。
 
 ```python
-from drawlib.canvas import setup, show
-from drawlib.smartarts import Table
-from drawlib.styles import Colors, Styles
-from drawlib.text import text
+from enum import Enum
 
-setup(width=120, height=52, cwd=True)
 
-text(
-    (60, 46.5),
-    f"[{summary.severity}] {summary.title}",
-    style=Styles.DarkBold.patch(text_size=11.5),
+class TicketQueue(str, Enum):
+    BILLING = "billing"
+    AUTH = "auth"
+    ANALYTICS = "analytics"
+
+
+class RoutedIssue(BaseModel):
+    queue: TicketQueue = Field(description="振り分け先のサポートキュー。")
+    urgent: bool = Field(description="決済またはログイン不能な場合はTrue。")
+    summary: str = Field(description="30文字以内の簡潔な課題要約。")
+
+
+class TriageBatch(BaseModel):
+    issues: list[RoutedIssue] = Field(description="メッセージから抽出された個別課題の一覧。")
+
+
+triage_response = client.models.generate_content(
+    model=MODEL,
+    contents="請求書#8821で二重決済が発生しており、CSVレポートのエクスポートも失敗します。",
+    config=types.GenerateContentConfig(
+        response_mime_type="application/json",
+        response_schema=TriageBatch,
+        temperature=0.1,
+        thinking_config=types.ThinkingConfig(thinking_level="low"),
+    ),
 )
 
-items = summary.action_items[:4]
-rows = [["優先度", "担当", "再発防止アクション"]] + [
-    [item.priority, item.owner, item.task] for item in items
-]
-
-table = Table(
-    cell_style=Styles.White,
-    text_style=Styles.Dark.patch(text_size=10.0),
-    header_cell_style=Styles.PrimaryFlat,
-    header_text_style=Styles.WhiteBold.patch(text_size=10.5),
-    border_style=Styles.MutedThin,
-)
-table.set_style_cell_evenodd(
-    even_color=Colors.Light,
-    even_text_style=Styles.Dark.patch(text_size=10.0),
-    odd_color=Colors.White,
-    odd_text_style=Styles.Dark.patch(text_size=10.0),
-)
-table.set_style_cell_header(
-    background_color=Colors.Primary,
-    text_style=Styles.WhiteBold.patch(text_size=10.5),
-)
-
-row_heights = [9.0] + [27.0 / max(len(items), 1)] * len(items)
-table.draw_flexible(
-    xy=(6, 41),
-    column_widths=[18, 26, 64],
-    row_heights=row_heights,
-    data=rows,
-    align="top_left",
-)
-
-show()
+batch: TriageBatch = triage_response.parsed
+for item in batch.issues:
+    flag = "URGENT" if item.urgent else "NORMAL"
+    print(f"[{flag}] -> {item.queue.value}: {item.summary}")
 ```

@@ -1,9 +1,9 @@
 # 03. Streaming 配信と ThinkingConfig による思考制御
 
-対話型 AI アプリケーションの体感速度は、**Streaming 配信 (`generate_content_stream`)** による最初の1トークン到達時間（TTFT: Time To First Token）の短縮と、**`types.ThinkingConfig(thinking_budget=...)`** によるタスク難度に応じた内部思考トークン量の最適化という2つの軸で改善できます。
-段階的なチャンク配信と明示的な思考バジェット制御を組み合わせることで、複雑な推論精度を維持しつつ、数秒かかっていたブロッキング待機をサブ秒のインタラクティブな応答体験へと変革できます。
+**`gemini-3.8-flash`** を用いた対話型 AI アプリケーションの体感速度は、**Streaming 配信 (`generate_content_stream`)** による最初の1トークン到達時間（TTFT: Time To First Token）の短縮と、**`types.ThinkingConfig(thinking_level=...)`** によるタスク難度に応じた思考レベル（`"low"`・`"medium"`・`"high"`）の最適化という2つの軸で改善できます。
+段階的なチャンク配信と明示的な思考レベル制御を組み合わせることで、複雑な推論精度を維持しつつ、数秒かかっていたブロッキング待機をサブ秒のインタラクティブな応答体験へと変革できます。
 
-```drawlib align=center code=fold file=ch03_streaming_ttft_ja.png caption="図3-1: ブロッキング生成と Streaming 配信・思考フェーズの TTFT タイムライン比較"
+```drawlib align=center code=fold file=ch03_streaming_ttft_ja.png caption="図3-1: ブロッキング生成と Streaming 配信・thinking_level の TTFT タイムライン比較 (gemini-3.8-flash)"
 from drawlib.canvas import save, setup
 from drawlib.icons import phosphor
 from drawlib.lines import line
@@ -11,33 +11,33 @@ from drawlib.shapes import rectangle
 from drawlib.styles import Styles
 from drawlib.text import text
 
-setup(width=152, height=74, dpi=150)
+setup(width=156, height=74, dpi=150)
 
 # Header labels
 text((6.0, 67.0), "配信モードと設定", style=Styles.DarkBold.patch(text_size=11.0, halign="left"))
 text(
-    (98.0, 67.0),
-    "リクエスト開始からの経過時間タイムライン (秒)",
+    (101.0, 67.0),
+    "gemini-3.8-flash 経過時間タイムライン (秒)",
     style=Styles.DarkBold.patch(text_size=11.0),
 )
 
-# Vertical timeline gridlines (0.0s to 3.0s -> x = 53.0 to 143.0, 30 units/sec)
+# Vertical timeline gridlines (0.0s to 3.0s -> x = 56.0 to 146.0, 30 units/sec)
 for i in range(7):
-    tx = 53.0 + i * 15.0
+    tx = 56.0 + i * 15.0
     sec = i * 0.5
     line((tx, 13.0), (tx, 62.5), style=Styles.MutedDashedThin)
     text((tx, 8.2), f"{sec:.1f}s", style=Styles.Muted.patch(text_size=10.0))
 
-line((53.0, 13.0), (143.0, 13.0), style=Styles.Dark)
+line((56.0, 13.0), (146.0, 13.0), style=Styles.Dark)
 
 # Row 1: Blocking generate_content()
-rectangle((28.0, 55.0), width=44.0, height=12.5, style=Styles.Neutral.patch(shape_r=1.8))
+rectangle((29.0, 55.0), width=46.0, height=12.5, style=Styles.Neutral.patch(shape_r=1.8))
 phosphor.hourglass((11.0, 55.0), width=4.4, style=Styles.Dark)
 text((15.2, 57.3), "1. ブロッキング呼び出し", style=Styles.DarkBold.patch(text_size=10.5, halign="left"))
 text((15.2, 52.3), "generate_content()", style=Styles.Muted.patch(text_size=10.0, halign="left"))
 
 rectangle(
-    (69.5, 55.0),
+    (72.5, 55.0),
     width=33.0,
     height=9.4,
     style=Styles.SecondaryNeutral.patch(shape_r=1.2),
@@ -45,7 +45,7 @@ rectangle(
     text_style=Styles.Dark.patch(text_size=10.0),
 )
 rectangle(
-    (111.8, 55.0),
+    (114.8, 55.0),
     width=50.4,
     height=9.4,
     style=Styles.Neutral.patch(shape_r=1.2),
@@ -53,14 +53,14 @@ rectangle(
     text_style=Styles.DarkBold.patch(text_size=10.0),
 )
 
-# Row 2: Streaming + Default Thinking
-rectangle((28.0, 38.5), width=44.0, height=12.5, style=Styles.Neutral.patch(shape_r=1.8))
+# Row 2: Streaming + thinking_level="medium" (Default)
+rectangle((29.0, 38.5), width=46.0, height=12.5, style=Styles.Neutral.patch(shape_r=1.8))
 phosphor.brain((11.0, 38.5), width=4.4, style=Styles.PrimaryBold)
 text((15.2, 40.8), "2. Stream + 通常思考", style=Styles.DarkBold.patch(text_size=10.5, halign="left"))
-text((15.2, 35.8), "動的思考 (-1: 既定)", style=Styles.Muted.patch(text_size=10.0, halign="left"))
+text((15.2, 35.8), 'thinking_level="medium"', style=Styles.Muted.patch(text_size=10.0, halign="left"))
 
 rectangle(
-    (69.5, 38.5),
+    (72.5, 38.5),
     width=33.0,
     height=9.4,
     style=Styles.SecondaryNeutral.patch(shape_r=1.2),
@@ -68,7 +68,7 @@ rectangle(
     text_style=Styles.Dark.patch(text_size=10.0),
 )
 rectangle(
-    (111.8, 38.5),
+    (114.8, 38.5),
     width=50.4,
     height=9.4,
     style=Styles.PrimaryNeutral.patch(shape_r=1.2),
@@ -76,33 +76,35 @@ rectangle(
     text_style=Styles.PrimaryBold.patch(text_size=10.0),
 )
 
-# Row 3: Streaming + thinking_budget=0 (Focal Hero)
-rectangle((28.0, 22.0), width=44.0, height=12.5, style=Styles.PrimaryNeutral.patch(shape_r=1.8))
+# Row 3: Streaming + thinking_level="low" (Focal Hero)
+rectangle((29.0, 22.0), width=46.0, height=12.5, style=Styles.PrimaryNeutral.patch(shape_r=1.8))
 phosphor.lightning((11.0, 22.0), width=4.4, style=Styles.PrimaryBold)
 text((15.2, 24.3), "3. 高速 Stream 配信", style=Styles.PrimaryBold.patch(text_size=10.5, halign="left"))
-text((15.2, 19.3), "thinking_budget=0", style=Styles.Dark.patch(text_size=10.0, halign="left"))
+text((15.2, 19.3), 'thinking_level="low"', style=Styles.Dark.patch(text_size=10.0, halign="left"))
 
-rectangle((57.0, 22.0), width=8.0, height=9.4, style=Styles.Neutral.patch(shape_r=1.0))
+rectangle((60.0, 22.0), width=8.0, height=9.4, style=Styles.Neutral.patch(shape_r=1.0))
 rectangle(
-    (83.8, 22.0),
+    (86.8, 22.0),
     width=44.4,
     height=9.4,
     style=Styles.PrimaryFlat.patch(shape_r=1.2),
     text="TTFT 0.28s・サブ秒即時配信",
     text_style=Styles.WhiteBold.patch(text_size=10.0),
 )
-text((108.5, 22.0), "1.75s で完了", style=Styles.PrimaryBold.patch(text_size=10.0, halign="left"))
+text((111.5, 22.0), "1.75s で完了", style=Styles.PrimaryBold.patch(text_size=10.0, halign="left"))
 
 save()
 ```
 
 ---
 
-## 1. 3行のクライアント初期化とプログレッシブ Streaming (`generate_content_stream`)
+## 1. クライアント初期化とプログレッシブ Streaming (`generate_content_stream`)
 
-まずは Google Colab の左サイドバーにある **🔑 シークレット (Secrets)** に登録した `GEMINI_API_KEY` を読み込み、最小3行で統合 `genai.Client` を初期化します。
+まずは使用するモデル `MODEL = "gemini-3.8-flash"` を定義し、Google Colab の左サイドバーにある **🔑 シークレット (Secrets)** に登録した `GEMINI_API_KEY` を読み込んで統合 `genai.Client` を初期化します。
 
 ```python
+MODEL = "gemini-3.8-flash"
+
 from google.colab import userdata
 from google import genai
 
@@ -118,8 +120,8 @@ t0 = time.perf_counter()
 ttft_ms = None
 
 for chunk in client.models.generate_content_stream(
-    model="gemini-2.5-flash",
-    contents="LLM API の実践的なレイテンシ最適化手法を4つ、1行1項目で簡潔に挙げてください。",
+    model=MODEL,
+    contents="3文で短いお話を書いてください。",
 ):
     if chunk.text:
         if ttft_ms is None:
@@ -134,15 +136,17 @@ print(f"\n\nTTFT: {ttft_ms:.0f} ms | Total: {total_ms:.0f} ms")
 
 ---
 
-## 2. `ThinkingConfig` (`thinking_budget`) による思考トークンの適正化
+## 2. `ThinkingConfig` (`thinking_level`) による思考レベルの適正化
 
-`gemini-2.5-flash` はハイブリッド推論モデルであり、最終的な出力トークンを生成する前に内部的な **思考トークン (Thinking Tokens)** を消費して回答計画や検証を行うことができます。内部思考は最初の出力トークンが返る *前* に実行されるため、`types.ThinkingConfig(thinking_budget=...)` の設定が TTFT とトークンコストに直結します。
+`gemini-3.8-flash` は推論機能を備えたモデルであり、可視の出力トークンを生成する前に内部的な **思考トークン (`thoughts_token_count`)** を消費して回答計画や検証を行うことができます。内部思考は最初の出力トークンが返る *前* に実行されるため、`types.ThinkingConfig(thinking_level=...)` に指定する3段階の思考レベルが TTFT とトークンコストに直結します。
 
-- **`thinking_budget=0`（思考オフ・最速応答）**: `gemini-2.5-flash` の内部思考を無効化し、意図分類・情報抽出・ルーティング・シンプルなチャット応答でサブ秒の TTFT を実現します。
-- **`thinking_budget=1024`（上限固定、`512`〜`4096`）**: 推論コストと p95 レイテンシの上限を予測可能な範囲に抑えつつ、RAG 要約や SQL 生成など中程度の複雑さを持つタスクの品質を高めます。
-- **動的デフォルト（`thinking_budget=-1` または省略時）**: プロンプトの難易度に応じてモデルが思考の深さを自動調整します。多段階の数学推論、コード生成、アーキテクチャ設計の比較検討に最適です。
+- **`thinking_level="low"`（思考 0 トークン・最速 TTFT）**: `gemini-3.8-flash` では内部思考を `0` トークンに抑え、日常チャット・ルーティング・意図分類・情報抽出でサブ秒の高速 TTFT を実現します。
+- **`thinking_level="medium"`（既定値・バランス型の動的思考）**: プロンプトの難易度に応じて思考の深さを自動調整します。単純な質問では余分な思考を省きつつ、RAG 要約や SQL 生成では適切な推論を行います。
+- **`thinking_level="high"`（深い多段階推論）**: 多段階の数学計算、アルゴリズム実装、アーキテクチャのトレードオフ分析など、精度重視のタスクに十分な思考トークンを割り当てます。
 
-```drawlib align=center code=fold file=ch03_thinking_tiers_ja.png caption="図3-2: タスク難易度に応じた ThinkingConfig (thinking_budget) 設計ガイド"
+> **重要 (`gemini-3.8-flash` の API 仕様):** Gemini 2.5 世代の数値指定 `thinking_budget` は非推奨（レガシー互換）となったため、`thinking_level` を使用してください（両方の同時指定はエラーになります）。また `gemini-3.8-flash` がサポートする値は `"low"`・`"medium"`・`"high"` の3段階のみであり、`"minimal"` や `"xhigh"` を指定すると HTTP `400 INVALID_ARGUMENT` が返ります。
+
+```drawlib align=center code=fold file=ch03_thinking_tiers_ja.png caption="図3-2: タスク難易度に応じた ThinkingConfig (thinking_level) 設計ガイド (gemini-3.8-flash)"
 from drawlib.canvas import save, setup
 from drawlib.icons import phosphor
 from drawlib.smartarts import CardList
@@ -153,7 +157,7 @@ setup(width=152, height=68, dpi=150)
 
 text(
     (76.0, 61.5),
-    "ワークロード別の thinking_budget 選定ガイド (gemini-2.5-flash)",
+    "ワークロード別の thinking_level 選定ガイド (gemini-3.8-flash)",
     style=Styles.DarkBold.patch(text_size=12.0),
 )
 
@@ -170,21 +174,21 @@ tiers = CardList(
     spacing=5.0,
 )
 tiers.add(
-    "Budget = 0 (オフ)",
-    "サブ秒の高速 TTFT\n分類・ルーティング・\n軽量チャット応答",
+    'level = "low"',
+    "思考 0 トークン・最速 TTFT\nチャット・ルーティング・\n情報抽出・意図分類",
     icon=phosphor.lightning,
     badge_style=Styles.PrimaryFlat,
     icon_style=Styles.WhiteBold,
 )
 tiers.add(
-    "Budget = 1024",
-    "上限固定 (512〜4096)\nRAG 要約・SQL 生成・\n予測可能な応答速度",
+    'level = "medium"',
+    "既定値・バランス型動的思考\nRAG 要約・SQL 生成・\n一般業務ワークロード",
     icon=phosphor.sliders,
     style=Styles.PrimaryNeutral,
 )
 tiers.add(
-    "動的自動 (-1)",
-    "難度に応じ自動拡張\n多段階の数学・コード・\nシステム設計分析",
+    'level = "high"',
+    "深い多段階推論トークン\n多段階の数学・コード・\nシステム設計分析",
     icon=phosphor.brain,
 )
 tiers.draw(xy=(6.0, 6.5), width=140.0, height=49.5, align="bottom_left")
@@ -192,97 +196,51 @@ tiers.draw(xy=(6.0, 6.5), width=140.0, height=49.5, align="bottom_left")
 save()
 ```
 
-### `thinking_budget=0` と `thinking_budget=1024` の実測ベンチマーク
+### `thinking_level="low"` と `thinking_level="high"` の実測ベンチマーク
 
-同一の計算プロンプトに対して `thinking_budget=0` と `thinking_budget=1024` をそれぞれ実行し、ストリームの `usage_metadata` から `ttft_ms`、`total_ms`、内部思考トークン数 (`thoughts_token_count`)、出力トークン数 (`candidates_token_count`) を記録して比較します。
+同一の計算プロンプトに対して `thinking_level="low"` と `thinking_level="high"` をそれぞれ実行し、ストリームの `usage_metadata` から `ttft_ms`、`total_ms`、内部思考トークン数 (`thoughts_token_count`)、出力トークン数 (`candidates_token_count`) を取得して比較テーブルを出力します。
 
 ```python
+import time
 from google.genai import types
 
-prompt = (
-    "ある API は毎秒120リクエストを処理します。キャッシュヒット(70%)は 8 ms、"
-    "ミス(30%)は Gemini 呼び出しで 420 ms かかります。加重平均レイテンシ(ms)を求めてください。"
-)
-results = {}
+prompt = "27 * 43 + 19 を計算してください。"
+rows = []
 
-for label, budget in [("Budget 0 (Off)", 0), ("Budget 1024 (Capped)", 1024)]:
+for level in ("low", "high"):
     t0 = time.perf_counter()
     ttft_ms = None
     usage = None
+    chunks = []
 
     for chunk in client.models.generate_content_stream(
-        model="gemini-2.5-flash",
+        model=MODEL,
         contents=prompt,
         config=types.GenerateContentConfig(
-            thinking_config=types.ThinkingConfig(thinking_budget=budget),
+            thinking_config=types.ThinkingConfig(thinking_level=level),
         ),
     ):
-        if chunk.text and ttft_ms is None:
-            ttft_ms = (time.perf_counter() - t0) * 1000
+        if chunk.text:
+            if ttft_ms is None:
+                ttft_ms = (time.perf_counter() - t0) * 1000
+            chunks.append(chunk.text)
         if chunk.usage_metadata is not None:
             usage = chunk.usage_metadata
 
     total_ms = (time.perf_counter() - t0) * 1000
     thoughts_tokens = getattr(usage, "thoughts_token_count", 0) or 0
-    candidates_tokens = getattr(usage, "candidates_token_count", 0) or 0
+    output_tokens = getattr(usage, "candidates_token_count", 0) or 0
+    rows.append((level, ttft_ms or total_ms, total_ms, thoughts_tokens, output_tokens))
+    print(f"[{level}] {''.join(chunks).strip()}")
 
-    results[label] = {
-        "ttft_ms": round(ttft_ms or total_ms, 1),
-        "total_ms": round(total_ms, 1),
-        "thoughts_token_count": thoughts_tokens,
-        "candidates_token_count": candidates_tokens,
-    }
-    print(f"{label}: {results[label]}")
-```
-
-### Colab セル内での実測レイテンシ・トークン比較グラフ描画
-
-Drawlib は `setup(..., cwd=True)` と `show()` を使うことで Jupyter / Google Colab のセル出力へ直接チャートを描画できます。上で計測した `results` を `BarChart` で可視化してみましょう。
-
-```python
-from drawlib.canvas import setup, show
-from drawlib.charts.bar import BarChart
-from drawlib.styles import Styles
-
-setup(width=116, height=56, cwd=True)
-
-metrics = ["ttft_ms", "total_ms", "thoughts_token_count", "candidates_token_count"]
-chart = BarChart(
-    axis_line_style=Styles.MutedDashed,
-    categories=["TTFT (ms)", "Total (ms)", "Thoughts Tok", "Output Tok"],
-    width=98.0,
-    height=38.0,
-    title="Latency & Token Footprint: Budget 0 vs. Budget 1024",
-    title_style=Styles.BlackBold.patch(text_size=11.5),
-    bar_mode="group",
-    bar_width_ratio=0.68,
-    bar_r=0.9,
-    axis_text_style=Styles.Muted.patch(text_size=10.0),
-    grid_style=Styles.MutedThin,
-    value_text_style=Styles.DarkBold.patch(text_size=10.0),
-    value_format="{:.0f}",
-)
-chart.add_series(
-    "Budget 0 (Off)",
-    [results["Budget 0 (Off)"][m] for m in metrics],
-    style=Styles.PrimaryFlat,
-)
-chart.add_series(
-    "Budget 1024 (Capped)",
-    [results["Budget 1024 (Capped)"][m] for m in metrics],
-    style=Styles.SecondaryNeutral,
-)
-chart.draw(xy=(9.0, 12.0))
-chart.draw_legend(
-    xy=(28.0, 5.5),
-    text_style=Styles.DarkBold.patch(text_size=10.0),
-    orientation="horizontal",
-)
-show()
+print(f"\n{'Level':<8} {'TTFT (ms)':>10} {'Total (ms)':>11} {'Thoughts Tok':>14} {'Output Tok':>12}")
+print("-" * 59)
+for level, ttft_ms, total_ms, thoughts_tokens, output_tokens in rows:
+    print(f"{level:<8} {ttft_ms:>10.1f} {total_ms:>11.1f} {thoughts_tokens:>14d} {output_tokens:>12d}")
 ```
 
 ### まとめ
 
 - **ユーザー向け応答は `generate_content_stream` を基本にする**: 全文の生成完了を待たずに思考完了直後からチャンクを順次表示し、体感待機時間を大幅に短縮できます。
-- **エンドポイントの SLA に合わせて `thinking_budget` を設計する**: 高速ルーティングや分類には `0`、定型業務や RAG には上限値（`512`〜`4096`）、高度な推論タスクには動的な `-1` を使い分けます。
-- **`thoughts_token_count` を継続モニタリングする**: `usage_metadata.thoughts_token_count` と `candidates_token_count` を併せて記録することで、本番環境の推論コストとレイテンシのバランスを定量的に管理できます。
+- **エンドポイントの SLA に合わせて `thinking_level` を選ぶ**: `gemini-3.8-flash` では、高速ルーティングや軽量チャットに `"low"`（思考 `0` トークン）、標準業務に既定の `"medium"`、高度な推論タスクに `"high"` を使い分けます。
+- **`thoughts_token_count` を継続モニタリングする**: `usage_metadata.thoughts_token_count` と `candidates_token_count` を併せて記録することで、本番環境の推論トークン消費とレイテンシのバランスを定量的に管理できます。

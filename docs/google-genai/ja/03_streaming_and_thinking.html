@@ -46,18 +46,18 @@
     
     
     
-    <meta name="description" content="対話型 AI アプリケーションの体感速度は、Streaming 配信 (generate_content_stream) による最初の1トークン到達時間（TTFT: Time To First Token）の短縮と、types.ThinkingConfig(thinking_budget=...)…">
+    <meta name="description" content="gemini-3.8-flash を用いた対話型 AI アプリケーションの体感速度は、Streaming 配信 (generate_content_stream) による最初の1トークン到達時間（TTFT: Time To First…">
     <link rel="canonical" href="https://examples.drawlib.com/google-genai/ja/03_streaming_and_thinking.html">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="Google GenAI SDK Cookbook">
     <meta property="og:title" content="03. Streaming 配信と ThinkingConfig による思考制御 — Google GenAI SDK Cookbook">
-    <meta property="og:description" content="対話型 AI アプリケーションの体感速度は、Streaming 配信 (generate_content_stream) による最初の1トークン到達時間（TTFT: Time To First Token）の短縮と、types.ThinkingConfig(thinking_budget=...)…">
+    <meta property="og:description" content="gemini-3.8-flash を用いた対話型 AI アプリケーションの体感速度は、Streaming 配信 (generate_content_stream) による最初の1トークン到達時間（TTFT: Time To First…">
     <meta property="og:url" content="https://examples.drawlib.com/google-genai/ja/03_streaming_and_thinking.html">
     <meta property="og:locale" content="ja_JP">
     <meta property="og:locale:alternate" content="en_US">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="03. Streaming 配信と ThinkingConfig による思考制御 — Google GenAI SDK Cookbook">
-    <meta name="twitter:description" content="対話型 AI アプリケーションの体感速度は、Streaming 配信 (generate_content_stream) による最初の1トークン到達時間（TTFT: Time To First Token）の短縮と、types.ThinkingConfig(thinking_budget=...)…">
+    <meta name="twitter:description" content="gemini-3.8-flash を用いた対話型 AI アプリケーションの体感速度は、Streaming 配信 (generate_content_stream) による最初の1トークン到達時間（TTFT: Time To First…">
     
     
     <link rel="icon" type="image/png" href="../_assets/favicon.png">
@@ -174,12 +174,12 @@
   </div>
   <div class="nb-cell nb-markdown-cell">
 <h1>03. Streaming 配信と ThinkingConfig による思考制御</h1>
-<p>対話型 AI アプリケーションの体感速度は、<strong>Streaming 配信 (<code>generate_content_stream</code>)</strong> による最初の1トークン到達時間（TTFT: Time To First Token）の短縮と、<strong><code>types.ThinkingConfig(thinking_budget=...)</code></strong> によるタスク難度に応じた内部思考トークン量の最適化という2つの軸で改善できます。
-段階的なチャンク配信と明示的な思考バジェット制御を組み合わせることで、複雑な推論精度を維持しつつ、数秒かかっていたブロッキング待機をサブ秒のインタラクティブな応答体験へと変革できます。</p>
+<p><strong><code>gemini-3.8-flash</code></strong> を用いた対話型 AI アプリケーションの体感速度は、<strong>Streaming 配信 (<code>generate_content_stream</code>)</strong> による最初の1トークン到達時間（TTFT: Time To First Token）の短縮と、<strong><code>types.ThinkingConfig(thinking_level=...)</code></strong> によるタスク難度に応じた思考レベル（<code>&quot;low&quot;</code>・<code>&quot;medium&quot;</code>・<code>&quot;high&quot;</code>）の最適化という2つの軸で改善できます。
+段階的なチャンク配信と明示的な思考レベル制御を組み合わせることで、複雑な推論精度を維持しつつ、数秒かかっていたブロッキング待機をサブ秒のインタラクティブな応答体験へと変革できます。</p>
 
 <figure class="drawlib-figure align-center">
-  <img src="../images/03_streaming_and_thinking/ch03_streaming_ttft_ja.png" alt="図3-1: ブロッキング生成と Streaming 配信・思考フェーズの TTFT タイムライン比較" loading="lazy">
-  <figcaption>図3-1: ブロッキング生成と Streaming 配信・思考フェーズの TTFT タイムライン比較</figcaption>
+  <img src="../images/03_streaming_and_thinking/ch03_streaming_ttft_ja.png" alt="図3-1: ブロッキング生成と Streaming 配信・thinking_level の TTFT タイムライン比較 (gemini-3.8-flash)" loading="lazy">
+  <figcaption>図3-1: ブロッキング生成と Streaming 配信・thinking_level の TTFT タイムライン比較 (gemini-3.8-flash)</figcaption>
 </figure>
 <details class="drawlib-code-fold">
   <summary>View Drawlib Python Code</summary>
@@ -190,33 +190,33 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.styles</span><span class="w"> </span><span class="kn">import</span> <span class="n">Styles</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.text</span><span class="w"> </span><span class="kn">import</span> <span class="n">text</span>
 
-<span class="n">setup</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mi">152</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">74</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">150</span><span class="p">)</span>
+<span class="n">setup</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mi">156</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">74</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">150</span><span class="p">)</span>
 
 <span class="c1"># Header labels</span>
 <span class="n">text</span><span class="p">((</span><span class="mf">6.0</span><span class="p">,</span> <span class="mf">67.0</span><span class="p">),</span> <span class="s2">"配信モードと設定"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">11.0</span><span class="p">,</span> <span class="n">halign</span><span class="o">=</span><span class="s2">"left"</span><span class="p">))</span>
 <span class="n">text</span><span class="p">(</span>
-    <span class="p">(</span><span class="mf">98.0</span><span class="p">,</span> <span class="mf">67.0</span><span class="p">),</span>
-    <span class="s2">"リクエスト開始からの経過時間タイムライン (秒)"</span><span class="p">,</span>
+    <span class="p">(</span><span class="mf">101.0</span><span class="p">,</span> <span class="mf">67.0</span><span class="p">),</span>
+    <span class="s2">"gemini-3.8-flash 経過時間タイムライン (秒)"</span><span class="p">,</span>
     <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">11.0</span><span class="p">),</span>
 <span class="p">)</span>
 
-<span class="c1"># Vertical timeline gridlines (0.0s to 3.0s -&gt; x = 53.0 to 143.0, 30 units/sec)</span>
+<span class="c1"># Vertical timeline gridlines (0.0s to 3.0s -&gt; x = 56.0 to 146.0, 30 units/sec)</span>
 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">7</span><span class="p">):</span>
-    <span class="n">tx</span> <span class="o">=</span> <span class="mf">53.0</span> <span class="o">+</span> <span class="n">i</span> <span class="o">*</span> <span class="mf">15.0</span>
+    <span class="n">tx</span> <span class="o">=</span> <span class="mf">56.0</span> <span class="o">+</span> <span class="n">i</span> <span class="o">*</span> <span class="mf">15.0</span>
     <span class="n">sec</span> <span class="o">=</span> <span class="n">i</span> <span class="o">*</span> <span class="mf">0.5</span>
     <span class="n">line</span><span class="p">((</span><span class="n">tx</span><span class="p">,</span> <span class="mf">13.0</span><span class="p">),</span> <span class="p">(</span><span class="n">tx</span><span class="p">,</span> <span class="mf">62.5</span><span class="p">),</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">MutedDashedThin</span><span class="p">)</span>
     <span class="n">text</span><span class="p">((</span><span class="n">tx</span><span class="p">,</span> <span class="mf">8.2</span><span class="p">),</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">sec</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">s"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Muted</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">))</span>
 
-<span class="n">line</span><span class="p">((</span><span class="mf">53.0</span><span class="p">,</span> <span class="mf">13.0</span><span class="p">),</span> <span class="p">(</span><span class="mf">143.0</span><span class="p">,</span> <span class="mf">13.0</span><span class="p">),</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Dark</span><span class="p">)</span>
+<span class="n">line</span><span class="p">((</span><span class="mf">56.0</span><span class="p">,</span> <span class="mf">13.0</span><span class="p">),</span> <span class="p">(</span><span class="mf">146.0</span><span class="p">,</span> <span class="mf">13.0</span><span class="p">),</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Dark</span><span class="p">)</span>
 
 <span class="c1"># Row 1: Blocking generate_content()</span>
-<span class="n">rectangle</span><span class="p">((</span><span class="mf">28.0</span><span class="p">,</span> <span class="mf">55.0</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">44.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">12.5</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Neutral</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">1.8</span><span class="p">))</span>
+<span class="n">rectangle</span><span class="p">((</span><span class="mf">29.0</span><span class="p">,</span> <span class="mf">55.0</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">46.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">12.5</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Neutral</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">1.8</span><span class="p">))</span>
 <span class="n">phosphor</span><span class="o">.</span><span class="n">hourglass</span><span class="p">((</span><span class="mf">11.0</span><span class="p">,</span> <span class="mf">55.0</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">4.4</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Dark</span><span class="p">)</span>
 <span class="n">text</span><span class="p">((</span><span class="mf">15.2</span><span class="p">,</span> <span class="mf">57.3</span><span class="p">),</span> <span class="s2">"1. ブロッキング呼び出し"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.5</span><span class="p">,</span> <span class="n">halign</span><span class="o">=</span><span class="s2">"left"</span><span class="p">))</span>
 <span class="n">text</span><span class="p">((</span><span class="mf">15.2</span><span class="p">,</span> <span class="mf">52.3</span><span class="p">),</span> <span class="s2">"generate_content()"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Muted</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">halign</span><span class="o">=</span><span class="s2">"left"</span><span class="p">))</span>
 
 <span class="n">rectangle</span><span class="p">(</span>
-    <span class="p">(</span><span class="mf">69.5</span><span class="p">,</span> <span class="mf">55.0</span><span class="p">),</span>
+    <span class="p">(</span><span class="mf">72.5</span><span class="p">,</span> <span class="mf">55.0</span><span class="p">),</span>
     <span class="n">width</span><span class="o">=</span><span class="mf">33.0</span><span class="p">,</span>
     <span class="n">height</span><span class="o">=</span><span class="mf">9.4</span><span class="p">,</span>
     <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">SecondaryNeutral</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">1.2</span><span class="p">),</span>
@@ -224,7 +224,7 @@
     <span class="n">text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Dark</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">),</span>
 <span class="p">)</span>
 <span class="n">rectangle</span><span class="p">(</span>
-    <span class="p">(</span><span class="mf">111.8</span><span class="p">,</span> <span class="mf">55.0</span><span class="p">),</span>
+    <span class="p">(</span><span class="mf">114.8</span><span class="p">,</span> <span class="mf">55.0</span><span class="p">),</span>
     <span class="n">width</span><span class="o">=</span><span class="mf">50.4</span><span class="p">,</span>
     <span class="n">height</span><span class="o">=</span><span class="mf">9.4</span><span class="p">,</span>
     <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Neutral</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">1.2</span><span class="p">),</span>
@@ -232,14 +232,14 @@
     <span class="n">text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">),</span>
 <span class="p">)</span>
 
-<span class="c1"># Row 2: Streaming + Default Thinking</span>
-<span class="n">rectangle</span><span class="p">((</span><span class="mf">28.0</span><span class="p">,</span> <span class="mf">38.5</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">44.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">12.5</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Neutral</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">1.8</span><span class="p">))</span>
+<span class="c1"># Row 2: Streaming + thinking_level="medium" (Default)</span>
+<span class="n">rectangle</span><span class="p">((</span><span class="mf">29.0</span><span class="p">,</span> <span class="mf">38.5</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">46.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">12.5</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Neutral</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">1.8</span><span class="p">))</span>
 <span class="n">phosphor</span><span class="o">.</span><span class="n">brain</span><span class="p">((</span><span class="mf">11.0</span><span class="p">,</span> <span class="mf">38.5</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">4.4</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryBold</span><span class="p">)</span>
 <span class="n">text</span><span class="p">((</span><span class="mf">15.2</span><span class="p">,</span> <span class="mf">40.8</span><span class="p">),</span> <span class="s2">"2. Stream + 通常思考"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.5</span><span class="p">,</span> <span class="n">halign</span><span class="o">=</span><span class="s2">"left"</span><span class="p">))</span>
-<span class="n">text</span><span class="p">((</span><span class="mf">15.2</span><span class="p">,</span> <span class="mf">35.8</span><span class="p">),</span> <span class="s2">"動的思考 (-1: 既定)"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Muted</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">halign</span><span class="o">=</span><span class="s2">"left"</span><span class="p">))</span>
+<span class="n">text</span><span class="p">((</span><span class="mf">15.2</span><span class="p">,</span> <span class="mf">35.8</span><span class="p">),</span> <span class="s1">'thinking_level="medium"'</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Muted</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">halign</span><span class="o">=</span><span class="s2">"left"</span><span class="p">))</span>
 
 <span class="n">rectangle</span><span class="p">(</span>
-    <span class="p">(</span><span class="mf">69.5</span><span class="p">,</span> <span class="mf">38.5</span><span class="p">),</span>
+    <span class="p">(</span><span class="mf">72.5</span><span class="p">,</span> <span class="mf">38.5</span><span class="p">),</span>
     <span class="n">width</span><span class="o">=</span><span class="mf">33.0</span><span class="p">,</span>
     <span class="n">height</span><span class="o">=</span><span class="mf">9.4</span><span class="p">,</span>
     <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">SecondaryNeutral</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">1.2</span><span class="p">),</span>
@@ -247,7 +247,7 @@
     <span class="n">text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Dark</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">),</span>
 <span class="p">)</span>
 <span class="n">rectangle</span><span class="p">(</span>
-    <span class="p">(</span><span class="mf">111.8</span><span class="p">,</span> <span class="mf">38.5</span><span class="p">),</span>
+    <span class="p">(</span><span class="mf">114.8</span><span class="p">,</span> <span class="mf">38.5</span><span class="p">),</span>
     <span class="n">width</span><span class="o">=</span><span class="mf">50.4</span><span class="p">,</span>
     <span class="n">height</span><span class="o">=</span><span class="mf">9.4</span><span class="p">,</span>
     <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryNeutral</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">1.2</span><span class="p">),</span>
@@ -255,36 +255,36 @@
     <span class="n">text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">),</span>
 <span class="p">)</span>
 
-<span class="c1"># Row 3: Streaming + thinking_budget=0 (Focal Hero)</span>
-<span class="n">rectangle</span><span class="p">((</span><span class="mf">28.0</span><span class="p">,</span> <span class="mf">22.0</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">44.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">12.5</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryNeutral</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">1.8</span><span class="p">))</span>
+<span class="c1"># Row 3: Streaming + thinking_level="low" (Focal Hero)</span>
+<span class="n">rectangle</span><span class="p">((</span><span class="mf">29.0</span><span class="p">,</span> <span class="mf">22.0</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">46.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">12.5</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryNeutral</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">1.8</span><span class="p">))</span>
 <span class="n">phosphor</span><span class="o">.</span><span class="n">lightning</span><span class="p">((</span><span class="mf">11.0</span><span class="p">,</span> <span class="mf">22.0</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">4.4</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryBold</span><span class="p">)</span>
 <span class="n">text</span><span class="p">((</span><span class="mf">15.2</span><span class="p">,</span> <span class="mf">24.3</span><span class="p">),</span> <span class="s2">"3. 高速 Stream 配信"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.5</span><span class="p">,</span> <span class="n">halign</span><span class="o">=</span><span class="s2">"left"</span><span class="p">))</span>
-<span class="n">text</span><span class="p">((</span><span class="mf">15.2</span><span class="p">,</span> <span class="mf">19.3</span><span class="p">),</span> <span class="s2">"thinking_budget=0"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Dark</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">halign</span><span class="o">=</span><span class="s2">"left"</span><span class="p">))</span>
+<span class="n">text</span><span class="p">((</span><span class="mf">15.2</span><span class="p">,</span> <span class="mf">19.3</span><span class="p">),</span> <span class="s1">'thinking_level="low"'</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Dark</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">halign</span><span class="o">=</span><span class="s2">"left"</span><span class="p">))</span>
 
-<span class="n">rectangle</span><span class="p">((</span><span class="mf">57.0</span><span class="p">,</span> <span class="mf">22.0</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">8.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">9.4</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Neutral</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">1.0</span><span class="p">))</span>
+<span class="n">rectangle</span><span class="p">((</span><span class="mf">60.0</span><span class="p">,</span> <span class="mf">22.0</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">8.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">9.4</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Neutral</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">1.0</span><span class="p">))</span>
 <span class="n">rectangle</span><span class="p">(</span>
-    <span class="p">(</span><span class="mf">83.8</span><span class="p">,</span> <span class="mf">22.0</span><span class="p">),</span>
+    <span class="p">(</span><span class="mf">86.8</span><span class="p">,</span> <span class="mf">22.0</span><span class="p">),</span>
     <span class="n">width</span><span class="o">=</span><span class="mf">44.4</span><span class="p">,</span>
     <span class="n">height</span><span class="o">=</span><span class="mf">9.4</span><span class="p">,</span>
     <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryFlat</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">1.2</span><span class="p">),</span>
     <span class="n">text</span><span class="o">=</span><span class="s2">"TTFT 0.28s・サブ秒即時配信"</span><span class="p">,</span>
     <span class="n">text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">WhiteBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">),</span>
 <span class="p">)</span>
-<span class="n">text</span><span class="p">((</span><span class="mf">108.5</span><span class="p">,</span> <span class="mf">22.0</span><span class="p">),</span> <span class="s2">"1.75s で完了"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">halign</span><span class="o">=</span><span class="s2">"left"</span><span class="p">))</span>
+<span class="n">text</span><span class="p">((</span><span class="mf">111.5</span><span class="p">,</span> <span class="mf">22.0</span><span class="p">),</span> <span class="s2">"1.75s で完了"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">halign</span><span class="o">=</span><span class="s2">"left"</span><span class="p">))</span>
 
 <span class="n">save</span><span class="p">()</span>
 </code></pre>
 </details>
 <hr />
-<h2>1. 3行のクライアント初期化とプログレッシブ Streaming (<code>generate_content_stream</code>)</h2>
-<p>まずは Google Colab の左サイドバーにある <strong>🔑 シークレット (Secrets)</strong> に登録した <code>GEMINI_API_KEY</code> を読み込み、最小3行で統合 <code>genai.Client</code> を初期化します。</p>
+<h2>1. クライアント初期化とプログレッシブ Streaming (<code>generate_content_stream</code>)</h2>
+<p>まずは使用するモデル <code>MODEL = &quot;gemini-3.8-flash&quot;</code> を定義し、Google Colab の左サイドバーにある <strong>🔑 シークレット (Secrets)</strong> に登録した <code>GEMINI_API_KEY</code> を読み込んで統合 <code>genai.Client</code> を初期化します。</p>
 
   </div>
   <div class="nb-cell nb-code-cell nb-setup-cell">
     <div class="nb-input">
       <div class="nb-prompt nb-in-prompt">In [setup]:</div>
       <div class="nb-code-area">
-        <pre><code class="language-bash">!pip<span class="w"> </span>install<span class="w"> </span>-q<span class="w"> </span>drawlib<span class="w"> </span>google-genai<span class="w"> </span>pydantic
+        <pre><code class="language-bash">!pip<span class="w"> </span>install<span class="w"> </span>-q<span class="w"> </span>google-genai
 </code></pre>
       </div>
     </div>
@@ -293,7 +293,9 @@
     <div class="nb-input">
       <div class="nb-prompt nb-in-prompt">In [1]:</div>
       <div class="nb-code-area">
-        <pre><code class="language-python"><span class="kn">from</span><span class="w"> </span><span class="nn">google.colab</span><span class="w"> </span><span class="kn">import</span> <span class="n">userdata</span>
+        <pre><code class="language-python"><span class="n">MODEL</span> <span class="o">=</span> <span class="s2">"gemini-3.8-flash"</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">google.colab</span><span class="w"> </span><span class="kn">import</span> <span class="n">userdata</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">google</span><span class="w"> </span><span class="kn">import</span> <span class="n">genai</span>
 
 <span class="n">client</span> <span class="o">=</span> <span class="n">genai</span><span class="o">.</span><span class="n">Client</span><span class="p">(</span><span class="n">api_key</span><span class="o">=</span><span class="n">userdata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"GEMINI_API_KEY"</span><span class="p">))</span>
@@ -315,8 +317,8 @@
 <span class="n">ttft_ms</span> <span class="o">=</span> <span class="kc">None</span>
 
 <span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="n">client</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">generate_content_stream</span><span class="p">(</span>
-    <span class="n">model</span><span class="o">=</span><span class="s2">"gemini-2.5-flash"</span><span class="p">,</span>
-    <span class="n">contents</span><span class="o">=</span><span class="s2">"LLM API の実践的なレイテンシ最適化手法を4つ、1行1項目で簡潔に挙げてください。"</span><span class="p">,</span>
+    <span class="n">model</span><span class="o">=</span><span class="n">MODEL</span><span class="p">,</span>
+    <span class="n">contents</span><span class="o">=</span><span class="s2">"3文で短いお話を書いてください。"</span><span class="p">,</span>
 <span class="p">):</span>
     <span class="k">if</span> <span class="n">chunk</span><span class="o">.</span><span class="n">text</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">ttft_ms</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -334,17 +336,20 @@
 <p><strong>補足:</strong> ストリームの先頭や末尾には <code>usage_metadata</code> のみを含む空テキストのチャンクが届く場合があるため、出力や <code>ttft_ms</code> の計測前には必ず <code>if chunk.text:</code> でガードしてください。</p>
 </blockquote>
 <hr />
-<h2>2. <code>ThinkingConfig</code> (<code>thinking_budget</code>) による思考トークンの適正化</h2>
-<p><code>gemini-2.5-flash</code> はハイブリッド推論モデルであり、最終的な出力トークンを生成する前に内部的な <strong>思考トークン (Thinking Tokens)</strong> を消費して回答計画や検証を行うことができます。内部思考は最初の出力トークンが返る <em>前</em> に実行されるため、<code>types.ThinkingConfig(thinking_budget=...)</code> の設定が TTFT とトークンコストに直結します。</p>
+<h2>2. <code>ThinkingConfig</code> (<code>thinking_level</code>) による思考レベルの適正化</h2>
+<p><code>gemini-3.8-flash</code> は推論機能を備えたモデルであり、可視の出力トークンを生成する前に内部的な <strong>思考トークン (<code>thoughts_token_count</code>)</strong> を消費して回答計画や検証を行うことができます。内部思考は最初の出力トークンが返る <em>前</em> に実行されるため、<code>types.ThinkingConfig(thinking_level=...)</code> に指定する3段階の思考レベルが TTFT とトークンコストに直結します。</p>
 <ul>
-<li><strong><code>thinking_budget=0</code>（思考オフ・最速応答）</strong>: <code>gemini-2.5-flash</code> の内部思考を無効化し、意図分類・情報抽出・ルーティング・シンプルなチャット応答でサブ秒の TTFT を実現します。</li>
-<li><strong><code>thinking_budget=1024</code>（上限固定、<code>512</code>〜<code>4096</code>）</strong>: 推論コストと p95 レイテンシの上限を予測可能な範囲に抑えつつ、RAG 要約や SQL 生成など中程度の複雑さを持つタスクの品質を高めます。</li>
-<li><strong>動的デフォルト（<code>thinking_budget=-1</code> または省略時）</strong>: プロンプトの難易度に応じてモデルが思考の深さを自動調整します。多段階の数学推論、コード生成、アーキテクチャ設計の比較検討に最適です。</li>
+<li><strong><code>thinking_level=&quot;low&quot;</code>（思考 0 トークン・最速 TTFT）</strong>: <code>gemini-3.8-flash</code> では内部思考を <code>0</code> トークンに抑え、日常チャット・ルーティング・意図分類・情報抽出でサブ秒の高速 TTFT を実現します。</li>
+<li><strong><code>thinking_level=&quot;medium&quot;</code>（既定値・バランス型の動的思考）</strong>: プロンプトの難易度に応じて思考の深さを自動調整します。単純な質問では余分な思考を省きつつ、RAG 要約や SQL 生成では適切な推論を行います。</li>
+<li><strong><code>thinking_level=&quot;high&quot;</code>（深い多段階推論）</strong>: 多段階の数学計算、アルゴリズム実装、アーキテクチャのトレードオフ分析など、精度重視のタスクに十分な思考トークンを割り当てます。</li>
 </ul>
+<blockquote>
+<p><strong>重要 (<code>gemini-3.8-flash</code> の API 仕様):</strong> Gemini 2.5 世代の数値指定 <code>thinking_budget</code> は非推奨（レガシー互換）となったため、<code>thinking_level</code> を使用してください（両方の同時指定はエラーになります）。また <code>gemini-3.8-flash</code> がサポートする値は <code>&quot;low&quot;</code>・<code>&quot;medium&quot;</code>・<code>&quot;high&quot;</code> の3段階のみであり、<code>&quot;minimal&quot;</code> や <code>&quot;xhigh&quot;</code> を指定すると HTTP <code>400 INVALID_ARGUMENT</code> が返ります。</p>
+</blockquote>
 
 <figure class="drawlib-figure align-center">
-  <img src="../images/03_streaming_and_thinking/ch03_thinking_tiers_ja.png" alt="図3-2: タスク難易度に応じた ThinkingConfig (thinking_budget) 設計ガイド" loading="lazy">
-  <figcaption>図3-2: タスク難易度に応じた ThinkingConfig (thinking_budget) 設計ガイド</figcaption>
+  <img src="../images/03_streaming_and_thinking/ch03_thinking_tiers_ja.png" alt="図3-2: タスク難易度に応じた ThinkingConfig (thinking_level) 設計ガイド (gemini-3.8-flash)" loading="lazy">
+  <figcaption>図3-2: タスク難易度に応じた ThinkingConfig (thinking_level) 設計ガイド (gemini-3.8-flash)</figcaption>
 </figure>
 <details class="drawlib-code-fold">
   <summary>View Drawlib Python Code</summary>
@@ -358,7 +363,7 @@
 
 <span class="n">text</span><span class="p">(</span>
     <span class="p">(</span><span class="mf">76.0</span><span class="p">,</span> <span class="mf">61.5</span><span class="p">),</span>
-    <span class="s2">"ワークロード別の thinking_budget 選定ガイド (gemini-2.5-flash)"</span><span class="p">,</span>
+    <span class="s2">"ワークロード別の thinking_level 選定ガイド (gemini-3.8-flash)"</span><span class="p">,</span>
     <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">12.0</span><span class="p">),</span>
 <span class="p">)</span>
 
@@ -375,21 +380,21 @@
     <span class="n">spacing</span><span class="o">=</span><span class="mf">5.0</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="n">tiers</span><span class="o">.</span><span class="n">add</span><span class="p">(</span>
-    <span class="s2">"Budget = 0 (オフ)"</span><span class="p">,</span>
-    <span class="s2">"サブ秒の高速 TTFT</span><span class="se">\n</span><span class="s2">分類・ルーティング・</span><span class="se">\n</span><span class="s2">軽量チャット応答"</span><span class="p">,</span>
+    <span class="s1">'level = "low"'</span><span class="p">,</span>
+    <span class="s2">"思考 0 トークン・最速 TTFT</span><span class="se">\n</span><span class="s2">チャット・ルーティング・</span><span class="se">\n</span><span class="s2">情報抽出・意図分類"</span><span class="p">,</span>
     <span class="n">icon</span><span class="o">=</span><span class="n">phosphor</span><span class="o">.</span><span class="n">lightning</span><span class="p">,</span>
     <span class="n">badge_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryFlat</span><span class="p">,</span>
     <span class="n">icon_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">WhiteBold</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="n">tiers</span><span class="o">.</span><span class="n">add</span><span class="p">(</span>
-    <span class="s2">"Budget = 1024"</span><span class="p">,</span>
-    <span class="s2">"上限固定 (512〜4096)</span><span class="se">\n</span><span class="s2">RAG 要約・SQL 生成・</span><span class="se">\n</span><span class="s2">予測可能な応答速度"</span><span class="p">,</span>
+    <span class="s1">'level = "medium"'</span><span class="p">,</span>
+    <span class="s2">"既定値・バランス型動的思考</span><span class="se">\n</span><span class="s2">RAG 要約・SQL 生成・</span><span class="se">\n</span><span class="s2">一般業務ワークロード"</span><span class="p">,</span>
     <span class="n">icon</span><span class="o">=</span><span class="n">phosphor</span><span class="o">.</span><span class="n">sliders</span><span class="p">,</span>
     <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryNeutral</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="n">tiers</span><span class="o">.</span><span class="n">add</span><span class="p">(</span>
-    <span class="s2">"動的自動 (-1)"</span><span class="p">,</span>
-    <span class="s2">"難度に応じ自動拡張</span><span class="se">\n</span><span class="s2">多段階の数学・コード・</span><span class="se">\n</span><span class="s2">システム設計分析"</span><span class="p">,</span>
+    <span class="s1">'level = "high"'</span><span class="p">,</span>
+    <span class="s2">"深い多段階推論トークン</span><span class="se">\n</span><span class="s2">多段階の数学・コード・</span><span class="se">\n</span><span class="s2">システム設計分析"</span><span class="p">,</span>
     <span class="n">icon</span><span class="o">=</span><span class="n">phosphor</span><span class="o">.</span><span class="n">brain</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="n">tiers</span><span class="o">.</span><span class="n">draw</span><span class="p">(</span><span class="n">xy</span><span class="o">=</span><span class="p">(</span><span class="mf">6.0</span><span class="p">,</span> <span class="mf">6.5</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">140.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">49.5</span><span class="p">,</span> <span class="n">align</span><span class="o">=</span><span class="s2">"bottom_left"</span><span class="p">)</span>
@@ -397,102 +402,50 @@
 <span class="n">save</span><span class="p">()</span>
 </code></pre>
 </details>
-<h3><code>thinking_budget=0</code> と <code>thinking_budget=1024</code> の実測ベンチマーク</h3>
-<p>同一の計算プロンプトに対して <code>thinking_budget=0</code> と <code>thinking_budget=1024</code> をそれぞれ実行し、ストリームの <code>usage_metadata</code> から <code>ttft_ms</code>、<code>total_ms</code>、内部思考トークン数 (<code>thoughts_token_count</code>)、出力トークン数 (<code>candidates_token_count</code>) を記録して比較します。</p>
+<h3><code>thinking_level=&quot;low&quot;</code> と <code>thinking_level=&quot;high&quot;</code> の実測ベンチマーク</h3>
+<p>同一の計算プロンプトに対して <code>thinking_level=&quot;low&quot;</code> と <code>thinking_level=&quot;high&quot;</code> をそれぞれ実行し、ストリームの <code>usage_metadata</code> から <code>ttft_ms</code>、<code>total_ms</code>、内部思考トークン数 (<code>thoughts_token_count</code>)、出力トークン数 (<code>candidates_token_count</code>) を取得して比較テーブルを出力します。</p>
 
   </div>
   <div class="nb-cell nb-code-cell">
     <div class="nb-input">
       <div class="nb-prompt nb-in-prompt">In [3]:</div>
       <div class="nb-code-area">
-        <pre><code class="language-python"><span class="kn">from</span><span class="w"> </span><span class="nn">google.genai</span><span class="w"> </span><span class="kn">import</span> <span class="n">types</span>
+        <pre><code class="language-python"><span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">google.genai</span><span class="w"> </span><span class="kn">import</span> <span class="n">types</span>
 
-<span class="n">prompt</span> <span class="o">=</span> <span class="p">(</span>
-    <span class="s2">"ある API は毎秒120リクエストを処理します。キャッシュヒット(70%)は 8 ms、"</span>
-    <span class="s2">"ミス(30%)は Gemini 呼び出しで 420 ms かかります。加重平均レイテンシ(ms)を求めてください。"</span>
-<span class="p">)</span>
-<span class="n">results</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="n">prompt</span> <span class="o">=</span> <span class="s2">"27 * 43 + 19 を計算してください。"</span>
+<span class="n">rows</span> <span class="o">=</span> <span class="p">[]</span>
 
-<span class="k">for</span> <span class="n">label</span><span class="p">,</span> <span class="n">budget</span> <span class="ow">in</span> <span class="p">[(</span><span class="s2">"Budget 0 (Off)"</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="s2">"Budget 1024 (Capped)"</span><span class="p">,</span> <span class="mi">1024</span><span class="p">)]:</span>
+<span class="k">for</span> <span class="n">level</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"low"</span><span class="p">,</span> <span class="s2">"high"</span><span class="p">):</span>
     <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span>
     <span class="n">ttft_ms</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">usage</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">chunks</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="n">client</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">generate_content_stream</span><span class="p">(</span>
-        <span class="n">model</span><span class="o">=</span><span class="s2">"gemini-2.5-flash"</span><span class="p">,</span>
+        <span class="n">model</span><span class="o">=</span><span class="n">MODEL</span><span class="p">,</span>
         <span class="n">contents</span><span class="o">=</span><span class="n">prompt</span><span class="p">,</span>
         <span class="n">config</span><span class="o">=</span><span class="n">types</span><span class="o">.</span><span class="n">GenerateContentConfig</span><span class="p">(</span>
-            <span class="n">thinking_config</span><span class="o">=</span><span class="n">types</span><span class="o">.</span><span class="n">ThinkingConfig</span><span class="p">(</span><span class="n">thinking_budget</span><span class="o">=</span><span class="n">budget</span><span class="p">),</span>
+            <span class="n">thinking_config</span><span class="o">=</span><span class="n">types</span><span class="o">.</span><span class="n">ThinkingConfig</span><span class="p">(</span><span class="n">thinking_level</span><span class="o">=</span><span class="n">level</span><span class="p">),</span>
         <span class="p">),</span>
     <span class="p">):</span>
-        <span class="k">if</span> <span class="n">chunk</span><span class="o">.</span><span class="n">text</span> <span class="ow">and</span> <span class="n">ttft_ms</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">ttft_ms</span> <span class="o">=</span> <span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span> <span class="o">-</span> <span class="n">t0</span><span class="p">)</span> <span class="o">*</span> <span class="mi">1000</span>
+        <span class="k">if</span> <span class="n">chunk</span><span class="o">.</span><span class="n">text</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">ttft_ms</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">ttft_ms</span> <span class="o">=</span> <span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span> <span class="o">-</span> <span class="n">t0</span><span class="p">)</span> <span class="o">*</span> <span class="mi">1000</span>
+            <span class="n">chunks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">chunk</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">chunk</span><span class="o">.</span><span class="n">usage_metadata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">usage</span> <span class="o">=</span> <span class="n">chunk</span><span class="o">.</span><span class="n">usage_metadata</span>
 
     <span class="n">total_ms</span> <span class="o">=</span> <span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span> <span class="o">-</span> <span class="n">t0</span><span class="p">)</span> <span class="o">*</span> <span class="mi">1000</span>
     <span class="n">thoughts_tokens</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">usage</span><span class="p">,</span> <span class="s2">"thoughts_token_count"</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">or</span> <span class="mi">0</span>
-    <span class="n">candidates_tokens</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">usage</span><span class="p">,</span> <span class="s2">"candidates_token_count"</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">or</span> <span class="mi">0</span>
+    <span class="n">output_tokens</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">usage</span><span class="p">,</span> <span class="s2">"candidates_token_count"</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">or</span> <span class="mi">0</span>
+    <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">level</span><span class="p">,</span> <span class="n">ttft_ms</span> <span class="ow">or</span> <span class="n">total_ms</span><span class="p">,</span> <span class="n">total_ms</span><span class="p">,</span> <span class="n">thoughts_tokens</span><span class="p">,</span> <span class="n">output_tokens</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"[</span><span class="si">{</span><span class="n">level</span><span class="si">}</span><span class="s2">] </span><span class="si">{</span><span class="s1">''</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">chunks</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
-    <span class="n">results</span><span class="p">[</span><span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">"ttft_ms"</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="n">ttft_ms</span> <span class="ow">or</span> <span class="n">total_ms</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
-        <span class="s2">"total_ms"</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="n">total_ms</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
-        <span class="s2">"thoughts_token_count"</span><span class="p">:</span> <span class="n">thoughts_tokens</span><span class="p">,</span>
-        <span class="s2">"candidates_token_count"</span><span class="p">:</span> <span class="n">candidates_tokens</span><span class="p">,</span>
-    <span class="p">}</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">results</span><span class="p">[</span><span class="n">label</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-</code></pre>
-      </div>
-    </div>
-  </div>
-  <div class="nb-cell nb-markdown-cell">
-<h3>Colab セル内での実測レイテンシ・トークン比較グラフ描画</h3>
-<p>Drawlib は <code>setup(..., cwd=True)</code> と <code>show()</code> を使うことで Jupyter / Google Colab のセル出力へ直接チャートを描画できます。上で計測した <code>results</code> を <code>BarChart</code> で可視化してみましょう。</p>
-
-  </div>
-  <div class="nb-cell nb-code-cell">
-    <div class="nb-input">
-      <div class="nb-prompt nb-in-prompt">In [4]:</div>
-      <div class="nb-code-area">
-        <pre><code class="language-python"><span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.canvas</span><span class="w"> </span><span class="kn">import</span> <span class="n">setup</span><span class="p">,</span> <span class="n">show</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.charts.bar</span><span class="w"> </span><span class="kn">import</span> <span class="n">BarChart</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.styles</span><span class="w"> </span><span class="kn">import</span> <span class="n">Styles</span>
-
-<span class="n">setup</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mi">116</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">56</span><span class="p">,</span> <span class="n">cwd</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
-<span class="n">metrics</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"ttft_ms"</span><span class="p">,</span> <span class="s2">"total_ms"</span><span class="p">,</span> <span class="s2">"thoughts_token_count"</span><span class="p">,</span> <span class="s2">"candidates_token_count"</span><span class="p">]</span>
-<span class="n">chart</span> <span class="o">=</span> <span class="n">BarChart</span><span class="p">(</span>
-    <span class="n">axis_line_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">MutedDashed</span><span class="p">,</span>
-    <span class="n">categories</span><span class="o">=</span><span class="p">[</span><span class="s2">"TTFT (ms)"</span><span class="p">,</span> <span class="s2">"Total (ms)"</span><span class="p">,</span> <span class="s2">"Thoughts Tok"</span><span class="p">,</span> <span class="s2">"Output Tok"</span><span class="p">],</span>
-    <span class="n">width</span><span class="o">=</span><span class="mf">98.0</span><span class="p">,</span>
-    <span class="n">height</span><span class="o">=</span><span class="mf">38.0</span><span class="p">,</span>
-    <span class="n">title</span><span class="o">=</span><span class="s2">"Latency &amp; Token Footprint: Budget 0 vs. Budget 1024"</span><span class="p">,</span>
-    <span class="n">title_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">BlackBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">11.5</span><span class="p">),</span>
-    <span class="n">bar_mode</span><span class="o">=</span><span class="s2">"group"</span><span class="p">,</span>
-    <span class="n">bar_width_ratio</span><span class="o">=</span><span class="mf">0.68</span><span class="p">,</span>
-    <span class="n">bar_r</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span>
-    <span class="n">axis_text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Muted</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">),</span>
-    <span class="n">grid_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">MutedThin</span><span class="p">,</span>
-    <span class="n">value_text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">),</span>
-    <span class="n">value_format</span><span class="o">=</span><span class="s2">"</span><span class="si">{:.0f}</span><span class="s2">"</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="n">chart</span><span class="o">.</span><span class="n">add_series</span><span class="p">(</span>
-    <span class="s2">"Budget 0 (Off)"</span><span class="p">,</span>
-    <span class="p">[</span><span class="n">results</span><span class="p">[</span><span class="s2">"Budget 0 (Off)"</span><span class="p">][</span><span class="n">m</span><span class="p">]</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">metrics</span><span class="p">],</span>
-    <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryFlat</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="n">chart</span><span class="o">.</span><span class="n">add_series</span><span class="p">(</span>
-    <span class="s2">"Budget 1024 (Capped)"</span><span class="p">,</span>
-    <span class="p">[</span><span class="n">results</span><span class="p">[</span><span class="s2">"Budget 1024 (Capped)"</span><span class="p">][</span><span class="n">m</span><span class="p">]</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">metrics</span><span class="p">],</span>
-    <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">SecondaryNeutral</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="n">chart</span><span class="o">.</span><span class="n">draw</span><span class="p">(</span><span class="n">xy</span><span class="o">=</span><span class="p">(</span><span class="mf">9.0</span><span class="p">,</span> <span class="mf">12.0</span><span class="p">))</span>
-<span class="n">chart</span><span class="o">.</span><span class="n">draw_legend</span><span class="p">(</span>
-    <span class="n">xy</span><span class="o">=</span><span class="p">(</span><span class="mf">28.0</span><span class="p">,</span> <span class="mf">5.5</span><span class="p">),</span>
-    <span class="n">text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">),</span>
-    <span class="n">orientation</span><span class="o">=</span><span class="s2">"horizontal"</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="n">show</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="si">{</span><span class="s1">'Level'</span><span class="si">:</span><span class="s2">&lt;8</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="s1">'TTFT (ms)'</span><span class="si">:</span><span class="s2">&gt;10</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="s1">'Total (ms)'</span><span class="si">:</span><span class="s2">&gt;11</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="s1">'Thoughts Tok'</span><span class="si">:</span><span class="s2">&gt;14</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="s1">'Output Tok'</span><span class="si">:</span><span class="s2">&gt;12</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"-"</span> <span class="o">*</span> <span class="mi">59</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">level</span><span class="p">,</span> <span class="n">ttft_ms</span><span class="p">,</span> <span class="n">total_ms</span><span class="p">,</span> <span class="n">thoughts_tokens</span><span class="p">,</span> <span class="n">output_tokens</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">level</span><span class="si">:</span><span class="s2">&lt;8</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">ttft_ms</span><span class="si">:</span><span class="s2">&gt;10.1f</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">total_ms</span><span class="si">:</span><span class="s2">&gt;11.1f</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">thoughts_tokens</span><span class="si">:</span><span class="s2">&gt;14d</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">output_tokens</span><span class="si">:</span><span class="s2">&gt;12d</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </code></pre>
       </div>
     </div>
@@ -501,8 +454,8 @@
 <h3>まとめ</h3>
 <ul>
 <li><strong>ユーザー向け応答は <code>generate_content_stream</code> を基本にする</strong>: 全文の生成完了を待たずに思考完了直後からチャンクを順次表示し、体感待機時間を大幅に短縮できます。</li>
-<li><strong>エンドポイントの SLA に合わせて <code>thinking_budget</code> を設計する</strong>: 高速ルーティングや分類には <code>0</code>、定型業務や RAG には上限値（<code>512</code>〜<code>4096</code>）、高度な推論タスクには動的な <code>-1</code> を使い分けます。</li>
-<li><strong><code>thoughts_token_count</code> を継続モニタリングする</strong>: <code>usage_metadata.thoughts_token_count</code> と <code>candidates_token_count</code> を併せて記録することで、本番環境の推論コストとレイテンシのバランスを定量的に管理できます。</li>
+<li><strong>エンドポイントの SLA に合わせて <code>thinking_level</code> を選ぶ</strong>: <code>gemini-3.8-flash</code> では、高速ルーティングや軽量チャットに <code>&quot;low&quot;</code>（思考 <code>0</code> トークン）、標準業務に既定の <code>&quot;medium&quot;</code>、高度な推論タスクに <code>&quot;high&quot;</code> を使い分けます。</li>
+<li><strong><code>thoughts_token_count</code> を継続モニタリングする</strong>: <code>usage_metadata.thoughts_token_count</code> と <code>candidates_token_count</code> を併せて記録することで、本番環境の推論トークン消費とレイテンシのバランスを定量的に管理できます。</li>
 </ul>
 
   </div>
