@@ -92,13 +92,24 @@ if [ -d "examples/catalog" ]; then
     done
 fi
 
-# 6. Overlay static portal pages (index.html, style.css, image gallery pages)
+# 6. Jupyter & Google Colab notebooks (examples/jupyter/*)
+if [ -d "examples/jupyter" ]; then
+    for proj in examples/jupyter/*; do
+        [ -d "$proj" ] || continue
+        slug="$(basename "$proj")"
+        check_slug "$slug"
+        echo "=== [jupyter] Building $slug (Jupyter .ipynb & HTML) ==="
+        $DRAWLIB_CMD build jupyter "$proj" -o "docs/$slug/"
+    done
+fi
+
+# 7. Overlay static portal pages (index.html, style.css, image gallery pages)
 if [ -d "portal" ]; then
     echo "=== Copying portal files to docs/ ==="
     cp -r portal/. docs/
 fi
 
-# 7. Inject showcase .demo-banner (for examples/{doc,slide,site,catalog}/*) and
+# 8. Inject showcase .demo-banner (for examples/{doc,slide,site,catalog,jupyter}/*) and
 #    GA4 tag into generated HTML pages in docs/ (after PDF/DOCX/PPTX builds so
 #    headless Chromium exports do not fire analytics or render the web banner,
 #    and without polluting reusable sample source files under examples/).
@@ -282,6 +293,12 @@ category_labels = {
         '<a href="https://www.drawlib.com/ja/" target="_blank" rel="noopener noreferrer">Drawlib</a> '
         'で構築されたリファレンスカタログのサンプルプロジェクト（<code>type = "catalog"</code>）',
     ),
+    "jupyter": (
+        'Sample Jupyter &amp; Colab Notebook (<code>type = "jupyter"</code>) built with '
+        '<a href="https://www.drawlib.com/" target="_blank" rel="noopener noreferrer">Drawlib</a>',
+        '<a href="https://www.drawlib.com/ja/" target="_blank" rel="noopener noreferrer">Drawlib</a> '
+        'で構築された Jupyter / Colab ノートブックのサンプルプロジェクト（<code>type = "jupyter"</code>）',
+    ),
 }
 
 html_lang_re = re.compile(r'<html\b[^>]*\blang=["\']([^"\']+)["\']', re.IGNORECASE)
@@ -289,7 +306,7 @@ body_open_re = re.compile(r"(<body\b[^>]*>)", re.IGNORECASE)
 refresh_re = re.compile(r'<meta\b[^>]*http-equiv=["\']?refresh["\']?', re.IGNORECASE)
 
 banner_injected = 0
-for category in ("doc", "slide", "site", "catalog"):
+for category in ("doc", "slide", "site", "catalog", "jupyter"):
     cat_dir = examples_root / category
     if not cat_dir.is_dir():
         continue

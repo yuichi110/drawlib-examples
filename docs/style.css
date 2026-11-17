@@ -275,6 +275,7 @@ a {
 #filter-catalog:checked ~ .main-content .filter-tabs label[for="filter-catalog"],
 #filter-doc:checked ~ .main-content .filter-tabs label[for="filter-doc"],
 #filter-slide:checked ~ .main-content .filter-tabs label[for="filter-slide"],
+#filter-jupyter:checked ~ .main-content .filter-tabs label[for="filter-jupyter"],
 #filter-images:checked ~ .main-content .filter-tabs label[for="filter-images"],
 #filter-engine:checked ~ .main-content .filter-tabs label[for="filter-engine"] {
     background: var(--bg-surface);
@@ -286,6 +287,7 @@ a {
 #filter-catalog:checked ~ .main-content .category-section:not([data-category="catalog"]):not([data-category="oss"]),
 #filter-doc:checked ~ .main-content .category-section:not([data-category="doc"]),
 #filter-slide:checked ~ .main-content .category-section:not([data-category="slide"]),
+#filter-jupyter:checked ~ .main-content .category-section:not([data-category="jupyter"]),
 #filter-images:checked ~ .main-content .category-section:not([data-category="images"]),
 #filter-engine:checked ~ .main-content .category-section:not([data-category="engine"]):not([data-category="oss"]) {
     display: none;

@@ -1,6 +1,6 @@
 # drawlib-examples
 
-Official showcase gallery of multi-page documentation sites (`site`), searchable API catalogs (`catalog`), linear documents (`doc`), 16:9 presentations (`slide`), standalone Python illustrations (`images`), and external document-engine use cases (`engine`) built with [**Drawlib**](https://github.com/yuichi110/drawlib).
+Official showcase gallery of multi-page documentation sites (`site`), searchable API catalogs (`catalog`), linear documents (`doc`), 16:9 presentations (`slide`), interactive Jupyter & Colab notebooks (`jupyter`), standalone Python illustrations (`images`), and external document-engine use cases (`engine`) built with [**Drawlib**](https://github.com/yuichi110/drawlib).
 
 ---
 
@@ -22,7 +22,7 @@ drawlib-examples/
 └── docs/                           # Generated GitHub Pages output (100% build artifact)
 ```
 
-*(Note: External `site`, `catalog`, `doc`, `slide`, and `engine` showcases linked directly from `portal/index.html` include the official Drawlib portals — [Drawlib Documentation](https://www.drawlib.com/), [Drawlib Architecture](https://www.drawlib.com/architecture/), [Drawlib API Specification](https://www.drawlib.com/api/), [Drawlib Quickstart Onboarding Guide](https://www.drawlib.com/quickstart/en/index.html), [About Drawlib — Official Showcase Deck](https://www.drawlib.com/about-drawlib/en/index.html), and [PNI Software Health Diagnostic Report (Drawlib Audit)](https://www.drawlib.com/reports/pni-full-audit/) maintained in [`yuichi110/drawlib`](https://github.com/yuichi110/drawlib) — as well as 6 multi-language OSS showcase suites:)*
+*(Note: External `site`, `catalog`, `doc`, `slide`, `jupyter`, and `engine` showcases linked directly from `portal/index.html` include the official Drawlib portals — [Drawlib Documentation](https://www.drawlib.com/), [Drawlib Architecture](https://www.drawlib.com/architecture/), [Drawlib API Specification](https://www.drawlib.com/api/), [Drawlib Quickstart Onboarding Guide](https://www.drawlib.com/quickstart/en/index.html), [About Drawlib — Official Showcase Deck](https://www.drawlib.com/about-drawlib/en/index.html), [Drawlib Interactive Notebooks](https://www.drawlib.com/jupyter/en/index.html), and [PNI Software Health Diagnostic Report (Drawlib Audit)](https://www.drawlib.com/reports/pni-full-audit/) maintained in [`yuichi110/drawlib`](https://github.com/yuichi110/drawlib) — as well as 6 multi-language OSS showcase suites:)*
 
 | Language | Target OSS | Portal Hub | User Guide (`site`) | Architecture (`site`) | API Reference (`catalog`) | Health Audit (`pni501`) | Repository |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -51,7 +51,7 @@ uv sync
 ./build.sh
 ```
 
-`./build.sh` cleans `docs/`, compiles every project under `examples/` into HTML, PDF, DOCX / PPTX, and PNG assets, copies `portal/` into `docs/`, and runs `drawlib serve docs/ --check` to verify all links and assets.
+`./build.sh` cleans `docs/`, compiles every project under `examples/` into HTML, PDF, DOCX / PPTX, Jupyter `.ipynb`, and PNG assets, copies `portal/` into `docs/`, and runs `drawlib serve docs/ --check` to verify all links and assets.
 
 ### 3. Preview Locally
 
