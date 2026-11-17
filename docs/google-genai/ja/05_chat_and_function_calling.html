@@ -1,0 +1,633 @@
+<!--
+ Copyright (c) 2026 Yuichi Ito (yuichi@yuichi.com)
+
+ This software is licensed under the Apache License, Version 2.0.
+ For more information, please visit: https://github.com/yuichi110/drawlib
+
+ This software is provided "as is", without warranty of any kind,
+ express or implied, including but not limited to the warranties of
+ merchantability, fitness for a particular purpose and noninfringement.
+-->
+<!DOCTYPE html>
+<html lang="ja" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>05. マルチターン Chat と Function Calling（ツール連携）</title>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-S9N5BZ1VRC"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-S9N5BZ1VRC');
+    </script>
+    <script>
+        (function() {
+            const saved = localStorage.getItem('drawlib-theme');
+            if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            } else {
+                document.documentElement.setAttribute('data-theme', 'light');
+            }
+        })();
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    
+    <link rel="alternate" hreflang="en" href="https://examples.drawlib.com/google-genai/en/05_chat_and_function_calling.html">
+    
+    <link rel="alternate" hreflang="ja" href="https://examples.drawlib.com/google-genai/ja/05_chat_and_function_calling.html">
+    
+    <link rel="alternate" hreflang="x-default" href="https://examples.drawlib.com/google-genai/en/05_chat_and_function_calling.html">
+    
+    
+    
+    <meta name="description" content="google-genai SDK は、ステートレスなモデル呼び出しを「状態とツールを備えた実用的なアシスタント」へと進化させる2つの標準プリミティブを提供しています。会話履歴を自動管理する client.chats.create() と、Python の型ヒントおよび docstring…">
+    <link rel="canonical" href="https://examples.drawlib.com/google-genai/ja/05_chat_and_function_calling.html">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Google GenAI SDK Cookbook">
+    <meta property="og:title" content="05. マルチターン Chat と Function Calling（ツール連携） — Google GenAI SDK Cookbook">
+    <meta property="og:description" content="google-genai SDK は、ステートレスなモデル呼び出しを「状態とツールを備えた実用的なアシスタント」へと進化させる2つの標準プリミティブを提供しています。会話履歴を自動管理する client.chats.create() と、Python の型ヒントおよび docstring…">
+    <meta property="og:url" content="https://examples.drawlib.com/google-genai/ja/05_chat_and_function_calling.html">
+    <meta property="og:locale" content="ja_JP">
+    <meta property="og:locale:alternate" content="en_US">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="05. マルチターン Chat と Function Calling（ツール連携） — Google GenAI SDK Cookbook">
+    <meta name="twitter:description" content="google-genai SDK は、ステートレスなモデル呼び出しを「状態とツールを備えた実用的なアシスタント」へと進化させる2つの標準プリミティブを提供しています。会話履歴を自動管理する client.chats.create() と、Python の型ヒントおよび docstring…">
+    
+    
+    <link rel="icon" type="image/png" href="../_assets/favicon.png">
+    
+    
+    <link rel="stylesheet" href="style.css">
+    
+    
+</head>
+<body>
+    <div class="demo-banner" role="region" aria-label="ポータルナビゲーション">
+        <div class="demo-banner-inner">
+            <span class="demo-banner-badge">DRAWLIB SHOWCASE</span>
+            <span class="demo-banner-text">
+                <a href="https://www.drawlib.com/ja/" target="_blank" rel="noopener noreferrer">Drawlib</a> で構築された Jupyter / Colab ノートブックのサンプルプロジェクト（<code>type = "jupyter"</code>）
+            </span>
+            <span class="demo-banner-links">
+                <a href="../../index.html">All Examples</a>
+                <span class="demo-banner-sep">·</span>
+                <a href="https://github.com/yuichi110/drawlib-examples/tree/main/examples/jupyter/google-genai" target="_blank" rel="noopener noreferrer">Source (GitHub) ↗</a>
+                <span class="demo-banner-sep">·</span>
+                <a href="https://www.drawlib.com/ja/" target="_blank" rel="noopener noreferrer">Drawlib ↗</a>
+            </span>
+        </div>
+    </div>
+    
+    <div class="doc-layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="index.html" class="sidebar-brand" aria-label="Google GenAI SDK Cookbook">
+                    
+                    Google GenAI SDK Cookbook
+                    
+                </a>
+                <div class="sidebar-header-actions">
+                    <button type="button" id="theme-toggle" class="theme-toggle-btn" aria-label="Toggle theme">
+                        <svg class="icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+                        <svg class="icon-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                    </button>
+                    <button type="button" id="menu-toggle" class="menu-toggle-btn" aria-label="Toggle navigation" aria-expanded="false">
+                        <svg class="icon-hamburger" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+                        <svg class="icon-close" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
+                </div>
+            </div>
+            <div class="sidebar-menu">
+                
+                    <div class="sidebar-heading">Notebooks</div>
+                    <ul class="nav-list">
+                        
+                        <li class="nav-item ">
+                            <a href="01_ai_studio_quickstart.html" >01. Google AI Studio で始める Hello World</a>
+                        </li>
+                        
+                        <li class="nav-item ">
+                            <a href="02_vertex_ai_quickstart.html" >02. Vertex AI で動かす Hello World とバックエンドの使い分け</a>
+                        </li>
+                        
+                        <li class="nav-item ">
+                            <a href="03_streaming_and_thinking.html" >03. Streaming 配信と ThinkingConfig による思考制御</a>
+                        </li>
+                        
+                        <li class="nav-item ">
+                            <a href="04_structured_outputs.html" >04. Pydantic による型安全な構造化出力（response_schema）</a>
+                        </li>
+                        
+                        <li class="nav-item active">
+                            <a href="05_chat_and_function_calling.html" >05. マルチターン Chat と Function Calling（ツール連携）</a>
+                        </li>
+                        
+                    </ul>
+                
+            </div>
+        </aside>
+        <div class="content-wrapper">
+            <header class="top-bar">
+                <div class="breadcrumbs">
+                    <span class="crumb">Notebooks</span>
+                    <span class="crumb-separator">&raquo;</span>
+                    <span class="crumb active">05. マルチターン Chat と Function Calling（ツール連携）</span>
+                </div>
+                
+                <div class="lang-switcher">
+                    <details class="lang-dropdown">
+                        <summary class="lang-dropdown-btn" aria-label="Select language">
+                            <svg class="lang-globe-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                            <span class="lang-current-label">日本語</span>
+                            <svg class="lang-caret-icon" viewBox="0 0 24 24" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        </summary>
+                        <div class="lang-dropdown-menu" role="menu">
+                            
+                            <a href="../en/05_chat_and_function_calling.html" class="lang-option" lang="en" hreflang="en" >
+                                <span>English</span>
+                                
+                            </a>
+                            
+                            <a href="05_chat_and_function_calling.html" class="lang-option active" lang="ja" hreflang="ja" aria-current="page">
+                                <span>日本語</span>
+                                
+                                <svg class="lang-check-icon" viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                
+                            </a>
+                            
+                        </div>
+                    </details>
+                </div>
+                
+            </header>
+            <main class="main-content">
+                <div class="jupyter-notebook">
+  <div class="nb-toolbar">
+    <a class="nb-btn nb-btn-colab" href="https://colab.research.google.com/github/yuichi110/drawlib-examples/blob/main/docs/google-genai/ja/05_chat_and_function_calling.ipynb" target="_blank" rel="noopener noreferrer"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"></a>
+    <a class="nb-btn nb-btn-download" href="05_chat_and_function_calling.ipynb" download="05_chat_and_function_calling.ipynb">⬇ Download .ipynb</a>
+  </div>
+  <div class="nb-cell nb-markdown-cell">
+<h1>05. マルチターン Chat と Function Calling（ツール連携）</h1>
+<p><code>google-genai</code> SDK は、ステートレスなモデル呼び出しを「状態とツールを備えた実用的なアシスタント」へと進化させる2つの標準プリミティブを提供しています。会話履歴を自動管理する <strong><code>client.chats.create()</code></strong> と、Python の型ヒントおよび docstring からスキーマを自動抽出し、ローカル関数の実行から結果の再投入までを自動化する <strong>自動 Function Calling（<code>tools=[fn]</code>）</strong> です。</p>
+
+<figure class="drawlib-figure align-center">
+  <img src="../images/05_chat_and_function_calling/ch05_function_calling_loop_ja.png" alt="図5-1: google-genai SDK における Python 関数の自動 Function Calling ループ" loading="lazy">
+  <figcaption>図5-1: google-genai SDK における Python 関数の自動 Function Calling ループ</figcaption>
+</figure>
+<details class="drawlib-code-fold">
+  <summary>View Drawlib Python Code</summary>
+  <pre><code class="language-python"><span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.canvas</span><span class="w"> </span><span class="kn">import</span> <span class="n">save</span><span class="p">,</span> <span class="n">setup</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.icons</span><span class="w"> </span><span class="kn">import</span> <span class="n">ai</span><span class="p">,</span> <span class="n">phosphor</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.lines</span><span class="w"> </span><span class="kn">import</span> <span class="n">line</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.shapes</span><span class="w"> </span><span class="kn">import</span> <span class="n">rectangle</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.styles</span><span class="w"> </span><span class="kn">import</span> <span class="n">Styles</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.text</span><span class="w"> </span><span class="kn">import</span> <span class="n">text</span>
+
+<span class="n">setup</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mi">152</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">76</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">150</span><span class="p">)</span>
+
+<span class="c1"># Title</span>
+<span class="n">text</span><span class="p">(</span>
+    <span class="p">(</span><span class="mf">76.0</span><span class="p">,</span> <span class="mf">69.5</span><span class="p">),</span>
+    <span class="s2">"Python 関数の自動 Function Calling ループ (tools=[get_region_latency])"</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">11.8</span><span class="p">),</span>
+<span class="p">)</span>
+
+<span class="c1"># --- Top Row (y_center = 51.0, height = 21.0 -&gt; [40.5, 61.5]) ---</span>
+<span class="c1"># 1. User Prompt (Neutral)</span>
+<span class="n">rectangle</span><span class="p">((</span><span class="mf">23.5</span><span class="p">,</span> <span class="mf">51.0</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">35.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">21.0</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Neutral</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">2.0</span><span class="p">))</span>
+<span class="n">phosphor</span><span class="o">.</span><span class="n">chat_circle_text</span><span class="p">((</span><span class="mf">10.0</span><span class="p">,</span> <span class="mf">56.8</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">3.8</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="p">)</span>
+<span class="n">text</span><span class="p">((</span><span class="mf">25.0</span><span class="p">,</span> <span class="mf">56.8</span><span class="p">),</span> <span class="s2">"1. ユーザー質問"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.5</span><span class="p">))</span>
+<span class="n">text</span><span class="p">(</span>
+    <span class="p">(</span><span class="mf">23.5</span><span class="p">,</span> <span class="mf">47.2</span><span class="p">),</span>
+    <span class="s2">"リージョン遅延を比較し</span><span class="se">\n</span><span class="s2">東京向け構成を推奨して"</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Dark</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">),</span>
+<span class="p">)</span>
+
+<span class="c1"># 2. genai.Client (Focal PrimaryFlat)</span>
+<span class="n">rectangle</span><span class="p">((</span><span class="mf">75.0</span><span class="p">,</span> <span class="mf">51.0</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">37.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">21.0</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryFlat</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">2.0</span><span class="p">))</span>
+<span class="n">phosphor</span><span class="o">.</span><span class="n">gear_six</span><span class="p">((</span><span class="mf">60.5</span><span class="p">,</span> <span class="mf">56.8</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">3.8</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">WhiteBold</span><span class="p">)</span>
+<span class="n">text</span><span class="p">((</span><span class="mf">76.8</span><span class="p">,</span> <span class="mf">56.8</span><span class="p">),</span> <span class="s2">"2. genai.Client"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">WhiteBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.8</span><span class="p">))</span>
+<span class="n">text</span><span class="p">(</span>
+    <span class="p">(</span><span class="mf">75.0</span><span class="p">,</span> <span class="mf">47.2</span><span class="p">),</span>
+    <span class="s2">"型ヒントと docstring から</span><span class="se">\n</span><span class="s2">JSON スキーマ自動生成"</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">White</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">),</span>
+<span class="p">)</span>
+
+<span class="c1"># 3. Gemini FunctionCall (PrimaryNeutral)</span>
+<span class="n">rectangle</span><span class="p">((</span><span class="mf">127.0</span><span class="p">,</span> <span class="mf">51.0</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">38.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">21.0</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryNeutral</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">2.0</span><span class="p">))</span>
+<span class="n">ai</span><span class="o">.</span><span class="n">gemini</span><span class="p">((</span><span class="mf">112.5</span><span class="p">,</span> <span class="mf">56.8</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">3.8</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Primary</span><span class="p">)</span>
+<span class="n">text</span><span class="p">((</span><span class="mf">128.5</span><span class="p">,</span> <span class="mf">56.8</span><span class="p">),</span> <span class="s2">"3. Gemini 2.5"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.5</span><span class="p">))</span>
+<span class="n">text</span><span class="p">(</span>
+    <span class="p">(</span><span class="mf">127.0</span><span class="p">,</span> <span class="mf">47.2</span><span class="p">),</span>
+    <span class="s1">'FunctionCall 発行:</span><span class="se">\n</span><span class="s1">region="asia-northeast1"'</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Dark</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">),</span>
+<span class="p">)</span>
+
+<span class="c1"># --- Bottom Row (y_center = 16.5, height = 21.0 -&gt; [6.0, 27.0]) ---</span>
+<span class="c1"># 4. Local Python Tool Execution (SecondaryNeutral)</span>
+<span class="n">rectangle</span><span class="p">((</span><span class="mf">127.0</span><span class="p">,</span> <span class="mf">16.5</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">38.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">21.0</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">SecondaryNeutral</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">2.0</span><span class="p">))</span>
+<span class="n">phosphor</span><span class="o">.</span><span class="n">terminal_window</span><span class="p">((</span><span class="mf">112.5</span><span class="p">,</span> <span class="mf">22.3</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">3.8</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="p">)</span>
+<span class="n">text</span><span class="p">((</span><span class="mf">128.8</span><span class="p">,</span> <span class="mf">22.3</span><span class="p">),</span> <span class="s2">"4. Python ローカル実行"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.5</span><span class="p">))</span>
+<span class="n">text</span><span class="p">(</span>
+    <span class="p">(</span><span class="mf">127.0</span><span class="p">,</span> <span class="mf">12.7</span><span class="p">),</span>
+    <span class="s2">"get_region_latency()</span><span class="se">\n</span><span class="s2">-&gt; {p50: 14.2, p95: 31.5}"</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Dark</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">),</span>
+<span class="p">)</span>
+
+<span class="c1"># 5. FunctionResponse JSON -&gt; Gemini (PrimaryNeutral)</span>
+<span class="n">rectangle</span><span class="p">((</span><span class="mf">75.0</span><span class="p">,</span> <span class="mf">16.5</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">37.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">21.0</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryNeutral</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">2.0</span><span class="p">))</span>
+<span class="n">ai</span><span class="o">.</span><span class="n">gemini</span><span class="p">((</span><span class="mf">60.5</span><span class="p">,</span> <span class="mf">22.3</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">3.8</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Primary</span><span class="p">)</span>
+<span class="n">text</span><span class="p">((</span><span class="mf">77.2</span><span class="p">,</span> <span class="mf">22.3</span><span class="p">),</span> <span class="s2">"5. FunctionResponse"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.5</span><span class="p">))</span>
+<span class="n">text</span><span class="p">(</span>
+    <span class="p">(</span><span class="mf">75.0</span><span class="p">,</span> <span class="mf">12.7</span><span class="p">),</span>
+    <span class="s2">"SDK が JSON 実行結果を</span><span class="se">\n</span><span class="s2">Gemini 2.5 へ自動返送"</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Dark</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">),</span>
+<span class="p">)</span>
+
+<span class="c1"># 6. Final Grounded Answer (Neutral)</span>
+<span class="n">rectangle</span><span class="p">((</span><span class="mf">23.5</span><span class="p">,</span> <span class="mf">16.5</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">35.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">21.0</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Neutral</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">2.0</span><span class="p">))</span>
+<span class="n">phosphor</span><span class="o">.</span><span class="n">check_circle</span><span class="p">((</span><span class="mf">10.0</span><span class="p">,</span> <span class="mf">22.3</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">3.8</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">SuccessBold</span><span class="p">)</span>
+<span class="n">text</span><span class="p">((</span><span class="mf">25.0</span><span class="p">,</span> <span class="mf">22.3</span><span class="p">),</span> <span class="s2">"6. 最終回答の生成"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.5</span><span class="p">))</span>
+<span class="n">text</span><span class="p">(</span>
+    <span class="p">(</span><span class="mf">23.5</span><span class="p">,</span> <span class="mf">12.7</span><span class="p">),</span>
+    <span class="s2">"asia-northeast1 を推奨</span><span class="se">\n</span><span class="s2">(p50: 14.2 ms 実測根拠)"</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Dark</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">),</span>
+<span class="p">)</span>
+
+<span class="c1"># --- Connectors ---</span>
+<span class="n">line</span><span class="p">((</span><span class="mf">41.0</span><span class="p">,</span> <span class="mf">51.0</span><span class="p">),</span> <span class="p">(</span><span class="mf">56.5</span><span class="p">,</span> <span class="mf">51.0</span><span class="p">),</span> <span class="n">arrow_head</span><span class="o">=</span><span class="s2">"-&gt;"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="p">)</span>
+<span class="n">text</span><span class="p">((</span><span class="mf">48.75</span><span class="p">,</span> <span class="mf">54.5</span><span class="p">),</span> <span class="s2">"Prompt"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Dark</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">))</span>
+
+<span class="n">line</span><span class="p">((</span><span class="mf">93.5</span><span class="p">,</span> <span class="mf">51.0</span><span class="p">),</span> <span class="p">(</span><span class="mf">108.0</span><span class="p">,</span> <span class="mf">51.0</span><span class="p">),</span> <span class="n">arrow_head</span><span class="o">=</span><span class="s2">"-&gt;"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="p">)</span>
+<span class="n">text</span><span class="p">((</span><span class="mf">100.75</span><span class="p">,</span> <span class="mf">54.5</span><span class="p">),</span> <span class="s2">"Schema"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Dark</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">))</span>
+
+<span class="n">line</span><span class="p">((</span><span class="mf">127.0</span><span class="p">,</span> <span class="mf">40.5</span><span class="p">),</span> <span class="p">(</span><span class="mf">127.0</span><span class="p">,</span> <span class="mf">27.0</span><span class="p">),</span> <span class="n">arrow_head</span><span class="o">=</span><span class="s2">"-&gt;"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryBold</span><span class="p">)</span>
+<span class="n">text</span><span class="p">((</span><span class="mf">137.5</span><span class="p">,</span> <span class="mf">33.75</span><span class="p">),</span> <span class="s2">"関数呼出"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">))</span>
+
+<span class="n">line</span><span class="p">((</span><span class="mf">108.0</span><span class="p">,</span> <span class="mf">16.5</span><span class="p">),</span> <span class="p">(</span><span class="mf">93.5</span><span class="p">,</span> <span class="mf">16.5</span><span class="p">),</span> <span class="n">arrow_head</span><span class="o">=</span><span class="s2">"-&gt;"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="p">)</span>
+<span class="n">text</span><span class="p">((</span><span class="mf">100.75</span><span class="p">,</span> <span class="mf">20.0</span><span class="p">),</span> <span class="s2">"JSON"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Dark</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">))</span>
+
+<span class="n">line</span><span class="p">((</span><span class="mf">56.5</span><span class="p">,</span> <span class="mf">16.5</span><span class="p">),</span> <span class="p">(</span><span class="mf">41.0</span><span class="p">,</span> <span class="mf">16.5</span><span class="p">),</span> <span class="n">arrow_head</span><span class="o">=</span><span class="s2">"-&gt;"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">SuccessBold</span><span class="p">)</span>
+<span class="n">text</span><span class="p">((</span><span class="mf">48.75</span><span class="p">,</span> <span class="mf">20.0</span><span class="p">),</span> <span class="s2">"最終回答"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">SuccessBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">))</span>
+
+<span class="c1"># SDK orchestration link across top and bottom stages</span>
+<span class="n">line</span><span class="p">((</span><span class="mf">75.0</span><span class="p">,</span> <span class="mf">40.5</span><span class="p">),</span> <span class="p">(</span><span class="mf">75.0</span><span class="p">,</span> <span class="mf">27.0</span><span class="p">),</span> <span class="n">arrow_head</span><span class="o">=</span><span class="s2">"-&gt;"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryDashed</span><span class="p">)</span>
+<span class="n">text</span><span class="p">((</span><span class="mf">85.5</span><span class="p">,</span> <span class="mf">33.75</span><span class="p">),</span> <span class="s2">"自動ループ"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">))</span>
+
+<span class="n">save</span><span class="p">()</span>
+</code></pre>
+</details>
+<hr />
+<h2>1. 3行のクライアント初期化とマルチターン会話（<code>client.chats.create</code>）</h2>
+<p>Google Colab のシークレット（<code>userdata.get</code>）から <code>GEMINI_API_KEY</code> を読み込み、共通の <code>genai.Client</code> を3行で初期化します。</p>
+
+  </div>
+  <div class="nb-cell nb-code-cell nb-setup-cell">
+    <div class="nb-input">
+      <div class="nb-prompt nb-in-prompt">In [setup]:</div>
+      <div class="nb-code-area">
+        <pre><code class="language-bash">!pip<span class="w"> </span>install<span class="w"> </span>-q<span class="w"> </span>drawlib<span class="w"> </span>google-genai<span class="w"> </span>pydantic
+</code></pre>
+      </div>
+    </div>
+  </div>
+  <div class="nb-cell nb-code-cell">
+    <div class="nb-input">
+      <div class="nb-prompt nb-in-prompt">In [1]:</div>
+      <div class="nb-code-area">
+        <pre><code class="language-python"><span class="kn">from</span><span class="w"> </span><span class="nn">google.colab</span><span class="w"> </span><span class="kn">import</span> <span class="n">userdata</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">google</span><span class="w"> </span><span class="kn">import</span> <span class="n">genai</span>
+
+<span class="n">client</span> <span class="o">=</span> <span class="n">genai</span><span class="o">.</span><span class="n">Client</span><span class="p">(</span><span class="n">api_key</span><span class="o">=</span><span class="n">userdata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"GEMINI_API_KEY"</span><span class="p">))</span>
+</code></pre>
+      </div>
+    </div>
+  </div>
+  <div class="nb-cell nb-markdown-cell">
+<p>単発の <code>client.models.generate_content()</code> とは異なり、<strong><code>client.chats.create()</code></strong> はセッション内部で <code>list[types.Content]</code> 形式の会話履歴を保持します。<code>chat.send_message()</code> を呼ぶたびに <code>Content(role=&quot;user&quot;)</code> とモデルの応答 <code>Content(role=&quot;model&quot;)</code>（および途中のツール呼び出し履歴）が自動的に追記されます。さらにマルチターン会話が長くなると、毎ターン送信される共通プレフィックスに対して Gemini 2.5 の <strong>暗黙的コンテキストキャッシュ（Implicit Context Caching）</strong> が追加設定なしで自動的に働き、レイテンシ（TTFT）と入力トークンコストが抑えられます。</p>
+
+<figure class="drawlib-figure align-center">
+  <img src="../images/05_chat_and_function_calling/ch05_chat_state_context_ja.png" alt="図5-2: chats.create() による会話履歴の蓄積とツール連携セッションの構造" loading="lazy">
+  <figcaption>図5-2: chats.create() による会話履歴の蓄積とツール連携セッションの構造</figcaption>
+</figure>
+<details class="drawlib-code-fold">
+  <summary>View Drawlib Python Code</summary>
+  <pre><code class="language-python"><span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.canvas</span><span class="w"> </span><span class="kn">import</span> <span class="n">save</span><span class="p">,</span> <span class="n">setup</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.icons</span><span class="w"> </span><span class="kn">import</span> <span class="n">ai</span><span class="p">,</span> <span class="n">phosphor</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.lines</span><span class="w"> </span><span class="kn">import</span> <span class="n">line</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.shapes</span><span class="w"> </span><span class="kn">import</span> <span class="n">rectangle</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.styles</span><span class="w"> </span><span class="kn">import</span> <span class="n">Styles</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.text</span><span class="w"> </span><span class="kn">import</span> <span class="n">text</span>
+
+<span class="n">setup</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mi">152</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">76</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">150</span><span class="p">)</span>
+
+<span class="c1"># Title</span>
+<span class="n">text</span><span class="p">(</span>
+    <span class="p">(</span><span class="mf">76.0</span><span class="p">,</span> <span class="mf">69.5</span><span class="p">),</span>
+    <span class="s2">"chats.create() の会話履歴蓄積と暗黙的コンテキストキャッシュ"</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">11.8</span><span class="p">),</span>
+<span class="p">)</span>
+
+<span class="c1"># --- Left Column: Sequential Notebook Calls (x in [6, 44], cx = 25.0) ---</span>
+<span class="n">rectangle</span><span class="p">((</span><span class="mf">25.0</span><span class="p">,</span> <span class="mf">51.0</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">38.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">14.0</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Neutral</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">2.0</span><span class="p">))</span>
+<span class="n">phosphor</span><span class="o">.</span><span class="n">chat_circle</span><span class="p">((</span><span class="mf">10.0</span><span class="p">,</span> <span class="mf">53.8</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">3.5</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="p">)</span>
+<span class="n">text</span><span class="p">((</span><span class="mf">26.5</span><span class="p">,</span> <span class="mf">53.8</span><span class="p">),</span> <span class="s2">"Turn 1: send_message()"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.2</span><span class="p">))</span>
+<span class="n">text</span><span class="p">((</span><span class="mf">25.0</span><span class="p">,</span> <span class="mf">47.6</span><span class="p">),</span> <span class="s2">"ゲートウェイ設計の初回相談"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Dark</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">))</span>
+
+<span class="n">rectangle</span><span class="p">((</span><span class="mf">25.0</span><span class="p">,</span> <span class="mf">32.0</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">38.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">14.0</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Neutral</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">2.0</span><span class="p">))</span>
+<span class="n">phosphor</span><span class="o">.</span><span class="n">chats_circle</span><span class="p">((</span><span class="mf">10.0</span><span class="p">,</span> <span class="mf">34.8</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">3.5</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="p">)</span>
+<span class="n">text</span><span class="p">((</span><span class="mf">26.5</span><span class="p">,</span> <span class="mf">34.8</span><span class="p">),</span> <span class="s2">"Turn 2: send_message()"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.2</span><span class="p">))</span>
+<span class="n">text</span><span class="p">((</span><span class="mf">25.0</span><span class="p">,</span> <span class="mf">28.6</span><span class="p">),</span> <span class="s2">"タイムアウト設計の深掘り"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Dark</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">))</span>
+
+<span class="n">rectangle</span><span class="p">((</span><span class="mf">25.0</span><span class="p">,</span> <span class="mf">13.0</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">38.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">14.0</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryFlat</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">2.0</span><span class="p">))</span>
+<span class="n">phosphor</span><span class="o">.</span><span class="n">wrench</span><span class="p">((</span><span class="mf">10.0</span><span class="p">,</span> <span class="mf">15.8</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">3.5</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">WhiteBold</span><span class="p">)</span>
+<span class="n">text</span><span class="p">((</span><span class="mf">26.5</span><span class="p">,</span> <span class="mf">15.8</span><span class="p">),</span> <span class="s2">"Turn 3: ツール連携ターン"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">WhiteBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.2</span><span class="p">))</span>
+<span class="n">text</span><span class="p">((</span><span class="mf">25.0</span><span class="p">,</span> <span class="mf">9.6</span><span class="p">),</span> <span class="s2">"tools=[get_region_latency]"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">White</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">))</span>
+
+<span class="c1"># --- Center Container: Session History Stack (x in [56, 104], cx = 80.0) ---</span>
+<span class="n">rectangle</span><span class="p">((</span><span class="mf">80.0</span><span class="p">,</span> <span class="mf">34.5</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">48.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">57.0</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">MutedDashed</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">2.5</span><span class="p">))</span>
+<span class="n">text</span><span class="p">((</span><span class="mf">80.0</span><span class="p">,</span> <span class="mf">59.2</span><span class="p">),</span> <span class="s2">"chat.get_history() (list[Content])"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.4</span><span class="p">))</span>
+
+<span class="n">rectangle</span><span class="p">((</span><span class="mf">80.0</span><span class="p">,</span> <span class="mf">51.0</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">42.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">7.6</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Neutral</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">1.5</span><span class="p">))</span>
+<span class="n">text</span><span class="p">((</span><span class="mf">80.0</span><span class="p">,</span> <span class="mf">51.0</span><span class="p">),</span> <span class="s1">'1. Content(role="user")'</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">))</span>
+
+<span class="n">rectangle</span><span class="p">((</span><span class="mf">80.0</span><span class="p">,</span> <span class="mf">41.5</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">42.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">7.6</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryNeutral</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">1.5</span><span class="p">))</span>
+<span class="n">text</span><span class="p">((</span><span class="mf">80.0</span><span class="p">,</span> <span class="mf">41.5</span><span class="p">),</span> <span class="s1">'2. Content(role="model")'</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Dark</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">))</span>
+
+<span class="n">rectangle</span><span class="p">((</span><span class="mf">80.0</span><span class="p">,</span> <span class="mf">32.0</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">42.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">7.6</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Neutral</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">1.5</span><span class="p">))</span>
+<span class="n">text</span><span class="p">((</span><span class="mf">80.0</span><span class="p">,</span> <span class="mf">32.0</span><span class="p">),</span> <span class="s1">'3. Content(role="user")'</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">))</span>
+
+<span class="n">rectangle</span><span class="p">((</span><span class="mf">80.0</span><span class="p">,</span> <span class="mf">22.5</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">42.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">7.6</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryNeutral</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">1.5</span><span class="p">))</span>
+<span class="n">text</span><span class="p">((</span><span class="mf">80.0</span><span class="p">,</span> <span class="mf">22.5</span><span class="p">),</span> <span class="s1">'4. Content(role="model")'</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Dark</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">))</span>
+
+<span class="n">rectangle</span><span class="p">((</span><span class="mf">80.0</span><span class="p">,</span> <span class="mf">13.0</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">42.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">7.6</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">SecondaryNeutral</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">1.5</span><span class="p">))</span>
+<span class="n">text</span><span class="p">((</span><span class="mf">80.0</span><span class="p">,</span> <span class="mf">13.0</span><span class="p">),</span> <span class="s2">"5. FunctionCall + JSON 応答"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">))</span>
+
+<span class="c1"># --- Right Column: Gemini 2.5 &amp; Implicit Caching (x in [115, 146], cx = 130.5) ---</span>
+<span class="n">rectangle</span><span class="p">((</span><span class="mf">130.5</span><span class="p">,</span> <span class="mf">48.5</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">31.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">25.0</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryNeutral</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">2.0</span><span class="p">))</span>
+<span class="n">ai</span><span class="o">.</span><span class="n">gemini</span><span class="p">((</span><span class="mf">130.5</span><span class="p">,</span> <span class="mf">56.2</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">4.2</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Primary</span><span class="p">)</span>
+<span class="n">text</span><span class="p">((</span><span class="mf">130.5</span><span class="p">,</span> <span class="mf">50.2</span><span class="p">),</span> <span class="s2">"Gemini 2.5 API"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.5</span><span class="p">))</span>
+<span class="n">text</span><span class="p">(</span>
+    <span class="p">(</span><span class="mf">130.5</span><span class="p">,</span> <span class="mf">42.0</span><span class="p">),</span>
+    <span class="s2">"毎ターン全履歴の</span><span class="se">\n</span><span class="s2">Content[] を送信"</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Dark</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">),</span>
+<span class="p">)</span>
+
+<span class="n">rectangle</span><span class="p">((</span><span class="mf">130.5</span><span class="p">,</span> <span class="mf">18.5</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">31.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">25.0</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">SecondaryNeutral</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">2.0</span><span class="p">))</span>
+<span class="n">phosphor</span><span class="o">.</span><span class="n">lightning</span><span class="p">((</span><span class="mf">119.5</span><span class="p">,</span> <span class="mf">26.5</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">3.8</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">SuccessBold</span><span class="p">)</span>
+<span class="n">text</span><span class="p">((</span><span class="mf">132.2</span><span class="p">,</span> <span class="mf">26.5</span><span class="p">),</span> <span class="s2">"暗黙キャッシュ"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.5</span><span class="p">))</span>
+<span class="n">text</span><span class="p">(</span>
+    <span class="p">(</span><span class="mf">130.5</span><span class="p">,</span> <span class="mf">15.5</span><span class="p">),</span>
+    <span class="s2">"共通プレフィックスを</span><span class="se">\n</span><span class="s2">自動で高速再利用</span><span class="se">\n</span><span class="s2">(低遅延・低コスト)"</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Dark</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">),</span>
+<span class="p">)</span>
+
+<span class="c1"># --- Orthogonal Connectors ---</span>
+<span class="n">line</span><span class="p">((</span><span class="mf">44.0</span><span class="p">,</span> <span class="mf">51.0</span><span class="p">),</span> <span class="p">(</span><span class="mf">59.0</span><span class="p">,</span> <span class="mf">51.0</span><span class="p">),</span> <span class="n">arrow_head</span><span class="o">=</span><span class="s2">"-&gt;"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="p">)</span>
+<span class="n">line</span><span class="p">((</span><span class="mf">44.0</span><span class="p">,</span> <span class="mf">32.0</span><span class="p">),</span> <span class="p">(</span><span class="mf">59.0</span><span class="p">,</span> <span class="mf">32.0</span><span class="p">),</span> <span class="n">arrow_head</span><span class="o">=</span><span class="s2">"-&gt;"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="p">)</span>
+<span class="n">line</span><span class="p">((</span><span class="mf">44.0</span><span class="p">,</span> <span class="mf">13.0</span><span class="p">),</span> <span class="p">(</span><span class="mf">59.0</span><span class="p">,</span> <span class="mf">13.0</span><span class="p">),</span> <span class="n">arrow_head</span><span class="o">=</span><span class="s2">"-&gt;"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryBold</span><span class="p">)</span>
+
+<span class="n">line</span><span class="p">((</span><span class="mf">104.0</span><span class="p">,</span> <span class="mf">48.5</span><span class="p">),</span> <span class="p">(</span><span class="mf">115.0</span><span class="p">,</span> <span class="mf">48.5</span><span class="p">),</span> <span class="n">arrow_head</span><span class="o">=</span><span class="s2">"-&gt;"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="p">)</span>
+<span class="n">line</span><span class="p">((</span><span class="mf">104.0</span><span class="p">,</span> <span class="mf">18.5</span><span class="p">),</span> <span class="p">(</span><span class="mf">115.0</span><span class="p">,</span> <span class="mf">18.5</span><span class="p">),</span> <span class="n">arrow_head</span><span class="o">=</span><span class="s2">"-&gt;"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">SuccessBold</span><span class="p">)</span>
+
+<span class="n">save</span><span class="p">()</span>
+</code></pre>
+</details>
+<p><code>gemini-2.5-flash</code> でチャットセッションを開始し、2回連続でフォローアップ質問を送信したあと、<code>chat.get_history()</code> に蓄積された <code>user</code> と <code>model</code> のターンを確認してみましょう。</p>
+
+  </div>
+  <div class="nb-cell nb-code-cell">
+    <div class="nb-input">
+      <div class="nb-prompt nb-in-prompt">In [2]:</div>
+      <div class="nb-code-area">
+        <pre><code class="language-python"><span class="n">chat</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">chats</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="s2">"gemini-2.5-flash"</span><span class="p">)</span>
+
+<span class="n">reply_1</span> <span class="o">=</span> <span class="n">chat</span><span class="o">.</span><span class="n">send_message</span><span class="p">(</span>
+    <span class="s2">"マルチリージョン構成の Cloud Run API ゲートウェイを設計中です。重要なポイントを2点に絞って教えてください。"</span>
+<span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Model (Turn 1):</span><span class="se">\n</span><span class="s2">"</span><span class="p">,</span> <span class="n">reply_1</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+
+<span class="n">reply_2</span> <span class="o">=</span> <span class="n">chat</span><span class="o">.</span><span class="n">send_message</span><span class="p">(</span>
+    <span class="s2">"その2点を踏まえると、クライアント側の HTTP タイムアウトとリトライ戦略はどう設定すべきですか？"</span>
+<span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Model (Turn 2):</span><span class="se">\n</span><span class="s2">"</span><span class="p">,</span> <span class="n">reply_2</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">--- 蓄積されたセッション履歴 ---"</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">turn</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">chat</span><span class="o">.</span><span class="n">get_history</span><span class="p">(),</span> <span class="n">start</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="n">preview</span> <span class="o">=</span> <span class="s2">" "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+        <span class="n">p</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="p">(</span><span class="n">turn</span><span class="o">.</span><span class="n">parts</span> <span class="ow">or</span> <span class="p">[])</span> <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">text</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">p</span><span class="o">.</span><span class="n">thought</span>
+    <span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"[</span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s2">] role=</span><span class="si">{</span><span class="n">turn</span><span class="o">.</span><span class="n">role</span><span class="si">:</span><span class="s2">&lt;5</span><span class="si">}</span><span class="s2"> | </span><span class="si">{</span><span class="n">preview</span><span class="p">[:</span><span class="mi">85</span><span class="p">]</span><span class="si">}</span><span class="s2">..."</span><span class="p">)</span>
+</code></pre>
+      </div>
+    </div>
+  </div>
+  <div class="nb-cell nb-markdown-cell">
+<hr />
+<h2>2. Python 関数の自動 Function Calling と Drawlib インライン可視化</h2>
+<p>外部の監視メトリクスや社内 API を Gemini に連携させるには、型ヒント（<code>region: str -&gt; dict[str, float]</code>）と <strong>Google スタイルの docstring</strong>（<code>Args:</code> / <code>Returns:</code>）を記述した通常の Python 関数を <strong><code>types.GenerateContentConfig(tools=[...])</code></strong> にそのまま渡します。SDK が関数シグネチャから JSON スキーマを自動生成します。</p>
+<p>複数リージョンの比較を求められた Gemini が <code>FunctionCall</code> を発行すると、<code>genai.Client</code> が各リージョンに対してローカルの <code>get_region_latency()</code> を自動実行し、<code>FunctionResponse</code> をモデルへ返送して実測値に基づく推奨構成をまとめ上げます。</p>
+
+  </div>
+  <div class="nb-cell nb-code-cell">
+    <div class="nb-input">
+      <div class="nb-prompt nb-in-prompt">In [3]:</div>
+      <div class="nb-code-area">
+        <pre><code class="language-python"><span class="kn">from</span><span class="w"> </span><span class="nn">google.genai</span><span class="w"> </span><span class="kn">import</span> <span class="n">types</span>
+
+<span class="n">REGION_LATENCY_MS</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">"asia-northeast1"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"p50_ms"</span><span class="p">:</span> <span class="mf">14.2</span><span class="p">,</span> <span class="s2">"p95_ms"</span><span class="p">:</span> <span class="mf">31.5</span><span class="p">},</span>
+    <span class="s2">"us-central1"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"p50_ms"</span><span class="p">:</span> <span class="mf">24.5</span><span class="p">,</span> <span class="s2">"p95_ms"</span><span class="p">:</span> <span class="mf">58.4</span><span class="p">},</span>
+    <span class="s2">"europe-west1"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"p50_ms"</span><span class="p">:</span> <span class="mf">38.6</span><span class="p">,</span> <span class="s2">"p95_ms"</span><span class="p">:</span> <span class="mf">84.2</span><span class="p">},</span>
+<span class="p">}</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">get_region_latency</span><span class="p">(</span><span class="n">region</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""指定されたクラウドリージョンの最新 API レイテンシ（p50 / p95 ミリ秒）を取得します。</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        region: 対象リージョン ID（'asia-northeast1', 'us-central1', 'europe-west1'）。</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        'p50_ms'（中央値）と 'p95_ms'（95パーセンタイル）を含む辞書。</span>
+<span class="sd">    """</span>
+    <span class="k">return</span> <span class="n">REGION_LATENCY_MS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">region</span><span class="p">,</span> <span class="p">{</span><span class="s2">"p50_ms"</span><span class="p">:</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="s2">"p95_ms"</span><span class="p">:</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">})</span>
+
+
+<span class="n">tool_chat</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">chats</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+    <span class="n">model</span><span class="o">=</span><span class="s2">"gemini-2.5-flash"</span><span class="p">,</span>
+    <span class="n">config</span><span class="o">=</span><span class="n">types</span><span class="o">.</span><span class="n">GenerateContentConfig</span><span class="p">(</span>
+        <span class="n">tools</span><span class="o">=</span><span class="p">[</span><span class="n">get_region_latency</span><span class="p">],</span>
+        <span class="n">temperature</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+    <span class="p">),</span>
+<span class="p">)</span>
+
+<span class="n">recommendation</span> <span class="o">=</span> <span class="n">tool_chat</span><span class="o">.</span><span class="n">send_message</span><span class="p">(</span>
+    <span class="s2">"asia-northeast1、us-central1、europe-west1 の p50 / p95 レイテンシを取得して比較し、"</span>
+    <span class="s2">"東京のユーザー向けに最適なプライマリおよびフェイルオーバー先リージョンを推奨してください。"</span>
+<span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">recommendation</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">--- 記録されたツール呼び出しトレース ---"</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">turn</span> <span class="ow">in</span> <span class="n">tool_chat</span><span class="o">.</span><span class="n">get_history</span><span class="p">():</span>
+    <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">turn</span><span class="o">.</span><span class="n">parts</span> <span class="ow">or</span> <span class="p">[]:</span>
+        <span class="k">if</span> <span class="n">part</span><span class="o">.</span><span class="n">function_call</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"-&gt; FunctionCall: </span><span class="si">{</span><span class="n">part</span><span class="o">.</span><span class="n">function_call</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">(</span><span class="si">{</span><span class="nb">dict</span><span class="p">(</span><span class="n">part</span><span class="o">.</span><span class="n">function_call</span><span class="o">.</span><span class="n">args</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="p">{})</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">part</span><span class="o">.</span><span class="n">function_response</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"&lt;- FunctionResponse: </span><span class="si">{</span><span class="n">part</span><span class="o">.</span><span class="n">function_response</span><span class="o">.</span><span class="n">response</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</code></pre>
+      </div>
+    </div>
+  </div>
+  <div class="nb-cell nb-markdown-cell">
+<p>最後に、全5章のクックブックの締めくくりとして、エージェントがツール経由で取得したマルチリージョンの <code>p50</code> / <code>p95</code> レイテンシデータを、<code>setup(..., cwd=True)</code> と <strong><code>BarChart</code></strong> + <code>show()</code> を使ってノートブックの出力セル内に直接チャートとして可視化します。</p>
+
+  </div>
+  <div class="nb-cell nb-code-cell">
+    <div class="nb-input">
+      <div class="nb-prompt nb-in-prompt">In [4]:</div>
+      <div class="nb-code-area">
+        <pre><code class="language-python"><span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.canvas</span><span class="w"> </span><span class="kn">import</span> <span class="n">clear</span><span class="p">,</span> <span class="n">setup</span><span class="p">,</span> <span class="n">show</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.charts.bar</span><span class="w"> </span><span class="kn">import</span> <span class="n">BarChart</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.styles</span><span class="w"> </span><span class="kn">import</span> <span class="n">Styles</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.text</span><span class="w"> </span><span class="kn">import</span> <span class="n">text</span>
+
+<span class="n">clear</span><span class="p">()</span>
+<span class="n">setup</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mi">116</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">56</span><span class="p">,</span> <span class="n">cwd</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="n">regions</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">REGION_LATENCY_MS</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+<span class="n">p50_ms</span> <span class="o">=</span> <span class="p">[</span><span class="n">get_region_latency</span><span class="p">(</span><span class="n">r</span><span class="p">)[</span><span class="s2">"p50_ms"</span><span class="p">]</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">regions</span><span class="p">]</span>
+<span class="n">p95_ms</span> <span class="o">=</span> <span class="p">[</span><span class="n">get_region_latency</span><span class="p">(</span><span class="n">r</span><span class="p">)[</span><span class="s2">"p95_ms"</span><span class="p">]</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">regions</span><span class="p">]</span>
+
+<span class="n">text</span><span class="p">(</span>
+    <span class="p">(</span><span class="mf">58.0</span><span class="p">,</span> <span class="mf">50.8</span><span class="p">),</span>
+    <span class="s2">"Gemini Function Calling で取得したリージョン別 API レイテンシ比較"</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">11.5</span><span class="p">),</span>
+<span class="p">)</span>
+
+<span class="n">chart</span> <span class="o">=</span> <span class="n">BarChart</span><span class="p">(</span>
+    <span class="n">axis_line_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">MutedDashed</span><span class="p">,</span>
+    <span class="n">categories</span><span class="o">=</span><span class="n">regions</span><span class="p">,</span>
+    <span class="n">width</span><span class="o">=</span><span class="mf">96.0</span><span class="p">,</span>
+    <span class="n">height</span><span class="o">=</span><span class="mf">34.0</span><span class="p">,</span>
+    <span class="n">orientation</span><span class="o">=</span><span class="s2">"vertical"</span><span class="p">,</span>
+    <span class="n">bar_mode</span><span class="o">=</span><span class="s2">"group"</span><span class="p">,</span>
+    <span class="n">bar_width_ratio</span><span class="o">=</span><span class="mf">0.62</span><span class="p">,</span>
+    <span class="n">bar_r</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span>
+    <span class="n">axis_text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Dark</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">),</span>
+    <span class="n">grid_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">MutedThin</span><span class="p">,</span>
+    <span class="n">value_text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">),</span>
+    <span class="n">value_format</span><span class="o">=</span><span class="s2">"</span><span class="si">{:.1f}</span><span class="s2"> ms"</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">chart</span><span class="o">.</span><span class="n">add_series</span><span class="p">(</span><span class="s2">"p50 中央値 (ms)"</span><span class="p">,</span> <span class="n">p50_ms</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryFlat</span><span class="p">)</span>
+<span class="n">chart</span><span class="o">.</span><span class="n">add_series</span><span class="p">(</span><span class="s2">"p95 テール遅延 (ms)"</span><span class="p">,</span> <span class="n">p95_ms</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">SecondaryNeutral</span><span class="p">)</span>
+<span class="n">chart</span><span class="o">.</span><span class="n">configure_y_axis</span><span class="p">(</span><span class="n">min_value</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="mf">100.0</span><span class="p">,</span> <span class="n">tick_step</span><span class="o">=</span><span class="mf">25.0</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">" ms"</span><span class="p">)</span>
+<span class="n">chart</span><span class="o">.</span><span class="n">draw</span><span class="p">(</span><span class="n">xy</span><span class="o">=</span><span class="p">(</span><span class="mf">12.0</span><span class="p">,</span> <span class="mf">6.0</span><span class="p">))</span>
+<span class="n">chart</span><span class="o">.</span><span class="n">draw_legend</span><span class="p">(</span>
+    <span class="n">xy</span><span class="o">=</span><span class="p">(</span><span class="mf">34.5</span><span class="p">,</span> <span class="mf">44.5</span><span class="p">),</span>
+    <span class="n">text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Dark</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">),</span>
+    <span class="n">orientation</span><span class="o">=</span><span class="s2">"horizontal"</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">show</span><span class="p">()</span>
+</code></pre>
+      </div>
+    </div>
+  </div>
+  <div class="nb-cell nb-markdown-cell">
+<blockquote>
+<p><strong>まとめ</strong>: <code>client.chats.create()</code> によるマルチターン文脈管理、型付き Python 関数を <code>tools=[fn]</code> に渡すだけの自動 Function Calling、そして <code>setup(..., cwd=True)</code> + <code>show()</code> による Drawlib チャート描画を組み合わせることで、データ取得から意思決定・可視化までを1つのノートブック内でシームレスに完結できます。</p>
+</blockquote>
+
+  </div>
+</div>
+            </main>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const themeBtn = document.getElementById('theme-toggle');
+            if (themeBtn) {
+                themeBtn.addEventListener('click', function() {
+                    const current = document.documentElement.getAttribute('data-theme');
+                    const next = current === 'dark' ? 'light' : 'dark';
+                    document.documentElement.setAttribute('data-theme', next);
+                    localStorage.setItem('drawlib-theme', next);
+                });
+            }
+
+            const langDropdowns = document.querySelectorAll('.lang-dropdown');
+            if (langDropdowns.length > 0) {
+                document.addEventListener('click', function(e) {
+                    langDropdowns.forEach(function(dd) {
+                        if (dd.hasAttribute('open') && !dd.contains(e.target)) {
+                            dd.removeAttribute('open');
+                        }
+                    });
+                });
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape') {
+                        langDropdowns.forEach(function(dd) {
+                            dd.removeAttribute('open');
+                        });
+                    }
+                });
+            }
+
+            const menuBtn = document.getElementById('menu-toggle');
+            const sidebar = document.querySelector('.sidebar');
+            if (menuBtn && sidebar) {
+                function setMenuOpen(open) {
+                    sidebar.classList.toggle('is-open', open);
+                    menuBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+                    document.body.classList.toggle('menu-open', open);
+                    if (open) {
+                        const menu = sidebar.querySelector('.sidebar-menu');
+                        if (menu) {
+                            menu.scrollTop = 0;
+                        }
+                    }
+                }
+
+                menuBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const willOpen = !sidebar.classList.contains('is-open');
+                    setMenuOpen(willOpen);
+                });
+
+                document.addEventListener('click', function(e) {
+                    if (sidebar.classList.contains('is-open') && !sidebar.contains(e.target)) {
+                        setMenuOpen(false);
+                    }
+                });
+
+                const navLinks = sidebar.querySelectorAll('.nav-item a');
+                navLinks.forEach(function(link) {
+                    link.addEventListener('click', function() {
+                        setMenuOpen(false);
+                    });
+                });
+
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape' && sidebar.classList.contains('is-open')) {
+                        setMenuOpen(false);
+                    }
+                });
+
+                window.addEventListener('resize', function() {
+                    if (window.innerWidth > 768 && sidebar.classList.contains('is-open')) {
+                        setMenuOpen(false);
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

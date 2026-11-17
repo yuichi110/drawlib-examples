@@ -1,0 +1,27 @@
+[project]
+name = "google-genai"
+type = "jupyter"
+title = "Google GenAI SDK Cookbook"
+description = "Hands-on bilingual Jupyter & Google Colab notebooks covering the unified google-genai SDK across Google AI Studio, Vertex AI, Streaming, ThinkingConfig, Pydantic Structured Outputs, and Function Calling."
+style = "google"
+
+[i18n]
+default_lang = "en"
+langs = ["en", "ja"]
+
+[i18n.labels]
+en = "English"
+ja = "日本語"
+
+[jupyter]
+colab_base_url = "https://colab.research.google.com/github/yuichi110/drawlib-examples/blob/main/docs/google-genai"
+setup_packages = ["drawlib", "google-genai", "pydantic"]
+drawlib_cell_mode = "markdown"
+image_mode = "url"
+execute = false
+
+[seo]
+site_url = "https://examples.drawlib.com/google-genai"
+sitemap = true
+robots = true
+llms_txt = true

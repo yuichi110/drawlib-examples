@@ -1,0 +1,590 @@
+<!--
+ Copyright (c) 2026 Yuichi Ito (yuichi@yuichi.com)
+
+ This software is licensed under the Apache License, Version 2.0.
+ For more information, please visit: https://github.com/yuichi110/drawlib
+
+ This software is provided "as is", without warranty of any kind,
+ express or implied, including but not limited to the warranties of
+ merchantability, fitness for a particular purpose and noninfringement.
+-->
+<!DOCTYPE html>
+<html lang="ja" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>02. Vertex AI で動かす Hello World とバックエンドの使い分け</title>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-S9N5BZ1VRC"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-S9N5BZ1VRC');
+    </script>
+    <script>
+        (function() {
+            const saved = localStorage.getItem('drawlib-theme');
+            if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            } else {
+                document.documentElement.setAttribute('data-theme', 'light');
+            }
+        })();
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    
+    <link rel="alternate" hreflang="en" href="https://examples.drawlib.com/google-genai/en/02_vertex_ai_quickstart.html">
+    
+    <link rel="alternate" hreflang="ja" href="https://examples.drawlib.com/google-genai/ja/02_vertex_ai_quickstart.html">
+    
+    <link rel="alternate" hreflang="x-default" href="https://examples.drawlib.com/google-genai/en/02_vertex_ai_quickstart.html">
+    
+    
+    
+    <meta name="description" content="統合 google-genai SDK の最大の強みは、Google AI Studio と Google Cloud Vertex AI の違いが genai.Client(...) の初期化コードのみに局所化されている点にあります。一度クライアントを生成すれば、client.models.generate_con…">
+    <link rel="canonical" href="https://examples.drawlib.com/google-genai/ja/02_vertex_ai_quickstart.html">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Google GenAI SDK Cookbook">
+    <meta property="og:title" content="02. Vertex AI で動かす Hello World とバックエンドの使い分け — Google GenAI SDK Cookbook">
+    <meta property="og:description" content="統合 google-genai SDK の最大の強みは、Google AI Studio と Google Cloud Vertex AI の違いが genai.Client(...) の初期化コードのみに局所化されている点にあります。一度クライアントを生成すれば、client.models.generate_con…">
+    <meta property="og:url" content="https://examples.drawlib.com/google-genai/ja/02_vertex_ai_quickstart.html">
+    <meta property="og:locale" content="ja_JP">
+    <meta property="og:locale:alternate" content="en_US">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="02. Vertex AI で動かす Hello World とバックエンドの使い分け — Google GenAI SDK Cookbook">
+    <meta name="twitter:description" content="統合 google-genai SDK の最大の強みは、Google AI Studio と Google Cloud Vertex AI の違いが genai.Client(...) の初期化コードのみに局所化されている点にあります。一度クライアントを生成すれば、client.models.generate_con…">
+    
+    
+    <link rel="icon" type="image/png" href="../_assets/favicon.png">
+    
+    
+    <link rel="stylesheet" href="style.css">
+    
+    
+</head>
+<body>
+    <div class="demo-banner" role="region" aria-label="ポータルナビゲーション">
+        <div class="demo-banner-inner">
+            <span class="demo-banner-badge">DRAWLIB SHOWCASE</span>
+            <span class="demo-banner-text">
+                <a href="https://www.drawlib.com/ja/" target="_blank" rel="noopener noreferrer">Drawlib</a> で構築された Jupyter / Colab ノートブックのサンプルプロジェクト（<code>type = "jupyter"</code>）
+            </span>
+            <span class="demo-banner-links">
+                <a href="../../index.html">All Examples</a>
+                <span class="demo-banner-sep">·</span>
+                <a href="https://github.com/yuichi110/drawlib-examples/tree/main/examples/jupyter/google-genai" target="_blank" rel="noopener noreferrer">Source (GitHub) ↗</a>
+                <span class="demo-banner-sep">·</span>
+                <a href="https://www.drawlib.com/ja/" target="_blank" rel="noopener noreferrer">Drawlib ↗</a>
+            </span>
+        </div>
+    </div>
+    
+    <div class="doc-layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="index.html" class="sidebar-brand" aria-label="Google GenAI SDK Cookbook">
+                    
+                    Google GenAI SDK Cookbook
+                    
+                </a>
+                <div class="sidebar-header-actions">
+                    <button type="button" id="theme-toggle" class="theme-toggle-btn" aria-label="Toggle theme">
+                        <svg class="icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+                        <svg class="icon-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                    </button>
+                    <button type="button" id="menu-toggle" class="menu-toggle-btn" aria-label="Toggle navigation" aria-expanded="false">
+                        <svg class="icon-hamburger" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+                        <svg class="icon-close" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
+                </div>
+            </div>
+            <div class="sidebar-menu">
+                
+                    <div class="sidebar-heading">Notebooks</div>
+                    <ul class="nav-list">
+                        
+                        <li class="nav-item ">
+                            <a href="01_ai_studio_quickstart.html" >01. Google AI Studio で始める Hello World</a>
+                        </li>
+                        
+                        <li class="nav-item active">
+                            <a href="02_vertex_ai_quickstart.html" >02. Vertex AI で動かす Hello World とバックエンドの使い分け</a>
+                        </li>
+                        
+                        <li class="nav-item ">
+                            <a href="03_streaming_and_thinking.html" >03. Streaming 配信と ThinkingConfig による思考制御</a>
+                        </li>
+                        
+                        <li class="nav-item ">
+                            <a href="04_structured_outputs.html" >04. Pydantic による型安全な構造化出力（response_schema）</a>
+                        </li>
+                        
+                        <li class="nav-item ">
+                            <a href="05_chat_and_function_calling.html" >05. マルチターン Chat と Function Calling（ツール連携）</a>
+                        </li>
+                        
+                    </ul>
+                
+            </div>
+        </aside>
+        <div class="content-wrapper">
+            <header class="top-bar">
+                <div class="breadcrumbs">
+                    <span class="crumb">Notebooks</span>
+                    <span class="crumb-separator">&raquo;</span>
+                    <span class="crumb active">02. Vertex AI で動かす Hello World とバックエンドの使い分け</span>
+                </div>
+                
+                <div class="lang-switcher">
+                    <details class="lang-dropdown">
+                        <summary class="lang-dropdown-btn" aria-label="Select language">
+                            <svg class="lang-globe-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                            <span class="lang-current-label">日本語</span>
+                            <svg class="lang-caret-icon" viewBox="0 0 24 24" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        </summary>
+                        <div class="lang-dropdown-menu" role="menu">
+                            
+                            <a href="../en/02_vertex_ai_quickstart.html" class="lang-option" lang="en" hreflang="en" >
+                                <span>English</span>
+                                
+                            </a>
+                            
+                            <a href="02_vertex_ai_quickstart.html" class="lang-option active" lang="ja" hreflang="ja" aria-current="page">
+                                <span>日本語</span>
+                                
+                                <svg class="lang-check-icon" viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                
+                            </a>
+                            
+                        </div>
+                    </details>
+                </div>
+                
+            </header>
+            <main class="main-content">
+                <div class="jupyter-notebook">
+  <div class="nb-toolbar">
+    <a class="nb-btn nb-btn-colab" href="https://colab.research.google.com/github/yuichi110/drawlib-examples/blob/main/docs/google-genai/ja/02_vertex_ai_quickstart.ipynb" target="_blank" rel="noopener noreferrer"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"></a>
+    <a class="nb-btn nb-btn-download" href="02_vertex_ai_quickstart.ipynb" download="02_vertex_ai_quickstart.ipynb">⬇ Download .ipynb</a>
+  </div>
+  <div class="nb-cell nb-markdown-cell">
+<h1>02. Vertex AI で動かす Hello World とバックエンドの使い分け</h1>
+<p>統合 <code>google-genai</code> SDK の最大の強みは、Google AI Studio と Google Cloud Vertex AI の違いが <strong><code>genai.Client(...)</code> の初期化コードのみに局所化されている点</strong>にあります。一度クライアントを生成すれば、<code>client.models.generate_content</code>、ストリーミング、<code>ThinkingConfig</code>、Pydantic による構造化出力、マルチターンチャット（<code>client.chats</code>）、Function Calling まで、後続のすべての呼び出しコードは <strong>100% 同一</strong>のまま動作します。</p>
+
+<figure class="drawlib-figure align-center">
+  <img src="../images/02_vertex_ai_quickstart/ch02_unified_sdk_arch_ja.png" alt="図2-1: 単一の google-genai SDK による AI Studio / Vertex AI 統合アーキテクチャ" loading="lazy">
+  <figcaption>図2-1: 単一の google-genai SDK による AI Studio / Vertex AI 統合アーキテクチャ</figcaption>
+</figure>
+<details class="drawlib-code-fold">
+  <summary>View Drawlib Python Code</summary>
+  <pre><code class="language-python"><span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.canvas</span><span class="w"> </span><span class="kn">import</span> <span class="n">save</span><span class="p">,</span> <span class="n">setup</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.diagrams.architecture</span><span class="w"> </span><span class="kn">import</span> <span class="n">ArchitectureDiagram</span><span class="p">,</span> <span class="n">GcpIcon</span><span class="p">,</span> <span class="n">Node</span><span class="p">,</span> <span class="n">NodeGroup</span><span class="p">,</span> <span class="n">PhosphorIcon</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.styles</span><span class="w"> </span><span class="kn">import</span> <span class="n">Styles</span>
+
+<span class="n">setup</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mi">152</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">76</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">150</span><span class="p">)</span>
+
+<span class="n">d</span> <span class="o">=</span> <span class="n">ArchitectureDiagram</span><span class="p">(</span>
+    <span class="n">node_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryBold</span><span class="p">,</span>
+    <span class="n">node_text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">),</span>
+    <span class="n">edge_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="p">,</span>
+    <span class="n">edge_text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Dark</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">),</span>
+    <span class="n">node_card_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Neutral</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># Left-Top: Path A — Google AI Studio</span>
+<span class="n">path_a</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">add</span><span class="p">(</span>
+    <span class="n">NodeGroup</span><span class="p">(</span>
+        <span class="n">title</span><span class="o">=</span><span class="s2">"Path A: Google AI Studio"</span><span class="p">,</span>
+        <span class="n">width</span><span class="o">=</span><span class="mf">58.0</span><span class="p">,</span>
+        <span class="n">height</span><span class="o">=</span><span class="mf">30.0</span><span class="p">,</span>
+        <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryDashed</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">2.0</span><span class="p">),</span>
+        <span class="n">text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.2</span><span class="p">,</span> <span class="n">halign</span><span class="o">=</span><span class="s2">"left"</span><span class="p">),</span>
+    <span class="p">),</span>
+    <span class="n">xy</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">36.0</span><span class="p">),</span>
+<span class="p">)</span>
+<span class="n">ai_auth</span> <span class="o">=</span> <span class="n">path_a</span><span class="o">.</span><span class="n">add</span><span class="p">(</span>
+    <span class="n">Node</span><span class="p">(</span>
+        <span class="s2">"API キー認証</span><span class="se">\n</span><span class="s2">api_key=..."</span><span class="p">,</span>
+        <span class="n">width</span><span class="o">=</span><span class="mf">20.0</span><span class="p">,</span>
+        <span class="n">height</span><span class="o">=</span><span class="mf">18.0</span><span class="p">,</span>
+        <span class="n">icon</span><span class="o">=</span><span class="n">PhosphorIcon</span><span class="o">.</span><span class="n">KEY</span><span class="p">,</span>
+        <span class="n">icon_size</span><span class="o">=</span><span class="mf">5.8</span><span class="p">,</span>
+        <span class="n">card_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Neutral</span><span class="p">,</span>
+    <span class="p">),</span>
+    <span class="n">xy</span><span class="o">=</span><span class="p">(</span><span class="mf">12.5</span><span class="p">,</span> <span class="mf">11.5</span><span class="p">),</span>
+<span class="p">)</span>
+<span class="n">ai_ep</span> <span class="o">=</span> <span class="n">path_a</span><span class="o">.</span><span class="n">add</span><span class="p">(</span>
+    <span class="n">Node</span><span class="p">(</span>
+        <span class="s2">"AI Studio API</span><span class="se">\n</span><span class="s2">generativelanguage</span><span class="se">\n</span><span class="s2">.googleapis.com"</span><span class="p">,</span>
+        <span class="n">width</span><span class="o">=</span><span class="mf">26.5</span><span class="p">,</span>
+        <span class="n">height</span><span class="o">=</span><span class="mf">18.0</span><span class="p">,</span>
+        <span class="n">icon</span><span class="o">=</span><span class="n">PhosphorIcon</span><span class="o">.</span><span class="n">SPARKLE</span><span class="p">,</span>
+        <span class="n">icon_size</span><span class="o">=</span><span class="mf">5.8</span><span class="p">,</span>
+        <span class="n">card_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryNeutral</span><span class="p">,</span>
+    <span class="p">),</span>
+    <span class="n">xy</span><span class="o">=</span><span class="p">(</span><span class="mf">42.25</span><span class="p">,</span> <span class="mf">11.5</span><span class="p">),</span>
+<span class="p">)</span>
+<span class="n">d</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">ai_auth</span><span class="p">,</span> <span class="n">ai_ep</span><span class="p">,</span> <span class="n">routing</span><span class="o">=</span><span class="s2">"direct"</span><span class="p">)</span>
+
+<span class="c1"># Left-Bottom: Path B — Google Cloud Vertex AI</span>
+<span class="n">path_b</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">add</span><span class="p">(</span>
+    <span class="n">NodeGroup</span><span class="p">(</span>
+        <span class="n">title</span><span class="o">=</span><span class="s2">"Path B: Vertex AI (GCP プロジェクト / VPC-SC)"</span><span class="p">,</span>
+        <span class="n">width</span><span class="o">=</span><span class="mf">58.0</span><span class="p">,</span>
+        <span class="n">height</span><span class="o">=</span><span class="mf">31.0</span><span class="p">,</span>
+        <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryDashed</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">2.0</span><span class="p">),</span>
+        <span class="n">text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.2</span><span class="p">,</span> <span class="n">halign</span><span class="o">=</span><span class="s2">"left"</span><span class="p">),</span>
+    <span class="p">),</span>
+    <span class="n">xy</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span>
+<span class="p">)</span>
+<span class="n">vx_auth</span> <span class="o">=</span> <span class="n">path_b</span><span class="o">.</span><span class="n">add</span><span class="p">(</span>
+    <span class="n">Node</span><span class="p">(</span>
+        <span class="s2">"IAM / ADC 認証</span><span class="se">\n</span><span class="s2">vertexai=True"</span><span class="p">,</span>
+        <span class="n">width</span><span class="o">=</span><span class="mf">20.0</span><span class="p">,</span>
+        <span class="n">height</span><span class="o">=</span><span class="mf">18.5</span><span class="p">,</span>
+        <span class="n">icon</span><span class="o">=</span><span class="n">GcpIcon</span><span class="o">.</span><span class="n">IDENTITY_AND_ACCESS_MANAGEMENT</span><span class="p">,</span>
+        <span class="n">icon_size</span><span class="o">=</span><span class="mf">5.8</span><span class="p">,</span>
+        <span class="n">card_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Neutral</span><span class="p">,</span>
+    <span class="p">),</span>
+    <span class="n">xy</span><span class="o">=</span><span class="p">(</span><span class="mf">12.5</span><span class="p">,</span> <span class="mf">12.0</span><span class="p">),</span>
+<span class="p">)</span>
+<span class="n">vx_ep</span> <span class="o">=</span> <span class="n">path_b</span><span class="o">.</span><span class="n">add</span><span class="p">(</span>
+    <span class="n">Node</span><span class="p">(</span>
+        <span class="s2">"Vertex AI API</span><span class="se">\n</span><span class="s2">aiplatform</span><span class="se">\n</span><span class="s2">.googleapis.com"</span><span class="p">,</span>
+        <span class="n">width</span><span class="o">=</span><span class="mf">26.5</span><span class="p">,</span>
+        <span class="n">height</span><span class="o">=</span><span class="mf">18.5</span><span class="p">,</span>
+        <span class="n">icon</span><span class="o">=</span><span class="n">GcpIcon</span><span class="o">.</span><span class="n">VERTEX_AI</span><span class="p">,</span>
+        <span class="n">icon_size</span><span class="o">=</span><span class="mf">5.8</span><span class="p">,</span>
+        <span class="n">card_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryNeutral</span><span class="p">,</span>
+    <span class="p">),</span>
+    <span class="n">xy</span><span class="o">=</span><span class="p">(</span><span class="mf">42.25</span><span class="p">,</span> <span class="mf">12.0</span><span class="p">),</span>
+<span class="p">)</span>
+<span class="n">d</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">vx_auth</span><span class="p">,</span> <span class="n">vx_ep</span><span class="p">,</span> <span class="n">routing</span><span class="o">=</span><span class="s2">"direct"</span><span class="p">)</span>
+
+<span class="c1"># Center Focal Hub: Unified genai.Client</span>
+<span class="n">hub</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">add</span><span class="p">(</span>
+    <span class="n">Node</span><span class="p">(</span>
+        <span class="s2">"genai.Client</span><span class="se">\n</span><span class="s2">統合 SDK</span><span class="se">\n</span><span class="s2">クライアント"</span><span class="p">,</span>
+        <span class="n">width</span><span class="o">=</span><span class="mf">27.0</span><span class="p">,</span>
+        <span class="n">height</span><span class="o">=</span><span class="mf">25.0</span><span class="p">,</span>
+        <span class="n">icon</span><span class="o">=</span><span class="n">PhosphorIcon</span><span class="o">.</span><span class="n">PLUGS_CONNECTED</span><span class="p">,</span>
+        <span class="n">icon_size</span><span class="o">=</span><span class="mf">6.8</span><span class="p">,</span>
+        <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">WhiteBold</span><span class="p">,</span>
+        <span class="n">card_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryFlat</span><span class="p">,</span>
+        <span class="n">text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">WhiteBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.6</span><span class="p">),</span>
+    <span class="p">),</span>
+    <span class="n">xy</span><span class="o">=</span><span class="p">(</span><span class="mf">85.5</span><span class="p">,</span> <span class="mf">33.0</span><span class="p">),</span>
+<span class="p">)</span>
+
+<span class="n">merge</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">junction</span><span class="p">((</span><span class="mf">65.0</span><span class="p">,</span> <span class="mf">33.0</span><span class="p">))</span>
+<span class="n">d</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">ai_ep</span><span class="p">,</span> <span class="n">merge</span><span class="p">,</span> <span class="n">arrow</span><span class="o">=</span><span class="s2">"-"</span><span class="p">,</span> <span class="n">routing</span><span class="o">=</span><span class="s2">"orthogonal"</span><span class="p">)</span><span class="o">.</span><span class="n">via</span><span class="p">((</span><span class="mf">65.0</span><span class="p">,</span> <span class="mf">47.5</span><span class="p">))</span>
+<span class="n">d</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">vx_ep</span><span class="p">,</span> <span class="n">merge</span><span class="p">,</span> <span class="n">arrow</span><span class="o">=</span><span class="s2">"-"</span><span class="p">,</span> <span class="n">routing</span><span class="o">=</span><span class="s2">"orthogonal"</span><span class="p">)</span><span class="o">.</span><span class="n">via</span><span class="p">((</span><span class="mf">65.0</span><span class="p">,</span> <span class="mf">12.0</span><span class="p">))</span>
+<span class="n">d</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">merge</span><span class="p">,</span> <span class="n">hub</span><span class="p">,</span> <span class="n">routing</span><span class="o">=</span><span class="s2">"direct"</span><span class="p">)</span>
+
+<span class="c1"># Right: 100% Identical Downstream Calls</span>
+<span class="n">sdk_calls</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">add</span><span class="p">(</span>
+    <span class="n">NodeGroup</span><span class="p">(</span>
+        <span class="n">title</span><span class="o">=</span><span class="s2">"100% 同一の呼び出し"</span><span class="p">,</span>
+        <span class="n">width</span><span class="o">=</span><span class="mf">30.0</span><span class="p">,</span>
+        <span class="n">height</span><span class="o">=</span><span class="mf">66.0</span><span class="p">,</span>
+        <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">MutedDashed</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">2.0</span><span class="p">),</span>
+        <span class="n">text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.2</span><span class="p">,</span> <span class="n">halign</span><span class="o">=</span><span class="s2">"left"</span><span class="p">),</span>
+    <span class="p">),</span>
+    <span class="n">xy</span><span class="o">=</span><span class="p">(</span><span class="mf">112.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span>
+<span class="p">)</span>
+<span class="n">models_node</span> <span class="o">=</span> <span class="n">sdk_calls</span><span class="o">.</span><span class="n">add</span><span class="p">(</span>
+    <span class="n">Node</span><span class="p">(</span>
+        <span class="s2">"client.models.*</span><span class="se">\n</span><span class="s2">generate_content</span><span class="se">\n</span><span class="s2">Stream / 構造化出力"</span><span class="p">,</span>
+        <span class="n">width</span><span class="o">=</span><span class="mf">25.5</span><span class="p">,</span>
+        <span class="n">height</span><span class="o">=</span><span class="mf">22.0</span><span class="p">,</span>
+        <span class="n">icon</span><span class="o">=</span><span class="n">PhosphorIcon</span><span class="o">.</span><span class="n">LIGHTNING</span><span class="p">,</span>
+        <span class="n">icon_size</span><span class="o">=</span><span class="mf">6.0</span><span class="p">,</span>
+        <span class="n">card_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Neutral</span><span class="p">,</span>
+    <span class="p">),</span>
+    <span class="n">xy</span><span class="o">=</span><span class="p">(</span><span class="mf">15.0</span><span class="p">,</span> <span class="mf">44.5</span><span class="p">),</span>
+<span class="p">)</span>
+<span class="n">chats_node</span> <span class="o">=</span> <span class="n">sdk_calls</span><span class="o">.</span><span class="n">add</span><span class="p">(</span>
+    <span class="n">Node</span><span class="p">(</span>
+        <span class="s2">"client.chats.*</span><span class="se">\n</span><span class="s2">マルチターン対話・</span><span class="se">\n</span><span class="s2">Function Calling"</span><span class="p">,</span>
+        <span class="n">width</span><span class="o">=</span><span class="mf">25.5</span><span class="p">,</span>
+        <span class="n">height</span><span class="o">=</span><span class="mf">22.0</span><span class="p">,</span>
+        <span class="n">icon</span><span class="o">=</span><span class="n">PhosphorIcon</span><span class="o">.</span><span class="n">CHAT_CIRCLE_TEXT</span><span class="p">,</span>
+        <span class="n">icon_size</span><span class="o">=</span><span class="mf">6.0</span><span class="p">,</span>
+        <span class="n">card_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryNeutral</span><span class="p">,</span>
+    <span class="p">),</span>
+    <span class="n">xy</span><span class="o">=</span><span class="p">(</span><span class="mf">15.0</span><span class="p">,</span> <span class="mf">15.5</span><span class="p">),</span>
+<span class="p">)</span>
+<span class="n">fork_pt</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">junction</span><span class="p">((</span><span class="mf">106.5</span><span class="p">,</span> <span class="mf">33.0</span><span class="p">))</span>
+<span class="n">d</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">hub</span><span class="p">,</span> <span class="n">fork_pt</span><span class="p">,</span> <span class="n">arrow</span><span class="o">=</span><span class="s2">"-"</span><span class="p">,</span> <span class="n">routing</span><span class="o">=</span><span class="s2">"direct"</span><span class="p">)</span>
+<span class="n">d</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">fork_pt</span><span class="p">,</span> <span class="n">models_node</span><span class="p">,</span> <span class="n">routing</span><span class="o">=</span><span class="s2">"orthogonal"</span><span class="p">)</span><span class="o">.</span><span class="n">via</span><span class="p">((</span><span class="mf">106.5</span><span class="p">,</span> <span class="mf">44.5</span><span class="p">))</span>
+<span class="n">d</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">fork_pt</span><span class="p">,</span> <span class="n">chats_node</span><span class="p">,</span> <span class="n">routing</span><span class="o">=</span><span class="s2">"orthogonal"</span><span class="p">)</span><span class="o">.</span><span class="n">via</span><span class="p">((</span><span class="mf">106.5</span><span class="p">,</span> <span class="mf">15.5</span><span class="p">))</span>
+
+<span class="n">d</span><span class="o">.</span><span class="n">draw</span><span class="p">(</span><span class="n">xy</span><span class="o">=</span><span class="p">(</span><span class="mf">5.0</span><span class="p">,</span> <span class="mf">5.0</span><span class="p">))</span>
+<span class="n">save</span><span class="p">()</span>
+</code></pre>
+</details>
+<hr />
+<h2>1. Vertex AI での最小構成 Hello World（Colab キーレス IAM 認証）</h2>
+<p>Google Cloud Vertex AI を利用する場合、静的な API キーを発行・配布する必要はありません。Google Colab 上で <code>auth.authenticate_user()</code> を実行すると、ブラウザの認証ポップアップを通じて Google Cloud IAM に紐づく一時的な認証情報（ADC: Application Default Credentials）が自動的に設定されます。事前に対象プロジェクトで Vertex AI API（<code>aiplatform.googleapis.com</code>）を有効化し、使用する Google アカウントに <strong>Vertex AI ユーザー</strong>（<code>roles/aiplatform.user</code>）ロールを付与しておいてください。</p>
+
+  </div>
+  <div class="nb-cell nb-code-cell nb-setup-cell">
+    <div class="nb-input">
+      <div class="nb-prompt nb-in-prompt">In [setup]:</div>
+      <div class="nb-code-area">
+        <pre><code class="language-bash">!pip<span class="w"> </span>install<span class="w"> </span>-q<span class="w"> </span>drawlib<span class="w"> </span>google-genai<span class="w"> </span>pydantic
+</code></pre>
+      </div>
+    </div>
+  </div>
+  <div class="nb-cell nb-code-cell">
+    <div class="nb-input">
+      <div class="nb-prompt nb-in-prompt">In [1]:</div>
+      <div class="nb-code-area">
+        <pre><code class="language-python"><span class="kn">from</span><span class="w"> </span><span class="nn">google.colab</span><span class="w"> </span><span class="kn">import</span> <span class="n">auth</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">google</span><span class="w"> </span><span class="kn">import</span> <span class="n">genai</span>
+
+<span class="c1"># ブラウザのポップアップで Google アカウント認証を実行</span>
+<span class="n">auth</span><span class="o">.</span><span class="n">authenticate_user</span><span class="p">()</span>
+
+<span class="n">client</span> <span class="o">=</span> <span class="n">genai</span><span class="o">.</span><span class="n">Client</span><span class="p">(</span>
+    <span class="n">vertexai</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">project</span><span class="o">=</span><span class="s2">"your-gcp-project-id"</span><span class="p">,</span>  <span class="c1"># ご自身の Google Cloud プロジェクト ID に置き換えてください</span>
+    <span class="n">location</span><span class="o">=</span><span class="s2">"us-central1"</span><span class="p">,</span>         <span class="c1"># または "asia-northeast1"、"global" など</span>
+<span class="p">)</span>
+
+<span class="n">response</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">generate_content</span><span class="p">(</span>
+    <span class="n">model</span><span class="o">=</span><span class="s2">"gemini-2.5-flash"</span><span class="p">,</span>
+    <span class="n">contents</span><span class="o">=</span><span class="s2">"Vertex AI からこんにちは！キーレス IAM 認証の利点を3つ、2文以内で簡潔に教えてください。"</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+</code></pre>
+      </div>
+    </div>
+  </div>
+  <div class="nb-cell nb-markdown-cell">
+<h3>共有ノートブックでプロジェクト ID のハードコードを避ける方法</h3>
+<p>ノートブックを Git リポジトリにコミットしたりチームメンバーと共有したりする際は、プロジェクト ID をコードセルに直接記述せず、<strong>Colab シークレット</strong>（左サイドバーの鍵アイコンから <code>GOOGLE_CLOUD_PROJECT</code> を登録し「ノートブックからのアクセス」を有効化）から <code>userdata.get(&quot;GOOGLE_CLOUD_PROJECT&quot;)</code> で安全に読み込むパターンが推奨されます。</p>
+
+  </div>
+  <div class="nb-cell nb-code-cell">
+    <div class="nb-input">
+      <div class="nb-prompt nb-in-prompt">In [2]:</div>
+      <div class="nb-code-area">
+        <pre><code class="language-python"><span class="kn">from</span><span class="w"> </span><span class="nn">google.colab</span><span class="w"> </span><span class="kn">import</span> <span class="n">auth</span><span class="p">,</span> <span class="n">userdata</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">google</span><span class="w"> </span><span class="kn">import</span> <span class="n">genai</span>
+
+<span class="n">auth</span><span class="o">.</span><span class="n">authenticate_user</span><span class="p">()</span>
+
+<span class="c1"># Colab シークレットから GOOGLE_CLOUD_PROJECT を安全に取得</span>
+<span class="n">client</span> <span class="o">=</span> <span class="n">genai</span><span class="o">.</span><span class="n">Client</span><span class="p">(</span>
+    <span class="n">vertexai</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">project</span><span class="o">=</span><span class="n">userdata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"GOOGLE_CLOUD_PROJECT"</span><span class="p">),</span>
+    <span class="n">location</span><span class="o">=</span><span class="s2">"asia-northeast1"</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">response</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">generate_content</span><span class="p">(</span>
+    <span class="n">model</span><span class="o">=</span><span class="s2">"gemini-2.5-flash"</span><span class="p">,</span>
+    <span class="n">contents</span><span class="o">=</span><span class="s2">"Colab シークレット経由で Vertex AI クライアントが正常に初期化されたことを確認してください。"</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+</code></pre>
+      </div>
+    </div>
+  </div>
+  <div class="nb-cell nb-markdown-cell">
+<blockquote>
+<p><strong>リージョンエンドポイントと <code>location=&quot;global&quot;</code> の使い分け:</strong>
+データ所在地（データレジデンシー）の厳格な国内・特定地域固定や低レイテンシが求められるワークロードでは、<code>&quot;asia-northeast1&quot;</code>（東京）や <code>&quot;us-central1&quot;</code>（アイオワ）などの<strong>リージョンエンドポイント</strong>を指定します。一方、マルチリージョンでの動的な負荷分散と高いクォータ可用性を優先する場合や、<strong>最新の Preview モデル</strong>（各リージョンへ展開される前に Vertex AI の <code>global</code> エンドポイント限定で先行公開されるモデル）を試す場合は <strong><code>location=&quot;global&quot;</code></strong> を指定してください。</p>
+</blockquote>
+<hr />
+<h2>2. Google AI Studio と Vertex AI の使い分け</h2>
+<p><code>google-genai</code> SDK は両方のバックエンドを単一のクライアントインターフェースに統合しているため、開発初期は Google AI Studio で素早くプロトタイプを作成し、エンタープライズ向けのセキュリティやガバナンスが必要になった段階で、推論やチャットの呼び出しコードを1行も書き換えることなく Vertex AI へ移行できます。</p>
+
+<figure class="drawlib-figure align-center">
+  <img src="../images/02_vertex_ai_quickstart/ch02_backend_comparison_ja.png" alt="図2-2: Google AI Studio と Vertex AI の機能・ガバナンス比較マトリクス" loading="lazy">
+  <figcaption>図2-2: Google AI Studio と Vertex AI の機能・ガバナンス比較マトリクス</figcaption>
+</figure>
+<details class="drawlib-code-fold">
+  <summary>View Drawlib Python Code</summary>
+  <pre><code class="language-python"><span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.canvas</span><span class="w"> </span><span class="kn">import</span> <span class="n">save</span><span class="p">,</span> <span class="n">setup</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.icons</span><span class="w"> </span><span class="kn">import</span> <span class="n">phosphor</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.smartarts</span><span class="w"> </span><span class="kn">import</span> <span class="n">Table</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.styles</span><span class="w"> </span><span class="kn">import</span> <span class="n">Colors</span><span class="p">,</span> <span class="n">Styles</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.text</span><span class="w"> </span><span class="kn">import</span> <span class="n">text</span>
+
+<span class="n">setup</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mi">152</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">82</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">150</span><span class="p">)</span>
+
+<span class="c1"># Title header with Phosphor icon</span>
+<span class="n">phosphor</span><span class="o">.</span><span class="n">scales</span><span class="p">((</span><span class="mf">43.0</span><span class="p">,</span> <span class="mf">75.5</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">5.0</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryBold</span><span class="p">)</span>
+<span class="n">text</span><span class="p">(</span>
+    <span class="p">(</span><span class="mf">79.5</span><span class="p">,</span> <span class="mf">75.5</span><span class="p">),</span>
+    <span class="s2">"Google AI Studio と Google Cloud Vertex AI の比較"</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">12.5</span><span class="p">),</span>
+<span class="p">)</span>
+
+<span class="n">table</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span>
+    <span class="n">cell_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">White</span><span class="p">,</span>
+    <span class="n">text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Dark</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.2</span><span class="p">),</span>
+    <span class="n">header_cell_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryFlat</span><span class="p">,</span>
+    <span class="n">header_text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">WhiteBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">11.0</span><span class="p">),</span>
+    <span class="n">border_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">MutedThin</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># 1. Neutral alternating rows</span>
+<span class="n">table</span><span class="o">.</span><span class="n">set_style_cell_evenodd</span><span class="p">(</span>
+    <span class="n">even_color</span><span class="o">=</span><span class="n">Colors</span><span class="o">.</span><span class="n">Light</span><span class="p">,</span>
+    <span class="n">even_text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Dark</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.2</span><span class="p">),</span>
+    <span class="n">odd_color</span><span class="o">=</span><span class="n">Colors</span><span class="o">.</span><span class="n">White</span><span class="p">,</span>
+    <span class="n">odd_text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Dark</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.2</span><span class="p">),</span>
+<span class="p">)</span>
+
+<span class="c1"># 2. Bold neutral row headers in column 0</span>
+<span class="n">table</span><span class="o">.</span><span class="n">set_style_cell_rowheader</span><span class="p">(</span>
+    <span class="n">background_color</span><span class="o">=</span><span class="n">Colors</span><span class="o">.</span><span class="n">Neutral</span><span class="p">,</span>
+    <span class="n">text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.2</span><span class="p">),</span>
+<span class="p">)</span>
+
+<span class="c1"># 3. Highlight 100% SDK compatibility row (row 6)</span>
+<span class="n">table</span><span class="o">.</span><span class="n">set_style_cell</span><span class="p">(</span>
+    <span class="n">background_color</span><span class="o">=</span><span class="n">Colors</span><span class="o">.</span><span class="n">PrimaryNeutral</span><span class="p">,</span>
+    <span class="n">text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.3</span><span class="p">),</span>
+    <span class="n">rows</span><span class="o">=</span><span class="p">[</span><span class="mi">6</span><span class="p">],</span>
+    <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
+<span class="p">)</span>
+
+<span class="c1"># 4. Re-apply focal header row style last so row 0 stays PrimaryFlat</span>
+<span class="n">table</span><span class="o">.</span><span class="n">set_style_cell_header</span><span class="p">(</span>
+    <span class="n">background_color</span><span class="o">=</span><span class="n">Colors</span><span class="o">.</span><span class="n">Primary</span><span class="p">,</span>
+    <span class="n">text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">WhiteBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">11.0</span><span class="p">),</span>
+<span class="p">)</span>
+
+<span class="n">table</span><span class="o">.</span><span class="n">set_style_border</span><span class="p">(</span>
+    <span class="n">top</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Primary</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">line_color</span><span class="o">=</span><span class="n">Colors</span><span class="o">.</span><span class="n">Primary</span><span class="p">,</span> <span class="n">line_width</span><span class="o">=</span><span class="mf">1.6</span><span class="p">),</span>
+    <span class="n">top2</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Primary</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">line_color</span><span class="o">=</span><span class="n">Colors</span><span class="o">.</span><span class="n">Primary</span><span class="p">,</span> <span class="n">line_width</span><span class="o">=</span><span class="mf">1.2</span><span class="p">),</span>
+    <span class="n">bottom</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Primary</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">line_color</span><span class="o">=</span><span class="n">Colors</span><span class="o">.</span><span class="n">Dark</span><span class="p">,</span> <span class="n">line_width</span><span class="o">=</span><span class="mf">1.4</span><span class="p">),</span>
+    <span class="n">left</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Primary</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">line_color</span><span class="o">=</span><span class="n">Colors</span><span class="o">.</span><span class="n">Muted</span><span class="p">,</span> <span class="n">line_width</span><span class="o">=</span><span class="mf">0.7</span><span class="p">),</span>
+    <span class="n">left2</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Primary</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">line_color</span><span class="o">=</span><span class="n">Colors</span><span class="o">.</span><span class="n">Muted</span><span class="p">,</span> <span class="n">line_width</span><span class="o">=</span><span class="mf">1.0</span><span class="p">),</span>
+    <span class="n">right</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Primary</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">line_color</span><span class="o">=</span><span class="n">Colors</span><span class="o">.</span><span class="n">Muted</span><span class="p">,</span> <span class="n">line_width</span><span class="o">=</span><span class="mf">0.7</span><span class="p">),</span>
+    <span class="n">between_columns</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Primary</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">line_color</span><span class="o">=</span><span class="n">Colors</span><span class="o">.</span><span class="n">Muted</span><span class="p">,</span> <span class="n">line_width</span><span class="o">=</span><span class="mf">0.7</span><span class="p">),</span>
+    <span class="n">between_rows</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Primary</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">line_color</span><span class="o">=</span><span class="n">Colors</span><span class="o">.</span><span class="n">Muted</span><span class="p">,</span> <span class="n">line_width</span><span class="o">=</span><span class="mf">0.7</span><span class="p">),</span>
+<span class="p">)</span>
+
+<span class="n">matrix_data</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">[</span><span class="s2">"比較項目"</span><span class="p">,</span> <span class="s2">"Google AI Studio"</span><span class="p">,</span> <span class="s2">"Google Cloud Vertex AI"</span><span class="p">],</span>
+    <span class="p">[</span><span class="s2">"認証方式"</span><span class="p">,</span> <span class="s2">"API キー (GEMINI_API_KEY)"</span><span class="p">,</span> <span class="s2">"キーレス IAM / ADC・サービスアカウント"</span><span class="p">],</span>
+    <span class="p">[</span><span class="s2">"課金・クォータ"</span><span class="p">,</span> <span class="s2">"無料枠 または GCP 連携の従量課金"</span><span class="p">,</span> <span class="s2">"GCP 請求先アカウント・予約スループット"</span><span class="p">],</span>
+    <span class="p">[</span><span class="s2">"データ所在地"</span><span class="p">,</span> <span class="s2">"グローバル自動ルーティング"</span><span class="p">,</span> <span class="s2">"リージョン指定 (東京・米国等) + global"</span><span class="p">],</span>
+    <span class="p">[</span><span class="s2">"VPC-SC / CMEK"</span><span class="p">,</span> <span class="s2">"非対応 (パブリック HTTPS API)"</span><span class="p">,</span> <span class="s2">"対応 (VPC-SC / Private PSC / CMEK)"</span><span class="p">],</span>
+    <span class="p">[</span><span class="s2">"最適な用途"</span><span class="p">,</span> <span class="s2">"高速プロトタイピング・学習・個人開発"</span><span class="p">,</span> <span class="s2">"本番システム運用・企業 IAM ガバナンス"</span><span class="p">],</span>
+    <span class="p">[</span><span class="s2">"SDK 互換性"</span><span class="p">,</span> <span class="s2">"100% 同一 (models.* / chats.*)"</span><span class="p">,</span> <span class="s2">"100% 同一 (models.* / chats.*)"</span><span class="p">],</span>
+<span class="p">]</span>
+
+<span class="n">table</span><span class="o">.</span><span class="n">draw_flexible</span><span class="p">(</span>
+    <span class="n">xy</span><span class="o">=</span><span class="p">(</span><span class="mf">6.0</span><span class="p">,</span> <span class="mf">69.5</span><span class="p">),</span>
+    <span class="n">column_widths</span><span class="o">=</span><span class="p">[</span><span class="mf">34.0</span><span class="p">,</span> <span class="mf">53.0</span><span class="p">,</span> <span class="mf">53.0</span><span class="p">],</span>
+    <span class="n">row_heights</span><span class="o">=</span><span class="p">[</span><span class="mf">9.5</span><span class="p">,</span> <span class="mf">9.0</span><span class="p">,</span> <span class="mf">9.0</span><span class="p">,</span> <span class="mf">9.0</span><span class="p">,</span> <span class="mf">9.0</span><span class="p">,</span> <span class="mf">9.0</span><span class="p">,</span> <span class="mf">9.0</span><span class="p">],</span>
+    <span class="n">data</span><span class="o">=</span><span class="n">matrix_data</span><span class="p">,</span>
+    <span class="n">align</span><span class="o">=</span><span class="s2">"top_left"</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">save</span><span class="p">()</span>
+</code></pre>
+</details>
+<h3>第3章〜第5章における初期化コードの扱い</h3>
+<ul>
+<li><strong>第3章〜第5章では簡潔な AI Studio 初期化を採用</strong>: 第1章で確認したとおり、Google AI Studio の API キーは Google Cloud プロジェクトに直接リンクして課金やレート制限の引き上げを行えるため、<strong>第3章〜第5章では各サンプルを最小限の見通し良いコードに保つ目的で、簡潔な3行の AI Studio 初期化</strong>（<code>genai.Client(api_key=userdata.get(&quot;GEMINI_API_KEY&quot;))</code>）に統一しています。</li>
+<li><strong>Vertex AI ユーザーはそのまま差し替え可能</strong>: 第3章〜第5章のすべてのコードセル（ストリーミング、<code>ThinkingConfig</code>、マルチモーダル入力、Pydantic 構造化出力、マルチターンチャット、Function Calling）は、冒頭の3行の <code>client</code> 初期化部分を本章の <code>vertexai=True</code> 構成に置き換えるだけで、<strong>残りのコードを1文字も変更せずに Vertex AI 上でそのまま動作します</strong>。</li>
+</ul>
+
+  </div>
+</div>
+            </main>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const themeBtn = document.getElementById('theme-toggle');
+            if (themeBtn) {
+                themeBtn.addEventListener('click', function() {
+                    const current = document.documentElement.getAttribute('data-theme');
+                    const next = current === 'dark' ? 'light' : 'dark';
+                    document.documentElement.setAttribute('data-theme', next);
+                    localStorage.setItem('drawlib-theme', next);
+                });
+            }
+
+            const langDropdowns = document.querySelectorAll('.lang-dropdown');
+            if (langDropdowns.length > 0) {
+                document.addEventListener('click', function(e) {
+                    langDropdowns.forEach(function(dd) {
+                        if (dd.hasAttribute('open') && !dd.contains(e.target)) {
+                            dd.removeAttribute('open');
+                        }
+                    });
+                });
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape') {
+                        langDropdowns.forEach(function(dd) {
+                            dd.removeAttribute('open');
+                        });
+                    }
+                });
+            }
+
+            const menuBtn = document.getElementById('menu-toggle');
+            const sidebar = document.querySelector('.sidebar');
+            if (menuBtn && sidebar) {
+                function setMenuOpen(open) {
+                    sidebar.classList.toggle('is-open', open);
+                    menuBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+                    document.body.classList.toggle('menu-open', open);
+                    if (open) {
+                        const menu = sidebar.querySelector('.sidebar-menu');
+                        if (menu) {
+                            menu.scrollTop = 0;
+                        }
+                    }
+                }
+
+                menuBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const willOpen = !sidebar.classList.contains('is-open');
+                    setMenuOpen(willOpen);
+                });
+
+                document.addEventListener('click', function(e) {
+                    if (sidebar.classList.contains('is-open') && !sidebar.contains(e.target)) {
+                        setMenuOpen(false);
+                    }
+                });
+
+                const navLinks = sidebar.querySelectorAll('.nav-item a');
+                navLinks.forEach(function(link) {
+                    link.addEventListener('click', function() {
+                        setMenuOpen(false);
+                    });
+                });
+
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape' && sidebar.classList.contains('is-open')) {
+                        setMenuOpen(false);
+                    }
+                });
+
+                window.addEventListener('resize', function() {
+                    if (window.innerWidth > 768 && sidebar.classList.contains('is-open')) {
+                        setMenuOpen(false);
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

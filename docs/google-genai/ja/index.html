@@ -1,0 +1,605 @@
+<!--
+ Copyright (c) 2026 Yuichi Ito (yuichi@yuichi.com)
+
+ This software is licensed under the Apache License, Version 2.0.
+ For more information, please visit: https://github.com/yuichi110/drawlib
+
+ This software is provided "as is", without warranty of any kind,
+ express or implied, including but not limited to the warranties of
+ merchantability, fitness for a particular purpose and noninfringement.
+-->
+<!DOCTYPE html>
+<html lang="ja" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>01. Google AI Studio で始める Hello World</title>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-S9N5BZ1VRC"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-S9N5BZ1VRC');
+    </script>
+    <script>
+        (function() {
+            const saved = localStorage.getItem('drawlib-theme');
+            if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            } else {
+                document.documentElement.setAttribute('data-theme', 'light');
+            }
+        })();
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    
+    <link rel="alternate" hreflang="en" href="https://examples.drawlib.com/google-genai/en/01_ai_studio_quickstart.html">
+    
+    <link rel="alternate" hreflang="ja" href="https://examples.drawlib.com/google-genai/ja/01_ai_studio_quickstart.html">
+    
+    <link rel="alternate" hreflang="x-default" href="https://examples.drawlib.com/google-genai/en/01_ai_studio_quickstart.html">
+    
+    
+    
+    <meta name="description" content="本クックブックでは drawlib.toml の [jupyter].setup_packages 設定により、生成されるすべてのノートブック先頭に !pip install -q drawlib google-genai pydantic が自動挿入されるため、Google Colab…">
+    <link rel="canonical" href="https://examples.drawlib.com/google-genai/ja/01_ai_studio_quickstart.html">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Google GenAI SDK Cookbook">
+    <meta property="og:title" content="01. Google AI Studio で始める Hello World — Google GenAI SDK Cookbook">
+    <meta property="og:description" content="本クックブックでは drawlib.toml の [jupyter].setup_packages 設定により、生成されるすべてのノートブック先頭に !pip install -q drawlib google-genai pydantic が自動挿入されるため、Google Colab…">
+    <meta property="og:url" content="https://examples.drawlib.com/google-genai/ja/01_ai_studio_quickstart.html">
+    <meta property="og:locale" content="ja_JP">
+    <meta property="og:locale:alternate" content="en_US">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="01. Google AI Studio で始める Hello World — Google GenAI SDK Cookbook">
+    <meta name="twitter:description" content="本クックブックでは drawlib.toml の [jupyter].setup_packages 設定により、生成されるすべてのノートブック先頭に !pip install -q drawlib google-genai pydantic が自動挿入されるため、Google Colab…">
+    
+    
+    <link rel="icon" type="image/png" href="../_assets/favicon.png">
+    
+    
+    <link rel="stylesheet" href="style.css">
+    
+    
+</head>
+<body>
+    <div class="demo-banner" role="region" aria-label="ポータルナビゲーション">
+        <div class="demo-banner-inner">
+            <span class="demo-banner-badge">DRAWLIB SHOWCASE</span>
+            <span class="demo-banner-text">
+                <a href="https://www.drawlib.com/ja/" target="_blank" rel="noopener noreferrer">Drawlib</a> で構築された Jupyter / Colab ノートブックのサンプルプロジェクト（<code>type = "jupyter"</code>）
+            </span>
+            <span class="demo-banner-links">
+                <a href="../../index.html">All Examples</a>
+                <span class="demo-banner-sep">·</span>
+                <a href="https://github.com/yuichi110/drawlib-examples/tree/main/examples/jupyter/google-genai" target="_blank" rel="noopener noreferrer">Source (GitHub) ↗</a>
+                <span class="demo-banner-sep">·</span>
+                <a href="https://www.drawlib.com/ja/" target="_blank" rel="noopener noreferrer">Drawlib ↗</a>
+            </span>
+        </div>
+    </div>
+    
+    <div class="doc-layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="index.html" class="sidebar-brand" aria-label="Google GenAI SDK Cookbook">
+                    
+                    Google GenAI SDK Cookbook
+                    
+                </a>
+                <div class="sidebar-header-actions">
+                    <button type="button" id="theme-toggle" class="theme-toggle-btn" aria-label="Toggle theme">
+                        <svg class="icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+                        <svg class="icon-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                    </button>
+                    <button type="button" id="menu-toggle" class="menu-toggle-btn" aria-label="Toggle navigation" aria-expanded="false">
+                        <svg class="icon-hamburger" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+                        <svg class="icon-close" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
+                </div>
+            </div>
+            <div class="sidebar-menu">
+                
+                    <div class="sidebar-heading">Notebooks</div>
+                    <ul class="nav-list">
+                        
+                        <li class="nav-item active">
+                            <a href="01_ai_studio_quickstart.html" >01. Google AI Studio で始める Hello World</a>
+                        </li>
+                        
+                        <li class="nav-item ">
+                            <a href="02_vertex_ai_quickstart.html" >02. Vertex AI で動かす Hello World とバックエンドの使い分け</a>
+                        </li>
+                        
+                        <li class="nav-item ">
+                            <a href="03_streaming_and_thinking.html" >03. Streaming 配信と ThinkingConfig による思考制御</a>
+                        </li>
+                        
+                        <li class="nav-item ">
+                            <a href="04_structured_outputs.html" >04. Pydantic による型安全な構造化出力（response_schema）</a>
+                        </li>
+                        
+                        <li class="nav-item ">
+                            <a href="05_chat_and_function_calling.html" >05. マルチターン Chat と Function Calling（ツール連携）</a>
+                        </li>
+                        
+                    </ul>
+                
+            </div>
+        </aside>
+        <div class="content-wrapper">
+            <header class="top-bar">
+                <div class="breadcrumbs">
+                    <span class="crumb">Notebooks</span>
+                    <span class="crumb-separator">&raquo;</span>
+                    <span class="crumb active">01. Google AI Studio で始める Hello World</span>
+                </div>
+                
+                <div class="lang-switcher">
+                    <details class="lang-dropdown">
+                        <summary class="lang-dropdown-btn" aria-label="Select language">
+                            <svg class="lang-globe-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                            <span class="lang-current-label">日本語</span>
+                            <svg class="lang-caret-icon" viewBox="0 0 24 24" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        </summary>
+                        <div class="lang-dropdown-menu" role="menu">
+                            
+                            <a href="../en/01_ai_studio_quickstart.html" class="lang-option" lang="en" hreflang="en" >
+                                <span>English</span>
+                                
+                            </a>
+                            
+                            <a href="01_ai_studio_quickstart.html" class="lang-option active" lang="ja" hreflang="ja" aria-current="page">
+                                <span>日本語</span>
+                                
+                                <svg class="lang-check-icon" viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                
+                            </a>
+                            
+                        </div>
+                    </details>
+                </div>
+                
+            </header>
+            <main class="main-content">
+                <div class="jupyter-notebook">
+  <div class="nb-toolbar">
+    <a class="nb-btn nb-btn-colab" href="https://colab.research.google.com/github/yuichi110/drawlib-examples/blob/main/docs/google-genai/ja/01_ai_studio_quickstart.ipynb" target="_blank" rel="noopener noreferrer"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"></a>
+    <a class="nb-btn nb-btn-download" href="01_ai_studio_quickstart.ipynb" download="01_ai_studio_quickstart.ipynb">⬇ Download .ipynb</a>
+  </div>
+  <div class="nb-cell nb-markdown-cell">
+<h1>01. Google AI Studio で始める Hello World</h1>
+<p>本クックブックでは <code>drawlib.toml</code> の <code>[jupyter].setup_packages</code> 設定により、生成されるすべてのノートブック先頭に <code>!pip install -q drawlib google-genai pydantic</code> が自動挿入されるため、Google Colab 上での手動パッケージ追加は不要です。Git リポジトリへ認証情報をハードコードせずに安全に Gemini を呼び出すため、<strong>Google Cloud プロジェクト</strong>に紐付いた API キー（<code>GEMINI_API_KEY</code>）を <strong>Google AI Studio</strong> で発行し、Colab 左サイドバーの <strong>シークレット（<code>🔑</code> アイコン）</strong> に保存して <strong>「ノートブックからのアクセス（Notebook access）」</strong> を ON に設定します。</p>
+
+<figure class="drawlib-figure align-center">
+  <img src="../images/01_ai_studio_quickstart/ch01_aistudio_workflow_ja.png" alt="図1-1: Google AI Studio APIキー発行と Colab シークレットによる最短実行フロー" loading="lazy">
+  <figcaption>図1-1: Google AI Studio APIキー発行と Colab シークレットによる最短実行フロー</figcaption>
+</figure>
+<details class="drawlib-code-fold">
+  <summary>View Drawlib Python Code</summary>
+  <pre><code class="language-python"><span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.canvas</span><span class="w"> </span><span class="kn">import</span> <span class="n">save</span><span class="p">,</span> <span class="n">setup</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.icons</span><span class="w"> </span><span class="kn">import</span> <span class="n">ai</span><span class="p">,</span> <span class="n">gcp</span><span class="p">,</span> <span class="n">phosphor</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.lines</span><span class="w"> </span><span class="kn">import</span> <span class="n">line</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.shapes</span><span class="w"> </span><span class="kn">import</span> <span class="n">rectangle</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.styles</span><span class="w"> </span><span class="kn">import</span> <span class="n">Colors</span><span class="p">,</span> <span class="n">Styles</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.text</span><span class="w"> </span><span class="kn">import</span> <span class="n">text</span>
+
+<span class="n">setup</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mi">152</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">76</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">150</span><span class="p">)</span>
+
+<span class="c1"># 外枠のニュートラルフレーム（50%以上を落ち着いた無彩色ベースで構成）</span>
+<span class="n">rectangle</span><span class="p">(</span>
+    <span class="p">(</span><span class="mf">76.0</span><span class="p">,</span> <span class="mf">38.0</span><span class="p">),</span>
+    <span class="n">width</span><span class="o">=</span><span class="mf">142.0</span><span class="p">,</span>
+    <span class="n">height</span><span class="o">=</span><span class="mf">66.0</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Neutral</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">2.5</span><span class="p">,</span> <span class="n">shape_fill_color</span><span class="o">=</span><span class="n">Colors</span><span class="o">.</span><span class="n">Light</span><span class="p">,</span> <span class="n">shape_line_color</span><span class="o">=</span><span class="n">Colors</span><span class="o">.</span><span class="n">Gray3</span><span class="p">),</span>
+<span class="p">)</span>
+
+<span class="c1"># ヘッダータイトル・サブタイトル</span>
+<span class="n">text</span><span class="p">(</span>
+    <span class="p">(</span><span class="mf">76.0</span><span class="p">,</span> <span class="mf">65.5</span><span class="p">),</span>
+    <span class="s2">"Google AI Studio + Google Colab 最短セットアップ &amp; 実行フロー"</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">12.8</span><span class="p">),</span>
+<span class="p">)</span>
+<span class="n">text</span><span class="p">(</span>
+    <span class="p">(</span><span class="mf">76.0</span><span class="p">,</span> <span class="mf">60.3</span><span class="p">),</span>
+    <span class="s2">"Google Cloud プロジェクト連携  •  Colab シークレット管理  •  統一 google-genai SDK"</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Muted</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.2</span><span class="p">),</span>
+<span class="p">)</span>
+
+<span class="c1"># 4段階のステージカード: width=28.0, gap=7.5 (x = 8.75..143.25)</span>
+<span class="n">card_w</span> <span class="o">=</span> <span class="mf">28.0</span>
+<span class="n">card_h</span> <span class="o">=</span> <span class="mf">34.0</span>
+<span class="n">cy</span> <span class="o">=</span> <span class="mf">37.8</span>
+<span class="n">cxs</span> <span class="o">=</span> <span class="p">[</span><span class="mf">22.75</span><span class="p">,</span> <span class="mf">58.25</span><span class="p">,</span> <span class="mf">93.75</span><span class="p">,</span> <span class="mf">129.25</span><span class="p">]</span>
+
+<span class="n">neutral_card</span> <span class="o">=</span> <span class="n">Styles</span><span class="o">.</span><span class="n">White</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">2.2</span><span class="p">,</span> <span class="n">shape_line_color</span><span class="o">=</span><span class="n">Colors</span><span class="o">.</span><span class="n">Gray4</span><span class="p">)</span>
+<span class="n">soft_card</span> <span class="o">=</span> <span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryNeutral</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">2.2</span><span class="p">)</span>
+<span class="n">hero_card</span> <span class="o">=</span> <span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryFlat</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">2.2</span><span class="p">)</span>
+
+<span class="c1"># Stage 1: Google Cloud プロジェクト + AI Studio</span>
+<span class="n">rectangle</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">cy</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="n">card_w</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="n">card_h</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">neutral_card</span><span class="p">)</span>
+<span class="n">rectangle</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mf">50.2</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">14.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">4.4</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">SecondaryNeutral</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">1.2</span><span class="p">,</span> <span class="n">shape_line_width</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+<span class="n">text</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mf">50.2</span><span class="p">),</span> <span class="s2">"STEP 1"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">))</span>
+<span class="n">rectangle</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mf">41.5</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">9.2</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">9.2</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryNeutral</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">shape_line_width</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+<span class="n">gcp</span><span class="o">.</span><span class="n">project</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mf">41.5</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">6.4</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Primary</span><span class="p">)</span>
+<span class="n">text</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mf">32.3</span><span class="p">),</span> <span class="s2">"APIキー発行"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">11.0</span><span class="p">))</span>
+<span class="n">text</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mf">25.5</span><span class="p">),</span> <span class="s2">"Cloud プロジェクト選択</span><span class="se">\n</span><span class="s2">GEMINI_API_KEY"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Muted</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">))</span>
+
+<span class="c1"># Stage 2: Colab シークレット保存</span>
+<span class="n">rectangle</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">cy</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="n">card_w</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="n">card_h</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">neutral_card</span><span class="p">)</span>
+<span class="n">rectangle</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mf">50.2</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">14.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">4.4</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">SecondaryNeutral</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">1.2</span><span class="p">,</span> <span class="n">shape_line_width</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+<span class="n">text</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mf">50.2</span><span class="p">),</span> <span class="s2">"STEP 2"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">))</span>
+<span class="n">rectangle</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mf">41.5</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">9.2</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">9.2</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">SecondaryNeutral</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">shape_line_width</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+<span class="n">phosphor</span><span class="o">.</span><span class="n">key</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mf">41.5</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">6.0</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="p">)</span>
+<span class="n">text</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mf">32.3</span><span class="p">),</span> <span class="s2">"Colab シークレット"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">11.0</span><span class="p">))</span>
+<span class="n">text</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mf">25.5</span><span class="p">),</span> <span class="s2">"左ペイン鍵アイコン</span><span class="se">\n</span><span class="s2">アクセス許可を ON"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Muted</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">))</span>
+
+<span class="c1"># Stage 3: genai.Client 初期化（主役の PrimaryFlat）</span>
+<span class="n">rectangle</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">cy</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="n">card_w</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="n">card_h</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">hero_card</span><span class="p">)</span>
+<span class="n">rectangle</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="mf">50.2</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">14.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">4.4</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">White</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">1.2</span><span class="p">,</span> <span class="n">shape_line_width</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+<span class="n">text</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="mf">50.2</span><span class="p">),</span> <span class="s2">"STEP 3"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">))</span>
+<span class="n">rectangle</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="mf">41.5</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">9.2</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">9.2</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">White</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">shape_line_width</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+<span class="n">ai</span><span class="o">.</span><span class="n">gemini</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="mf">41.5</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">6.4</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Primary</span><span class="p">)</span>
+<span class="n">text</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="mf">32.3</span><span class="p">),</span> <span class="s2">"genai.Client"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">WhiteBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">11.2</span><span class="p">))</span>
+<span class="n">text</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="mf">25.5</span><span class="p">),</span> <span class="s2">"userdata.get(...)</span><span class="se">\n</span><span class="s2">api_key=api_key"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">White</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">))</span>
+
+<span class="c1"># Stage 4: gemini-2.5-flash 推論レスポンス</span>
+<span class="n">rectangle</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">cy</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="n">card_w</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="n">card_h</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">soft_card</span><span class="p">)</span>
+<span class="n">rectangle</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="mf">50.2</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">14.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">4.4</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">White</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">1.2</span><span class="p">,</span> <span class="n">shape_line_color</span><span class="o">=</span><span class="n">Colors</span><span class="o">.</span><span class="n">Gray3</span><span class="p">))</span>
+<span class="n">text</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="mf">50.2</span><span class="p">),</span> <span class="s2">"STEP 4"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">))</span>
+<span class="n">rectangle</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="mf">41.5</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">9.2</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">9.2</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">White</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">shape_line_color</span><span class="o">=</span><span class="n">Colors</span><span class="o">.</span><span class="n">Gray3</span><span class="p">))</span>
+<span class="n">phosphor</span><span class="o">.</span><span class="n">sparkle</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="mf">41.5</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">6.0</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryBold</span><span class="p">)</span>
+<span class="n">text</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="mf">32.3</span><span class="p">),</span> <span class="s2">"推論レスポンス"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">11.0</span><span class="p">))</span>
+<span class="n">text</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="mf">25.5</span><span class="p">),</span> <span class="s2">"gemini-2.5-flash</span><span class="se">\n</span><span class="s2">text + usage_metadata"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Dark</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">))</span>
+
+<span class="c1"># ステージ間の矢印（カード間隔 7.5 ユニット）</span>
+<span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+    <span class="n">x_start</span> <span class="o">=</span> <span class="n">cxs</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">+</span> <span class="n">card_w</span> <span class="o">/</span> <span class="mf">2.0</span> <span class="o">+</span> <span class="mf">0.6</span>
+    <span class="n">x_end</span> <span class="o">=</span> <span class="n">cxs</span><span class="p">[</span><span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">card_w</span> <span class="o">/</span> <span class="mf">2.0</span> <span class="o">-</span> <span class="mf">0.6</span>
+    <span class="n">line</span><span class="p">((</span><span class="n">x_start</span><span class="p">,</span> <span class="n">cy</span><span class="p">),</span> <span class="p">(</span><span class="n">x_end</span><span class="p">,</span> <span class="n">cy</span><span class="p">),</span> <span class="n">arrow_head</span><span class="o">=</span><span class="s2">"-&gt;"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="p">)</span>
+
+<span class="c1"># 下部セットアップ情報バー</span>
+<span class="n">rectangle</span><span class="p">(</span>
+    <span class="p">(</span><span class="mf">76.0</span><span class="p">,</span> <span class="mf">12.2</span><span class="p">),</span>
+    <span class="n">width</span><span class="o">=</span><span class="mf">134.5</span><span class="p">,</span>
+    <span class="n">height</span><span class="o">=</span><span class="mf">8.4</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">White</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">1.8</span><span class="p">,</span> <span class="n">shape_line_color</span><span class="o">=</span><span class="n">Colors</span><span class="o">.</span><span class="n">Gray4</span><span class="p">),</span>
+<span class="p">)</span>
+<span class="n">phosphor</span><span class="o">.</span><span class="n">terminal_window</span><span class="p">((</span><span class="mf">15.0</span><span class="p">,</span> <span class="mf">12.2</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">4.6</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryBold</span><span class="p">)</span>
+<span class="n">text</span><span class="p">(</span>
+    <span class="p">(</span><span class="mf">79.0</span><span class="p">,</span> <span class="mf">12.2</span><span class="p">),</span>
+    <span class="s2">"自動挿入セットアップセル:  !pip install -q drawlib google-genai pydantic   •   Git への鍵混入ゼロ"</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.2</span><span class="p">),</span>
+<span class="p">)</span>
+
+<span class="n">save</span><span class="p">()</span>
+</code></pre>
+</details>
+<h2>1. Colab シークレットを使った最小構成の Hello World (<code>userdata</code> + <code>genai.Client</code>)</h2>
+<p>Google Colab で最初のコードセルを実行する前に、以下の手順（初回のみ）でシークレットを設定します。</p>
+<ol>
+<li><strong>Google AI Studio</strong>（<code>aistudio.google.com/apikey</code>）を開き、<strong>「API キーを作成（Create API key）」</strong> から既存または新規の <strong>Google Cloud プロジェクト</strong>を選択してキーを発行します。</li>
+<li>Google Colab 左サイドバーの <strong>シークレット（<code>🔑</code>）</strong> アイコンを開き、名前を <code>GEMINI_API_KEY</code> としてキーを貼り付け、<strong>「ノートブックからのアクセス」</strong> トグルを ON にします。</li>
+<li>実行時に <code>userdata.get(&quot;GEMINI_API_KEY&quot;)</code> でキーを読み込み、<code>genai.Client</code> を初期化します。</li>
+</ol>
+
+  </div>
+  <div class="nb-cell nb-code-cell nb-setup-cell">
+    <div class="nb-input">
+      <div class="nb-prompt nb-in-prompt">In [setup]:</div>
+      <div class="nb-code-area">
+        <pre><code class="language-bash">!pip<span class="w"> </span>install<span class="w"> </span>-q<span class="w"> </span>drawlib<span class="w"> </span>google-genai<span class="w"> </span>pydantic
+</code></pre>
+      </div>
+    </div>
+  </div>
+  <div class="nb-cell nb-code-cell">
+    <div class="nb-input">
+      <div class="nb-prompt nb-in-prompt">In [1]:</div>
+      <div class="nb-code-area">
+        <pre><code class="language-python"><span class="kn">from</span><span class="w"> </span><span class="nn">google.colab</span><span class="w"> </span><span class="kn">import</span> <span class="n">userdata</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">google</span><span class="w"> </span><span class="kn">import</span> <span class="n">genai</span>
+
+<span class="n">api_key</span> <span class="o">=</span> <span class="n">userdata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"GEMINI_API_KEY"</span><span class="p">)</span>
+<span class="n">client</span> <span class="o">=</span> <span class="n">genai</span><span class="o">.</span><span class="n">Client</span><span class="p">(</span><span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span><span class="p">)</span>
+
+<span class="n">response</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">generate_content</span><span class="p">(</span>
+    <span class="n">model</span><span class="o">=</span><span class="s2">"gemini-2.5-flash"</span><span class="p">,</span>
+    <span class="n">contents</span><span class="o">=</span><span class="s2">"統一された SDK が開発者の生産性を高める理由を2文で説明してください。"</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+</code></pre>
+      </div>
+    </div>
+  </div>
+  <div class="nb-cell nb-markdown-cell">
+<p><code>genai.Client</code> は <code>google-genai</code> SDK 全体で共通のエントリーポイントです。本章で学ぶ <code>client.models.*</code> や <code>client.chats.*</code> の呼び出しコードは、AI Studio の API キー認証でも Google Cloud Vertex AI の IAM 認証でも一切書き換えることなくそのまま動作します。</p>
+<h2>2. Google Cloud プロジェクト連携：無料枠（Free Tier）と従量課金枠（Paid Tier）</h2>
+<p>Google AI Studio で発行されるすべての API キーは、背後にある <strong>Google Cloud プロジェクト</strong>に紐付いています。普段から Google Cloud を利用している開発者は、AI Studio のキー作成ダイアログで既存のプロジェクトを選択できるため、API の有効化（<code>generativelanguage.googleapis.com</code>）やクォータ監視、請求管理を一元化できます。</p>
+<ul>
+<li><strong>無料枠 — Free Tier（課金未設定プロジェクト）</strong>: 選択した Google Cloud プロジェクトに <strong>Cloud Billing（請求先アカウント）が紐付いていない場合</strong>、API キーは完全無料の Free Tier として動作します。ハッカソンや学習・プロトタイピングに最適ですが、レート制限（RPM/TPM/RPD）は低めに設定されており、入出力データが Google 製品の品質改善に利用される場合があります（機密データの送信は避けてください）。</li>
+<li><strong>従量課金枠 — Paid Tier（Cloud Billing 有効化済み）</strong>: 同じ Google Cloud プロジェクトで <strong>Cloud Billing</strong> を有効化すると、同じ <code>GEMINI_API_KEY</code> が自動的に従量課金枠（Pay-as-You-Go）へアップグレードされます。Python コードを1行も変更することなく、本番ワークロード向けの高い RPM/TPM クォータと**エンタープライズ水準のデータプライバシー（プロンプトや出力が Google のモデル学習に使用されない保証）**が適用されます。</li>
+</ul>
+
+<figure class="drawlib-figure align-center">
+  <img src="../images/01_ai_studio_quickstart/ch01_billing_tiers_ja.png" alt="図1-2: Google AI Studio 無料枠と Cloud Billing 従量課金枠（Paid Tier）の比較" loading="lazy">
+  <figcaption>図1-2: Google AI Studio 無料枠と Cloud Billing 従量課金枠（Paid Tier）の比較</figcaption>
+</figure>
+<details class="drawlib-code-fold">
+  <summary>View Drawlib Python Code</summary>
+  <pre><code class="language-python"><span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.canvas</span><span class="w"> </span><span class="kn">import</span> <span class="n">save</span><span class="p">,</span> <span class="n">setup</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.icons</span><span class="w"> </span><span class="kn">import</span> <span class="n">gcp</span><span class="p">,</span> <span class="n">phosphor</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.lines</span><span class="w"> </span><span class="kn">import</span> <span class="n">line</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.shapes</span><span class="w"> </span><span class="kn">import</span> <span class="n">rectangle</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.smartarts</span><span class="w"> </span><span class="kn">import</span> <span class="n">CardList</span><span class="p">,</span> <span class="n">Panel</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.styles</span><span class="w"> </span><span class="kn">import</span> <span class="n">Colors</span><span class="p">,</span> <span class="n">Styles</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.text</span><span class="w"> </span><span class="kn">import</span> <span class="n">text</span>
+
+<span class="n">setup</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mi">152</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">78</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">150</span><span class="p">)</span>
+
+<span class="c1"># 上部共通バナー: 同一の Google Cloud プロジェクト &amp; API キー</span>
+<span class="n">rectangle</span><span class="p">(</span>
+    <span class="p">(</span><span class="mf">76.0</span><span class="p">,</span> <span class="mf">67.5</span><span class="p">),</span>
+    <span class="n">width</span><span class="o">=</span><span class="mf">140.0</span><span class="p">,</span>
+    <span class="n">height</span><span class="o">=</span><span class="mf">11.0</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Neutral</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">shape_fill_color</span><span class="o">=</span><span class="n">Colors</span><span class="o">.</span><span class="n">Light</span><span class="p">,</span> <span class="n">shape_line_color</span><span class="o">=</span><span class="n">Colors</span><span class="o">.</span><span class="n">Gray4</span><span class="p">),</span>
+<span class="p">)</span>
+<span class="n">gcp</span><span class="o">.</span><span class="n">project</span><span class="p">((</span><span class="mf">14.5</span><span class="p">,</span> <span class="mf">67.5</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">6.6</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Primary</span><span class="p">)</span>
+<span class="n">text</span><span class="p">(</span>
+    <span class="p">(</span><span class="mf">80.5</span><span class="p">,</span> <span class="mf">69.8</span><span class="p">),</span>
+    <span class="s2">"同一の Google Cloud プロジェクト &amp; 同一の GEMINI_API_KEY"</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">11.5</span><span class="p">),</span>
+<span class="p">)</span>
+<span class="n">text</span><span class="p">(</span>
+    <span class="p">(</span><span class="mf">80.5</span><span class="p">,</span> <span class="mf">65.0</span><span class="p">),</span>
+    <span class="s2">"Cloud Billing を紐付けるだけで、SDK コードを1行も変更せずにレート上限とデータ保護をアップグレード"</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Muted</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">),</span>
+<span class="p">)</span>
+
+<span class="c1"># 左パネル: 無料枠 Free Tier（落ち着いたニュートラル配色）</span>
+<span class="n">left_panel</span> <span class="o">=</span> <span class="n">Panel</span><span class="p">(</span>
+    <span class="s2">"無料枠 (Free Tier)"</span><span class="p">,</span>
+    <span class="s2">"課金未設定"</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Neutral</span><span class="p">,</span>
+    <span class="n">header_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">SecondaryNeutral</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_line_width</span><span class="o">=</span><span class="mf">1.2</span><span class="p">),</span>
+    <span class="n">text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">11.2</span><span class="p">),</span>
+    <span class="n">description_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Muted</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">),</span>
+    <span class="n">icon</span><span class="o">=</span><span class="n">phosphor</span><span class="o">.</span><span class="n">code</span><span class="p">,</span>
+    <span class="n">icon_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="p">,</span>
+    <span class="n">header_variant</span><span class="o">=</span><span class="s2">"filled"</span><span class="p">,</span>
+    <span class="n">header_height</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">left_panel</span><span class="o">.</span><span class="n">draw</span><span class="p">((</span><span class="mf">6.0</span><span class="p">,</span> <span class="mf">5.5</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">64.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">52.5</span><span class="p">,</span> <span class="n">align</span><span class="o">=</span><span class="s2">"bottom_left"</span><span class="p">)</span>
+<span class="n">l_xy</span><span class="p">,</span> <span class="n">l_w</span><span class="p">,</span> <span class="n">l_h</span> <span class="o">=</span> <span class="n">left_panel</span><span class="o">.</span><span class="n">get_content_box</span><span class="p">((</span><span class="mf">6.0</span><span class="p">,</span> <span class="mf">5.5</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">64.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">52.5</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="p">(</span><span class="mf">3.2</span><span class="p">,</span> <span class="mf">2.6</span><span class="p">))</span>
+
+<span class="n">free_cards</span> <span class="o">=</span> <span class="n">CardList</span><span class="p">(</span>
+    <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">White</span><span class="p">,</span>
+    <span class="n">text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.5</span><span class="p">),</span>
+    <span class="n">description_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Muted</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">),</span>
+    <span class="n">badge_shape</span><span class="o">=</span><span class="s2">"rounded_rect"</span><span class="p">,</span>
+    <span class="n">badge_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">SecondaryNeutral</span><span class="p">,</span>
+    <span class="n">icon_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="p">,</span>
+    <span class="n">spacing</span><span class="o">=</span><span class="mf">2.2</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">free_cards</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">"完全無料（$0）で開始"</span><span class="p">,</span> <span class="s2">"請求先アカウント未設定のプロジェクト"</span><span class="p">,</span> <span class="n">icon</span><span class="o">=</span><span class="n">phosphor</span><span class="o">.</span><span class="n">credit_card</span><span class="p">)</span>
+<span class="n">free_cards</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">"検証用レートクォータ"</span><span class="p">,</span> <span class="s2">"テスト向けの低めな RPM / TPM 上限"</span><span class="p">,</span> <span class="n">icon</span><span class="o">=</span><span class="n">phosphor</span><span class="o">.</span><span class="n">chart_bar</span><span class="p">)</span>
+<span class="n">free_cards</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">"標準データ利用規約"</span><span class="p">,</span> <span class="s2">"入出力が製品改善に使われる場合あり"</span><span class="p">,</span> <span class="n">icon</span><span class="o">=</span><span class="n">phosphor</span><span class="o">.</span><span class="n">shield_check</span><span class="p">)</span>
+<span class="n">free_cards</span><span class="o">.</span><span class="n">draw</span><span class="p">(</span><span class="n">l_xy</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">l_w</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="n">l_h</span><span class="p">)</span>
+
+<span class="c1"># 中央のアップグレード矢印（パネル間隔 12.0 ユニット）</span>
+<span class="n">line</span><span class="p">((</span><span class="mf">71.2</span><span class="p">,</span> <span class="mf">31.8</span><span class="p">),</span> <span class="p">(</span><span class="mf">80.8</span><span class="p">,</span> <span class="mf">31.8</span><span class="p">),</span> <span class="n">arrow_head</span><span class="o">=</span><span class="s2">"-&gt;"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="p">)</span>
+<span class="n">text</span><span class="p">((</span><span class="mf">76.0</span><span class="p">,</span> <span class="mf">36.8</span><span class="p">),</span> <span class="s2">"課金を</span><span class="se">\n</span><span class="s2">有効化"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">))</span>
+
+<span class="c1"># 右パネル: 従量課金枠 Paid Tier（ヘッダーのみ PrimaryFlat で強調）</span>
+<span class="n">right_panel</span> <span class="o">=</span> <span class="n">Panel</span><span class="p">(</span>
+    <span class="s2">"従量課金枠 (Paid Tier)"</span><span class="p">,</span>
+    <span class="s2">"Cloud Billing 連携"</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryNeutral</span><span class="p">,</span>
+    <span class="n">header_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryFlat</span><span class="p">,</span>
+    <span class="n">text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">WhiteBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">11.2</span><span class="p">),</span>
+    <span class="n">description_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">White</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">),</span>
+    <span class="n">icon</span><span class="o">=</span><span class="n">phosphor</span><span class="o">.</span><span class="n">sparkle</span><span class="p">,</span>
+    <span class="n">icon_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">WhiteBold</span><span class="p">,</span>
+    <span class="n">header_variant</span><span class="o">=</span><span class="s2">"filled"</span><span class="p">,</span>
+    <span class="n">header_height</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">right_panel</span><span class="o">.</span><span class="n">draw</span><span class="p">((</span><span class="mf">82.0</span><span class="p">,</span> <span class="mf">5.5</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">64.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">52.5</span><span class="p">,</span> <span class="n">align</span><span class="o">=</span><span class="s2">"bottom_left"</span><span class="p">)</span>
+<span class="n">r_xy</span><span class="p">,</span> <span class="n">r_w</span><span class="p">,</span> <span class="n">r_h</span> <span class="o">=</span> <span class="n">right_panel</span><span class="o">.</span><span class="n">get_content_box</span><span class="p">((</span><span class="mf">82.0</span><span class="p">,</span> <span class="mf">5.5</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">64.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">52.5</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="p">(</span><span class="mf">3.2</span><span class="p">,</span> <span class="mf">2.6</span><span class="p">))</span>
+
+<span class="n">paid_cards</span> <span class="o">=</span> <span class="n">CardList</span><span class="p">(</span>
+    <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">White</span><span class="p">,</span>
+    <span class="n">text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.5</span><span class="p">),</span>
+    <span class="n">description_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Dark</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">),</span>
+    <span class="n">badge_shape</span><span class="o">=</span><span class="s2">"rounded_rect"</span><span class="p">,</span>
+    <span class="n">badge_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryNeutral</span><span class="p">,</span>
+    <span class="n">icon_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryBold</span><span class="p">,</span>
+    <span class="n">spacing</span><span class="o">=</span><span class="mf">2.2</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">paid_cards</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">"トークン従量課金"</span><span class="p">,</span> <span class="s2">"Google Cloud 請求先へ統合請求"</span><span class="p">,</span> <span class="n">icon</span><span class="o">=</span><span class="n">phosphor</span><span class="o">.</span><span class="n">credit_card</span><span class="p">)</span>
+<span class="n">paid_cards</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">"高い RPM / TPM クォータ"</span><span class="p">,</span> <span class="s2">"本番アプリのトラフィックに対応"</span><span class="p">,</span> <span class="n">icon</span><span class="o">=</span><span class="n">phosphor</span><span class="o">.</span><span class="n">chart_bar</span><span class="p">)</span>
+<span class="n">paid_cards</span><span class="o">.</span><span class="n">add</span><span class="p">(</span>
+    <span class="s2">"学習利用なし（データ保護）"</span><span class="p">,</span>
+    <span class="s2">"入出力は Google モデル学習に不使用"</span><span class="p">,</span>
+    <span class="n">icon</span><span class="o">=</span><span class="n">phosphor</span><span class="o">.</span><span class="n">shield_check</span><span class="p">,</span>
+    <span class="n">badge_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryFlat</span><span class="p">,</span>
+    <span class="n">icon_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">WhiteBold</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">paid_cards</span><span class="o">.</span><span class="n">draw</span><span class="p">(</span><span class="n">r_xy</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">r_w</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="n">r_h</span><span class="p">)</span>
+
+<span class="n">save</span><span class="p">()</span>
+</code></pre>
+</details>
+<h2>3. <code>GenerateContentConfig</code> と Drawlib によるトークン消費量の可視化</h2>
+<p>モデルの役割設定（システムプロンプト）や出力の再現性（<code>temperature</code>）を制御するには、<code>types.GenerateContentConfig</code> を <code>generate_content</code> に渡します。また、レスポンスの <code>response.usage_metadata</code> からは、入力プロンプト（<code>prompt_token_count</code>）、内部思考（<code>thoughts_token_count</code>）、最終回答（<code>candidates_token_count</code>）の正確なトークン数を取得できます。</p>
+
+  </div>
+  <div class="nb-cell nb-code-cell">
+    <div class="nb-input">
+      <div class="nb-prompt nb-in-prompt">In [2]:</div>
+      <div class="nb-code-area">
+        <pre><code class="language-python"><span class="kn">from</span><span class="w"> </span><span class="nn">google.genai</span><span class="w"> </span><span class="kn">import</span> <span class="n">types</span>
+
+<span class="n">config</span> <span class="o">=</span> <span class="n">types</span><span class="o">.</span><span class="n">GenerateContentConfig</span><span class="p">(</span>
+    <span class="n">system_instruction</span><span class="o">=</span><span class="s2">"あなたは簡潔に回答するクラウドアーキテクトです。短い箇条書き3点で答えてください。"</span><span class="p">,</span>
+    <span class="n">temperature</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">response</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">generate_content</span><span class="p">(</span>
+    <span class="n">model</span><span class="o">=</span><span class="s2">"gemini-2.5-flash"</span><span class="p">,</span>
+    <span class="n">contents</span><span class="o">=</span><span class="s2">"ノートブックで API キーを安全に管理するベストプラクティスを3つ挙げてください。"</span><span class="p">,</span>
+    <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+
+<span class="n">usage</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">usage_metadata</span>
+<span class="n">prompt_tokens</span> <span class="o">=</span> <span class="n">usage</span><span class="o">.</span><span class="n">prompt_token_count</span> <span class="ow">or</span> <span class="mi">0</span>
+<span class="n">thoughts_tokens</span> <span class="o">=</span> <span class="n">usage</span><span class="o">.</span><span class="n">thoughts_token_count</span> <span class="ow">or</span> <span class="mi">0</span>
+<span class="n">candidates_tokens</span> <span class="o">=</span> <span class="n">usage</span><span class="o">.</span><span class="n">candidates_token_count</span> <span class="ow">or</span> <span class="mi">0</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Prompt tokens:     </span><span class="si">{</span><span class="n">prompt_tokens</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Thoughts tokens:   </span><span class="si">{</span><span class="n">thoughts_tokens</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Candidates tokens: </span><span class="si">{</span><span class="n">candidates_tokens</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</code></pre>
+      </div>
+    </div>
+  </div>
+  <div class="nb-cell nb-markdown-cell">
+<p>ノートブックには <code>google-genai</code> と一緒に <code>drawlib</code> もセットアップされているため、<code>setup(..., cwd=True)</code> と <code>BarChart</code>、<code>show()</code> を使って、直前のセルで取得した <code>usage_metadata</code> のトークン内訳をそのまま次のセルで可視化できます。</p>
+
+  </div>
+  <div class="nb-cell nb-code-cell">
+    <div class="nb-input">
+      <div class="nb-prompt nb-in-prompt">In [3]:</div>
+      <div class="nb-code-area">
+        <pre><code class="language-python"><span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.canvas</span><span class="w"> </span><span class="kn">import</span> <span class="n">setup</span><span class="p">,</span> <span class="n">show</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.charts.bar</span><span class="w"> </span><span class="kn">import</span> <span class="n">BarChart</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.styles</span><span class="w"> </span><span class="kn">import</span> <span class="n">Styles</span>
+
+<span class="n">setup</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mi">110</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">52</span><span class="p">,</span> <span class="n">cwd</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="n">chart</span> <span class="o">=</span> <span class="n">BarChart</span><span class="p">(</span>
+    <span class="n">axis_line_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">MutedDashed</span><span class="p">,</span>
+    <span class="n">categories</span><span class="o">=</span><span class="p">[</span><span class="s2">"入力 (Prompt)"</span><span class="p">,</span> <span class="s2">"思考 (Thoughts)"</span><span class="p">,</span> <span class="s2">"出力 (Candidates)"</span><span class="p">],</span>
+    <span class="n">width</span><span class="o">=</span><span class="mf">96.0</span><span class="p">,</span>
+    <span class="n">height</span><span class="o">=</span><span class="mf">40.0</span><span class="p">,</span>
+    <span class="n">title</span><span class="o">=</span><span class="s2">"Gemini 2.5 Flash — トークン消費量の内訳"</span><span class="p">,</span>
+    <span class="n">title_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">12.0</span><span class="p">),</span>
+    <span class="n">background_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Neutral</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">2.0</span><span class="p">),</span>
+    <span class="n">bar_width_ratio</span><span class="o">=</span><span class="mf">0.48</span><span class="p">,</span>
+    <span class="n">bar_r</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span>
+    <span class="n">axis_text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Dark</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.5</span><span class="p">),</span>
+    <span class="n">grid_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">MutedThin</span><span class="p">,</span>
+    <span class="n">value_text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.5</span><span class="p">),</span>
+    <span class="n">value_format</span><span class="o">=</span><span class="s2">"</span><span class="si">{:.0f}</span><span class="s2">"</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">chart</span><span class="o">.</span><span class="n">add_series</span><span class="p">(</span>
+    <span class="s2">"トークン数"</span><span class="p">,</span>
+    <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">prompt_tokens</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">thoughts_tokens</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">candidates_tokens</span><span class="p">)],</span>
+    <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryFlat</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">chart</span><span class="o">.</span><span class="n">configure_y_axis</span><span class="p">(</span><span class="n">min_value</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+<span class="n">chart</span><span class="o">.</span><span class="n">draw</span><span class="p">(</span><span class="n">xy</span><span class="o">=</span><span class="p">(</span><span class="mf">7.0</span><span class="p">,</span> <span class="mf">6.0</span><span class="p">))</span>
+
+<span class="n">show</span><span class="p">()</span>
+</code></pre>
+      </div>
+    </div>
+  </div>
+  <div class="nb-cell nb-markdown-cell">
+<h3>まとめと次のステップ</h3>
+<ul>
+<li><strong>セキュアで手軽な実行環境</strong>: <code>GEMINI_API_KEY</code> を Colab シークレットに保管することで、Git への鍵漏洩を防ぎつつ、Google Cloud プロジェクトの無料枠・従量課金枠をシームレスに使い分けられます。</li>
+<li><strong>次章（Chapter 02）のプレビュー</strong>: 続く第2章では、後続の Gemini 呼び出しコードを1行も変えずに、<code>genai.Client</code> の初期化だけを <strong>Google Cloud Vertex AI</strong>（<code>vertexai=True</code>・IAM 認証）へ切り替える方法を解説します。</li>
+</ul>
+
+  </div>
+</div>
+            </main>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const themeBtn = document.getElementById('theme-toggle');
+            if (themeBtn) {
+                themeBtn.addEventListener('click', function() {
+                    const current = document.documentElement.getAttribute('data-theme');
+                    const next = current === 'dark' ? 'light' : 'dark';
+                    document.documentElement.setAttribute('data-theme', next);
+                    localStorage.setItem('drawlib-theme', next);
+                });
+            }
+
+            const langDropdowns = document.querySelectorAll('.lang-dropdown');
+            if (langDropdowns.length > 0) {
+                document.addEventListener('click', function(e) {
+                    langDropdowns.forEach(function(dd) {
+                        if (dd.hasAttribute('open') && !dd.contains(e.target)) {
+                            dd.removeAttribute('open');
+                        }
+                    });
+                });
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape') {
+                        langDropdowns.forEach(function(dd) {
+                            dd.removeAttribute('open');
+                        });
+                    }
+                });
+            }
+
+            const menuBtn = document.getElementById('menu-toggle');
+            const sidebar = document.querySelector('.sidebar');
+            if (menuBtn && sidebar) {
+                function setMenuOpen(open) {
+                    sidebar.classList.toggle('is-open', open);
+                    menuBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+                    document.body.classList.toggle('menu-open', open);
+                    if (open) {
+                        const menu = sidebar.querySelector('.sidebar-menu');
+                        if (menu) {
+                            menu.scrollTop = 0;
+                        }
+                    }
+                }
+
+                menuBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const willOpen = !sidebar.classList.contains('is-open');
+                    setMenuOpen(willOpen);
+                });
+
+                document.addEventListener('click', function(e) {
+                    if (sidebar.classList.contains('is-open') && !sidebar.contains(e.target)) {
+                        setMenuOpen(false);
+                    }
+                });
+
+                const navLinks = sidebar.querySelectorAll('.nav-item a');
+                navLinks.forEach(function(link) {
+                    link.addEventListener('click', function() {
+                        setMenuOpen(false);
+                    });
+                });
+
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape' && sidebar.classList.contains('is-open')) {
+                        setMenuOpen(false);
+                    }
+                });
+
+                window.addEventListener('resize', function() {
+                    if (window.innerWidth > 768 && sidebar.classList.contains('is-open')) {
+                        setMenuOpen(false);
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

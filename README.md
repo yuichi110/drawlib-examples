@@ -15,6 +15,8 @@ drawlib-examples/
 │   │   └── gemini_latency/         # Bilingual (EN/JA) Gemini 3.8 Flash latency & architecture report
 │   ├── slide/
 │   │   └── ddos-incident-response/ # 16:9 cloud security postmortem deck
+│   ├── jupyter/
+│   │   └── google-genai/           # Bilingual (EN/JA) Google GenAI SDK Jupyter & Colab cookbook
 │   └── images/
 │       ├── animation/              # AI-authored web & social animations (APNG, WebP & GIF)
 │       ├── logo/                   # Official Drawlib brand logos & favicon
