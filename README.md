@@ -16,6 +16,7 @@ drawlib-examples/
 │   ├── slide/
 │   │   └── ddos-incident-response/ # 16:9 cloud security postmortem deck
 │   ├── jupyter/
+│   │   ├── pydantic/               # Bilingual (EN/JA) Pydantic v2 hands-on cookbook (execute = true)
 │   │   └── google-genai/           # Bilingual (EN/JA) Google GenAI SDK Jupyter & Colab cookbook
 │   └── images/
 │       ├── animation/              # AI-authored web & social animations (APNG, WebP & GIF)

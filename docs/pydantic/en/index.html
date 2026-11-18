@@ -1,0 +1,628 @@
+<!--
+ Copyright (c) 2026 Yuichi Ito (yuichi@yuichi.com)
+
+ This software is licensed under the Apache License, Version 2.0.
+ For more information, please visit: https://github.com/yuichi110/drawlib
+
+ This software is provided "as is", without warranty of any kind,
+ express or implied, including but not limited to the warranties of
+ merchantability, fitness for a particular purpose and noninfringement.
+-->
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>01. BaseModel Essentials &amp; Type Coercion (Lax vs. Strict)</title>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-S9N5BZ1VRC"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-S9N5BZ1VRC');
+    </script>
+    <script>
+        (function() {
+            const saved = localStorage.getItem('drawlib-theme');
+            if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            } else {
+                document.documentElement.setAttribute('data-theme', 'light');
+            }
+        })();
+    </script>
+    
+    
+    
+    <link rel="alternate" hreflang="en" href="https://examples.drawlib.com/pydantic/en/01_basemodel_quickstart.html">
+    
+    <link rel="alternate" hreflang="ja" href="https://examples.drawlib.com/pydantic/ja/01_basemodel_quickstart.html">
+    
+    <link rel="alternate" hreflang="x-default" href="https://examples.drawlib.com/pydantic/en/01_basemodel_quickstart.html">
+    
+    
+    
+    <meta name="description" content="Pydantic v2 turns standard Python type annotations (class User(BaseModel):) into a blazing-fast, Rust-powered validation and serialization pipeline backed by…">
+    <link rel="canonical" href="https://examples.drawlib.com/pydantic/en/01_basemodel_quickstart.html">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Pydantic v2 Hands-On Cookbook">
+    <meta property="og:title" content="01. BaseModel Essentials &amp; Type Coercion (Lax vs. Strict) — Pydantic v2 Hands-On Cookbook">
+    <meta property="og:description" content="Pydantic v2 turns standard Python type annotations (class User(BaseModel):) into a blazing-fast, Rust-powered validation and serialization pipeline backed by…">
+    <meta property="og:url" content="https://examples.drawlib.com/pydantic/en/01_basemodel_quickstart.html">
+    <meta property="og:locale" content="en_US">
+    <meta property="og:locale:alternate" content="ja_JP">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="01. BaseModel Essentials &amp; Type Coercion (Lax vs. Strict) — Pydantic v2 Hands-On Cookbook">
+    <meta name="twitter:description" content="Pydantic v2 turns standard Python type annotations (class User(BaseModel):) into a blazing-fast, Rust-powered validation and serialization pipeline backed by…">
+    
+    
+    <link rel="icon" type="image/png" href="../_assets/favicon.png">
+    
+    
+    <link rel="stylesheet" href="style.css">
+    
+    
+</head>
+<body>
+    <div class="demo-banner" role="region" aria-label="Portal Navigation">
+        <div class="demo-banner-inner">
+            <span class="demo-banner-badge">DRAWLIB SHOWCASE</span>
+            <span class="demo-banner-text">
+                Sample Jupyter &amp; Colab Notebook (<code>type = "jupyter"</code>) built with <a href="https://www.drawlib.com/" target="_blank" rel="noopener noreferrer">Drawlib</a>
+            </span>
+            <span class="demo-banner-links">
+                <a href="../../index.html">All Examples</a>
+                <span class="demo-banner-sep">·</span>
+                <a href="https://github.com/yuichi110/drawlib-examples/tree/main/examples/jupyter/pydantic" target="_blank" rel="noopener noreferrer">Source (GitHub) ↗</a>
+                <span class="demo-banner-sep">·</span>
+                <a href="https://www.drawlib.com/" target="_blank" rel="noopener noreferrer">Drawlib ↗</a>
+            </span>
+        </div>
+    </div>
+    
+    <div class="doc-layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="index.html" class="sidebar-brand" aria-label="Pydantic v2 Hands-On Cookbook">
+                    
+                    Pydantic v2 Hands-On Cookbook
+                    
+                </a>
+                <div class="sidebar-header-actions">
+                    <button type="button" id="theme-toggle" class="theme-toggle-btn" aria-label="Toggle theme">
+                        <svg class="icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+                        <svg class="icon-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                    </button>
+                    <button type="button" id="menu-toggle" class="menu-toggle-btn" aria-label="Toggle navigation" aria-expanded="false">
+                        <svg class="icon-hamburger" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+                        <svg class="icon-close" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
+                </div>
+            </div>
+            <div class="sidebar-menu">
+                
+                    <div class="sidebar-heading">Notebooks</div>
+                    <ul class="nav-list">
+                        
+                        <li class="nav-item active">
+                            <a href="01_basemodel_quickstart.html" >01. BaseModel Essentials &amp; Type Coercion (Lax vs. Strict)</a>
+                        </li>
+                        
+                        <li class="nav-item ">
+                            <a href="02_fields_and_errors.html" >02. Field Constraints &amp; Inspecting ValidationError</a>
+                        </li>
+                        
+                        <li class="nav-item ">
+                            <a href="03_validators_and_computed.html" >03. Custom Validators &amp; Computed Fields</a>
+                        </li>
+                        
+                        <li class="nav-item ">
+                            <a href="04_nested_unions_and_schema.html" >04. Nested Models, Discriminated Unions &amp; JSON Schema</a>
+                        </li>
+                        
+                    </ul>
+                
+            </div>
+        </aside>
+        <div class="content-wrapper">
+            <header class="top-bar">
+                <div class="breadcrumbs">
+                    <span class="crumb">Notebooks</span>
+                    <span class="crumb-separator">&raquo;</span>
+                    <span class="crumb active">01. BaseModel Essentials &amp; Type Coercion (Lax vs. Strict)</span>
+                </div>
+                
+                <div class="lang-switcher">
+                    <details class="lang-dropdown">
+                        <summary class="lang-dropdown-btn" aria-label="Select language">
+                            <svg class="lang-globe-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                            <span class="lang-current-label">English</span>
+                            <svg class="lang-caret-icon" viewBox="0 0 24 24" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        </summary>
+                        <div class="lang-dropdown-menu" role="menu">
+                            
+                            <a href="01_basemodel_quickstart.html" class="lang-option active" lang="en" hreflang="en" aria-current="page">
+                                <span>English</span>
+                                
+                                <svg class="lang-check-icon" viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                
+                            </a>
+                            
+                            <a href="../ja/01_basemodel_quickstart.html" class="lang-option" lang="ja" hreflang="ja" >
+                                <span>日本語</span>
+                                
+                            </a>
+                            
+                        </div>
+                    </details>
+                </div>
+                
+            </header>
+            <main class="main-content">
+                <div class="jupyter-notebook">
+  <div class="nb-toolbar">
+    <a class="nb-btn nb-btn-colab" href="https://colab.research.google.com/github/yuichi110/drawlib-examples/blob/main/docs/pydantic/en/01_basemodel_quickstart.ipynb" target="_blank" rel="noopener noreferrer"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"></a>
+    <a class="nb-btn nb-btn-download" href="01_basemodel_quickstart.ipynb" download="01_basemodel_quickstart.ipynb">⬇ Download .ipynb</a>
+    <span class="nb-status-pill">✓ Dry-Run Verified (3 cells)</span>
+  </div>
+  <div class="nb-cell nb-markdown-cell">
+<h1>01. BaseModel Essentials &amp; Type Coercion (Lax vs. Strict)</h1>
+<p>Pydantic v2 turns standard Python type annotations (<code>class User(BaseModel):</code>) into a blazing-fast, Rust-powered validation and serialization pipeline backed by <code>pydantic-core</code>. Because <code>pydantic</code> v2 comes pre-installed in Google Colab and requires zero API keys or external services, you can run every cell in this cookbook immediately out of the box.</p>
+
+<figure class="drawlib-figure align-center">
+  <img src="../images/01_basemodel_quickstart/ch01_pydantic_pipeline.png" alt="Figure 1-1: Pydantic v2 End-to-End Validation &amp; Serialization Pipeline" loading="lazy">
+  <figcaption>Figure 1-1: Pydantic v2 End-to-End Validation &amp; Serialization Pipeline</figcaption>
+</figure>
+<details class="drawlib-code-fold">
+  <summary>View Drawlib Python Code</summary>
+  <pre><code class="language-python"><span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.canvas</span><span class="w"> </span><span class="kn">import</span> <span class="n">save</span><span class="p">,</span> <span class="n">setup</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.icons</span><span class="w"> </span><span class="kn">import</span> <span class="n">phosphor</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.lines</span><span class="w"> </span><span class="kn">import</span> <span class="n">line</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.shapes</span><span class="w"> </span><span class="kn">import</span> <span class="n">rectangle</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.styles</span><span class="w"> </span><span class="kn">import</span> <span class="n">Colors</span><span class="p">,</span> <span class="n">Styles</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.text</span><span class="w"> </span><span class="kn">import</span> <span class="n">text</span>
+
+<span class="n">setup</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mi">152</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">76</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">150</span><span class="p">)</span>
+
+<span class="c1"># Outer calm frame (50%+ neutral baseline)</span>
+<span class="n">rectangle</span><span class="p">(</span>
+    <span class="p">(</span><span class="mf">76.0</span><span class="p">,</span> <span class="mf">38.0</span><span class="p">),</span>
+    <span class="n">width</span><span class="o">=</span><span class="mf">142.0</span><span class="p">,</span>
+    <span class="n">height</span><span class="o">=</span><span class="mf">66.0</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Neutral</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">2.5</span><span class="p">,</span> <span class="n">shape_fill_color</span><span class="o">=</span><span class="n">Colors</span><span class="o">.</span><span class="n">Light</span><span class="p">,</span> <span class="n">shape_line_color</span><span class="o">=</span><span class="n">Colors</span><span class="o">.</span><span class="n">Gray3</span><span class="p">),</span>
+<span class="p">)</span>
+
+<span class="c1"># Header title &amp; subtitle</span>
+<span class="n">text</span><span class="p">(</span>
+    <span class="p">(</span><span class="mf">76.0</span><span class="p">,</span> <span class="mf">65.5</span><span class="p">),</span>
+    <span class="s2">"Pydantic v2: Type Hints -&gt; Rust Validation &amp; Serialization Pipeline"</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">12.6</span><span class="p">),</span>
+<span class="p">)</span>
+<span class="n">text</span><span class="p">(</span>
+    <span class="p">(</span><span class="mf">76.0</span><span class="p">,</span> <span class="mf">60.3</span><span class="p">),</span>
+    <span class="s2">"class User(BaseModel)  •  Automatic Lax Coercion or Strict Checks  •  Clean Output"</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Muted</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.2</span><span class="p">),</span>
+<span class="p">)</span>
+
+<span class="c1"># 4 horizontal stage cards: width=28.0, gap=7.5 (x spans 8.75..143.25)</span>
+<span class="n">card_w</span> <span class="o">=</span> <span class="mf">28.0</span>
+<span class="n">card_h</span> <span class="o">=</span> <span class="mf">34.0</span>
+<span class="n">cy</span> <span class="o">=</span> <span class="mf">37.8</span>
+<span class="n">cxs</span> <span class="o">=</span> <span class="p">[</span><span class="mf">22.75</span><span class="p">,</span> <span class="mf">58.25</span><span class="p">,</span> <span class="mf">93.75</span><span class="p">,</span> <span class="mf">129.25</span><span class="p">]</span>
+
+<span class="n">neutral_card</span> <span class="o">=</span> <span class="n">Styles</span><span class="o">.</span><span class="n">White</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">2.2</span><span class="p">,</span> <span class="n">shape_line_color</span><span class="o">=</span><span class="n">Colors</span><span class="o">.</span><span class="n">Gray4</span><span class="p">)</span>
+<span class="n">soft_card</span> <span class="o">=</span> <span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryNeutral</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">2.2</span><span class="p">)</span>
+<span class="n">hero_card</span> <span class="o">=</span> <span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryFlat</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">2.2</span><span class="p">)</span>
+
+<span class="c1"># Stage 1: Untrusted Input (dict / JSON string)</span>
+<span class="n">rectangle</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">cy</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="n">card_w</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="n">card_h</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">neutral_card</span><span class="p">)</span>
+<span class="n">rectangle</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mf">50.2</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">14.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">4.4</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">SecondaryNeutral</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">1.2</span><span class="p">,</span> <span class="n">shape_line_width</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+<span class="n">text</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mf">50.2</span><span class="p">),</span> <span class="s2">"STEP 1"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">))</span>
+<span class="n">rectangle</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mf">41.5</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">9.2</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">9.2</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">SecondaryNeutral</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">shape_line_width</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+<span class="n">phosphor</span><span class="o">.</span><span class="n">brackets_curly</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mf">41.5</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">6.0</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="p">)</span>
+<span class="n">text</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mf">32.3</span><span class="p">),</span> <span class="s2">"Untrusted Input"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.8</span><span class="p">))</span>
+<span class="n">text</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mf">25.5</span><span class="p">),</span> <span class="s1">'Raw dict / JSON</span><span class="se">\n</span><span class="s1">{"id": "42"}'</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Muted</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">))</span>
+
+<span class="c1"># Stage 2: pydantic-core Engine (Focal PrimaryFlat Hero Card)</span>
+<span class="n">rectangle</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">cy</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="n">card_w</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="n">card_h</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">hero_card</span><span class="p">)</span>
+<span class="n">rectangle</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mf">50.2</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">14.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">4.4</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">White</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">1.2</span><span class="p">,</span> <span class="n">shape_line_width</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+<span class="n">text</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mf">50.2</span><span class="p">),</span> <span class="s2">"STEP 2"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">))</span>
+<span class="n">rectangle</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mf">41.5</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">9.2</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">9.2</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">White</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">shape_line_width</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+<span class="n">phosphor</span><span class="o">.</span><span class="n">cpu</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mf">41.5</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">6.0</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryBold</span><span class="p">)</span>
+<span class="n">text</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mf">32.3</span><span class="p">),</span> <span class="s2">"pydantic-core"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">WhiteBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">11.2</span><span class="p">))</span>
+<span class="n">text</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mf">25.5</span><span class="p">),</span> <span class="s2">"Rust v2 Engine</span><span class="se">\n</span><span class="s2">Coerce &amp; Validate"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">White</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">))</span>
+
+<span class="c1"># Stage 3: Validated BaseModel (Typed Python Attributes)</span>
+<span class="n">rectangle</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">cy</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="n">card_w</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="n">card_h</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">soft_card</span><span class="p">)</span>
+<span class="n">rectangle</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="mf">50.2</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">14.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">4.4</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">White</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">1.2</span><span class="p">,</span> <span class="n">shape_line_color</span><span class="o">=</span><span class="n">Colors</span><span class="o">.</span><span class="n">Gray3</span><span class="p">))</span>
+<span class="n">text</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="mf">50.2</span><span class="p">),</span> <span class="s2">"STEP 3"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">))</span>
+<span class="n">rectangle</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="mf">41.5</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">9.2</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">9.2</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">White</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">shape_line_color</span><span class="o">=</span><span class="n">Colors</span><span class="o">.</span><span class="n">Gray3</span><span class="p">))</span>
+<span class="n">phosphor</span><span class="o">.</span><span class="n">shield_check</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="mf">41.5</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">6.0</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryBold</span><span class="p">)</span>
+<span class="n">text</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="mf">32.3</span><span class="p">),</span> <span class="s2">"BaseModel"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">11.0</span><span class="p">))</span>
+<span class="n">text</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="mf">25.5</span><span class="p">),</span> <span class="s2">"Typed Python Attrs</span><span class="se">\n</span><span class="s2">user.id == 42"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Dark</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">))</span>
+
+<span class="c1"># Stage 4: model_dump() / JSON &amp; JSON Schema</span>
+<span class="n">rectangle</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">cy</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="n">card_w</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="n">card_h</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">neutral_card</span><span class="p">)</span>
+<span class="n">rectangle</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="mf">50.2</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">14.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">4.4</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">SecondaryNeutral</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">1.2</span><span class="p">,</span> <span class="n">shape_line_width</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+<span class="n">text</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="mf">50.2</span><span class="p">),</span> <span class="s2">"STEP 4"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">))</span>
+<span class="n">rectangle</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="mf">41.5</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">9.2</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">9.2</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryNeutral</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">shape_line_width</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+<span class="n">phosphor</span><span class="o">.</span><span class="n">file_code</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="mf">41.5</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">6.0</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryBold</span><span class="p">)</span>
+<span class="n">text</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="mf">32.3</span><span class="p">),</span> <span class="s2">"model_dump()"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">11.0</span><span class="p">))</span>
+<span class="n">text</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="mf">25.5</span><span class="p">),</span> <span class="s2">"dict, JSON &amp;</span><span class="se">\n</span><span class="s2">JSON Schema"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Muted</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">))</span>
+
+<span class="c1"># Inter-stage orthogonal connectors (7.5-unit gap between card edges)</span>
+<span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+    <span class="n">x_start</span> <span class="o">=</span> <span class="n">cxs</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">+</span> <span class="n">card_w</span> <span class="o">/</span> <span class="mf">2.0</span> <span class="o">+</span> <span class="mf">0.6</span>
+    <span class="n">x_end</span> <span class="o">=</span> <span class="n">cxs</span><span class="p">[</span><span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">card_w</span> <span class="o">/</span> <span class="mf">2.0</span> <span class="o">-</span> <span class="mf">0.6</span>
+    <span class="n">line</span><span class="p">((</span><span class="n">x_start</span><span class="p">,</span> <span class="n">cy</span><span class="p">),</span> <span class="p">(</span><span class="n">x_end</span><span class="p">,</span> <span class="n">cy</span><span class="p">),</span> <span class="n">arrow_head</span><span class="o">=</span><span class="s2">"-&gt;"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="p">)</span>
+
+<span class="c1"># Subtle bottom banner</span>
+<span class="n">rectangle</span><span class="p">(</span>
+    <span class="p">(</span><span class="mf">76.0</span><span class="p">,</span> <span class="mf">12.2</span><span class="p">),</span>
+    <span class="n">width</span><span class="o">=</span><span class="mf">134.5</span><span class="p">,</span>
+    <span class="n">height</span><span class="o">=</span><span class="mf">8.4</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">White</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">1.8</span><span class="p">,</span> <span class="n">shape_line_color</span><span class="o">=</span><span class="n">Colors</span><span class="o">.</span><span class="n">Gray4</span><span class="p">),</span>
+<span class="p">)</span>
+<span class="n">phosphor</span><span class="o">.</span><span class="n">seal_check</span><span class="p">((</span><span class="mf">37.5</span><span class="p">,</span> <span class="mf">12.2</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">4.6</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryBold</span><span class="p">)</span>
+<span class="n">text</span><span class="p">(</span>
+    <span class="p">(</span><span class="mf">79.0</span><span class="p">,</span> <span class="mf">12.2</span><span class="p">),</span>
+    <span class="s2">"Zero API Keys  •  Pre-Installed in Google Colab  •  Rust-Powered v2 Core"</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.2</span><span class="p">),</span>
+<span class="p">)</span>
+
+<span class="n">save</span><span class="p">()</span>
+</code></pre>
+</details>
+<h2>1. Your First <code>BaseModel</code> &amp; Automatic Lax Type Coercion</h2>
+<p>To define a schema in Pydantic v2, subclass <code>BaseModel</code> and declare fields using standard Python type hints (<code>int</code>, <code>str</code>, <code>bool</code>, <code>list[str]</code>). By default, Pydantic runs in <strong>Lax Mode</strong>: when URL query parameters, form inputs, or loosely typed payloads pass strings such as <code>&quot;42&quot;</code> or <code>&quot;true&quot;</code>, <code>pydantic-core</code> automatically coerces compatible values into native Python types while guaranteeing runtime type safety:</p>
+
+  </div>
+  <div class="nb-cell nb-code-cell nb-setup-cell">
+    <div class="nb-input">
+      <div class="nb-prompt nb-in-prompt">In [setup]:</div>
+      <div class="nb-code-area">
+        <pre><code class="language-bash">!pip<span class="w"> </span>install<span class="w"> </span>-q<span class="w"> </span>pydantic
+</code></pre>
+      </div>
+    </div>
+  </div>
+  <div class="nb-cell nb-code-cell">
+    <div class="nb-input">
+      <div class="nb-prompt nb-in-prompt">In [1]:</div>
+      <div class="nb-code-area">
+        <pre><code class="language-python"><span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseModel</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">User</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="nb">id</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">is_active</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">tags</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+
+<span class="n">user</span> <span class="o">=</span> <span class="n">User</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"42"</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"Alice"</span><span class="p">,</span> <span class="n">is_active</span><span class="o">=</span><span class="s2">"true"</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="p">[</span><span class="s2">"admin"</span><span class="p">,</span> <span class="s2">"colab"</span><span class="p">])</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"type(user.id):"</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">user</span><span class="o">.</span><span class="n">id</span><span class="p">),</span> <span class="s2">"| is_active:"</span><span class="p">,</span> <span class="n">user</span><span class="o">.</span><span class="n">is_active</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"model_dump():"</span><span class="p">,</span> <span class="n">user</span><span class="o">.</span><span class="n">model_dump</span><span class="p">())</span>
+</code></pre>
+      </div>
+    </div>
+    <div class="nb-output">
+      <div class="nb-prompt nb-out-prompt">Out [1]:</div>
+      <div class="nb-output-area">
+        <pre class="nb-stream-stdout">id=42 name=&#x27;Alice&#x27; is_active=True tags=[&#x27;admin&#x27;, &#x27;colab&#x27;]
+type(user.id): &lt;class &#x27;int&#x27;&gt; | is_active: True
+model_dump(): {&#x27;id&#x27;: 42, &#x27;name&#x27;: &#x27;Alice&#x27;, &#x27;is_active&#x27;: True, &#x27;tags&#x27;: [&#x27;admin&#x27;, &#x27;colab&#x27;]}
+</pre>
+      </div>
+    </div>
+  </div>
+  <div class="nb-cell nb-markdown-cell">
+<p>Notice also how Pydantic v2 standardizes all validation and serialization methods under the <code>model_*</code> prefix—replacing deprecated v1 names (<code>parse_obj</code>, <code>parse_raw</code>, <code>dict</code>, and <code>json</code>):</p>
+<ul>
+<li><strong><code>Model.model_validate(obj)</code></strong> <em>(v1: <code>parse_obj</code>)</em>: Validates a Python <code>dict</code> or object into a typed <code>BaseModel</code> instance.</li>
+<li><strong><code>Model.model_validate_json(data)</code></strong> <em>(v1: <code>parse_raw</code>)</em>: Parses and validates raw UTF-8 JSON strings or <code>bytes</code> directly in Rust (<code>jiter</code>) in a single pass—skipping Python's <code>json.loads()</code> overhead.</li>
+<li><strong><code>instance.model_dump()</code> / <code>instance.model_dump_json()</code></strong> <em>(v1: <code>dict()</code> / <code>json()</code>)</em>: Serializes the validated model back into a Python <code>dict</code> or formatted JSON string.</li>
+</ul>
+
+  </div>
+  <div class="nb-cell nb-code-cell">
+    <div class="nb-input">
+      <div class="nb-prompt nb-in-prompt">In [2]:</div>
+      <div class="nb-code-area">
+        <pre><code class="language-python"><span class="n">raw_json</span> <span class="o">=</span> <span class="s1">'{"id": "108", "name": "Bob", "tags": ["data", "rust"]}'</span>
+
+<span class="n">bob</span> <span class="o">=</span> <span class="n">User</span><span class="o">.</span><span class="n">model_validate_json</span><span class="p">(</span><span class="n">raw_json</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Validated from JSON:"</span><span class="p">,</span> <span class="n">bob</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">bob</span><span class="o">.</span><span class="n">model_dump_json</span><span class="p">(</span><span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+</code></pre>
+      </div>
+    </div>
+    <div class="nb-output">
+      <div class="nb-prompt nb-out-prompt">Out [2]:</div>
+      <div class="nb-output-area">
+        <pre class="nb-stream-stdout">Validated from JSON: id=108 name=&#x27;Bob&#x27; is_active=True tags=[&#x27;data&#x27;, &#x27;rust&#x27;]
+{
+  &quot;id&quot;: 108,
+  &quot;name&quot;: &quot;Bob&quot;,
+  &quot;is_active&quot;: true,
+  &quot;tags&quot;: [
+    &quot;data&quot;,
+    &quot;rust&quot;
+  ]
+}
+</pre>
+      </div>
+    </div>
+  </div>
+  <div class="nb-cell nb-markdown-cell">
+<h2>2. Lax Mode vs. Strict Mode (<code>ConfigDict(strict=True)</code>)</h2>
+<p>While automatic coercion in <strong>Lax Mode</strong> is ideal at application boundaries (HTTP query strings, environment variables, CSV imports), internal service-to-service APIs and financial pipelines often want to reject mismatched wire types instead of silently converting <code>&quot;42&quot;</code> to <code>42</code>.</p>
+<p>Pydantic v2 lets you switch to <strong>Strict Mode</strong> either <strong>per validation call</strong> (<code>strict=True</code>) or <strong>across an entire model</strong> (<code>model_config = ConfigDict(strict=True)</code>):</p>
+<ul>
+<li><strong>Lax Mode (Default)</strong>: Converts lossless/unambiguous inputs (<code>&quot;42&quot;</code> → <code>42</code>, <code>&quot;true&quot;</code> → <code>True</code>, <code>[1, 2]</code> → <code>(1, 2)</code>), while still rejecting unparseable inputs like <code>&quot;forty-two&quot;</code>.</li>
+<li><strong>Strict Mode (<code>strict=True</code>)</strong>: Requires exact type identity in Python (<code>&quot;42&quot;</code> fails <code>int</code> with <code>int_type</code>, <code>&quot;true&quot;</code> fails <code>bool</code> with <code>bool_type</code>, and <code>[1, 2]</code> fails <code>tuple[int, int]</code> with <code>tuple_type</code> when validating Python dicts).</li>
+</ul>
+
+<figure class="drawlib-figure align-center">
+  <img src="../images/01_basemodel_quickstart/ch01_lax_vs_strict.png" alt="Figure 1-2: Lax Mode (Default Coercion) vs. Strict Mode Exact Type Matching" loading="lazy">
+  <figcaption>Figure 1-2: Lax Mode (Default Coercion) vs. Strict Mode Exact Type Matching</figcaption>
+</figure>
+<details class="drawlib-code-fold">
+  <summary>View Drawlib Python Code</summary>
+  <pre><code class="language-python"><span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.canvas</span><span class="w"> </span><span class="kn">import</span> <span class="n">save</span><span class="p">,</span> <span class="n">setup</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.icons</span><span class="w"> </span><span class="kn">import</span> <span class="n">phosphor</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.shapes</span><span class="w"> </span><span class="kn">import</span> <span class="n">rectangle</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.smartarts</span><span class="w"> </span><span class="kn">import</span> <span class="n">Table</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.styles</span><span class="w"> </span><span class="kn">import</span> <span class="n">Colors</span><span class="p">,</span> <span class="n">Styles</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.text</span><span class="w"> </span><span class="kn">import</span> <span class="n">text</span>
+
+<span class="n">setup</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mi">152</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">78</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">150</span><span class="p">)</span>
+
+<span class="c1"># Outer calm frame (50%+ neutral baseline)</span>
+<span class="n">rectangle</span><span class="p">(</span>
+    <span class="p">(</span><span class="mf">76.0</span><span class="p">,</span> <span class="mf">39.0</span><span class="p">),</span>
+    <span class="n">width</span><span class="o">=</span><span class="mf">142.0</span><span class="p">,</span>
+    <span class="n">height</span><span class="o">=</span><span class="mf">68.0</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Neutral</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">2.5</span><span class="p">,</span> <span class="n">shape_fill_color</span><span class="o">=</span><span class="n">Colors</span><span class="o">.</span><span class="n">Light</span><span class="p">,</span> <span class="n">shape_line_color</span><span class="o">=</span><span class="n">Colors</span><span class="o">.</span><span class="n">Gray3</span><span class="p">),</span>
+<span class="p">)</span>
+
+<span class="c1"># Header title</span>
+<span class="n">text</span><span class="p">(</span>
+    <span class="p">(</span><span class="mf">76.0</span><span class="p">,</span> <span class="mf">67.5</span><span class="p">),</span>
+    <span class="s2">"Lax Mode (Default Coercion) vs. Strict Mode Exact Type Matching"</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">12.4</span><span class="p">),</span>
+<span class="p">)</span>
+
+<span class="c1"># Mode summary callout pills aligned to table width (x = 9.5..142.5)</span>
+<span class="n">rectangle</span><span class="p">((</span><span class="mf">41.5</span><span class="p">,</span> <span class="mf">58.6</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">64.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">8.0</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryNeutral</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">1.8</span><span class="p">))</span>
+<span class="n">phosphor</span><span class="o">.</span><span class="n">arrows_left_right</span><span class="p">((</span><span class="mf">18.0</span><span class="p">,</span> <span class="mf">58.6</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">4.5</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryBold</span><span class="p">)</span>
+<span class="n">text</span><span class="p">((</span><span class="mf">44.2</span><span class="p">,</span> <span class="mf">58.6</span><span class="p">),</span> <span class="s2">"Lax Mode: model_validate(data)  [Default]"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">))</span>
+
+<span class="n">rectangle</span><span class="p">((</span><span class="mf">110.5</span><span class="p">,</span> <span class="mf">58.6</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">64.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">8.0</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">White</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">1.8</span><span class="p">,</span> <span class="n">shape_line_color</span><span class="o">=</span><span class="n">Colors</span><span class="o">.</span><span class="n">Gray4</span><span class="p">))</span>
+<span class="n">phosphor</span><span class="o">.</span><span class="n">shield_check</span><span class="p">((</span><span class="mf">86.0</span><span class="p">,</span> <span class="mf">58.6</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">4.5</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="p">)</span>
+<span class="n">text</span><span class="p">((</span><span class="mf">113.2</span><span class="p">,</span> <span class="mf">58.6</span><span class="p">),</span> <span class="s2">"Strict: strict=True / ConfigDict(strict=True)"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">))</span>
+
+<span class="c1"># Comparison Table (Top-Left anchored at xy=(9.5, 51.2), total width=133.0, total height=42.8)</span>
+<span class="n">table</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span>
+    <span class="n">cell_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">White</span><span class="p">,</span>
+    <span class="n">text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Dark</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">),</span>
+    <span class="n">header_cell_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryFlat</span><span class="p">,</span>
+    <span class="n">header_text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">WhiteBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.4</span><span class="p">),</span>
+    <span class="n">border_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">MutedThin</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">table</span><span class="o">.</span><span class="n">set_style_cell_evenodd</span><span class="p">(</span>
+    <span class="n">even_color</span><span class="o">=</span><span class="n">Colors</span><span class="o">.</span><span class="n">Light</span><span class="p">,</span>
+    <span class="n">even_text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Dark</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">),</span>
+    <span class="n">odd_color</span><span class="o">=</span><span class="n">Colors</span><span class="o">.</span><span class="n">White</span><span class="p">,</span>
+    <span class="n">odd_text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Dark</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">),</span>
+<span class="p">)</span>
+<span class="n">table</span><span class="o">.</span><span class="n">set_style_cell</span><span class="p">(</span>
+    <span class="n">background_color</span><span class="o">=</span><span class="n">Colors</span><span class="o">.</span><span class="n">White</span><span class="p">,</span>
+    <span class="n">text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">),</span>
+    <span class="n">rows</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span>
+    <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+<span class="p">)</span>
+<span class="n">table</span><span class="o">.</span><span class="n">set_style_cell</span><span class="p">(</span>
+    <span class="n">background_color</span><span class="o">=</span><span class="n">Colors</span><span class="o">.</span><span class="n">SuccessNeutral</span><span class="p">,</span>
+    <span class="n">text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">),</span>
+    <span class="n">rows</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span>
+    <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+<span class="p">)</span>
+<span class="n">table</span><span class="o">.</span><span class="n">set_style_cell</span><span class="p">(</span>
+    <span class="n">background_color</span><span class="o">=</span><span class="n">Colors</span><span class="o">.</span><span class="n">DangerNeutral</span><span class="p">,</span>
+    <span class="n">text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DangerBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">),</span>
+    <span class="n">rows</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span>
+    <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span>
+<span class="p">)</span>
+<span class="n">table</span><span class="o">.</span><span class="n">set_style_cell</span><span class="p">(</span>
+    <span class="n">background_color</span><span class="o">=</span><span class="n">Colors</span><span class="o">.</span><span class="n">SuccessNeutral</span><span class="p">,</span>
+    <span class="n">text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">),</span>
+    <span class="n">rows</span><span class="o">=</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span>
+    <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span>
+<span class="p">)</span>
+<span class="c1"># Re-apply header last so row 0 keeps its Primary focal header bar</span>
+<span class="n">table</span><span class="o">.</span><span class="n">set_style_cell_header</span><span class="p">(</span>
+    <span class="n">background_color</span><span class="o">=</span><span class="n">Colors</span><span class="o">.</span><span class="n">Primary</span><span class="p">,</span>
+    <span class="n">text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">WhiteBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.4</span><span class="p">),</span>
+<span class="p">)</span>
+
+<span class="n">table</span><span class="o">.</span><span class="n">set_style_border</span><span class="p">(</span>
+    <span class="n">top</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Primary</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">line_color</span><span class="o">=</span><span class="n">Colors</span><span class="o">.</span><span class="n">Gray4</span><span class="p">,</span> <span class="n">line_width</span><span class="o">=</span><span class="mf">1.2</span><span class="p">),</span>
+    <span class="n">top2</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Primary</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">line_color</span><span class="o">=</span><span class="n">Colors</span><span class="o">.</span><span class="n">Primary</span><span class="p">,</span> <span class="n">line_width</span><span class="o">=</span><span class="mf">1.2</span><span class="p">),</span>
+    <span class="n">bottom</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Primary</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">line_color</span><span class="o">=</span><span class="n">Colors</span><span class="o">.</span><span class="n">Gray4</span><span class="p">,</span> <span class="n">line_width</span><span class="o">=</span><span class="mf">1.2</span><span class="p">),</span>
+    <span class="n">left</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Primary</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">line_color</span><span class="o">=</span><span class="n">Colors</span><span class="o">.</span><span class="n">Gray4</span><span class="p">,</span> <span class="n">line_width</span><span class="o">=</span><span class="mf">1.2</span><span class="p">),</span>
+    <span class="n">right</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Primary</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">line_color</span><span class="o">=</span><span class="n">Colors</span><span class="o">.</span><span class="n">Gray4</span><span class="p">,</span> <span class="n">line_width</span><span class="o">=</span><span class="mf">1.2</span><span class="p">),</span>
+    <span class="n">between_columns</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Primary</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">line_color</span><span class="o">=</span><span class="n">Colors</span><span class="o">.</span><span class="n">Gray3</span><span class="p">,</span> <span class="n">line_width</span><span class="o">=</span><span class="mf">0.8</span><span class="p">),</span>
+    <span class="n">between_rows</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Primary</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">line_color</span><span class="o">=</span><span class="n">Colors</span><span class="o">.</span><span class="n">Gray3</span><span class="p">,</span> <span class="n">line_width</span><span class="o">=</span><span class="mf">0.8</span><span class="p">),</span>
+<span class="p">)</span>
+
+<span class="n">comparison_data</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">[</span><span class="s2">"Field Type"</span><span class="p">,</span> <span class="s2">"Python Input"</span><span class="p">,</span> <span class="s2">"Lax Mode (Default)"</span><span class="p">,</span> <span class="s2">"Strict Mode (strict=True)"</span><span class="p">],</span>
+    <span class="p">[</span><span class="s2">"id: int"</span><span class="p">,</span> <span class="s1">'"42" (str)'</span><span class="p">,</span> <span class="s2">"Coerced -&gt; 42 (int)"</span><span class="p">,</span> <span class="s2">"Error: int_type"</span><span class="p">],</span>
+    <span class="p">[</span><span class="s2">"is_active: bool"</span><span class="p">,</span> <span class="s1">'"true" (str)'</span><span class="p">,</span> <span class="s2">"Coerced -&gt; True (bool)"</span><span class="p">,</span> <span class="s2">"Error: bool_type"</span><span class="p">],</span>
+    <span class="p">[</span><span class="s2">"coords: tuple[int, int]"</span><span class="p">,</span> <span class="s2">"[1, 2] (list)"</span><span class="p">,</span> <span class="s2">"Coerced -&gt; (1, 2)"</span><span class="p">,</span> <span class="s2">"Error: tuple_type"</span><span class="p">],</span>
+    <span class="p">[</span><span class="s2">"id: int"</span><span class="p">,</span> <span class="s2">"42 (int)"</span><span class="p">,</span> <span class="s2">"Valid -&gt; 42 (int)"</span><span class="p">,</span> <span class="s2">"Valid -&gt; 42 (int)"</span><span class="p">],</span>
+<span class="p">]</span>
+
+<span class="n">table</span><span class="o">.</span><span class="n">draw_flexible</span><span class="p">(</span>
+    <span class="n">xy</span><span class="o">=</span><span class="p">(</span><span class="mf">9.5</span><span class="p">,</span> <span class="mf">51.2</span><span class="p">),</span>
+    <span class="n">column_widths</span><span class="o">=</span><span class="p">[</span><span class="mf">31.0</span><span class="p">,</span> <span class="mf">26.0</span><span class="p">,</span> <span class="mf">38.0</span><span class="p">,</span> <span class="mf">38.0</span><span class="p">],</span>
+    <span class="n">row_heights</span><span class="o">=</span><span class="p">[</span><span class="mf">8.4</span><span class="p">,</span> <span class="mf">8.6</span><span class="p">,</span> <span class="mf">8.6</span><span class="p">,</span> <span class="mf">8.6</span><span class="p">,</span> <span class="mf">8.6</span><span class="p">],</span>
+    <span class="n">data</span><span class="o">=</span><span class="n">comparison_data</span><span class="p">,</span>
+    <span class="n">align</span><span class="o">=</span><span class="s2">"top_left"</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">save</span><span class="p">()</span>
+</code></pre>
+</details>
+<p>Let's compare Lax vs. Strict validation side-by-side on our <code>User</code> model—first passing <code>strict=True</code> to <code>User.model_validate(...)</code>, and then locking strictness onto a dedicated model class via <code>ConfigDict(strict=True)</code>:</p>
+
+  </div>
+  <div class="nb-cell nb-code-cell">
+    <div class="nb-input">
+      <div class="nb-prompt nb-in-prompt">In [3]:</div>
+      <div class="nb-code-area">
+        <pre><code class="language-python"><span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConfigDict</span><span class="p">,</span> <span class="n">ValidationError</span>
+
+<span class="n">payload</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"id"</span><span class="p">:</span> <span class="s2">"42"</span><span class="p">,</span> <span class="s2">"name"</span><span class="p">:</span> <span class="s2">"Alice"</span><span class="p">}</span>
+
+<span class="c1"># 1. Default Lax Mode: coerces "42" -&gt; 42</span>
+<span class="n">lax_user</span> <span class="o">=</span> <span class="n">User</span><span class="o">.</span><span class="n">model_validate</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Lax mode succeeded:"</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">lax_user</span><span class="p">))</span>
+
+<span class="c1"># 2. Per-call Strict Mode: rejects string "42" for int field</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">User</span><span class="o">.</span><span class="n">model_validate</span><span class="p">(</span><span class="n">payload</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">except</span> <span class="n">ValidationError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Strict mode raised ValidationError:"</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+
+
+<span class="c1"># 3. Model-wide Strict Mode via ConfigDict(strict=True)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">StrictPoint</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="n">model_config</span> <span class="o">=</span> <span class="n">ConfigDict</span><span class="p">(</span><span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">label</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">coords</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span>
+
+
+<span class="n">point</span> <span class="o">=</span> <span class="n">StrictPoint</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">"origin"</span><span class="p">,</span> <span class="n">coords</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">StrictPoint exact match:"</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">point</span><span class="p">))</span>
+</code></pre>
+      </div>
+    </div>
+    <div class="nb-output">
+      <div class="nb-prompt nb-out-prompt">Out [3]:</div>
+      <div class="nb-output-area">
+        <pre class="nb-stream-stdout">Lax mode succeeded: User(id=42, name=&#x27;Alice&#x27;, is_active=True, tags=[])
+
+Strict mode raised ValidationError:
+1 validation error for User
+id
+  Input should be a valid integer [type=int_type, input_value=&#x27;42&#x27;, input_type=str]
+    For further information visit https://errors.pydantic.dev/2.14/v/int_type
+
+StrictPoint exact match: StrictPoint(label=&#x27;origin&#x27;, coords=(0, 0))
+</pre>
+      </div>
+    </div>
+  </div>
+  <div class="nb-cell nb-markdown-cell">
+<p>Notice how <code>pydantic-core</code> pinpoints the exact offending field (<code>id</code>), human-readable message (<code>Input should be a valid integer</code>), error code (<code>type=int_type</code>), and raw <code>input_value='42'</code>—and when you parse JSON via <code>StrictPoint.model_validate_json('{&quot;label&quot;: &quot;origin&quot;, &quot;coords&quot;: [0, 0]}')</code>, Strict Mode still accepts JSON arrays for <code>tuple</code> fields because JSON has no native tuple literal.</p>
+<h3>Key Takeaways &amp; Next Step</h3>
+<ul>
+<li><strong><code>BaseModel</code> + v2 <code>model_*</code> API</strong>: Declare fields with standard Python type hints, validate dicts or raw JSON strings at Rust speed via <code>model_validate()</code> / <code>model_validate_json()</code>, and serialize cleanly with <code>model_dump()</code> / <code>model_dump_json()</code>.</li>
+<li><strong>Up Next in Chapter 02</strong>: Learn how to attach declarative numeric, string, and safe factory defaults with <code>Field(...)</code> and programmatically inspect structured multi-field <code>ValidationError</code> payloads (<code>e.errors()</code>).</li>
+</ul>
+
+  </div>
+</div>
+            </main>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const themeBtn = document.getElementById('theme-toggle');
+            if (themeBtn) {
+                themeBtn.addEventListener('click', function() {
+                    const current = document.documentElement.getAttribute('data-theme');
+                    const next = current === 'dark' ? 'light' : 'dark';
+                    document.documentElement.setAttribute('data-theme', next);
+                    localStorage.setItem('drawlib-theme', next);
+                });
+            }
+
+            const langDropdowns = document.querySelectorAll('.lang-dropdown');
+            if (langDropdowns.length > 0) {
+                document.addEventListener('click', function(e) {
+                    langDropdowns.forEach(function(dd) {
+                        if (dd.hasAttribute('open') && !dd.contains(e.target)) {
+                            dd.removeAttribute('open');
+                        }
+                    });
+                });
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape') {
+                        langDropdowns.forEach(function(dd) {
+                            dd.removeAttribute('open');
+                        });
+                    }
+                });
+            }
+
+            const menuBtn = document.getElementById('menu-toggle');
+            const sidebar = document.querySelector('.sidebar');
+            if (menuBtn && sidebar) {
+                function setMenuOpen(open) {
+                    sidebar.classList.toggle('is-open', open);
+                    menuBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+                    document.body.classList.toggle('menu-open', open);
+                    if (open) {
+                        const menu = sidebar.querySelector('.sidebar-menu');
+                        if (menu) {
+                            menu.scrollTop = 0;
+                        }
+                    }
+                }
+
+                menuBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const willOpen = !sidebar.classList.contains('is-open');
+                    setMenuOpen(willOpen);
+                });
+
+                document.addEventListener('click', function(e) {
+                    if (sidebar.classList.contains('is-open') && !sidebar.contains(e.target)) {
+                        setMenuOpen(false);
+                    }
+                });
+
+                const navLinks = sidebar.querySelectorAll('.nav-item a');
+                navLinks.forEach(function(link) {
+                    link.addEventListener('click', function() {
+                        setMenuOpen(false);
+                    });
+                });
+
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape' && sidebar.classList.contains('is-open')) {
+                        setMenuOpen(false);
+                    }
+                });
+
+                window.addEventListener('resize', function() {
+                    if (window.innerWidth > 768 && sidebar.classList.contains('is-open')) {
+                        setMenuOpen(false);
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

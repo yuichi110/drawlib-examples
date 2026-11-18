@@ -1,0 +1,27 @@
+[project]
+name = "pydantic"
+type = "jupyter"
+title = "Pydantic v2 Hands-On Cookbook"
+description = "Interactive bilingual Jupyter & Google Colab notebooks covering Pydantic v2 BaseModel validation, Field constraints, custom validators, discriminated unions, and JSON Schema generation."
+style = "google"
+
+[i18n]
+default_lang = "en"
+langs = ["en", "ja"]
+
+[i18n.labels]
+en = "English"
+ja = "日本語"
+
+[jupyter]
+colab_base_url = "https://colab.research.google.com/github/yuichi110/drawlib-examples/blob/main/docs/pydantic"
+setup_packages = ["pydantic"]
+drawlib_cell_mode = "markdown"
+image_mode = "url"
+execute = true
+
+[seo]
+site_url = "https://examples.drawlib.com/pydantic"
+sitemap = true
+robots = true
+llms_txt = true

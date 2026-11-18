@@ -1,0 +1,630 @@
+<!--
+ Copyright (c) 2026 Yuichi Ito (yuichi@yuichi.com)
+
+ This software is licensed under the Apache License, Version 2.0.
+ For more information, please visit: https://github.com/yuichi110/drawlib
+
+ This software is provided "as is", without warranty of any kind,
+ express or implied, including but not limited to the warranties of
+ merchantability, fitness for a particular purpose and noninfringement.
+-->
+<!DOCTYPE html>
+<html lang="ja" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>01. BaseModel の基本と型変換（Lax vs. Strict モード）</title>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-S9N5BZ1VRC"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-S9N5BZ1VRC');
+    </script>
+    <script>
+        (function() {
+            const saved = localStorage.getItem('drawlib-theme');
+            if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            } else {
+                document.documentElement.setAttribute('data-theme', 'light');
+            }
+        })();
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    
+    <link rel="alternate" hreflang="en" href="https://examples.drawlib.com/pydantic/en/01_basemodel_quickstart.html">
+    
+    <link rel="alternate" hreflang="ja" href="https://examples.drawlib.com/pydantic/ja/01_basemodel_quickstart.html">
+    
+    <link rel="alternate" hreflang="x-default" href="https://examples.drawlib.com/pydantic/en/01_basemodel_quickstart.html">
+    
+    
+    
+    <meta name="description" content="Pydantic v2 は、Python 標準の型ヒント（class User(BaseModel):）を Rust 製の高速コアエンジン pydantic-core による型検証・シリアライズパイプラインへと変換します。pydantic v2 は Google Colab…">
+    <link rel="canonical" href="https://examples.drawlib.com/pydantic/ja/01_basemodel_quickstart.html">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Pydantic v2 Hands-On Cookbook">
+    <meta property="og:title" content="01. BaseModel の基本と型変換（Lax vs. Strict モード） — Pydantic v2 Hands-On Cookbook">
+    <meta property="og:description" content="Pydantic v2 は、Python 標準の型ヒント（class User(BaseModel):）を Rust 製の高速コアエンジン pydantic-core による型検証・シリアライズパイプラインへと変換します。pydantic v2 は Google Colab…">
+    <meta property="og:url" content="https://examples.drawlib.com/pydantic/ja/01_basemodel_quickstart.html">
+    <meta property="og:locale" content="ja_JP">
+    <meta property="og:locale:alternate" content="en_US">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="01. BaseModel の基本と型変換（Lax vs. Strict モード） — Pydantic v2 Hands-On Cookbook">
+    <meta name="twitter:description" content="Pydantic v2 は、Python 標準の型ヒント（class User(BaseModel):）を Rust 製の高速コアエンジン pydantic-core による型検証・シリアライズパイプラインへと変換します。pydantic v2 は Google Colab…">
+    
+    
+    <link rel="icon" type="image/png" href="../_assets/favicon.png">
+    
+    
+    <link rel="stylesheet" href="style.css">
+    
+    
+</head>
+<body>
+    <div class="demo-banner" role="region" aria-label="ポータルナビゲーション">
+        <div class="demo-banner-inner">
+            <span class="demo-banner-badge">DRAWLIB SHOWCASE</span>
+            <span class="demo-banner-text">
+                <a href="https://www.drawlib.com/ja/" target="_blank" rel="noopener noreferrer">Drawlib</a> で構築された Jupyter / Colab ノートブックのサンプルプロジェクト（<code>type = "jupyter"</code>）
+            </span>
+            <span class="demo-banner-links">
+                <a href="../../index.html">All Examples</a>
+                <span class="demo-banner-sep">·</span>
+                <a href="https://github.com/yuichi110/drawlib-examples/tree/main/examples/jupyter/pydantic" target="_blank" rel="noopener noreferrer">Source (GitHub) ↗</a>
+                <span class="demo-banner-sep">·</span>
+                <a href="https://www.drawlib.com/ja/" target="_blank" rel="noopener noreferrer">Drawlib ↗</a>
+            </span>
+        </div>
+    </div>
+    
+    <div class="doc-layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="index.html" class="sidebar-brand" aria-label="Pydantic v2 Hands-On Cookbook">
+                    
+                    Pydantic v2 Hands-On Cookbook
+                    
+                </a>
+                <div class="sidebar-header-actions">
+                    <button type="button" id="theme-toggle" class="theme-toggle-btn" aria-label="Toggle theme">
+                        <svg class="icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+                        <svg class="icon-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                    </button>
+                    <button type="button" id="menu-toggle" class="menu-toggle-btn" aria-label="Toggle navigation" aria-expanded="false">
+                        <svg class="icon-hamburger" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+                        <svg class="icon-close" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
+                </div>
+            </div>
+            <div class="sidebar-menu">
+                
+                    <div class="sidebar-heading">Notebooks</div>
+                    <ul class="nav-list">
+                        
+                        <li class="nav-item active">
+                            <a href="01_basemodel_quickstart.html" >01. BaseModel の基本と型変換（Lax vs. Strict モード）</a>
+                        </li>
+                        
+                        <li class="nav-item ">
+                            <a href="02_fields_and_errors.html" >02. Field 制約と ValidationError の構造理解</a>
+                        </li>
+                        
+                        <li class="nav-item ">
+                            <a href="03_validators_and_computed.html" >03. カスタムバリデータと @computed_field</a>
+                        </li>
+                        
+                        <li class="nav-item ">
+                            <a href="04_nested_unions_and_schema.html" >04. ネスト構造・判別共用体（Discriminated Union）・JSON Schema</a>
+                        </li>
+                        
+                    </ul>
+                
+            </div>
+        </aside>
+        <div class="content-wrapper">
+            <header class="top-bar">
+                <div class="breadcrumbs">
+                    <span class="crumb">Notebooks</span>
+                    <span class="crumb-separator">&raquo;</span>
+                    <span class="crumb active">01. BaseModel の基本と型変換（Lax vs. Strict モード）</span>
+                </div>
+                
+                <div class="lang-switcher">
+                    <details class="lang-dropdown">
+                        <summary class="lang-dropdown-btn" aria-label="Select language">
+                            <svg class="lang-globe-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                            <span class="lang-current-label">日本語</span>
+                            <svg class="lang-caret-icon" viewBox="0 0 24 24" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        </summary>
+                        <div class="lang-dropdown-menu" role="menu">
+                            
+                            <a href="../en/01_basemodel_quickstart.html" class="lang-option" lang="en" hreflang="en" >
+                                <span>English</span>
+                                
+                            </a>
+                            
+                            <a href="01_basemodel_quickstart.html" class="lang-option active" lang="ja" hreflang="ja" aria-current="page">
+                                <span>日本語</span>
+                                
+                                <svg class="lang-check-icon" viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                
+                            </a>
+                            
+                        </div>
+                    </details>
+                </div>
+                
+            </header>
+            <main class="main-content">
+                <div class="jupyter-notebook">
+  <div class="nb-toolbar">
+    <a class="nb-btn nb-btn-colab" href="https://colab.research.google.com/github/yuichi110/drawlib-examples/blob/main/docs/pydantic/ja/01_basemodel_quickstart.ipynb" target="_blank" rel="noopener noreferrer"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"></a>
+    <a class="nb-btn nb-btn-download" href="01_basemodel_quickstart.ipynb" download="01_basemodel_quickstart.ipynb">⬇ Download .ipynb</a>
+    <span class="nb-status-pill">✓ Dry-Run Verified (3 cells)</span>
+  </div>
+  <div class="nb-cell nb-markdown-cell">
+<h1>01. BaseModel の基本と型変換（Lax vs. Strict モード）</h1>
+<p>Pydantic v2 は、Python 標準の型ヒント（<code>class User(BaseModel):</code>）を Rust 製の高速コアエンジン <code>pydantic-core</code> による型検証・シリアライズパイプラインへと変換します。<code>pydantic</code> v2 は Google Colab に標準でプリインストールされており、API キーや外部サービス設定も一切不要なため、本クックブックのすべてのコードセルをそのまま即座に実行できます。</p>
+
+<figure class="drawlib-figure align-center">
+  <img src="../images/01_basemodel_quickstart/ch01_pydantic_pipeline_ja.png" alt="図1-1: Pydantic v2 における型検証・変換・シリアライズの一貫パイプライン" loading="lazy">
+  <figcaption>図1-1: Pydantic v2 における型検証・変換・シリアライズの一貫パイプライン</figcaption>
+</figure>
+<details class="drawlib-code-fold">
+  <summary>View Drawlib Python Code</summary>
+  <pre><code class="language-python"><span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.canvas</span><span class="w"> </span><span class="kn">import</span> <span class="n">save</span><span class="p">,</span> <span class="n">setup</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.icons</span><span class="w"> </span><span class="kn">import</span> <span class="n">phosphor</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.lines</span><span class="w"> </span><span class="kn">import</span> <span class="n">line</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.shapes</span><span class="w"> </span><span class="kn">import</span> <span class="n">rectangle</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.styles</span><span class="w"> </span><span class="kn">import</span> <span class="n">Colors</span><span class="p">,</span> <span class="n">Styles</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.text</span><span class="w"> </span><span class="kn">import</span> <span class="n">text</span>
+
+<span class="n">setup</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mi">152</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">76</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">150</span><span class="p">)</span>
+
+<span class="c1"># 外枠のニュートラルフレーム（50%以上を無彩色・淡色ベースで構成）</span>
+<span class="n">rectangle</span><span class="p">(</span>
+    <span class="p">(</span><span class="mf">76.0</span><span class="p">,</span> <span class="mf">38.0</span><span class="p">),</span>
+    <span class="n">width</span><span class="o">=</span><span class="mf">142.0</span><span class="p">,</span>
+    <span class="n">height</span><span class="o">=</span><span class="mf">66.0</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Neutral</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">2.5</span><span class="p">,</span> <span class="n">shape_fill_color</span><span class="o">=</span><span class="n">Colors</span><span class="o">.</span><span class="n">Light</span><span class="p">,</span> <span class="n">shape_line_color</span><span class="o">=</span><span class="n">Colors</span><span class="o">.</span><span class="n">Gray3</span><span class="p">),</span>
+<span class="p">)</span>
+
+<span class="c1"># ヘッダータイトル・サブタイトル</span>
+<span class="n">text</span><span class="p">(</span>
+    <span class="p">(</span><span class="mf">76.0</span><span class="p">,</span> <span class="mf">65.5</span><span class="p">),</span>
+    <span class="s2">"Pydantic v2: Python 型ヒントから Rust 検証・構造化出力までの一貫基盤"</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">12.4</span><span class="p">),</span>
+<span class="p">)</span>
+<span class="n">text</span><span class="p">(</span>
+    <span class="p">(</span><span class="mf">76.0</span><span class="p">,</span> <span class="mf">60.3</span><span class="p">),</span>
+    <span class="s2">"class User(BaseModel)  •  柔軟な自動型変換 (Lax) / 厳格検証 (Strict)  •  JSON シリアライズ"</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Muted</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.2</span><span class="p">),</span>
+<span class="p">)</span>
+
+<span class="c1"># 4段階のステージカード: width=28.0, gap=7.5 (x = 8.75..143.25)</span>
+<span class="n">card_w</span> <span class="o">=</span> <span class="mf">28.0</span>
+<span class="n">card_h</span> <span class="o">=</span> <span class="mf">34.0</span>
+<span class="n">cy</span> <span class="o">=</span> <span class="mf">37.8</span>
+<span class="n">cxs</span> <span class="o">=</span> <span class="p">[</span><span class="mf">22.75</span><span class="p">,</span> <span class="mf">58.25</span><span class="p">,</span> <span class="mf">93.75</span><span class="p">,</span> <span class="mf">129.25</span><span class="p">]</span>
+
+<span class="n">neutral_card</span> <span class="o">=</span> <span class="n">Styles</span><span class="o">.</span><span class="n">White</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">2.2</span><span class="p">,</span> <span class="n">shape_line_color</span><span class="o">=</span><span class="n">Colors</span><span class="o">.</span><span class="n">Gray4</span><span class="p">)</span>
+<span class="n">soft_card</span> <span class="o">=</span> <span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryNeutral</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">2.2</span><span class="p">)</span>
+<span class="n">hero_card</span> <span class="o">=</span> <span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryFlat</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">2.2</span><span class="p">)</span>
+
+<span class="c1"># Stage 1: 未検証の外部入力 (dict / JSON 文字列)</span>
+<span class="n">rectangle</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">cy</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="n">card_w</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="n">card_h</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">neutral_card</span><span class="p">)</span>
+<span class="n">rectangle</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mf">50.2</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">14.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">4.4</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">SecondaryNeutral</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">1.2</span><span class="p">,</span> <span class="n">shape_line_width</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+<span class="n">text</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mf">50.2</span><span class="p">),</span> <span class="s2">"STEP 1"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">))</span>
+<span class="n">rectangle</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mf">41.5</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">9.2</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">9.2</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">SecondaryNeutral</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">shape_line_width</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+<span class="n">phosphor</span><span class="o">.</span><span class="n">brackets_curly</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mf">41.5</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">6.0</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="p">)</span>
+<span class="n">text</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mf">32.3</span><span class="p">),</span> <span class="s2">"未検証の外部入力"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.8</span><span class="p">))</span>
+<span class="n">text</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mf">25.5</span><span class="p">),</span> <span class="s1">'生 dict / JSON 文字列</span><span class="se">\n</span><span class="s1">{"id": "42"}'</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Muted</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">))</span>
+
+<span class="c1"># Stage 2: pydantic-core エンジン（主役の PrimaryFlat カード）</span>
+<span class="n">rectangle</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">cy</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="n">card_w</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="n">card_h</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">hero_card</span><span class="p">)</span>
+<span class="n">rectangle</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mf">50.2</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">14.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">4.4</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">White</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">1.2</span><span class="p">,</span> <span class="n">shape_line_width</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+<span class="n">text</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mf">50.2</span><span class="p">),</span> <span class="s2">"STEP 2"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">))</span>
+<span class="n">rectangle</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mf">41.5</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">9.2</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">9.2</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">White</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">shape_line_width</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+<span class="n">phosphor</span><span class="o">.</span><span class="n">cpu</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mf">41.5</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">6.0</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryBold</span><span class="p">)</span>
+<span class="n">text</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mf">32.3</span><span class="p">),</span> <span class="s2">"pydantic-core"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">WhiteBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">11.2</span><span class="p">))</span>
+<span class="n">text</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mf">25.5</span><span class="p">),</span> <span class="s2">"Rust 製 v2 エンジン</span><span class="se">\n</span><span class="s2">型変換・制約チェック"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">White</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">))</span>
+
+<span class="c1"># Stage 3: 検証済み BaseModel（型安全な Python 属性）</span>
+<span class="n">rectangle</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">cy</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="n">card_w</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="n">card_h</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">soft_card</span><span class="p">)</span>
+<span class="n">rectangle</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="mf">50.2</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">14.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">4.4</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">White</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">1.2</span><span class="p">,</span> <span class="n">shape_line_color</span><span class="o">=</span><span class="n">Colors</span><span class="o">.</span><span class="n">Gray3</span><span class="p">))</span>
+<span class="n">text</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="mf">50.2</span><span class="p">),</span> <span class="s2">"STEP 3"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">))</span>
+<span class="n">rectangle</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="mf">41.5</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">9.2</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">9.2</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">White</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">shape_line_color</span><span class="o">=</span><span class="n">Colors</span><span class="o">.</span><span class="n">Gray3</span><span class="p">))</span>
+<span class="n">phosphor</span><span class="o">.</span><span class="n">shield_check</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="mf">41.5</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">6.0</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryBold</span><span class="p">)</span>
+<span class="n">text</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="mf">32.3</span><span class="p">),</span> <span class="s2">"検証済みモデル"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.8</span><span class="p">))</span>
+<span class="n">text</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="mf">25.5</span><span class="p">),</span> <span class="s2">"型安全な Python 属性</span><span class="se">\n</span><span class="s2">user.id == 42"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Dark</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">))</span>
+
+<span class="c1"># Stage 4: model_dump() / JSON &amp; JSON Schema</span>
+<span class="n">rectangle</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">cy</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="n">card_w</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="n">card_h</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">neutral_card</span><span class="p">)</span>
+<span class="n">rectangle</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="mf">50.2</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">14.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">4.4</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">SecondaryNeutral</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">1.2</span><span class="p">,</span> <span class="n">shape_line_width</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+<span class="n">text</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="mf">50.2</span><span class="p">),</span> <span class="s2">"STEP 4"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">))</span>
+<span class="n">rectangle</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="mf">41.5</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">9.2</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">9.2</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryNeutral</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">shape_line_width</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+<span class="n">phosphor</span><span class="o">.</span><span class="n">file_code</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="mf">41.5</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">6.0</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryBold</span><span class="p">)</span>
+<span class="n">text</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="mf">32.3</span><span class="p">),</span> <span class="s2">"model_dump()"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">11.0</span><span class="p">))</span>
+<span class="n">text</span><span class="p">((</span><span class="n">cxs</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="mf">25.5</span><span class="p">),</span> <span class="s2">"dict / JSON 出力 &amp;</span><span class="se">\n</span><span class="s2">JSON Schema 生成"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Muted</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">))</span>
+
+<span class="c1"># ステージ間の水平コネクタ（カード間隔 7.5 ユニット）</span>
+<span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+    <span class="n">x_start</span> <span class="o">=</span> <span class="n">cxs</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">+</span> <span class="n">card_w</span> <span class="o">/</span> <span class="mf">2.0</span> <span class="o">+</span> <span class="mf">0.6</span>
+    <span class="n">x_end</span> <span class="o">=</span> <span class="n">cxs</span><span class="p">[</span><span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">card_w</span> <span class="o">/</span> <span class="mf">2.0</span> <span class="o">-</span> <span class="mf">0.6</span>
+    <span class="n">line</span><span class="p">((</span><span class="n">x_start</span><span class="p">,</span> <span class="n">cy</span><span class="p">),</span> <span class="p">(</span><span class="n">x_end</span><span class="p">,</span> <span class="n">cy</span><span class="p">),</span> <span class="n">arrow_head</span><span class="o">=</span><span class="s2">"-&gt;"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="p">)</span>
+
+<span class="c1"># 下部サマリーバナー</span>
+<span class="n">rectangle</span><span class="p">(</span>
+    <span class="p">(</span><span class="mf">76.0</span><span class="p">,</span> <span class="mf">12.2</span><span class="p">),</span>
+    <span class="n">width</span><span class="o">=</span><span class="mf">134.5</span><span class="p">,</span>
+    <span class="n">height</span><span class="o">=</span><span class="mf">8.4</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">White</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">1.8</span><span class="p">,</span> <span class="n">shape_line_color</span><span class="o">=</span><span class="n">Colors</span><span class="o">.</span><span class="n">Gray4</span><span class="p">),</span>
+<span class="p">)</span>
+<span class="n">phosphor</span><span class="o">.</span><span class="n">seal_check</span><span class="p">((</span><span class="mf">39.5</span><span class="p">,</span> <span class="mf">12.2</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">4.6</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryBold</span><span class="p">)</span>
+<span class="n">text</span><span class="p">(</span>
+    <span class="p">(</span><span class="mf">79.0</span><span class="p">,</span> <span class="mf">12.2</span><span class="p">),</span>
+    <span class="s2">"API キー不要  •  Google Colab 標準搭載で即実行可能  •  Rust 製 v2 コア"</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.2</span><span class="p">),</span>
+<span class="p">)</span>
+
+<span class="n">save</span><span class="p">()</span>
+</code></pre>
+</details>
+<h2>1. 最初の <code>BaseModel</code> と自動型変換（Lax モード）</h2>
+<p>Pydantic v2 でデータスキーマを定義するには、<code>BaseModel</code> を継承して Python 標準の型アノテーション（<code>int</code>, <code>str</code>, <code>bool</code>, <code>list[str]</code>）を記述するだけです。既定の <strong>Lax モード（柔軟モード）</strong> では、URL クエリ文字列やフォーム送信、外部 JSON ペイロードから <code>&quot;42&quot;</code> や <code>&quot;true&quot;</code> といった文字列が渡されても、<code>pydantic-core</code> が互換性のある値をネイティブの <code>int</code> や <code>bool</code> へ安全に変換し、実行時の型安全性を保証します。</p>
+
+  </div>
+  <div class="nb-cell nb-code-cell nb-setup-cell">
+    <div class="nb-input">
+      <div class="nb-prompt nb-in-prompt">In [setup]:</div>
+      <div class="nb-code-area">
+        <pre><code class="language-bash">!pip<span class="w"> </span>install<span class="w"> </span>-q<span class="w"> </span>pydantic
+</code></pre>
+      </div>
+    </div>
+  </div>
+  <div class="nb-cell nb-code-cell">
+    <div class="nb-input">
+      <div class="nb-prompt nb-in-prompt">In [1]:</div>
+      <div class="nb-code-area">
+        <pre><code class="language-python"><span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseModel</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">User</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="nb">id</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">is_active</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">tags</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+
+<span class="n">user</span> <span class="o">=</span> <span class="n">User</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"42"</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"Alice"</span><span class="p">,</span> <span class="n">is_active</span><span class="o">=</span><span class="s2">"true"</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="p">[</span><span class="s2">"admin"</span><span class="p">,</span> <span class="s2">"colab"</span><span class="p">])</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"type(user.id):"</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">user</span><span class="o">.</span><span class="n">id</span><span class="p">),</span> <span class="s2">"| is_active:"</span><span class="p">,</span> <span class="n">user</span><span class="o">.</span><span class="n">is_active</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"model_dump():"</span><span class="p">,</span> <span class="n">user</span><span class="o">.</span><span class="n">model_dump</span><span class="p">())</span>
+</code></pre>
+      </div>
+    </div>
+    <div class="nb-output">
+      <div class="nb-prompt nb-out-prompt">Out [1]:</div>
+      <div class="nb-output-area">
+        <pre class="nb-stream-stdout">id=42 name=&#x27;Alice&#x27; is_active=True tags=[&#x27;admin&#x27;, &#x27;colab&#x27;]
+type(user.id): &lt;class &#x27;int&#x27;&gt; | is_active: True
+model_dump(): {&#x27;id&#x27;: 42, &#x27;name&#x27;: &#x27;Alice&#x27;, &#x27;is_active&#x27;: True, &#x27;tags&#x27;: [&#x27;admin&#x27;, &#x27;colab&#x27;]}
+</pre>
+      </div>
+    </div>
+  </div>
+  <div class="nb-cell nb-markdown-cell">
+<p>また Pydantic v2 では、旧 v1 のメソッド名（<code>parse_obj</code>, <code>parse_raw</code>, <code>dict</code>, <code>json</code>）が非推奨となり、<code>model_*</code> プレフィックスの統一メソッドへ刷新されています。</p>
+<ul>
+<li><strong><code>Model.model_validate(obj)</code></strong> <em>(旧 v1: <code>parse_obj</code>)</em>: Python の <code>dict</code> やオブジェクトを検証し、型付きの <code>BaseModel</code> インスタンスを生成します。</li>
+<li><strong><code>Model.model_validate_json(data)</code></strong> <em>(旧 v1: <code>parse_raw</code>)</em>: 生の UTF-8 JSON 文字列（または <code>bytes</code>）を Python の <code>json.loads()</code> を介さず Rust 内部（<code>jiter</code>）で一括パース＆検証するため、高速に動作します。</li>
+<li><strong><code>instance.model_dump()</code> / <code>instance.model_dump_json()</code></strong> <em>(旧 v1: <code>dict()</code> / <code>json()</code>)</em>: 検証済みモデルを Python の <code>dict</code> または整形済み JSON 文字列へシリアライズします。</li>
+</ul>
+
+  </div>
+  <div class="nb-cell nb-code-cell">
+    <div class="nb-input">
+      <div class="nb-prompt nb-in-prompt">In [2]:</div>
+      <div class="nb-code-area">
+        <pre><code class="language-python"><span class="n">raw_json</span> <span class="o">=</span> <span class="s1">'{"id": "108", "name": "Bob", "tags": ["data", "rust"]}'</span>
+
+<span class="n">bob</span> <span class="o">=</span> <span class="n">User</span><span class="o">.</span><span class="n">model_validate_json</span><span class="p">(</span><span class="n">raw_json</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Validated from JSON:"</span><span class="p">,</span> <span class="n">bob</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">bob</span><span class="o">.</span><span class="n">model_dump_json</span><span class="p">(</span><span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+</code></pre>
+      </div>
+    </div>
+    <div class="nb-output">
+      <div class="nb-prompt nb-out-prompt">Out [2]:</div>
+      <div class="nb-output-area">
+        <pre class="nb-stream-stdout">Validated from JSON: id=108 name=&#x27;Bob&#x27; is_active=True tags=[&#x27;data&#x27;, &#x27;rust&#x27;]
+{
+  &quot;id&quot;: 108,
+  &quot;name&quot;: &quot;Bob&quot;,
+  &quot;is_active&quot;: true,
+  &quot;tags&quot;: [
+    &quot;data&quot;,
+    &quot;rust&quot;
+  ]
+}
+</pre>
+      </div>
+    </div>
+  </div>
+  <div class="nb-cell nb-markdown-cell">
+<h2>2. Lax モードと Strict モードの使い分け（<code>ConfigDict(strict=True)</code>）</h2>
+<p>外部入力を受け取る境界層（HTTP クエリパラメータ、環境変数、CSV 取り込みなど）では自動型変換を行う <strong>Lax モード</strong> が便利ですが、マイクロサービス間の内部契約や決済・金融データ処理では、<code>&quot;42&quot;</code> を暗黙的に <code>42</code> へ変換せず型不一致バグとして即座に弾きたい場面があります。</p>
+<p>Pydantic v2 では、<strong>呼び出し単位</strong>（<code>strict=True</code> 引数）または <strong>モデル全体</strong>（<code>model_config = ConfigDict(strict=True)</code>）で <strong>Strict モード（厳格モード）</strong> を有効化できます。</p>
+<ul>
+<li><strong>Lax モード（既定）</strong>: <code>&quot;42&quot;</code> → <code>42</code>、<code>&quot;true&quot;</code> → <code>True</code>、<code>[1, 2]</code> → <code>(1, 2)</code> のように解釈可能な入力を自動変換しつつ、<code>&quot;forty-two&quot;</code> のような変換不能な値は確実に拒否します。</li>
+<li><strong>Strict モード（<code>strict=True</code>）</strong>: Python オブジェクト検証時に厳密な型一致を要求します（<code>int</code> に対する <code>&quot;42&quot;</code> は <code>int_type</code>、<code>bool</code> に対する <code>&quot;true&quot;</code> は <code>bool_type</code>、<code>tuple[int, int]</code> に対する <code>[1, 2]</code> は <code>tuple_type</code> エラーとなります）。</li>
+</ul>
+
+<figure class="drawlib-figure align-center">
+  <img src="../images/01_basemodel_quickstart/ch01_lax_vs_strict_ja.png" alt="図1-2: Lax モード（既定の自動型変換）と Strict モード（厳格型一致）の挙動比較" loading="lazy">
+  <figcaption>図1-2: Lax モード（既定の自動型変換）と Strict モード（厳格型一致）の挙動比較</figcaption>
+</figure>
+<details class="drawlib-code-fold">
+  <summary>View Drawlib Python Code</summary>
+  <pre><code class="language-python"><span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.canvas</span><span class="w"> </span><span class="kn">import</span> <span class="n">save</span><span class="p">,</span> <span class="n">setup</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.icons</span><span class="w"> </span><span class="kn">import</span> <span class="n">phosphor</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.shapes</span><span class="w"> </span><span class="kn">import</span> <span class="n">rectangle</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.smartarts</span><span class="w"> </span><span class="kn">import</span> <span class="n">Table</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.styles</span><span class="w"> </span><span class="kn">import</span> <span class="n">Colors</span><span class="p">,</span> <span class="n">Styles</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.text</span><span class="w"> </span><span class="kn">import</span> <span class="n">text</span>
+
+<span class="n">setup</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mi">152</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">78</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">150</span><span class="p">)</span>
+
+<span class="c1"># 外枠のニュートラルフレーム（50%以上を無彩色・淡色ベースで構成）</span>
+<span class="n">rectangle</span><span class="p">(</span>
+    <span class="p">(</span><span class="mf">76.0</span><span class="p">,</span> <span class="mf">39.0</span><span class="p">),</span>
+    <span class="n">width</span><span class="o">=</span><span class="mf">142.0</span><span class="p">,</span>
+    <span class="n">height</span><span class="o">=</span><span class="mf">68.0</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Neutral</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">2.5</span><span class="p">,</span> <span class="n">shape_fill_color</span><span class="o">=</span><span class="n">Colors</span><span class="o">.</span><span class="n">Light</span><span class="p">,</span> <span class="n">shape_line_color</span><span class="o">=</span><span class="n">Colors</span><span class="o">.</span><span class="n">Gray3</span><span class="p">),</span>
+<span class="p">)</span>
+
+<span class="c1"># ヘッダータイトル</span>
+<span class="n">text</span><span class="p">(</span>
+    <span class="p">(</span><span class="mf">76.0</span><span class="p">,</span> <span class="mf">67.5</span><span class="p">),</span>
+    <span class="s2">"Lax モード（既定の自動型変換）と Strict モード（厳格型一致）の挙動比較"</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">12.2</span><span class="p">),</span>
+<span class="p">)</span>
+
+<span class="c1"># モード概要バッジ（下のテーブル幅 x = 9.5..142.5 に整列）</span>
+<span class="n">rectangle</span><span class="p">((</span><span class="mf">41.5</span><span class="p">,</span> <span class="mf">58.6</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">64.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">8.0</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryNeutral</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">1.8</span><span class="p">))</span>
+<span class="n">phosphor</span><span class="o">.</span><span class="n">arrows_left_right</span><span class="p">((</span><span class="mf">18.0</span><span class="p">,</span> <span class="mf">58.6</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">4.5</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryBold</span><span class="p">)</span>
+<span class="n">text</span><span class="p">((</span><span class="mf">44.2</span><span class="p">,</span> <span class="mf">58.6</span><span class="p">),</span> <span class="s2">"Lax モード: model_validate(data)［既定］"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">))</span>
+
+<span class="n">rectangle</span><span class="p">((</span><span class="mf">110.5</span><span class="p">,</span> <span class="mf">58.6</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">64.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">8.0</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">White</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">1.8</span><span class="p">,</span> <span class="n">shape_line_color</span><span class="o">=</span><span class="n">Colors</span><span class="o">.</span><span class="n">Gray4</span><span class="p">))</span>
+<span class="n">phosphor</span><span class="o">.</span><span class="n">shield_check</span><span class="p">((</span><span class="mf">86.0</span><span class="p">,</span> <span class="mf">58.6</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">4.5</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="p">)</span>
+<span class="n">text</span><span class="p">((</span><span class="mf">113.2</span><span class="p">,</span> <span class="mf">58.6</span><span class="p">),</span> <span class="s2">"Strict: strict=True / ConfigDict(strict=True)"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">))</span>
+
+<span class="c1"># 比較テーブル（左上アンカー xy=(9.5, 51.2), 合計幅=133.0, 合計高さ=42.8）</span>
+<span class="n">table</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span>
+    <span class="n">cell_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">White</span><span class="p">,</span>
+    <span class="n">text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Dark</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">),</span>
+    <span class="n">header_cell_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryFlat</span><span class="p">,</span>
+    <span class="n">header_text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">WhiteBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.4</span><span class="p">),</span>
+    <span class="n">border_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">MutedThin</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">table</span><span class="o">.</span><span class="n">set_style_cell_evenodd</span><span class="p">(</span>
+    <span class="n">even_color</span><span class="o">=</span><span class="n">Colors</span><span class="o">.</span><span class="n">Light</span><span class="p">,</span>
+    <span class="n">even_text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Dark</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">),</span>
+    <span class="n">odd_color</span><span class="o">=</span><span class="n">Colors</span><span class="o">.</span><span class="n">White</span><span class="p">,</span>
+    <span class="n">odd_text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Dark</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">),</span>
+<span class="p">)</span>
+<span class="n">table</span><span class="o">.</span><span class="n">set_style_cell</span><span class="p">(</span>
+    <span class="n">background_color</span><span class="o">=</span><span class="n">Colors</span><span class="o">.</span><span class="n">White</span><span class="p">,</span>
+    <span class="n">text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">),</span>
+    <span class="n">rows</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span>
+    <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+<span class="p">)</span>
+<span class="n">table</span><span class="o">.</span><span class="n">set_style_cell</span><span class="p">(</span>
+    <span class="n">background_color</span><span class="o">=</span><span class="n">Colors</span><span class="o">.</span><span class="n">SuccessNeutral</span><span class="p">,</span>
+    <span class="n">text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">),</span>
+    <span class="n">rows</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span>
+    <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+<span class="p">)</span>
+<span class="n">table</span><span class="o">.</span><span class="n">set_style_cell</span><span class="p">(</span>
+    <span class="n">background_color</span><span class="o">=</span><span class="n">Colors</span><span class="o">.</span><span class="n">DangerNeutral</span><span class="p">,</span>
+    <span class="n">text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DangerBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">),</span>
+    <span class="n">rows</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span>
+    <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span>
+<span class="p">)</span>
+<span class="n">table</span><span class="o">.</span><span class="n">set_style_cell</span><span class="p">(</span>
+    <span class="n">background_color</span><span class="o">=</span><span class="n">Colors</span><span class="o">.</span><span class="n">SuccessNeutral</span><span class="p">,</span>
+    <span class="n">text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">),</span>
+    <span class="n">rows</span><span class="o">=</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span>
+    <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span>
+<span class="p">)</span>
+<span class="c1"># ヘッダー行（row 0）が上書きされないよう最後に再適用</span>
+<span class="n">table</span><span class="o">.</span><span class="n">set_style_cell_header</span><span class="p">(</span>
+    <span class="n">background_color</span><span class="o">=</span><span class="n">Colors</span><span class="o">.</span><span class="n">Primary</span><span class="p">,</span>
+    <span class="n">text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">WhiteBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.4</span><span class="p">),</span>
+<span class="p">)</span>
+
+<span class="n">table</span><span class="o">.</span><span class="n">set_style_border</span><span class="p">(</span>
+    <span class="n">top</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Primary</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">line_color</span><span class="o">=</span><span class="n">Colors</span><span class="o">.</span><span class="n">Gray4</span><span class="p">,</span> <span class="n">line_width</span><span class="o">=</span><span class="mf">1.2</span><span class="p">),</span>
+    <span class="n">top2</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Primary</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">line_color</span><span class="o">=</span><span class="n">Colors</span><span class="o">.</span><span class="n">Primary</span><span class="p">,</span> <span class="n">line_width</span><span class="o">=</span><span class="mf">1.2</span><span class="p">),</span>
+    <span class="n">bottom</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Primary</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">line_color</span><span class="o">=</span><span class="n">Colors</span><span class="o">.</span><span class="n">Gray4</span><span class="p">,</span> <span class="n">line_width</span><span class="o">=</span><span class="mf">1.2</span><span class="p">),</span>
+    <span class="n">left</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Primary</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">line_color</span><span class="o">=</span><span class="n">Colors</span><span class="o">.</span><span class="n">Gray4</span><span class="p">,</span> <span class="n">line_width</span><span class="o">=</span><span class="mf">1.2</span><span class="p">),</span>
+    <span class="n">right</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Primary</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">line_color</span><span class="o">=</span><span class="n">Colors</span><span class="o">.</span><span class="n">Gray4</span><span class="p">,</span> <span class="n">line_width</span><span class="o">=</span><span class="mf">1.2</span><span class="p">),</span>
+    <span class="n">between_columns</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Primary</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">line_color</span><span class="o">=</span><span class="n">Colors</span><span class="o">.</span><span class="n">Gray3</span><span class="p">,</span> <span class="n">line_width</span><span class="o">=</span><span class="mf">0.8</span><span class="p">),</span>
+    <span class="n">between_rows</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Primary</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">line_color</span><span class="o">=</span><span class="n">Colors</span><span class="o">.</span><span class="n">Gray3</span><span class="p">,</span> <span class="n">line_width</span><span class="o">=</span><span class="mf">0.8</span><span class="p">),</span>
+<span class="p">)</span>
+
+<span class="n">comparison_data</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">[</span><span class="s2">"フィールド型定義"</span><span class="p">,</span> <span class="s2">"Python 入力値"</span><span class="p">,</span> <span class="s2">"Lax モード（既定）"</span><span class="p">,</span> <span class="s2">"Strict モード（strict=True）"</span><span class="p">],</span>
+    <span class="p">[</span><span class="s2">"id: int"</span><span class="p">,</span> <span class="s1">'"42" (str)'</span><span class="p">,</span> <span class="s2">"変換 OK -&gt; 42 (int)"</span><span class="p">,</span> <span class="s2">"失敗: int_type"</span><span class="p">],</span>
+    <span class="p">[</span><span class="s2">"is_active: bool"</span><span class="p">,</span> <span class="s1">'"true" (str)'</span><span class="p">,</span> <span class="s2">"変換 OK -&gt; True (bool)"</span><span class="p">,</span> <span class="s2">"失敗: bool_type"</span><span class="p">],</span>
+    <span class="p">[</span><span class="s2">"coords: tuple[int, int]"</span><span class="p">,</span> <span class="s2">"[1, 2] (list)"</span><span class="p">,</span> <span class="s2">"変換 OK -&gt; (1, 2)"</span><span class="p">,</span> <span class="s2">"失敗: tuple_type"</span><span class="p">],</span>
+    <span class="p">[</span><span class="s2">"id: int"</span><span class="p">,</span> <span class="s2">"42 (int)"</span><span class="p">,</span> <span class="s2">"検証 OK -&gt; 42 (int)"</span><span class="p">,</span> <span class="s2">"検証 OK -&gt; 42 (int)"</span><span class="p">],</span>
+<span class="p">]</span>
+
+<span class="n">table</span><span class="o">.</span><span class="n">draw_flexible</span><span class="p">(</span>
+    <span class="n">xy</span><span class="o">=</span><span class="p">(</span><span class="mf">9.5</span><span class="p">,</span> <span class="mf">51.2</span><span class="p">),</span>
+    <span class="n">column_widths</span><span class="o">=</span><span class="p">[</span><span class="mf">31.0</span><span class="p">,</span> <span class="mf">26.0</span><span class="p">,</span> <span class="mf">38.0</span><span class="p">,</span> <span class="mf">38.0</span><span class="p">],</span>
+    <span class="n">row_heights</span><span class="o">=</span><span class="p">[</span><span class="mf">8.4</span><span class="p">,</span> <span class="mf">8.6</span><span class="p">,</span> <span class="mf">8.6</span><span class="p">,</span> <span class="mf">8.6</span><span class="p">,</span> <span class="mf">8.6</span><span class="p">],</span>
+    <span class="n">data</span><span class="o">=</span><span class="n">comparison_data</span><span class="p">,</span>
+    <span class="n">align</span><span class="o">=</span><span class="s2">"top_left"</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">save</span><span class="p">()</span>
+</code></pre>
+</details>
+<p>先ほど定義した <code>User</code> モデルを使って、既定の Lax モードと呼び出し単位の <code>strict=True</code>、さらに <code>ConfigDict(strict=True)</code> によるモデル単位の厳格検証を実際に比較してみましょう。</p>
+
+  </div>
+  <div class="nb-cell nb-code-cell">
+    <div class="nb-input">
+      <div class="nb-prompt nb-in-prompt">In [3]:</div>
+      <div class="nb-code-area">
+        <pre><code class="language-python"><span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConfigDict</span><span class="p">,</span> <span class="n">ValidationError</span>
+
+<span class="n">payload</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"id"</span><span class="p">:</span> <span class="s2">"42"</span><span class="p">,</span> <span class="s2">"name"</span><span class="p">:</span> <span class="s2">"Alice"</span><span class="p">}</span>
+
+<span class="c1"># 1. 既定の Lax モード: 文字列 "42" を int の 42 へ自動変換</span>
+<span class="n">lax_user</span> <span class="o">=</span> <span class="n">User</span><span class="o">.</span><span class="n">model_validate</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Lax mode succeeded:"</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">lax_user</span><span class="p">))</span>
+
+<span class="c1"># 2. 呼び出し単位の Strict モード: int に対する文字列 "42" を拒否</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">User</span><span class="o">.</span><span class="n">model_validate</span><span class="p">(</span><span class="n">payload</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">except</span> <span class="n">ValidationError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Strict mode raised ValidationError:"</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+
+
+<span class="c1"># 3. ConfigDict(strict=True) によるモデル全体の Strict モード化</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">StrictPoint</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="n">model_config</span> <span class="o">=</span> <span class="n">ConfigDict</span><span class="p">(</span><span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">label</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">coords</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span>
+
+
+<span class="n">point</span> <span class="o">=</span> <span class="n">StrictPoint</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">"origin"</span><span class="p">,</span> <span class="n">coords</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">StrictPoint exact match:"</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">point</span><span class="p">))</span>
+</code></pre>
+      </div>
+    </div>
+    <div class="nb-output">
+      <div class="nb-prompt nb-out-prompt">Out [3]:</div>
+      <div class="nb-output-area">
+        <pre class="nb-stream-stdout">Lax mode succeeded: User(id=42, name=&#x27;Alice&#x27;, is_active=True, tags=[])
+
+Strict mode raised ValidationError:
+1 validation error for User
+id
+  Input should be a valid integer [type=int_type, input_value=&#x27;42&#x27;, input_type=str]
+    For further information visit https://errors.pydantic.dev/2.14/v/int_type
+
+StrictPoint exact match: StrictPoint(label=&#x27;origin&#x27;, coords=(0, 0))
+</pre>
+      </div>
+    </div>
+  </div>
+  <div class="nb-cell nb-markdown-cell">
+<p><code>ValidationError</code> の出力には、違反したフィールド名（<code>id</code>）、分かりやすいエラーメッセージ（<code>Input should be a valid integer</code>）、エラー種別コード（<code>type=int_type</code>）、実際に入力された値（<code>input_value='42'</code>）が正確に記録されます。なお JSON にはタプル構文が存在しないため、<code>StrictPoint.model_validate_json('{&quot;label&quot;: &quot;origin&quot;, &quot;coords&quot;: [0, 0]}')</code> のように JSON 文字列を直接検証する場合は、Strict モードでも JSON 配列 <code>[0, 0]</code> が <code>tuple[int, int]</code> として受理されます。</p>
+<h3>まとめと次のステップ</h3>
+<ul>
+<li><strong><code>BaseModel</code> と v2 標準 <code>model_*</code> メソッド</strong>: Python 標準の型ヒントを宣言するだけで、<code>model_validate()</code> / <code>model_validate_json()</code> による Rust 高速検証と <code>model_dump()</code> / <code>model_dump_json()</code> による出力を一貫して扱えます。</li>
+<li><strong>次章（Chapter 02）のプレビュー</strong>: 続く第2章では、<code>Field(...)</code> による数値範囲・文字列パターン制約や安全な <code>default_factory</code> の定義方法と、複数フィールドにわたる <code>ValidationError</code>（<code>e.errors()</code>）の構造的な解析手法を学びます。</li>
+</ul>
+
+  </div>
+</div>
+            </main>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const themeBtn = document.getElementById('theme-toggle');
+            if (themeBtn) {
+                themeBtn.addEventListener('click', function() {
+                    const current = document.documentElement.getAttribute('data-theme');
+                    const next = current === 'dark' ? 'light' : 'dark';
+                    document.documentElement.setAttribute('data-theme', next);
+                    localStorage.setItem('drawlib-theme', next);
+                });
+            }
+
+            const langDropdowns = document.querySelectorAll('.lang-dropdown');
+            if (langDropdowns.length > 0) {
+                document.addEventListener('click', function(e) {
+                    langDropdowns.forEach(function(dd) {
+                        if (dd.hasAttribute('open') && !dd.contains(e.target)) {
+                            dd.removeAttribute('open');
+                        }
+                    });
+                });
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape') {
+                        langDropdowns.forEach(function(dd) {
+                            dd.removeAttribute('open');
+                        });
+                    }
+                });
+            }
+
+            const menuBtn = document.getElementById('menu-toggle');
+            const sidebar = document.querySelector('.sidebar');
+            if (menuBtn && sidebar) {
+                function setMenuOpen(open) {
+                    sidebar.classList.toggle('is-open', open);
+                    menuBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+                    document.body.classList.toggle('menu-open', open);
+                    if (open) {
+                        const menu = sidebar.querySelector('.sidebar-menu');
+                        if (menu) {
+                            menu.scrollTop = 0;
+                        }
+                    }
+                }
+
+                menuBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const willOpen = !sidebar.classList.contains('is-open');
+                    setMenuOpen(willOpen);
+                });
+
+                document.addEventListener('click', function(e) {
+                    if (sidebar.classList.contains('is-open') && !sidebar.contains(e.target)) {
+                        setMenuOpen(false);
+                    }
+                });
+
+                const navLinks = sidebar.querySelectorAll('.nav-item a');
+                navLinks.forEach(function(link) {
+                    link.addEventListener('click', function() {
+                        setMenuOpen(false);
+                    });
+                });
+
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape' && sidebar.classList.contains('is-open')) {
+                        setMenuOpen(false);
+                    }
+                });
+
+                window.addEventListener('resize', function() {
+                    if (window.innerWidth > 768 && sidebar.classList.contains('is-open')) {
+                        setMenuOpen(false);
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

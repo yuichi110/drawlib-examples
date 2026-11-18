@@ -1,0 +1,604 @@
+<!--
+ Copyright (c) 2026 Yuichi Ito (yuichi@yuichi.com)
+
+ This software is licensed under the Apache License, Version 2.0.
+ For more information, please visit: https://github.com/yuichi110/drawlib
+
+ This software is provided "as is", without warranty of any kind,
+ express or implied, including but not limited to the warranties of
+ merchantability, fitness for a particular purpose and noninfringement.
+-->
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>03. Custom Validators &amp; Computed Fields</title>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-S9N5BZ1VRC"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-S9N5BZ1VRC');
+    </script>
+    <script>
+        (function() {
+            const saved = localStorage.getItem('drawlib-theme');
+            if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            } else {
+                document.documentElement.setAttribute('data-theme', 'light');
+            }
+        })();
+    </script>
+    
+    
+    
+    <link rel="alternate" hreflang="en" href="https://examples.drawlib.com/pydantic/en/03_validators_and_computed.html">
+    
+    <link rel="alternate" hreflang="ja" href="https://examples.drawlib.com/pydantic/ja/03_validators_and_computed.html">
+    
+    <link rel="alternate" hreflang="x-default" href="https://examples.drawlib.com/pydantic/en/03_validators_and_computed.html">
+    
+    
+    
+    <meta name="description" content="Built-in Field(...) constraints cover numeric bounds, lengths, and regex patterns, while custom Python domain logic hooks into four distinct stages…">
+    <link rel="canonical" href="https://examples.drawlib.com/pydantic/en/03_validators_and_computed.html">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Pydantic v2 Hands-On Cookbook">
+    <meta property="og:title" content="03. Custom Validators &amp; Computed Fields — Pydantic v2 Hands-On Cookbook">
+    <meta property="og:description" content="Built-in Field(...) constraints cover numeric bounds, lengths, and regex patterns, while custom Python domain logic hooks into four distinct stages…">
+    <meta property="og:url" content="https://examples.drawlib.com/pydantic/en/03_validators_and_computed.html">
+    <meta property="og:locale" content="en_US">
+    <meta property="og:locale:alternate" content="ja_JP">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="03. Custom Validators &amp; Computed Fields — Pydantic v2 Hands-On Cookbook">
+    <meta name="twitter:description" content="Built-in Field(...) constraints cover numeric bounds, lengths, and regex patterns, while custom Python domain logic hooks into four distinct stages…">
+    
+    
+    <link rel="icon" type="image/png" href="../_assets/favicon.png">
+    
+    
+    <link rel="stylesheet" href="style.css">
+    
+    
+</head>
+<body>
+    <div class="demo-banner" role="region" aria-label="Portal Navigation">
+        <div class="demo-banner-inner">
+            <span class="demo-banner-badge">DRAWLIB SHOWCASE</span>
+            <span class="demo-banner-text">
+                Sample Jupyter &amp; Colab Notebook (<code>type = "jupyter"</code>) built with <a href="https://www.drawlib.com/" target="_blank" rel="noopener noreferrer">Drawlib</a>
+            </span>
+            <span class="demo-banner-links">
+                <a href="../../index.html">All Examples</a>
+                <span class="demo-banner-sep">·</span>
+                <a href="https://github.com/yuichi110/drawlib-examples/tree/main/examples/jupyter/pydantic" target="_blank" rel="noopener noreferrer">Source (GitHub) ↗</a>
+                <span class="demo-banner-sep">·</span>
+                <a href="https://www.drawlib.com/" target="_blank" rel="noopener noreferrer">Drawlib ↗</a>
+            </span>
+        </div>
+    </div>
+    
+    <div class="doc-layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="index.html" class="sidebar-brand" aria-label="Pydantic v2 Hands-On Cookbook">
+                    
+                    Pydantic v2 Hands-On Cookbook
+                    
+                </a>
+                <div class="sidebar-header-actions">
+                    <button type="button" id="theme-toggle" class="theme-toggle-btn" aria-label="Toggle theme">
+                        <svg class="icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+                        <svg class="icon-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                    </button>
+                    <button type="button" id="menu-toggle" class="menu-toggle-btn" aria-label="Toggle navigation" aria-expanded="false">
+                        <svg class="icon-hamburger" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+                        <svg class="icon-close" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
+                </div>
+            </div>
+            <div class="sidebar-menu">
+                
+                    <div class="sidebar-heading">Notebooks</div>
+                    <ul class="nav-list">
+                        
+                        <li class="nav-item ">
+                            <a href="01_basemodel_quickstart.html" >01. BaseModel Essentials &amp; Type Coercion (Lax vs. Strict)</a>
+                        </li>
+                        
+                        <li class="nav-item ">
+                            <a href="02_fields_and_errors.html" >02. Field Constraints &amp; Inspecting ValidationError</a>
+                        </li>
+                        
+                        <li class="nav-item active">
+                            <a href="03_validators_and_computed.html" >03. Custom Validators &amp; Computed Fields</a>
+                        </li>
+                        
+                        <li class="nav-item ">
+                            <a href="04_nested_unions_and_schema.html" >04. Nested Models, Discriminated Unions &amp; JSON Schema</a>
+                        </li>
+                        
+                    </ul>
+                
+            </div>
+        </aside>
+        <div class="content-wrapper">
+            <header class="top-bar">
+                <div class="breadcrumbs">
+                    <span class="crumb">Notebooks</span>
+                    <span class="crumb-separator">&raquo;</span>
+                    <span class="crumb active">03. Custom Validators &amp; Computed Fields</span>
+                </div>
+                
+                <div class="lang-switcher">
+                    <details class="lang-dropdown">
+                        <summary class="lang-dropdown-btn" aria-label="Select language">
+                            <svg class="lang-globe-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                            <span class="lang-current-label">English</span>
+                            <svg class="lang-caret-icon" viewBox="0 0 24 24" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        </summary>
+                        <div class="lang-dropdown-menu" role="menu">
+                            
+                            <a href="03_validators_and_computed.html" class="lang-option active" lang="en" hreflang="en" aria-current="page">
+                                <span>English</span>
+                                
+                                <svg class="lang-check-icon" viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                
+                            </a>
+                            
+                            <a href="../ja/03_validators_and_computed.html" class="lang-option" lang="ja" hreflang="ja" >
+                                <span>日本語</span>
+                                
+                            </a>
+                            
+                        </div>
+                    </details>
+                </div>
+                
+            </header>
+            <main class="main-content">
+                <div class="jupyter-notebook">
+  <div class="nb-toolbar">
+    <a class="nb-btn nb-btn-colab" href="https://colab.research.google.com/github/yuichi110/drawlib-examples/blob/main/docs/pydantic/en/03_validators_and_computed.ipynb" target="_blank" rel="noopener noreferrer"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"></a>
+    <a class="nb-btn nb-btn-download" href="03_validators_and_computed.ipynb" download="03_validators_and_computed.ipynb">⬇ Download .ipynb</a>
+    <span class="nb-status-pill">✓ Dry-Run Verified (2 cells)</span>
+  </div>
+  <div class="nb-cell nb-markdown-cell">
+<h1>03. Custom Validators &amp; Computed Fields</h1>
+<p>Built-in <code>Field(...)</code> constraints cover numeric bounds, lengths, and regex patterns, while custom Python domain logic hooks into four distinct stages: pre-parsing normalization (<code>@field_validator(..., mode=&quot;before&quot;)</code>), typed single-field checks (<code>@field_validator(..., mode=&quot;after&quot;)</code>), cross-field invariants (<code>@model_validator(mode=&quot;after&quot;)</code>), and derived serialization properties (<code>@computed_field</code>).
+Understanding the exact execution order of these hooks lets Pydantic v2's Rust core handle fast type coercion while layering domain invariants cleanly before, after, and during JSON export.</p>
+
+<figure class="drawlib-figure align-center">
+  <img src="../images/03_validators_and_computed/ch03_validator_lifecycle.png" alt="Figure 3-1: Pydantic v2 Validation &amp; Computed Field Execution Order" loading="lazy">
+  <figcaption>Figure 3-1: Pydantic v2 Validation &amp; Computed Field Execution Order</figcaption>
+</figure>
+<details class="drawlib-code-fold">
+  <summary>View Drawlib Python Code</summary>
+  <pre><code class="language-python"><span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.canvas</span><span class="w"> </span><span class="kn">import</span> <span class="n">save</span><span class="p">,</span> <span class="n">setup</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.icons</span><span class="w"> </span><span class="kn">import</span> <span class="n">phosphor</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.shapes</span><span class="w"> </span><span class="kn">import</span> <span class="n">rectangle</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.smartarts</span><span class="w"> </span><span class="kn">import</span> <span class="n">CardList</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.styles</span><span class="w"> </span><span class="kn">import</span> <span class="n">Styles</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.text</span><span class="w"> </span><span class="kn">import</span> <span class="n">text</span>
+
+<span class="n">setup</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mi">152</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">74</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">150</span><span class="p">)</span>
+
+<span class="n">text</span><span class="p">(</span>
+    <span class="p">(</span><span class="mf">76.0</span><span class="p">,</span> <span class="mf">67.8</span><span class="p">),</span>
+    <span class="s2">"Pydantic v2 Validation &amp; Computed Field Pipeline"</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">12.0</span><span class="p">),</span>
+<span class="p">)</span>
+
+<span class="n">stages</span> <span class="o">=</span> <span class="n">CardList</span><span class="p">(</span>
+    <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Neutral</span><span class="p">,</span>
+    <span class="n">text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.5</span><span class="p">),</span>
+    <span class="n">description_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Dark</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">),</span>
+    <span class="n">badge_shape</span><span class="o">=</span><span class="s2">"circle"</span><span class="p">,</span>
+    <span class="n">badge_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryNeutral</span><span class="p">,</span>
+    <span class="n">icon_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryBold</span><span class="p">,</span>
+    <span class="n">direction</span><span class="o">=</span><span class="s2">"horizontal"</span><span class="p">,</span>
+    <span class="n">show_arrows</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">arrow_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Dark</span><span class="p">,</span>
+    <span class="n">spacing</span><span class="o">=</span><span class="mf">4.6</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">stages</span><span class="o">.</span><span class="n">add</span><span class="p">(</span>
+    <span class="s1">'1. Pre-Parse</span><span class="se">\n</span><span class="s1">mode="before"'</span><span class="p">,</span>
+    <span class="s2">"@field_validator</span><span class="se">\n</span><span class="s2">Normalize raw str</span><span class="se">\n</span><span class="s2">before parsing"</span><span class="p">,</span>
+    <span class="n">icon</span><span class="o">=</span><span class="n">phosphor</span><span class="o">.</span><span class="n">funnel</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">stages</span><span class="o">.</span><span class="n">add</span><span class="p">(</span>
+    <span class="s2">"2. Rust Core</span><span class="se">\n</span><span class="s2">Type &amp; Field()"</span><span class="p">,</span>
+    <span class="s2">"pydantic-core</span><span class="se">\n</span><span class="s2">Fast coercion &amp;</span><span class="se">\n</span><span class="s2">Field constraints"</span><span class="p">,</span>
+    <span class="n">icon</span><span class="o">=</span><span class="n">phosphor</span><span class="o">.</span><span class="n">cpu</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryFlat</span><span class="p">,</span>
+    <span class="n">text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">WhiteBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.5</span><span class="p">),</span>
+    <span class="n">description_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">White</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">),</span>
+    <span class="n">badge_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">White</span><span class="p">,</span>
+    <span class="n">icon_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryBold</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">stages</span><span class="o">.</span><span class="n">add</span><span class="p">(</span>
+    <span class="s1">'3. Post-Parse</span><span class="se">\n</span><span class="s1">mode="after"'</span><span class="p">,</span>
+    <span class="s2">"@field_validator &amp;</span><span class="se">\n</span><span class="s2">@model_validator</span><span class="se">\n</span><span class="s2">Typed invariants"</span><span class="p">,</span>
+    <span class="n">icon</span><span class="o">=</span><span class="n">phosphor</span><span class="o">.</span><span class="n">shield_check</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryNeutral</span><span class="p">,</span>
+    <span class="n">badge_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">White</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">stages</span><span class="o">.</span><span class="n">add</span><span class="p">(</span>
+    <span class="s2">"4. Derived Out</span><span class="se">\n</span><span class="s2">@computed_field"</span><span class="p">,</span>
+    <span class="s2">"@property auto-</span><span class="se">\n</span><span class="s2">included in dump</span><span class="se">\n</span><span class="s2">&amp; JSON output"</span><span class="p">,</span>
+    <span class="n">icon</span><span class="o">=</span><span class="n">phosphor</span><span class="o">.</span><span class="n">brackets_curly</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">SecondaryNeutral</span><span class="p">,</span>
+    <span class="n">badge_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">White</span><span class="p">,</span>
+    <span class="n">icon_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">SecondaryBold</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">stages</span><span class="o">.</span><span class="n">draw</span><span class="p">(</span><span class="n">xy</span><span class="o">=</span><span class="p">(</span><span class="mf">5.0</span><span class="p">,</span> <span class="mf">15.2</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">142.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">47.0</span><span class="p">,</span> <span class="n">align</span><span class="o">=</span><span class="s2">"bottom_left"</span><span class="p">)</span>
+
+<span class="c1"># Phase summary bars underneath the 4 stages</span>
+<span class="n">rectangle</span><span class="p">(</span>
+    <span class="p">(</span><span class="mf">57.675</span><span class="p">,</span> <span class="mf">8.4</span><span class="p">),</span>
+    <span class="n">width</span><span class="o">=</span><span class="mf">105.35</span><span class="p">,</span>
+    <span class="n">height</span><span class="o">=</span><span class="mf">6.8</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Neutral</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">1.5</span><span class="p">),</span>
+    <span class="n">text</span><span class="o">=</span><span class="s2">"Validation Phase: BaseModel(...) / model_validate()"</span><span class="p">,</span>
+    <span class="n">text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">),</span>
+<span class="p">)</span>
+<span class="n">rectangle</span><span class="p">(</span>
+    <span class="p">(</span><span class="mf">130.975</span><span class="p">,</span> <span class="mf">8.4</span><span class="p">),</span>
+    <span class="n">width</span><span class="o">=</span><span class="mf">32.05</span><span class="p">,</span>
+    <span class="n">height</span><span class="o">=</span><span class="mf">6.8</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">SecondaryNeutral</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">1.5</span><span class="p">),</span>
+    <span class="n">text</span><span class="o">=</span><span class="s2">"model_dump / JSON"</span><span class="p">,</span>
+    <span class="n">text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">),</span>
+<span class="p">)</span>
+
+<span class="n">save</span><span class="p">()</span>
+</code></pre>
+</details>
+<hr />
+<h2>1. Normalizing &amp; Checking Fields with <code>@field_validator</code></h2>
+<p><code>@field_validator</code> attaches custom validation or normalization logic to one or more named fields on a <code>BaseModel</code>. Always place <code>@classmethod</code> immediately beneath <code>@field_validator(...)</code> and choose the execution <code>mode</code> based on whether your code expects raw input or an already-parsed Python type:</p>
+<ul>
+<li><strong><code>mode=&quot;before&quot;</code> (Raw Input Normalization)</strong>: Runs <em>before</em> Pydantic's Rust core parses the field. Because incoming data could be any raw JSON or form value (<code>object</code>), guard type assumptions with <code>isinstance(...)</code>—for example, splitting a comma-separated string <code>&quot; python, fastapi , ai &quot;</code> into <code>[&quot;python&quot;, &quot;fastapi&quot;, &quot;ai&quot;]</code> while letting native <code>list[str]</code> inputs pass straight through.</li>
+<li><strong><code>mode=&quot;after&quot;</code> (Default — Typed Single-Field Validation)</strong>: Runs <em>after</em> Rust core validation succeeds, guaranteeing that <code>value</code> already matches the annotated Python type (<code>str</code>). Raise a <code>ValueError</code> with a clear message whenever a domain rule fails; Pydantic automatically wraps it into a structured <code>ValidationError</code>.</li>
+</ul>
+
+  </div>
+  <div class="nb-cell nb-code-cell nb-setup-cell">
+    <div class="nb-input">
+      <div class="nb-prompt nb-in-prompt">In [setup]:</div>
+      <div class="nb-code-area">
+        <pre><code class="language-bash">!pip<span class="w"> </span>install<span class="w"> </span>-q<span class="w"> </span>pydantic
+</code></pre>
+      </div>
+    </div>
+  </div>
+  <div class="nb-cell nb-code-cell">
+    <div class="nb-input">
+      <div class="nb-prompt nb-in-prompt">In [1]:</div>
+      <div class="nb-code-area">
+        <pre><code class="language-python"><span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseModel</span><span class="p">,</span> <span class="n">ValidationError</span><span class="p">,</span> <span class="n">field_validator</span>
+
+<span class="n">RESERVED_USERNAMES</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"admin"</span><span class="p">,</span> <span class="s2">"root"</span><span class="p">,</span> <span class="s2">"system"</span><span class="p">}</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">UserProfile</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="n">username</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">tags</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="nd">@field_validator</span><span class="p">(</span><span class="s2">"tags"</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">"before"</span><span class="p">)</span>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">split_csv_tags</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">object</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">return</span> <span class="p">[</span><span class="n">tag</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">value</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">","</span><span class="p">)</span> <span class="k">if</span> <span class="n">tag</span><span class="o">.</span><span class="n">strip</span><span class="p">()]</span>
+        <span class="k">return</span> <span class="n">value</span>
+
+    <span class="nd">@field_validator</span><span class="p">(</span><span class="s2">"username"</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">"after"</span><span class="p">)</span>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">normalize_and_check_username</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">cleaned</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">cleaned</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"username cannot be blank"</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">cleaned</span> <span class="ow">in</span> <span class="n">RESERVED_USERNAMES</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="n">cleaned</span><span class="si">}</span><span class="s2">' is a reserved username"</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">cleaned</span>
+
+
+<span class="n">profile</span> <span class="o">=</span> <span class="n">UserProfile</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="s2">"  Alice_Dev  "</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="s2">" python, fastapi , ai "</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Normalized profile:"</span><span class="p">,</span> <span class="n">profile</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Dumped dict:"</span><span class="p">,</span> <span class="n">profile</span><span class="o">.</span><span class="n">model_dump</span><span class="p">())</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">UserProfile</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="s2">"Admin"</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="p">[</span><span class="s2">"ops"</span><span class="p">,</span> <span class="s2">"security"</span><span class="p">])</span>
+<span class="k">except</span> <span class="n">ValidationError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Rejected reserved username:"</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">issue</span> <span class="ow">in</span> <span class="n">err</span><span class="o">.</span><span class="n">errors</span><span class="p">():</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  loc=</span><span class="si">{</span><span class="n">issue</span><span class="p">[</span><span class="s1">'loc'</span><span class="p">]</span><span class="si">}</span><span class="s2"> | type=</span><span class="si">{</span><span class="n">issue</span><span class="p">[</span><span class="s1">'type'</span><span class="p">]</span><span class="si">}</span><span class="s2"> | msg=</span><span class="si">{</span><span class="n">issue</span><span class="p">[</span><span class="s1">'msg'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</code></pre>
+      </div>
+    </div>
+    <div class="nb-output">
+      <div class="nb-prompt nb-out-prompt">Out [1]:</div>
+      <div class="nb-output-area">
+        <pre class="nb-stream-stdout">Normalized profile: username=&#x27;alice_dev&#x27; tags=[&#x27;python&#x27;, &#x27;fastapi&#x27;, &#x27;ai&#x27;]
+Dumped dict: {&#x27;username&#x27;: &#x27;alice_dev&#x27;, &#x27;tags&#x27;: [&#x27;python&#x27;, &#x27;fastapi&#x27;, &#x27;ai&#x27;]}
+
+Rejected reserved username:
+  loc=(&#x27;username&#x27;,) | type=value_error | msg=Value error, &#x27;admin&#x27; is a reserved username
+</pre>
+      </div>
+    </div>
+  </div>
+  <div class="nb-cell nb-markdown-cell">
+<blockquote>
+<p><strong>Note:</strong> Raise <code>ValueError</code> (or <code>AssertionError</code>) inside validators rather than instantiating <code>ValidationError</code> directly. Pydantic v2 catches <code>ValueError</code> and enriches it with the exact field path (<code>loc</code>), input value, and <code>value_error</code> metadata.</p>
+</blockquote>
+<hr />
+<h2>2. Cross-Field Rules (<code>@model_validator</code>) &amp; Derived <code>@computed_field</code>s</h2>
+<p>Single-field validators operate in isolation—they should not depend on sibling fields that might have failed validation or been declared later. When a rule spans multiple fields, or when downstream APIs need derived attributes serialized into JSON, reach for <code>@model_validator(mode=&quot;after&quot;)</code> and <code>@computed_field</code>:</p>
+<ul>
+<li><strong><code>@model_validator(mode=&quot;after&quot;)</code></strong>: Runs as an instance method receiving <code>self</code> once <strong>all</strong> individual fields have passed validation and type coercion (for example, <code>check_in</code> and <code>check_out</code> are already <code>datetime.date</code> objects). Enforce cross-field invariants like <code>self.check_out &gt; self.check_in</code> and always <code>return self</code>.</li>
+<li><strong><code>@computed_field</code> + <code>@property</code></strong>: Whereas a plain Python <code>@property</code> is accessible in Python code (<code>booking.nights</code>) yet silently omitted during serialization, stacking <code>@computed_field</code> above <code>@property</code> includes the computed value automatically in both <code>model_dump()</code> and <code>model_dump_json()</code>.</li>
+</ul>
+
+<figure class="drawlib-figure align-center">
+  <img src="../images/03_validators_and_computed/ch03_cross_field_and_computed.png" alt="Figure 3-2: Single-Field vs. Cross-Field Validation and @computed_field Serialization" loading="lazy">
+  <figcaption>Figure 3-2: Single-Field vs. Cross-Field Validation and @computed_field Serialization</figcaption>
+</figure>
+<details class="drawlib-code-fold">
+  <summary>View Drawlib Python Code</summary>
+  <pre><code class="language-python"><span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.canvas</span><span class="w"> </span><span class="kn">import</span> <span class="n">save</span><span class="p">,</span> <span class="n">setup</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.icons</span><span class="w"> </span><span class="kn">import</span> <span class="n">phosphor</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.shapes</span><span class="w"> </span><span class="kn">import</span> <span class="n">rectangle</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.smartarts</span><span class="w"> </span><span class="kn">import</span> <span class="n">CardList</span><span class="p">,</span> <span class="n">Panel</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.styles</span><span class="w"> </span><span class="kn">import</span> <span class="n">Styles</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.text</span><span class="w"> </span><span class="kn">import</span> <span class="n">text</span>
+
+<span class="n">setup</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mi">156</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">76</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">150</span><span class="p">)</span>
+
+<span class="n">text</span><span class="p">(</span>
+    <span class="p">(</span><span class="mf">78.0</span><span class="p">,</span> <span class="mf">69.8</span><span class="p">),</span>
+    <span class="s2">"Role Split: @field_validator vs. @model_validator vs. @computed_field"</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">12.0</span><span class="p">),</span>
+<span class="p">)</span>
+
+<span class="n">hooks</span> <span class="o">=</span> <span class="n">CardList</span><span class="p">(</span>
+    <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Neutral</span><span class="p">,</span>
+    <span class="n">text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.8</span><span class="p">),</span>
+    <span class="n">description_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Dark</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">),</span>
+    <span class="n">badge_shape</span><span class="o">=</span><span class="s2">"rounded_rect"</span><span class="p">,</span>
+    <span class="n">badge_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryNeutral</span><span class="p">,</span>
+    <span class="n">badge_text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">),</span>
+    <span class="n">icon_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryBold</span><span class="p">,</span>
+    <span class="n">direction</span><span class="o">=</span><span class="s2">"vertical"</span><span class="p">,</span>
+    <span class="n">spacing</span><span class="o">=</span><span class="mf">3.2</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">hooks</span><span class="o">.</span><span class="n">add</span><span class="p">(</span>
+    <span class="s2">"@field_validator (Single Field)"</span><span class="p">,</span>
+    <span class="s1">'Clean raw input (mode="before") or</span><span class="se">\n</span><span class="s1">validate 1 typed value (mode="after")'</span><span class="p">,</span>
+    <span class="n">badge_text</span><span class="o">=</span><span class="s2">"cls"</span><span class="p">,</span>
+    <span class="n">icon</span><span class="o">=</span><span class="n">phosphor</span><span class="o">.</span><span class="n">funnel</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">hooks</span><span class="o">.</span><span class="n">add</span><span class="p">(</span>
+    <span class="s1">'@model_validator(mode="after")'</span><span class="p">,</span>
+    <span class="s2">"Inspect populated self across fields</span><span class="se">\n</span><span class="s2">(e.g., check_out &gt; check_in); return self"</span><span class="p">,</span>
+    <span class="n">badge_text</span><span class="o">=</span><span class="s2">"self"</span><span class="p">,</span>
+    <span class="n">icon</span><span class="o">=</span><span class="n">phosphor</span><span class="o">.</span><span class="n">arrows_left_right</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryNeutral</span><span class="p">,</span>
+    <span class="n">badge_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryFlat</span><span class="p">,</span>
+    <span class="n">badge_text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">WhiteBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">),</span>
+    <span class="n">icon_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">WhiteBold</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">hooks</span><span class="o">.</span><span class="n">add</span><span class="p">(</span>
+    <span class="s2">"@computed_field + @property"</span><span class="p">,</span>
+    <span class="s2">"Derive read-only fields from self;</span><span class="se">\n</span><span class="s2">exported in model_dump() &amp; JSON"</span><span class="p">,</span>
+    <span class="n">badge_text</span><span class="o">=</span><span class="s2">"JSON"</span><span class="p">,</span>
+    <span class="n">icon</span><span class="o">=</span><span class="n">phosphor</span><span class="o">.</span><span class="n">calculator</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">SecondaryNeutral</span><span class="p">,</span>
+    <span class="n">badge_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">White</span><span class="p">,</span>
+    <span class="n">badge_text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">SecondaryBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">),</span>
+    <span class="n">icon_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">SecondaryBold</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">hooks</span><span class="o">.</span><span class="n">draw</span><span class="p">(</span><span class="n">xy</span><span class="o">=</span><span class="p">(</span><span class="mf">5.0</span><span class="p">,</span> <span class="mf">6.0</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">88.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">58.0</span><span class="p">,</span> <span class="n">align</span><span class="o">=</span><span class="s2">"bottom_left"</span><span class="p">)</span>
+
+<span class="n">out_panel</span> <span class="o">=</span> <span class="n">Panel</span><span class="p">(</span>
+    <span class="s2">"Serialization Check"</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Neutral</span><span class="p">,</span>
+    <span class="n">header_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryFlat</span><span class="p">,</span>
+    <span class="n">text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">WhiteBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.8</span><span class="p">),</span>
+    <span class="n">icon</span><span class="o">=</span><span class="n">phosphor</span><span class="o">.</span><span class="n">file_code</span><span class="p">,</span>
+    <span class="n">icon_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">WhiteBold</span><span class="p">,</span>
+    <span class="n">header_variant</span><span class="o">=</span><span class="s2">"filled"</span><span class="p">,</span>
+    <span class="n">header_height</span><span class="o">=</span><span class="mf">9.0</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">out_panel</span><span class="o">.</span><span class="n">draw</span><span class="p">((</span><span class="mf">97.0</span><span class="p">,</span> <span class="mf">6.0</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">54.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">58.0</span><span class="p">,</span> <span class="n">align</span><span class="o">=</span><span class="s2">"bottom_left"</span><span class="p">)</span>
+
+<span class="c1"># Top comparison card: Plain @property</span>
+<span class="n">rectangle</span><span class="p">((</span><span class="mf">124.0</span><span class="p">,</span> <span class="mf">42.5</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">47.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">19.0</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">White</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">1.8</span><span class="p">))</span>
+<span class="n">phosphor</span><span class="o">.</span><span class="n">x_circle</span><span class="p">((</span><span class="mf">105.5</span><span class="p">,</span> <span class="mf">47.5</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">4.2</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DangerBold</span><span class="p">)</span>
+<span class="n">text</span><span class="p">((</span><span class="mf">109.2</span><span class="p">,</span> <span class="mf">47.5</span><span class="p">),</span> <span class="s2">"Plain @property"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.5</span><span class="p">,</span> <span class="n">halign</span><span class="o">=</span><span class="s2">"left"</span><span class="p">))</span>
+<span class="n">text</span><span class="p">((</span><span class="mf">104.0</span><span class="p">,</span> <span class="mf">41.2</span><span class="p">),</span> <span class="s2">"obj.nights  -&gt;  4 (Python OK)"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Dark</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">halign</span><span class="o">=</span><span class="s2">"left"</span><span class="p">))</span>
+<span class="n">text</span><span class="p">((</span><span class="mf">104.0</span><span class="p">,</span> <span class="mf">36.0</span><span class="p">),</span> <span class="s2">"model_dump  -&gt;  Omitted"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DangerBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">halign</span><span class="o">=</span><span class="s2">"left"</span><span class="p">))</span>
+
+<span class="c1"># Bottom comparison card: @computed_field</span>
+<span class="n">rectangle</span><span class="p">((</span><span class="mf">124.0</span><span class="p">,</span> <span class="mf">19.0</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">47.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">20.5</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryNeutral</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">1.8</span><span class="p">))</span>
+<span class="n">phosphor</span><span class="o">.</span><span class="n">check_circle</span><span class="p">((</span><span class="mf">105.5</span><span class="p">,</span> <span class="mf">24.5</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">4.2</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">SuccessBold</span><span class="p">)</span>
+<span class="n">text</span><span class="p">((</span><span class="mf">109.2</span><span class="p">,</span> <span class="mf">24.5</span><span class="p">),</span> <span class="s2">"@computed_field"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.5</span><span class="p">,</span> <span class="n">halign</span><span class="o">=</span><span class="s2">"left"</span><span class="p">))</span>
+<span class="n">text</span><span class="p">((</span><span class="mf">104.0</span><span class="p">,</span> <span class="mf">18.0</span><span class="p">),</span> <span class="s2">"obj.nights  -&gt;  4 (Python OK)"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Dark</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">halign</span><span class="o">=</span><span class="s2">"left"</span><span class="p">))</span>
+<span class="n">text</span><span class="p">((</span><span class="mf">104.0</span><span class="p">,</span> <span class="mf">12.8</span><span class="p">),</span> <span class="s2">"model_dump  -&gt;  Included!"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">SuccessBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">halign</span><span class="o">=</span><span class="s2">"left"</span><span class="p">))</span>
+
+<span class="n">save</span><span class="p">()</span>
+</code></pre>
+</details>
+<h3>Validating Date Ranges &amp; Serializing Computed Totals</h3>
+<p>Let's combine <code>@model_validator(mode=&quot;after&quot;)</code> and <code>@computed_field</code> in a <code>HotelBooking</code> model. Notice how ISO date strings (<code>&quot;2026-05-10&quot;</code>) are parsed into <code>datetime.date</code> instances first, checked for <code>check_out &gt; check_in</code>, and serialized with <code>nights</code> and <code>total_price</code> included automatically in the JSON payload:</p>
+
+  </div>
+  <div class="nb-cell nb-code-cell">
+    <div class="nb-input">
+      <div class="nb-prompt nb-in-prompt">In [2]:</div>
+      <div class="nb-code-area">
+        <pre><code class="language-python"><span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">date</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Self</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseModel</span><span class="p">,</span> <span class="n">Field</span><span class="p">,</span> <span class="n">ValidationError</span><span class="p">,</span> <span class="n">computed_field</span><span class="p">,</span> <span class="n">model_validator</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">HotelBooking</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="n">check_in</span><span class="p">:</span> <span class="n">date</span>
+    <span class="n">check_out</span><span class="p">:</span> <span class="n">date</span>
+    <span class="n">nightly_rate</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">gt</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="nd">@model_validator</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">"after"</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_date_order</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_out</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_in</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"check_out must be strictly after check_in"</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="nd">@computed_field</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">nights</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">check_out</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_in</span><span class="p">)</span><span class="o">.</span><span class="n">days</span>
+
+    <span class="nd">@computed_field</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">total_price</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">nights</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">nightly_rate</span>
+
+
+<span class="n">booking</span> <span class="o">=</span> <span class="n">HotelBooking</span><span class="p">(</span>
+    <span class="n">check_in</span><span class="o">=</span><span class="s2">"2026-05-10"</span><span class="p">,</span>
+    <span class="n">check_out</span><span class="o">=</span><span class="s2">"2026-05-14"</span><span class="p">,</span>
+    <span class="n">nightly_rate</span><span class="o">=</span><span class="mi">180</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Serialized JSON with @computed_field values:"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">booking</span><span class="o">.</span><span class="n">model_dump_json</span><span class="p">(</span><span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">HotelBooking</span><span class="p">(</span>
+        <span class="n">check_in</span><span class="o">=</span><span class="s2">"2026-05-14"</span><span class="p">,</span>
+        <span class="n">check_out</span><span class="o">=</span><span class="s2">"2026-05-10"</span><span class="p">,</span>
+        <span class="n">nightly_rate</span><span class="o">=</span><span class="mi">180</span><span class="p">,</span>
+    <span class="p">)</span>
+<span class="k">except</span> <span class="n">ValidationError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Caught invalid date range:"</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">issue</span> <span class="ow">in</span> <span class="n">err</span><span class="o">.</span><span class="n">errors</span><span class="p">():</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  loc=</span><span class="si">{</span><span class="n">issue</span><span class="p">[</span><span class="s1">'loc'</span><span class="p">]</span><span class="si">}</span><span class="s2"> | type=</span><span class="si">{</span><span class="n">issue</span><span class="p">[</span><span class="s1">'type'</span><span class="p">]</span><span class="si">}</span><span class="s2"> | msg=</span><span class="si">{</span><span class="n">issue</span><span class="p">[</span><span class="s1">'msg'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</code></pre>
+      </div>
+    </div>
+    <div class="nb-output">
+      <div class="nb-prompt nb-out-prompt">Out [2]:</div>
+      <div class="nb-output-area">
+        <pre class="nb-stream-stdout">Serialized JSON with @computed_field values:
+{
+  &quot;check_in&quot;: &quot;2026-05-10&quot;,
+  &quot;check_out&quot;: &quot;2026-05-14&quot;,
+  &quot;nightly_rate&quot;: 180,
+  &quot;nights&quot;: 4,
+  &quot;total_price&quot;: 720
+}
+
+Caught invalid date range:
+  loc=() | type=value_error | msg=Value error, check_out must be strictly after check_in
+</pre>
+      </div>
+    </div>
+  </div>
+  <div class="nb-cell nb-markdown-cell">
+<h3>Key Takeaways</h3>
+<ul>
+<li><strong>Normalize Raw Payloads in <code>mode=&quot;before&quot;</code>, Validate Types in <code>mode=&quot;after&quot;</code></strong>: Let <code>pydantic-core</code> perform type coercion in between so <code>mode=&quot;after&quot;</code> validators receive guaranteed Python types.</li>
+<li><strong>Enforce Multi-Field Invariants in <code>@model_validator(mode=&quot;after&quot;)</code></strong>: Validate relationships like <code>check_out &gt; check_in</code> against the fully populated <code>self</code> instance and always <code>return self</code>.</li>
+<li><strong>Expose Derived Fields via <code>@computed_field</code></strong>: Stack <code>@computed_field</code> above <code>@property</code> whenever calculated values such as <code>nights</code> and <code>total_price</code> belong in <code>model_dump()</code> and JSON API responses.</li>
+</ul>
+
+  </div>
+</div>
+            </main>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const themeBtn = document.getElementById('theme-toggle');
+            if (themeBtn) {
+                themeBtn.addEventListener('click', function() {
+                    const current = document.documentElement.getAttribute('data-theme');
+                    const next = current === 'dark' ? 'light' : 'dark';
+                    document.documentElement.setAttribute('data-theme', next);
+                    localStorage.setItem('drawlib-theme', next);
+                });
+            }
+
+            const langDropdowns = document.querySelectorAll('.lang-dropdown');
+            if (langDropdowns.length > 0) {
+                document.addEventListener('click', function(e) {
+                    langDropdowns.forEach(function(dd) {
+                        if (dd.hasAttribute('open') && !dd.contains(e.target)) {
+                            dd.removeAttribute('open');
+                        }
+                    });
+                });
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape') {
+                        langDropdowns.forEach(function(dd) {
+                            dd.removeAttribute('open');
+                        });
+                    }
+                });
+            }
+
+            const menuBtn = document.getElementById('menu-toggle');
+            const sidebar = document.querySelector('.sidebar');
+            if (menuBtn && sidebar) {
+                function setMenuOpen(open) {
+                    sidebar.classList.toggle('is-open', open);
+                    menuBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+                    document.body.classList.toggle('menu-open', open);
+                    if (open) {
+                        const menu = sidebar.querySelector('.sidebar-menu');
+                        if (menu) {
+                            menu.scrollTop = 0;
+                        }
+                    }
+                }
+
+                menuBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const willOpen = !sidebar.classList.contains('is-open');
+                    setMenuOpen(willOpen);
+                });
+
+                document.addEventListener('click', function(e) {
+                    if (sidebar.classList.contains('is-open') && !sidebar.contains(e.target)) {
+                        setMenuOpen(false);
+                    }
+                });
+
+                const navLinks = sidebar.querySelectorAll('.nav-item a');
+                navLinks.forEach(function(link) {
+                    link.addEventListener('click', function() {
+                        setMenuOpen(false);
+                    });
+                });
+
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape' && sidebar.classList.contains('is-open')) {
+                        setMenuOpen(false);
+                    }
+                });
+
+                window.addEventListener('resize', function() {
+                    if (window.innerWidth > 768 && sidebar.classList.contains('is-open')) {
+                        setMenuOpen(false);
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

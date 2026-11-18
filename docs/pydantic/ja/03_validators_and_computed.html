@@ -1,0 +1,606 @@
+<!--
+ Copyright (c) 2026 Yuichi Ito (yuichi@yuichi.com)
+
+ This software is licensed under the Apache License, Version 2.0.
+ For more information, please visit: https://github.com/yuichi110/drawlib
+
+ This software is provided "as is", without warranty of any kind,
+ express or implied, including but not limited to the warranties of
+ merchantability, fitness for a particular purpose and noninfringement.
+-->
+<!DOCTYPE html>
+<html lang="ja" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>03. カスタムバリデータと @computed_field</title>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-S9N5BZ1VRC"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-S9N5BZ1VRC');
+    </script>
+    <script>
+        (function() {
+            const saved = localStorage.getItem('drawlib-theme');
+            if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            } else {
+                document.documentElement.setAttribute('data-theme', 'light');
+            }
+        })();
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    
+    <link rel="alternate" hreflang="en" href="https://examples.drawlib.com/pydantic/en/03_validators_and_computed.html">
+    
+    <link rel="alternate" hreflang="ja" href="https://examples.drawlib.com/pydantic/ja/03_validators_and_computed.html">
+    
+    <link rel="alternate" hreflang="x-default" href="https://examples.drawlib.com/pydantic/en/03_validators_and_computed.html">
+    
+    
+    
+    <meta name="description" content="組み込みの Field(...) 制約だけで表現しきれない実務のドメインルールは、パース前の正規化（@field_validator(..., mode=&quot;before&quot;)）、型変換後の単一項目チェック（@field_validator(...…">
+    <link rel="canonical" href="https://examples.drawlib.com/pydantic/ja/03_validators_and_computed.html">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Pydantic v2 Hands-On Cookbook">
+    <meta property="og:title" content="03. カスタムバリデータと @computed_field — Pydantic v2 Hands-On Cookbook">
+    <meta property="og:description" content="組み込みの Field(...) 制約だけで表現しきれない実務のドメインルールは、パース前の正規化（@field_validator(..., mode=&quot;before&quot;)）、型変換後の単一項目チェック（@field_validator(...…">
+    <meta property="og:url" content="https://examples.drawlib.com/pydantic/ja/03_validators_and_computed.html">
+    <meta property="og:locale" content="ja_JP">
+    <meta property="og:locale:alternate" content="en_US">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="03. カスタムバリデータと @computed_field — Pydantic v2 Hands-On Cookbook">
+    <meta name="twitter:description" content="組み込みの Field(...) 制約だけで表現しきれない実務のドメインルールは、パース前の正規化（@field_validator(..., mode=&quot;before&quot;)）、型変換後の単一項目チェック（@field_validator(...…">
+    
+    
+    <link rel="icon" type="image/png" href="../_assets/favicon.png">
+    
+    
+    <link rel="stylesheet" href="style.css">
+    
+    
+</head>
+<body>
+    <div class="demo-banner" role="region" aria-label="ポータルナビゲーション">
+        <div class="demo-banner-inner">
+            <span class="demo-banner-badge">DRAWLIB SHOWCASE</span>
+            <span class="demo-banner-text">
+                <a href="https://www.drawlib.com/ja/" target="_blank" rel="noopener noreferrer">Drawlib</a> で構築された Jupyter / Colab ノートブックのサンプルプロジェクト（<code>type = "jupyter"</code>）
+            </span>
+            <span class="demo-banner-links">
+                <a href="../../index.html">All Examples</a>
+                <span class="demo-banner-sep">·</span>
+                <a href="https://github.com/yuichi110/drawlib-examples/tree/main/examples/jupyter/pydantic" target="_blank" rel="noopener noreferrer">Source (GitHub) ↗</a>
+                <span class="demo-banner-sep">·</span>
+                <a href="https://www.drawlib.com/ja/" target="_blank" rel="noopener noreferrer">Drawlib ↗</a>
+            </span>
+        </div>
+    </div>
+    
+    <div class="doc-layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="index.html" class="sidebar-brand" aria-label="Pydantic v2 Hands-On Cookbook">
+                    
+                    Pydantic v2 Hands-On Cookbook
+                    
+                </a>
+                <div class="sidebar-header-actions">
+                    <button type="button" id="theme-toggle" class="theme-toggle-btn" aria-label="Toggle theme">
+                        <svg class="icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+                        <svg class="icon-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                    </button>
+                    <button type="button" id="menu-toggle" class="menu-toggle-btn" aria-label="Toggle navigation" aria-expanded="false">
+                        <svg class="icon-hamburger" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+                        <svg class="icon-close" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
+                </div>
+            </div>
+            <div class="sidebar-menu">
+                
+                    <div class="sidebar-heading">Notebooks</div>
+                    <ul class="nav-list">
+                        
+                        <li class="nav-item ">
+                            <a href="01_basemodel_quickstart.html" >01. BaseModel の基本と型変換（Lax vs. Strict モード）</a>
+                        </li>
+                        
+                        <li class="nav-item ">
+                            <a href="02_fields_and_errors.html" >02. Field 制約と ValidationError の構造理解</a>
+                        </li>
+                        
+                        <li class="nav-item active">
+                            <a href="03_validators_and_computed.html" >03. カスタムバリデータと @computed_field</a>
+                        </li>
+                        
+                        <li class="nav-item ">
+                            <a href="04_nested_unions_and_schema.html" >04. ネスト構造・判別共用体（Discriminated Union）・JSON Schema</a>
+                        </li>
+                        
+                    </ul>
+                
+            </div>
+        </aside>
+        <div class="content-wrapper">
+            <header class="top-bar">
+                <div class="breadcrumbs">
+                    <span class="crumb">Notebooks</span>
+                    <span class="crumb-separator">&raquo;</span>
+                    <span class="crumb active">03. カスタムバリデータと @computed_field</span>
+                </div>
+                
+                <div class="lang-switcher">
+                    <details class="lang-dropdown">
+                        <summary class="lang-dropdown-btn" aria-label="Select language">
+                            <svg class="lang-globe-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                            <span class="lang-current-label">日本語</span>
+                            <svg class="lang-caret-icon" viewBox="0 0 24 24" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        </summary>
+                        <div class="lang-dropdown-menu" role="menu">
+                            
+                            <a href="../en/03_validators_and_computed.html" class="lang-option" lang="en" hreflang="en" >
+                                <span>English</span>
+                                
+                            </a>
+                            
+                            <a href="03_validators_and_computed.html" class="lang-option active" lang="ja" hreflang="ja" aria-current="page">
+                                <span>日本語</span>
+                                
+                                <svg class="lang-check-icon" viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                
+                            </a>
+                            
+                        </div>
+                    </details>
+                </div>
+                
+            </header>
+            <main class="main-content">
+                <div class="jupyter-notebook">
+  <div class="nb-toolbar">
+    <a class="nb-btn nb-btn-colab" href="https://colab.research.google.com/github/yuichi110/drawlib-examples/blob/main/docs/pydantic/ja/03_validators_and_computed.ipynb" target="_blank" rel="noopener noreferrer"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"></a>
+    <a class="nb-btn nb-btn-download" href="03_validators_and_computed.ipynb" download="03_validators_and_computed.ipynb">⬇ Download .ipynb</a>
+    <span class="nb-status-pill">✓ Dry-Run Verified (2 cells)</span>
+  </div>
+  <div class="nb-cell nb-markdown-cell">
+<h1>03. カスタムバリデータと @computed_field</h1>
+<p>組み込みの <code>Field(...)</code> 制約だけで表現しきれない実務のドメインルールは、パース前の正規化（<code>@field_validator(..., mode=&quot;before&quot;)</code>）、型変換後の単一項目チェック（<code>@field_validator(..., mode=&quot;after&quot;)</code>）、複数フィールド間の整合性検証（<code>@model_validator(mode=&quot;after&quot;)</code>）、そしてシリアライズ対象の派生プロパティ（<code>@computed_field</code>）という4段階で実装します。
+これら4つのフックの正確な実行順序を押さえることで、Pydantic v2 の高速な Rust コアによる型変換を活かしつつ、入力クレンジングから JSON 出力への計算結果の自動付与までを一貫して記述できます。</p>
+
+<figure class="drawlib-figure align-center">
+  <img src="../images/03_validators_and_computed/ch03_validator_lifecycle_ja.png" alt="図3-1: Pydantic v2 におけるバリデータ実行順序と @computed_field のライフサイクル" loading="lazy">
+  <figcaption>図3-1: Pydantic v2 におけるバリデータ実行順序と @computed_field のライフサイクル</figcaption>
+</figure>
+<details class="drawlib-code-fold">
+  <summary>View Drawlib Python Code</summary>
+  <pre><code class="language-python"><span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.canvas</span><span class="w"> </span><span class="kn">import</span> <span class="n">save</span><span class="p">,</span> <span class="n">setup</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.icons</span><span class="w"> </span><span class="kn">import</span> <span class="n">phosphor</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.shapes</span><span class="w"> </span><span class="kn">import</span> <span class="n">rectangle</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.smartarts</span><span class="w"> </span><span class="kn">import</span> <span class="n">CardList</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.styles</span><span class="w"> </span><span class="kn">import</span> <span class="n">Styles</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.text</span><span class="w"> </span><span class="kn">import</span> <span class="n">text</span>
+
+<span class="n">setup</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mi">152</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">74</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">150</span><span class="p">)</span>
+
+<span class="n">text</span><span class="p">(</span>
+    <span class="p">(</span><span class="mf">76.0</span><span class="p">,</span> <span class="mf">67.8</span><span class="p">),</span>
+    <span class="s2">"Pydantic v2 におけるバリデータ実行順序と @computed_field"</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">12.0</span><span class="p">),</span>
+<span class="p">)</span>
+
+<span class="n">stages</span> <span class="o">=</span> <span class="n">CardList</span><span class="p">(</span>
+    <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Neutral</span><span class="p">,</span>
+    <span class="n">text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.5</span><span class="p">),</span>
+    <span class="n">description_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Dark</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">),</span>
+    <span class="n">badge_shape</span><span class="o">=</span><span class="s2">"circle"</span><span class="p">,</span>
+    <span class="n">badge_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryNeutral</span><span class="p">,</span>
+    <span class="n">icon_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryBold</span><span class="p">,</span>
+    <span class="n">direction</span><span class="o">=</span><span class="s2">"horizontal"</span><span class="p">,</span>
+    <span class="n">show_arrows</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">arrow_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Dark</span><span class="p">,</span>
+    <span class="n">spacing</span><span class="o">=</span><span class="mf">4.6</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">stages</span><span class="o">.</span><span class="n">add</span><span class="p">(</span>
+    <span class="s1">'1. パース前正規化</span><span class="se">\n</span><span class="s1">mode="before"'</span><span class="p">,</span>
+    <span class="s2">"@field_validator</span><span class="se">\n</span><span class="s2">生の文字列や入力を</span><span class="se">\n</span><span class="s2">型変換前に整形"</span><span class="p">,</span>
+    <span class="n">icon</span><span class="o">=</span><span class="n">phosphor</span><span class="o">.</span><span class="n">funnel</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">stages</span><span class="o">.</span><span class="n">add</span><span class="p">(</span>
+    <span class="s2">"2. Rust コア検証</span><span class="se">\n</span><span class="s2">型変換・Field()"</span><span class="p">,</span>
+    <span class="s2">"pydantic-core</span><span class="se">\n</span><span class="s2">高速な型強制変換と</span><span class="se">\n</span><span class="s2">Field 制約チェック"</span><span class="p">,</span>
+    <span class="n">icon</span><span class="o">=</span><span class="n">phosphor</span><span class="o">.</span><span class="n">cpu</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryFlat</span><span class="p">,</span>
+    <span class="n">text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">WhiteBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.5</span><span class="p">),</span>
+    <span class="n">description_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">White</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">),</span>
+    <span class="n">badge_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">White</span><span class="p">,</span>
+    <span class="n">icon_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryBold</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">stages</span><span class="o">.</span><span class="n">add</span><span class="p">(</span>
+    <span class="s1">'3. 型変換後の検証</span><span class="se">\n</span><span class="s1">mode="after"'</span><span class="p">,</span>
+    <span class="s2">"@field_validator と</span><span class="se">\n</span><span class="s2">@model_validator</span><span class="se">\n</span><span class="s2">型安全な相関検証"</span><span class="p">,</span>
+    <span class="n">icon</span><span class="o">=</span><span class="n">phosphor</span><span class="o">.</span><span class="n">shield_check</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryNeutral</span><span class="p">,</span>
+    <span class="n">badge_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">White</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">stages</span><span class="o">.</span><span class="n">add</span><span class="p">(</span>
+    <span class="s2">"4. 派生プロパティ</span><span class="se">\n</span><span class="s2">@computed_field"</span><span class="p">,</span>
+    <span class="s2">"@property の値を</span><span class="se">\n</span><span class="s2">model_dump / JSON</span><span class="se">\n</span><span class="s2">へ自動で出力"</span><span class="p">,</span>
+    <span class="n">icon</span><span class="o">=</span><span class="n">phosphor</span><span class="o">.</span><span class="n">brackets_curly</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">SecondaryNeutral</span><span class="p">,</span>
+    <span class="n">badge_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">White</span><span class="p">,</span>
+    <span class="n">icon_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">SecondaryBold</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">stages</span><span class="o">.</span><span class="n">draw</span><span class="p">(</span><span class="n">xy</span><span class="o">=</span><span class="p">(</span><span class="mf">5.0</span><span class="p">,</span> <span class="mf">15.2</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">142.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">47.0</span><span class="p">,</span> <span class="n">align</span><span class="o">=</span><span class="s2">"bottom_left"</span><span class="p">)</span>
+
+<span class="c1"># Phase summary bars underneath the 4 stages</span>
+<span class="n">rectangle</span><span class="p">(</span>
+    <span class="p">(</span><span class="mf">57.675</span><span class="p">,</span> <span class="mf">8.4</span><span class="p">),</span>
+    <span class="n">width</span><span class="o">=</span><span class="mf">105.35</span><span class="p">,</span>
+    <span class="n">height</span><span class="o">=</span><span class="mf">6.8</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Neutral</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">1.5</span><span class="p">),</span>
+    <span class="n">text</span><span class="o">=</span><span class="s2">"バリデーション段階: BaseModel(...) / model_validate()"</span><span class="p">,</span>
+    <span class="n">text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">),</span>
+<span class="p">)</span>
+<span class="n">rectangle</span><span class="p">(</span>
+    <span class="p">(</span><span class="mf">130.975</span><span class="p">,</span> <span class="mf">8.4</span><span class="p">),</span>
+    <span class="n">width</span><span class="o">=</span><span class="mf">32.05</span><span class="p">,</span>
+    <span class="n">height</span><span class="o">=</span><span class="mf">6.8</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">SecondaryNeutral</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">1.5</span><span class="p">),</span>
+    <span class="n">text</span><span class="o">=</span><span class="s2">"model_dump / JSON"</span><span class="p">,</span>
+    <span class="n">text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">),</span>
+<span class="p">)</span>
+
+<span class="n">save</span><span class="p">()</span>
+</code></pre>
+</details>
+<hr />
+<h2>1. <code>@field_validator</code> による単一フィールドの正規化と検証</h2>
+<p><code>@field_validator</code> は、<code>BaseModel</code> の特定フィールドに対してカスタムの前処理や検証ロジックを紐づけます。デコレータの直下に <code>@classmethod</code> を配置し、未パースの生データを扱うか型変換後の Python オブジェクトを扱うかに応じて <code>mode</code> を使い分けます。</p>
+<ul>
+<li><strong><code>mode=&quot;before&quot;</code>（パース前の入力正規化）</strong>: Pydantic の Rust コアが型変換を行う <em>前</em> に実行されます。任意の未検証データ（<code>object</code>）が渡されるため、<code>isinstance(...)</code> で型を確認した上でカンマ区切り文字列 <code>&quot; python, fastapi , ai &quot;</code> を <code>[&quot;python&quot;, &quot;fastapi&quot;, &quot;ai&quot;]</code> へ分割し、既に <code>list[str]</code> の入力はそのまま通過させます。</li>
+<li><strong><code>mode=&quot;after&quot;</code>（既定値・型変換後の単一項目チェック）</strong>: Rust コアの検証を通過した <em>後</em> に実行されるため、引数が注釈どおりの型（<code>str</code>）であることが保証されます。予約語 <code>&quot;admin&quot;</code> の拒否などドメインルールに違反する場合は <code>ValueError</code> を送出すると、Pydantic が自動的に構造化された <code>ValidationError</code> へ変換します。</li>
+</ul>
+
+  </div>
+  <div class="nb-cell nb-code-cell nb-setup-cell">
+    <div class="nb-input">
+      <div class="nb-prompt nb-in-prompt">In [setup]:</div>
+      <div class="nb-code-area">
+        <pre><code class="language-bash">!pip<span class="w"> </span>install<span class="w"> </span>-q<span class="w"> </span>pydantic
+</code></pre>
+      </div>
+    </div>
+  </div>
+  <div class="nb-cell nb-code-cell">
+    <div class="nb-input">
+      <div class="nb-prompt nb-in-prompt">In [1]:</div>
+      <div class="nb-code-area">
+        <pre><code class="language-python"><span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseModel</span><span class="p">,</span> <span class="n">ValidationError</span><span class="p">,</span> <span class="n">field_validator</span>
+
+<span class="n">RESERVED_USERNAMES</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"admin"</span><span class="p">,</span> <span class="s2">"root"</span><span class="p">,</span> <span class="s2">"system"</span><span class="p">}</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">UserProfile</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="n">username</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">tags</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="nd">@field_validator</span><span class="p">(</span><span class="s2">"tags"</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">"before"</span><span class="p">)</span>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">split_csv_tags</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">object</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">return</span> <span class="p">[</span><span class="n">tag</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">value</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">","</span><span class="p">)</span> <span class="k">if</span> <span class="n">tag</span><span class="o">.</span><span class="n">strip</span><span class="p">()]</span>
+        <span class="k">return</span> <span class="n">value</span>
+
+    <span class="nd">@field_validator</span><span class="p">(</span><span class="s2">"username"</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">"after"</span><span class="p">)</span>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">normalize_and_check_username</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">cleaned</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">cleaned</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"username cannot be blank"</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">cleaned</span> <span class="ow">in</span> <span class="n">RESERVED_USERNAMES</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="n">cleaned</span><span class="si">}</span><span class="s2">' is a reserved username"</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">cleaned</span>
+
+
+<span class="n">profile</span> <span class="o">=</span> <span class="n">UserProfile</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="s2">"  Alice_Dev  "</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="s2">" python, fastapi , ai "</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Normalized profile:"</span><span class="p">,</span> <span class="n">profile</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Dumped dict:"</span><span class="p">,</span> <span class="n">profile</span><span class="o">.</span><span class="n">model_dump</span><span class="p">())</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">UserProfile</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="s2">"Admin"</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="p">[</span><span class="s2">"ops"</span><span class="p">,</span> <span class="s2">"security"</span><span class="p">])</span>
+<span class="k">except</span> <span class="n">ValidationError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Rejected reserved username:"</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">issue</span> <span class="ow">in</span> <span class="n">err</span><span class="o">.</span><span class="n">errors</span><span class="p">():</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  loc=</span><span class="si">{</span><span class="n">issue</span><span class="p">[</span><span class="s1">'loc'</span><span class="p">]</span><span class="si">}</span><span class="s2"> | type=</span><span class="si">{</span><span class="n">issue</span><span class="p">[</span><span class="s1">'type'</span><span class="p">]</span><span class="si">}</span><span class="s2"> | msg=</span><span class="si">{</span><span class="n">issue</span><span class="p">[</span><span class="s1">'msg'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</code></pre>
+      </div>
+    </div>
+    <div class="nb-output">
+      <div class="nb-prompt nb-out-prompt">Out [1]:</div>
+      <div class="nb-output-area">
+        <pre class="nb-stream-stdout">Normalized profile: username=&#x27;alice_dev&#x27; tags=[&#x27;python&#x27;, &#x27;fastapi&#x27;, &#x27;ai&#x27;]
+Dumped dict: {&#x27;username&#x27;: &#x27;alice_dev&#x27;, &#x27;tags&#x27;: [&#x27;python&#x27;, &#x27;fastapi&#x27;, &#x27;ai&#x27;]}
+
+Rejected reserved username:
+  loc=(&#x27;username&#x27;,) | type=value_error | msg=Value error, &#x27;admin&#x27; is a reserved username
+</pre>
+      </div>
+    </div>
+  </div>
+  <div class="nb-cell nb-markdown-cell">
+<blockquote>
+<p><strong>補足:</strong> バリデータ内では <code>ValidationError</code> を直接生成せず、<code>ValueError</code>（または <code>AssertionError</code>）を送出してください。Pydantic v2 が <code>ValueError</code> を捕捉し、エラー発生箇所（<code>loc</code>）や入力値を付与した <code>ValidationError</code> を構築します。</p>
+</blockquote>
+<hr />
+<h2>2. 複数フィールド相関検証（<code>@model_validator</code>）と <code>@computed_field</code></h2>
+<p><code>@field_validator</code> は個々のフィールドを独立して検証するため、他フィールドとの前後関係や整合性の検証には向きません。複数フィールドにまたがる不変条件（インバリアント）の検証や、算出プロパティの JSON シリアライズには <code>@model_validator(mode=&quot;after&quot;)</code> と <code>@computed_field</code> を組み合わせます。</p>
+<ul>
+<li><strong><code>@model_validator(mode=&quot;after&quot;)</code></strong>: 全フィールドの型変換と単一検証が完了した後のインスタンス <code>self</code> を受け取ります（例: <code>check_in</code> と <code>check_out</code> は既に <code>datetime.date</code> 型）。<code>self.check_out &gt; self.check_in</code> のような相関ルールを検査し、最後に必ず <code>return self</code> を返します。</li>
+<li><strong><code>@computed_field</code> + <code>@property</code></strong>: 通常の Python <code>@property</code> はコード上から <code>booking.nights</code> で参照できてもシリアライズ時には除外されますが、<code>@computed_field</code> を <code>@property</code> の上に重ねると、<code>model_dump()</code> と <code>model_dump_json()</code> の出力に計算結果が自動的に含まれます。</li>
+</ul>
+
+<figure class="drawlib-figure align-center">
+  <img src="../images/03_validators_and_computed/ch03_cross_field_and_computed_ja.png" alt="図3-2: 単一フィールド検証・複数フィールド相関検証・@computed_field の役割分担" loading="lazy">
+  <figcaption>図3-2: 単一フィールド検証・複数フィールド相関検証・@computed_field の役割分担</figcaption>
+</figure>
+<details class="drawlib-code-fold">
+  <summary>View Drawlib Python Code</summary>
+  <pre><code class="language-python"><span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.canvas</span><span class="w"> </span><span class="kn">import</span> <span class="n">save</span><span class="p">,</span> <span class="n">setup</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.icons</span><span class="w"> </span><span class="kn">import</span> <span class="n">phosphor</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.shapes</span><span class="w"> </span><span class="kn">import</span> <span class="n">rectangle</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.smartarts</span><span class="w"> </span><span class="kn">import</span> <span class="n">CardList</span><span class="p">,</span> <span class="n">Panel</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.styles</span><span class="w"> </span><span class="kn">import</span> <span class="n">Styles</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">drawlib.text</span><span class="w"> </span><span class="kn">import</span> <span class="n">text</span>
+
+<span class="n">setup</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mi">156</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">76</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">150</span><span class="p">)</span>
+
+<span class="n">text</span><span class="p">(</span>
+    <span class="p">(</span><span class="mf">78.0</span><span class="p">,</span> <span class="mf">69.8</span><span class="p">),</span>
+    <span class="s2">"@field_validator・@model_validator・@computed_field の役割分担"</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">12.0</span><span class="p">),</span>
+<span class="p">)</span>
+
+<span class="n">hooks</span> <span class="o">=</span> <span class="n">CardList</span><span class="p">(</span>
+    <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Neutral</span><span class="p">,</span>
+    <span class="n">text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.8</span><span class="p">),</span>
+    <span class="n">description_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Dark</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">),</span>
+    <span class="n">badge_shape</span><span class="o">=</span><span class="s2">"rounded_rect"</span><span class="p">,</span>
+    <span class="n">badge_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryNeutral</span><span class="p">,</span>
+    <span class="n">badge_text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">),</span>
+    <span class="n">icon_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryBold</span><span class="p">,</span>
+    <span class="n">direction</span><span class="o">=</span><span class="s2">"vertical"</span><span class="p">,</span>
+    <span class="n">spacing</span><span class="o">=</span><span class="mf">3.2</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">hooks</span><span class="o">.</span><span class="n">add</span><span class="p">(</span>
+    <span class="s2">"@field_validator（単一フィールド）"</span><span class="p">,</span>
+    <span class="s1">'単一項目の前処理 (mode="before") や</span><span class="se">\n</span><span class="s1">型変換後の値検証 (mode="after")'</span><span class="p">,</span>
+    <span class="n">badge_text</span><span class="o">=</span><span class="s2">"cls"</span><span class="p">,</span>
+    <span class="n">icon</span><span class="o">=</span><span class="n">phosphor</span><span class="o">.</span><span class="n">funnel</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">hooks</span><span class="o">.</span><span class="n">add</span><span class="p">(</span>
+    <span class="s1">'@model_validator(mode="after")'</span><span class="p">,</span>
+    <span class="s2">"構築済みの self で複数項目を相関検証</span><span class="se">\n</span><span class="s2">(例: check_out &gt; check_in)・self を返却"</span><span class="p">,</span>
+    <span class="n">badge_text</span><span class="o">=</span><span class="s2">"self"</span><span class="p">,</span>
+    <span class="n">icon</span><span class="o">=</span><span class="n">phosphor</span><span class="o">.</span><span class="n">arrows_left_right</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryNeutral</span><span class="p">,</span>
+    <span class="n">badge_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryFlat</span><span class="p">,</span>
+    <span class="n">badge_text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">WhiteBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">),</span>
+    <span class="n">icon_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">WhiteBold</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">hooks</span><span class="o">.</span><span class="n">add</span><span class="p">(</span>
+    <span class="s2">"@computed_field + @property"</span><span class="p">,</span>
+    <span class="s2">"self から読み取り専用の派生値を算出し</span><span class="se">\n</span><span class="s2">model_dump() と JSON へ自動出力"</span><span class="p">,</span>
+    <span class="n">badge_text</span><span class="o">=</span><span class="s2">"JSON"</span><span class="p">,</span>
+    <span class="n">icon</span><span class="o">=</span><span class="n">phosphor</span><span class="o">.</span><span class="n">calculator</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">SecondaryNeutral</span><span class="p">,</span>
+    <span class="n">badge_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">White</span><span class="p">,</span>
+    <span class="n">badge_text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">SecondaryBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">),</span>
+    <span class="n">icon_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">SecondaryBold</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">hooks</span><span class="o">.</span><span class="n">draw</span><span class="p">(</span><span class="n">xy</span><span class="o">=</span><span class="p">(</span><span class="mf">5.0</span><span class="p">,</span> <span class="mf">6.0</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">88.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">58.0</span><span class="p">,</span> <span class="n">align</span><span class="o">=</span><span class="s2">"bottom_left"</span><span class="p">)</span>
+
+<span class="n">out_panel</span> <span class="o">=</span> <span class="n">Panel</span><span class="p">(</span>
+    <span class="s2">"シリアライズ出力の比較"</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Neutral</span><span class="p">,</span>
+    <span class="n">header_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryFlat</span><span class="p">,</span>
+    <span class="n">text_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">WhiteBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.8</span><span class="p">),</span>
+    <span class="n">icon</span><span class="o">=</span><span class="n">phosphor</span><span class="o">.</span><span class="n">file_code</span><span class="p">,</span>
+    <span class="n">icon_style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">WhiteBold</span><span class="p">,</span>
+    <span class="n">header_variant</span><span class="o">=</span><span class="s2">"filled"</span><span class="p">,</span>
+    <span class="n">header_height</span><span class="o">=</span><span class="mf">9.0</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">out_panel</span><span class="o">.</span><span class="n">draw</span><span class="p">((</span><span class="mf">97.0</span><span class="p">,</span> <span class="mf">6.0</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">54.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">58.0</span><span class="p">,</span> <span class="n">align</span><span class="o">=</span><span class="s2">"bottom_left"</span><span class="p">)</span>
+
+<span class="c1"># Top comparison card: Plain @property</span>
+<span class="n">rectangle</span><span class="p">((</span><span class="mf">124.0</span><span class="p">,</span> <span class="mf">42.5</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">47.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">19.0</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">White</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">1.8</span><span class="p">))</span>
+<span class="n">phosphor</span><span class="o">.</span><span class="n">x_circle</span><span class="p">((</span><span class="mf">105.5</span><span class="p">,</span> <span class="mf">47.5</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">4.2</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DangerBold</span><span class="p">)</span>
+<span class="n">text</span><span class="p">((</span><span class="mf">109.2</span><span class="p">,</span> <span class="mf">47.5</span><span class="p">),</span> <span class="s2">"通常の @property"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DarkBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.5</span><span class="p">,</span> <span class="n">halign</span><span class="o">=</span><span class="s2">"left"</span><span class="p">))</span>
+<span class="n">text</span><span class="p">((</span><span class="mf">104.0</span><span class="p">,</span> <span class="mf">41.2</span><span class="p">),</span> <span class="s2">"obj.nights  -&gt;  4 (Python 参照可)"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Dark</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">halign</span><span class="o">=</span><span class="s2">"left"</span><span class="p">))</span>
+<span class="n">text</span><span class="p">((</span><span class="mf">104.0</span><span class="p">,</span> <span class="mf">36.0</span><span class="p">),</span> <span class="s2">"model_dump  -&gt;  JSON に出力されない"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">DangerBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">halign</span><span class="o">=</span><span class="s2">"left"</span><span class="p">))</span>
+
+<span class="c1"># Bottom comparison card: @computed_field</span>
+<span class="n">rectangle</span><span class="p">((</span><span class="mf">124.0</span><span class="p">,</span> <span class="mf">19.0</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">47.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">20.5</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryNeutral</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">shape_r</span><span class="o">=</span><span class="mf">1.8</span><span class="p">))</span>
+<span class="n">phosphor</span><span class="o">.</span><span class="n">check_circle</span><span class="p">((</span><span class="mf">105.5</span><span class="p">,</span> <span class="mf">24.5</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mf">4.2</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">SuccessBold</span><span class="p">)</span>
+<span class="n">text</span><span class="p">((</span><span class="mf">109.2</span><span class="p">,</span> <span class="mf">24.5</span><span class="p">),</span> <span class="s2">"@computed_field"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">PrimaryBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.5</span><span class="p">,</span> <span class="n">halign</span><span class="o">=</span><span class="s2">"left"</span><span class="p">))</span>
+<span class="n">text</span><span class="p">((</span><span class="mf">104.0</span><span class="p">,</span> <span class="mf">18.0</span><span class="p">),</span> <span class="s2">"obj.nights  -&gt;  4 (Python 参照可)"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">Dark</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">halign</span><span class="o">=</span><span class="s2">"left"</span><span class="p">))</span>
+<span class="n">text</span><span class="p">((</span><span class="mf">104.0</span><span class="p">,</span> <span class="mf">12.8</span><span class="p">),</span> <span class="s2">"model_dump  -&gt;  JSON に自動出力!"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">Styles</span><span class="o">.</span><span class="n">SuccessBold</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">text_size</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">halign</span><span class="o">=</span><span class="s2">"left"</span><span class="p">))</span>
+
+<span class="n">save</span><span class="p">()</span>
+</code></pre>
+</details>
+<h3>日付範囲の相関検証と派生フィールドの JSON 出力</h3>
+<p>宿泊予約モデル <code>HotelBooking</code> に <code>@model_validator(mode=&quot;after&quot;)</code> と <code>@computed_field</code> を実装して動作を確認しましょう。ISO 形式の日付文字列（<code>&quot;2026-05-10&quot;</code>）がまず <code>datetime.date</code> へ型変換され、<code>check_out &gt; check_in</code> の検証を通過した後、<code>nights</code>（宿泊数）と <code>total_price</code>（合計金額）が JSON ペイロードへ自動的に出力されます。</p>
+
+  </div>
+  <div class="nb-cell nb-code-cell">
+    <div class="nb-input">
+      <div class="nb-prompt nb-in-prompt">In [2]:</div>
+      <div class="nb-code-area">
+        <pre><code class="language-python"><span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">date</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Self</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseModel</span><span class="p">,</span> <span class="n">Field</span><span class="p">,</span> <span class="n">ValidationError</span><span class="p">,</span> <span class="n">computed_field</span><span class="p">,</span> <span class="n">model_validator</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">HotelBooking</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="n">check_in</span><span class="p">:</span> <span class="n">date</span>
+    <span class="n">check_out</span><span class="p">:</span> <span class="n">date</span>
+    <span class="n">nightly_rate</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">gt</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="nd">@model_validator</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">"after"</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_date_order</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_out</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_in</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"check_out must be strictly after check_in"</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="nd">@computed_field</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">nights</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">check_out</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_in</span><span class="p">)</span><span class="o">.</span><span class="n">days</span>
+
+    <span class="nd">@computed_field</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">total_price</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">nights</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">nightly_rate</span>
+
+
+<span class="n">booking</span> <span class="o">=</span> <span class="n">HotelBooking</span><span class="p">(</span>
+    <span class="n">check_in</span><span class="o">=</span><span class="s2">"2026-05-10"</span><span class="p">,</span>
+    <span class="n">check_out</span><span class="o">=</span><span class="s2">"2026-05-14"</span><span class="p">,</span>
+    <span class="n">nightly_rate</span><span class="o">=</span><span class="mi">180</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Serialized JSON with @computed_field values:"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">booking</span><span class="o">.</span><span class="n">model_dump_json</span><span class="p">(</span><span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">HotelBooking</span><span class="p">(</span>
+        <span class="n">check_in</span><span class="o">=</span><span class="s2">"2026-05-14"</span><span class="p">,</span>
+        <span class="n">check_out</span><span class="o">=</span><span class="s2">"2026-05-10"</span><span class="p">,</span>
+        <span class="n">nightly_rate</span><span class="o">=</span><span class="mi">180</span><span class="p">,</span>
+    <span class="p">)</span>
+<span class="k">except</span> <span class="n">ValidationError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Caught invalid date range:"</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">issue</span> <span class="ow">in</span> <span class="n">err</span><span class="o">.</span><span class="n">errors</span><span class="p">():</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  loc=</span><span class="si">{</span><span class="n">issue</span><span class="p">[</span><span class="s1">'loc'</span><span class="p">]</span><span class="si">}</span><span class="s2"> | type=</span><span class="si">{</span><span class="n">issue</span><span class="p">[</span><span class="s1">'type'</span><span class="p">]</span><span class="si">}</span><span class="s2"> | msg=</span><span class="si">{</span><span class="n">issue</span><span class="p">[</span><span class="s1">'msg'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</code></pre>
+      </div>
+    </div>
+    <div class="nb-output">
+      <div class="nb-prompt nb-out-prompt">Out [2]:</div>
+      <div class="nb-output-area">
+        <pre class="nb-stream-stdout">Serialized JSON with @computed_field values:
+{
+  &quot;check_in&quot;: &quot;2026-05-10&quot;,
+  &quot;check_out&quot;: &quot;2026-05-14&quot;,
+  &quot;nightly_rate&quot;: 180,
+  &quot;nights&quot;: 4,
+  &quot;total_price&quot;: 720
+}
+
+Caught invalid date range:
+  loc=() | type=value_error | msg=Value error, check_out must be strictly after check_in
+</pre>
+      </div>
+    </div>
+  </div>
+  <div class="nb-cell nb-markdown-cell">
+<h3>まとめ</h3>
+<ul>
+<li><strong>生データの整形は <code>mode=&quot;before&quot;</code>、型安全な単一検証は <code>mode=&quot;after&quot;</code></strong>: 間の型強制変換を <code>pydantic-core</code> に任せることで、<code>mode=&quot;after&quot;</code> では確実に型付けされた値を扱えます。</li>
+<li><strong>複数フィールド間の不変条件は <code>@model_validator(mode=&quot;after&quot;)</code></strong>: 構築済みの <code>self</code> に対して <code>check_out &gt; check_in</code> などの相関ルールを検証し、必ず <code>return self</code> を返します。</li>
+<li><strong>レスポンスに含める算出値は <code>@computed_field</code></strong>: <code>@property</code> の上に <code>@computed_field</code> を重ねることで、<code>nights</code> や <code>total_price</code> を <code>model_dump()</code> および JSON 出力へ自動反映できます。</li>
+</ul>
+
+  </div>
+</div>
+            </main>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const themeBtn = document.getElementById('theme-toggle');
+            if (themeBtn) {
+                themeBtn.addEventListener('click', function() {
+                    const current = document.documentElement.getAttribute('data-theme');
+                    const next = current === 'dark' ? 'light' : 'dark';
+                    document.documentElement.setAttribute('data-theme', next);
+                    localStorage.setItem('drawlib-theme', next);
+                });
+            }
+
+            const langDropdowns = document.querySelectorAll('.lang-dropdown');
+            if (langDropdowns.length > 0) {
+                document.addEventListener('click', function(e) {
+                    langDropdowns.forEach(function(dd) {
+                        if (dd.hasAttribute('open') && !dd.contains(e.target)) {
+                            dd.removeAttribute('open');
+                        }
+                    });
+                });
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape') {
+                        langDropdowns.forEach(function(dd) {
+                            dd.removeAttribute('open');
+                        });
+                    }
+                });
+            }
+
+            const menuBtn = document.getElementById('menu-toggle');
+            const sidebar = document.querySelector('.sidebar');
+            if (menuBtn && sidebar) {
+                function setMenuOpen(open) {
+                    sidebar.classList.toggle('is-open', open);
+                    menuBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+                    document.body.classList.toggle('menu-open', open);
+                    if (open) {
+                        const menu = sidebar.querySelector('.sidebar-menu');
+                        if (menu) {
+                            menu.scrollTop = 0;
+                        }
+                    }
+                }
+
+                menuBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const willOpen = !sidebar.classList.contains('is-open');
+                    setMenuOpen(willOpen);
+                });
+
+                document.addEventListener('click', function(e) {
+                    if (sidebar.classList.contains('is-open') && !sidebar.contains(e.target)) {
+                        setMenuOpen(false);
+                    }
+                });
+
+                const navLinks = sidebar.querySelectorAll('.nav-item a');
+                navLinks.forEach(function(link) {
+                    link.addEventListener('click', function() {
+                        setMenuOpen(false);
+                    });
+                });
+
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape' && sidebar.classList.contains('is-open')) {
+                        setMenuOpen(false);
+                    }
+                });
+
+                window.addEventListener('resize', function() {
+                    if (window.innerWidth > 768 && sidebar.classList.contains('is-open')) {
+                        setMenuOpen(false);
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

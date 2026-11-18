@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://examples.drawlib.com/pydantic/en/</loc>
+  </url>
+  <url>
+    <loc>https://examples.drawlib.com/pydantic/en/01_basemodel_quickstart.html</loc>
+  </url>
+  <url>
+    <loc>https://examples.drawlib.com/pydantic/en/02_fields_and_errors.html</loc>
+  </url>
+  <url>
+    <loc>https://examples.drawlib.com/pydantic/en/03_validators_and_computed.html</loc>
+  </url>
+  <url>
+    <loc>https://examples.drawlib.com/pydantic/en/04_nested_unions_and_schema.html</loc>
+  </url>
+  <url>
+    <loc>https://examples.drawlib.com/pydantic/ja/</loc>
+  </url>
+  <url>
+    <loc>https://examples.drawlib.com/pydantic/ja/01_basemodel_quickstart.html</loc>
+  </url>
+  <url>
+    <loc>https://examples.drawlib.com/pydantic/ja/02_fields_and_errors.html</loc>
+  </url>
+  <url>
+    <loc>https://examples.drawlib.com/pydantic/ja/03_validators_and_computed.html</loc>
+  </url>
+  <url>
+    <loc>https://examples.drawlib.com/pydantic/ja/04_nested_unions_and_schema.html</loc>
+  </url>
+</urlset>
