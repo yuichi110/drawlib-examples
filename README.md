@@ -17,7 +17,8 @@ drawlib-examples/
 │   │   └── ddos-incident-response/ # 16:9 cloud security postmortem deck
 │   ├── jupyter/
 │   │   ├── pydantic/               # Bilingual (EN/JA) Pydantic v2 hands-on cookbook (execute = true)
-│   │   └── google-genai/           # Bilingual (EN/JA) Google GenAI SDK Jupyter & Colab cookbook
+│   │   ├── google-genai/           # Bilingual (EN/JA) Google GenAI SDK Jupyter & Colab cookbook
+│   │   └── fastapi-gdrive/         # Bilingual (EN/JA) FastAPI hands-on synced via rclone to Google Drive
 │   └── images/
 │       ├── animation/              # AI-authored web & social animations (APNG, WebP & GIF)
 │       ├── logo/                   # Official Drawlib brand logos & favicon

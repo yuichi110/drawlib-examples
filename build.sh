@@ -97,6 +97,11 @@ if [ -d "examples/jupyter" ]; then
     for proj in examples/jupyter/*; do
         [ -d "$proj" ] || continue
         slug="$(basename "$proj")"
+        # Distributed directly to Google Drive via rclone (./gdrive-sync.sh), not hosted under docs/
+        if [ "$slug" = "fastapi-gdrive" ]; then
+            echo "=== [jupyter] Skipping $slug (hosted on Google Drive via rclone) ==="
+            continue
+        fi
         check_slug "$slug"
         echo "=== [jupyter] Building $slug (Jupyter .ipynb & HTML) ==="
         $DRAWLIB_CMD build jupyter "$proj" -o "docs/$slug/"
