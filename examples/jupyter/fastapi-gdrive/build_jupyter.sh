@@ -19,6 +19,8 @@ if [ -z "${DRAWLIB_CMD:-}" ]; then
 fi
 
 echo "Using Drawlib command: $DRAWLIB_CMD"
+echo "Cleaning _build/jupyter/..."
+rm -rf _build/jupyter
 echo "Building standalone Jupyter notebooks (.ipynb only)..."
 $DRAWLIB_CMD build jupyter . -o _build/jupyter/ "$@"
 echo "Jupyter build complete: _build/jupyter/"

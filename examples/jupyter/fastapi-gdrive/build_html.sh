@@ -19,6 +19,8 @@ if [ -z "${DRAWLIB_CMD:-}" ]; then
 fi
 
 echo "Using Drawlib command: $DRAWLIB_CMD"
+echo "Cleaning _build/html/..."
+rm -rf _build/html
 echo "Building Jupyter HTML preview (with bundled .ipynb)..."
 $DRAWLIB_CMD build html . -o _build/html/ "$@"
 echo "HTML preview build complete: _build/html/"
