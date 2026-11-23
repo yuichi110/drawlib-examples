@@ -1,10 +1,10 @@
-# 07. Production Architecture & Deployment
+# 08. 本番アーキテクチャと運用 (Production Architecture & Deployment)
 
-FastAPI is one of the fastest and most popular ASGI web frameworks in the Python ecosystem, built directly on top of Starlette (asynchronous web core) and Pydantic (data validation).
+FastAPI は、Starlette（非同期 Web コア）と Pydantic（データバリデーション）の上に構築された、Python エコシステム屈指の超高速 ASGI Web フレームワークです。
 
-To conclude this series, this chapter explores the **recommended cloud architecture design**, **Lifespan lifecycle management**, and **asynchronous background processing (`BackgroundTasks`)** required to run FastAPI reliably at enterprise scale.
+シリーズの締めくくりとなる本章では、FastAPI を本番環境（クラウド、コンテナ、クラスタ）で高信頼・高スループットに運用するための **推奨アーキテクチャ設計**、**Lifespan イベント管理**、および **非同期バックグラウンド処理 (`BackgroundTasks`)** を学びます。
 
-```drawlib align=center code=fold file=07_production_backend_architecture.png caption="Production FastAPI Backend Architecture & Request Data Flow in Cloud Environments"
+```drawlib align=center code=fold file=08_production_backend_architecture.png caption="クラウド本番環境における FastAPI バックエンドアーキテクチャとデータフロー"
 from drawlib.canvas import save, setup
 from drawlib.icons import code as code_icons, phosphor
 from drawlib.lines import line
@@ -101,10 +101,10 @@ save()
 
 ---
 
-## 1. Application Lifecycle Management (`lifespan`)
+## 1. アプリケーションのライフサイクル管理 (`lifespan`)
 
-In production, applications must reliably initialize database connection pools and cache clients during startup, and gracefully disconnect and flush queues upon shutdown.
-FastAPI standardizes this through modern Python `asynccontextmanager` **Lifespan events**.
+本番環境では、アプリケーション起動時にデータベース接続プールやキャッシュ接続を確立し、終了時に安全にクローズする必要があります。
+FastAPI では、モダンな Python の `asynccontextmanager` を用いた **Lifespan イベント** が標準推奨されています。
 
 ```python
 from contextlib import asynccontextmanager
@@ -114,26 +114,26 @@ from fastapi import BackgroundTasks, FastAPI, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.testclient import TestClient
 
-# Mock External Connection Pool State
+# モックの外部リソース接続プール
 app_resources: Dict[str, any] = {}
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # --- Startup Handler ---
+    # --- 起動時処理 (Startup) ---
     print("[Startup] Initializing Database Connection Pool & Redis Cache...")
     app_resources["db_connected"] = True
     app_resources["sent_emails"] = []
     yield
-    # --- Shutdown Handler ---
+    # --- 終了時処理 (Shutdown) ---
     print("[Shutdown] Closing connection pools and flushing queues...")
     app_resources["db_connected"] = False
 ```
 
 ---
 
-## 2. CORS Middleware Configuration
+## 2. CORS ミドルウェアの設定
 
-When APIs serve browser single-page applications (SPAs), **CORS (Cross-Origin Resource Sharing)** must be configured to permit only trusted frontend domains.
+ブラウザから直接 API が呼び出される本番構成では、**CORS (Cross-Origin Resource Sharing)** を適切に構成して、許可されたドメインからのリクエストのみを受け付けます。
 
 ```python
 app = FastAPI(
@@ -142,7 +142,7 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# CORS Middleware setup
+# CORS ミドルウェアの追加
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["https://myapp.example.com", "http://localhost:3000"],
@@ -154,31 +154,31 @@ app.add_middleware(
 
 ---
 
-## 3. Asynchronous Background Tasks (`BackgroundTasks`)
+## 3. 非同期バックグラウンドタスク (`BackgroundTasks`)
 
-Operations such as sending notification emails, publishing event webhooks, or writing audit logs should never block HTTP response delivery.
-FastAPI's built-in `BackgroundTasks` schedules post-response execution, dramatically reducing client-facing latency.
+メール送信や監査ログの記録など、レスポンス返却をブロックしたくない処理は `BackgroundTasks` を利用してバックグラウンドで非同期実行します。
+クライアントには即座に `200 OK` が返るため、体感レイテンシを大幅に短縮できます。
 
 ```python
 def send_notification_email(email: str, message: str):
-    """Executes asynchronously after HTTP response is dispatched"""
+    """レスポンス返却後に非同期で実行されるタスク"""
     log_entry = f"Sent email to {email}: {message}"
     print(f"  [Background Worker] {log_entry}")
     app_resources["sent_emails"].append(log_entry)
 
 @app.post("/register/", status_code=status.HTTP_202_ACCEPTED)
 def register_user(email: str, background_tasks: BackgroundTasks):
-    # 1. Immediate business logic execution
+    # 1. ユーザー登録処理（即時実行）
     user_data = {"email": email, "status": "active"}
 
-    # 2. Enqueue background task
+    # 2. バックグラウンドタスクの登録（レスポンス後に実行）
     background_tasks.add_task(
         send_notification_email,
         email=email,
         message="Welcome to FastAPI Illustrated by Drawlib!",
     )
 
-    # 3. Return immediate response
+    # 3. クライアントへ即座にレスポンス返却
     return {
         "message": "User registered successfully. Welcome email is queued.",
         "user": user_data,
@@ -186,7 +186,7 @@ def register_user(email: str, background_tasks: BackgroundTasks):
 
 @app.get("/health/")
 def health_check():
-    """Health check endpoint for reverse proxies and load balancers"""
+    """ロードバランサー用の死活監視ヘルスチェックエンドポイント"""
     return {
         "status": "healthy",
         "database": "connected" if app_resources.get("db_connected") else "disconnected",
@@ -196,21 +196,22 @@ def health_check():
 
 ---
 
-## 4. End-to-End Testing with TestClient
+## 4. TestClient による本番フローの統合テスト
 
-Using `TestClient` inside a Python `with` context manager fully activates the `lifespan` startup/shutdown handlers and verifies background execution.
+`TestClient` のコンテキストマネージャーを使用すると、`lifespan` の起動と終了、および `BackgroundTasks` の実行結果を完全に検証できます。
 
 ```python
+# lifespan を伴うコンテキスト内でテスト実行
 with TestClient(app) as client:
-    # 1. Verify health check
+    # 1. ヘルスチェック確認
     health_res = client.get("/health/")
     print("Health Check:", health_res.json())
 
-    # 2. Registration request (HTTP 202 Accepted)
+    # 2. ユーザー登録リクエスト (HTTP 202 Accepted)
     reg_res = client.post("/register/?email=alice@drawlib.org")
     print("Registration Response:", reg_res.status_code, reg_res.json()["message"])
 
-    # 3. Verify that the background task executed
+    # 3. バックグラウンドタスクが実行されたか確認
     health_after = client.get("/health/")
     print("Updated Status:", health_after.json())
     print("Logged Emails:", app_resources["sent_emails"])
@@ -218,30 +219,30 @@ with TestClient(app) as client:
 
 ---
 
-## 5. Summary of Production Best Practices
+## 5. 本番運用のベストプラクティスまとめ
 
-1. **Uvicorn + Process Management**:
-   * Leverage multi-core CPUs using Gunicorn with Uvicorn workers (`uvicorn.workers.UvicornWorker`) or horizontally scaled container clusters (Docker / Kubernetes).
-2. **Reverse Proxy Offloading**:
-   * Offload SSL termination, rate limiting, and static file caching to Nginx, AWS ALB, or Cloudflare, keeping FastAPI focused strictly on dynamic business logic.
-3. **Structured Logging & Tracing**:
-   * Employ JSON-structured logging and OpenTelemetry instrumentation for end-to-end distributed observability across microservices.
+1. **Uvicorn + プロセス管理**:
+   * シングルプロセス運用ではなく、マルチコア CPU を活かすため Gunicorn の Uvicorn ワーカー (`uvicorn.workers.UvicornWorker`) や Docker / Kubernetes による複数コンテナ分散配置を行います。
+2. **リバースプロキシ連携**:
+   * TLS/SSL 終端、レートリミット、静的ファイルの配信は Nginx や AWS ALB に任せ、FastAPI は純粋なビジネスロジックの処理に特化させます。
+3. **ログとトレーシング**:
+   * JSON 形式の構造化ログや OpenTelemetry による分散トレーシングを組み込み、可観測性（Observability）を担保します。
 
 ---
 
-## Series Wrap-Up & About Drawlib
+## シリーズのまとめ & Drawlib について
 
-Across this 7-chapter series, you have experienced the full progression of FastAPI—from basic routing and Pydantic validation to Dependency Injection, JWT Bearer security, and production cloud architecture.
+本シリーズ（全 7 章）を通して、FastAPI の基礎からルーティング、Pydantic バリデーション、依存性注入、JWT 認証、そして本番アーキテクチャまでを一貫して体験しました。
 
-Every architectural diagram, workflow, and sequence in this Jupyter series was generated programmatically from Python code using **[Drawlib](https://github.com/yuichi-fukuda/drawlib)**.
+この Jupyter ノートブック内のすべてのアーキテクチャ図・フロー図・シーケンス図は、Python ライブラリ **[Drawlib](https://github.com/yuichi-fukuda/drawlib)** によってコードから自動生成されています。
 
 ```text
-Illustration as Code: Define diagrams in code, not GUI tools.
+図を描くのではなく、コードで図を定義する（Illustration as Code）
 ```
 
-With Drawlib, visual architecture remains in perfect sync with Git repositories, eliminating outdated documentation and enabling automated Colab and Jupyter publication.
+Drawlib を使えば、ドキュメントの更新と図の保守を Git 上で完全に同期し、常に正確で美しい技術資料や Colab ノートブックを自動生成できます。ぜひ皆さんの Python プロジェクトでも Drawlib をご活用ください！
 
-* **Drawlib Documentation**: [https://drawlib.org/](https://drawlib.org/)
-* **GitHub Repository**: [https://github.com/yuichi-fukuda/drawlib](https://github.com/yuichi-fukuda/drawlib)
-* **Live Google Drive / Colab Folder**: [FastAPI Jupyter Showcase](https://drive.google.com/drive/folders/1dPZ0bikr9EY2VXQX2OCHhL3He9jxX2kH?usp=drive_link)
+* **Drawlib 公式ドキュメント**: [https://drawlib.org/](https://drawlib.org/)
+* **GitHub リポジトリ**: [https://github.com/yuichi-fukuda/drawlib](https://github.com/yuichi-fukuda/drawlib)
+* **Google Drive / Colab デモフォルダ**: [FastAPI Jupyter Showcase](https://drive.google.com/drive/folders/1dPZ0bikr9EY2VXQX2OCHhL3He9jxX2kH?usp=drive_link)
 
