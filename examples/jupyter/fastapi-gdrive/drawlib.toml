@@ -1,0 +1,27 @@
+[project]
+name = "fastapi-gdrive"
+type = "jupyter"
+title = "FastAPI on Google Drive (Hello World)"
+description = "Minimal Python Hello World notebook for verifying the Drawlib Jupyter + Google Drive (rclone) + Colab workflow."
+style = "google"
+
+[i18n]
+default_lang = "en"
+langs = ["en", "ja"]
+
+[i18n.labels]
+en = "English"
+ja = "日本語"
+
+[jupyter]
+# colab_base_url = "https://colab.research.google.com/github/owner/repo/blob/main/fastapi-gdrive_jupyter"
+drawlib_cell_mode = "markdown"
+execute = true
+
+# [seo]
+# site_url = "https://example.com"
+# og_image = "_assets/ogp.png"
+# twitter_card = "summary_large_image"
+# sitemap = true
+# robots = true
+# llms_txt = true
