@@ -83,10 +83,8 @@ save()
 
 ```python
 !pip install -q fastapi httpx jinja2 playwright
-!playwright install chromium
+!playwright install --with-deps chromium
 ```
-
-*(Note: On minimal Linux containers where system browser libraries are missing, run `!playwright install-deps chromium` as well.)*
 
 ---
 
@@ -187,7 +185,7 @@ from playwright.async_api import async_playwright
 screenshot_path = "dashboard_screenshot.png"
 
 async with async_playwright() as p:
-    browser = await p.chromium.launch()
+    browser = await p.chromium.launch(args=["--no-sandbox"])
     page = await browser.new_page(viewport={"width": 900, "height": 420})
     await page.set_content(response.text, wait_until="load")
     await page.screenshot(path=screenshot_path, full_page=True)
