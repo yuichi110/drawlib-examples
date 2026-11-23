@@ -10,79 +10,79 @@ from drawlib.shapes import circle, rectangle
 from drawlib.styles import Styles
 from drawlib.text import text
 
-setup(width=128, height=58)
+setup(width=138, height=58)
 
 # Outer container
-rectangle((64, 32.5), width=122, height=45, style=Styles.MutedDashed.patch(shape_r=2.0))
+rectangle((69, 32.5), width=132, height=45, style=Styles.MutedDashed.patch(shape_r=2.0))
 text(
-    (64, 51.0),
+    (69, 51.0),
     "Illustrated Notebook as Code: Git Markdown -> Drawlib -> Google Drive -> Colab",
     style=Styles.DarkBold.patch(text_size=10.6),
 )
 
 # Stage 1: Git Markdown Source
-rectangle((16.0, 30.0), width=23, height=34, style=Styles.Neutral.patch(shape_r=1.8))
-phosphor.git_branch((16.0, 41.2), width=4.8, style=Styles.PrimaryBold)
-text((16.0, 34.4), "1. Git Source", style=Styles.DarkBold.patch(text_size=10.0))
+rectangle((17.0, 30.0), width=20, height=34, style=Styles.Neutral.patch(shape_r=1.8))
+phosphor.git_branch((17.0, 41.2), width=4.8, style=Styles.PrimaryBold)
+text((17.0, 34.4), "1. Git Source", style=Styles.DarkBold.patch(text_size=10.0))
 text(
-    (16.0, 22.8),
-    "docs_src/fastapi/\n• Pure Markdown\n• drawlib code\n• Git SSOT",
-    style=Styles.Dark.patch(text_size=9.2),
+    (17.0, 22.8),
+    "fastapi-gdrive/\n• Pure Markdown\n• drawlib code\n• Git SSOT",
+    style=Styles.Dark.patch(text_size=9.5),
 )
 
-line((27.5, 30.0), (31.5, 30.0), arrow_head="->", style=Styles.DarkBold)
+line((27.0, 30.0), (33.0, 30.0), arrow_head="->", style=Styles.DarkBold)
 
 # Stage 2: Drawlib Compiler (Focal Hero)
-rectangle((43.0, 30.0), width=23, height=34, style=Styles.PrimaryFlat.patch(shape_r=1.8))
+rectangle((43.0, 30.0), width=20, height=34, style=Styles.PrimaryFlat.patch(shape_r=1.8))
 circle((43.0, 41.2), radius=3.4, style=Styles.White.patch(shape_line_width=0))
 ai.jupyter((43.0, 41.2), width=4.5, style=Styles.Neutral)
 text((43.0, 34.0), "2. drawlib build", style=Styles.WhiteBold.patch(text_size=10.0))
 text(
     (43.0, 22.8),
     "build jupyter\n• Base64 diagrams\n• Clean .ipynb\n• Zero local HTML",
-    style=Styles.White.patch(text_size=9.2),
+    style=Styles.White.patch(text_size=9.5),
 )
 
-line((54.5, 30.0), (58.5, 30.0), arrow_head="->", style=Styles.DarkBold)
+line((53.0, 30.0), (59.0, 30.0), arrow_head="->", style=Styles.DarkBold)
 
-# Stage 3: rclone copy
-rectangle((70.0, 30.0), width=23, height=34, style=Styles.PrimaryNeutral.patch(shape_r=1.8))
-phosphor.arrows_clockwise((70.0, 41.2), width=4.8, style=Styles.PrimaryBold)
-text((70.0, 34.0), "3. rclone sync", style=Styles.DarkBold.patch(text_size=10.0))
+# Stage 3: rclone sync
+rectangle((69.0, 30.0), width=20, height=34, style=Styles.PrimaryNeutral.patch(shape_r=1.8))
+phosphor.arrows_clockwise((69.0, 41.2), width=4.8, style=Styles.PrimaryBold)
+text((69.0, 34.0), "3. rclone sync", style=Styles.DarkBold.patch(text_size=10.0))
 text(
-    (70.0, 22.8),
+    (69.0, 22.8),
     "-M metadata-set\n• Colab MIME type\n• Preserves IDs\n• Fast & headless",
-    style=Styles.Dark.patch(text_size=9.2),
+    style=Styles.Dark.patch(text_size=9.5),
 )
 
-line((81.5, 30.0), (85.5, 30.0), arrow_head="->", style=Styles.DarkBold)
+line((79.0, 30.0), (85.0, 30.0), arrow_head="->", style=Styles.DarkBold)
 
 # Stage 4: Google Drive Shared Folder
-rectangle((97.0, 30.0), width=23, height=34, style=Styles.SecondaryNeutral.patch(shape_r=1.8))
-workspace.google_drive((97.0, 41.2), width=4.8, style=Styles.Neutral)
-text((97.0, 34.4), "4. Google Drive", style=Styles.DarkBold.patch(text_size=10.0))
+rectangle((95.0, 30.0), width=20, height=34, style=Styles.SecondaryNeutral.patch(shape_r=1.8))
+workspace.google_drive((95.0, 41.2), width=4.8, style=Styles.Neutral)
+text((95.0, 34.4), "4. Google Drive", style=Styles.DarkBold.patch(text_size=10.0))
 text(
-    (97.0, 22.8),
+    (95.0, 22.8),
     "Shared Folder\n• Viewer role\n• Clean .ipynb\n• Always updated",
-    style=Styles.Dark.patch(text_size=9.2),
+    style=Styles.Dark.patch(text_size=9.5),
 )
 
-line((108.5, 30.0), (112.5, 30.0), arrow_head="->", style=Styles.DarkBold)
+line((105.0, 30.0), (111.0, 30.0), arrow_head="->", style=Styles.DarkBold)
 
 # Stage 5: Google Colaboratory (Recipient run)
-rectangle((118.5, 30.0), width=18, height=34, style=Styles.Neutral.patch(shape_r=1.8))
-code_icons.colab((118.5, 41.2), width=4.8, style=Styles.Neutral)
-text((118.5, 34.4), "5. Colab", style=Styles.DarkBold.patch(text_size=10.0))
+rectangle((121.0, 30.0), width=20, height=34, style=Styles.Neutral.patch(shape_r=1.8))
+code_icons.colab((121.0, 41.2), width=4.8, style=Styles.Neutral)
+text((121.0, 34.4), "5. Colab", style=Styles.DarkBold.patch(text_size=10.0))
 text(
-    (118.5, 22.8),
+    (121.0, 22.8),
     "Run in Cloud\n• Zero install\n• Free GPUs\n• Interactive",
-    style=Styles.Dark.patch(text_size=9.2),
+    style=Styles.Dark.patch(text_size=9.5),
 )
 
 # Bottom ribbon
 rectangle(
-    (64, 5.2),
-    width=122,
+    (69, 5.2),
+    width=132,
     height=6.4,
     style=Styles.Neutral.patch(shape_r=1.2),
     text="Illustration as Code   •   Self-Contained Base64 Diagrams   •   Zero Local Setup for Learners",
