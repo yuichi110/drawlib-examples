@@ -99,6 +99,10 @@ rectangle(
 save()
 ```
 
+```python
+!pip install -q fastapi httpx
+```
+
 ---
 
 ## 1. アプリケーションのライフサイクル管理 (`lifespan`)

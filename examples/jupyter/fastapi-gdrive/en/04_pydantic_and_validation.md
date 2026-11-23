@@ -79,6 +79,10 @@ rectangle(
 save()
 ```
 
+```python
+!pip install -q fastapi httpx pydantic
+```
+
 ---
 
 ## 1. Defining Schemas with Pydantic `BaseModel`

@@ -81,6 +81,10 @@ rectangle(
 save()
 ```
 
+```python
+!pip install -q fastapi httpx
+```
+
 ---
 
 ## 1. Extracting Reusable Query Logic

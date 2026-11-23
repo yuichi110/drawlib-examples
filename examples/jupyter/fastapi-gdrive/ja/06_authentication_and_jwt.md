@@ -93,8 +93,7 @@ save()
 Colab や Jupyter 上で実行する場合、JWT の署名と検証を行うライブラリが必要です。ここでは標準的な `pyjwt` を使用します。
 
 ```python
-# 必要に応じて Colab 等でインストール
-# !pip install "fastapi[standard]" httpx pyjwt
+!pip install -q fastapi httpx pyjwt python-multipart
 ```
 
 ---

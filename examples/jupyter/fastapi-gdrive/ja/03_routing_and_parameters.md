@@ -79,6 +79,10 @@ rectangle(
 save()
 ```
 
+```python
+!pip install -q fastapi httpx
+```
+
 ---
 
 ## 1. パスパラメータ（Path Parameters）

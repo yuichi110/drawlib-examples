@@ -81,6 +81,10 @@ rectangle(
 save()
 ```
 
+```python
+!pip install -q fastapi httpx
+```
+
 ---
 
 ## 1. 共通パラメータ処理の分離

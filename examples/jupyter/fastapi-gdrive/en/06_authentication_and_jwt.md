@@ -93,8 +93,7 @@ save()
 When executing on Google Colab or Jupyter, we require a library to handle cryptographic JWT encoding and decoding. We use standard `pyjwt`.
 
 ```python
-# Install in Colab or environment if needed
-# !pip install "fastapi[standard]" httpx pyjwt
+!pip install -q fastapi httpx pyjwt python-multipart
 ```
 
 ---
